@@ -1,12 +1,60 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useEffect } from 'react';
+import Header from '@/components/landing/Header';
+import HeroSection from '@/components/landing/HeroSection';
+import CategorySection from '@/components/landing/CategorySection';
+import ProductGridSection from '@/components/landing/ProductGridSection';
+import AboutSection from '@/components/landing/AboutSection';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import InstagramSection from '@/components/landing/InstagramSection';
+import FAQSection from '@/components/landing/FAQSection';
+import Footer from '@/components/landing/Footer';
+import RegistrationModal from '@/components/landing/RegistrationModal';
 
 const Index = () => {
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  // Show registration modal on page load (with slight delay for better UX)
+  useEffect(() => {
+    const hasSeenModal = sessionStorage.getItem('henig-modal-shown');
+    
+    if (!hasSeenModal) {
+      const timer = setTimeout(() => {
+        setIsRegisterModalOpen(true);
+        sessionStorage.setItem('henig-modal-shown', 'true');
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleOpenRegisterModal = () => {
+    setIsRegisterModalOpen(true);
+  };
+
+  const handleCloseRegisterModal = () => {
+    setIsRegisterModalOpen(false);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header onRegisterClick={handleOpenRegisterModal} />
+      
+      <main>
+        <HeroSection />
+        <CategorySection />
+        <ProductGridSection />
+        <AboutSection />
+        <FeaturesSection onRegisterClick={handleOpenRegisterModal} />
+        <InstagramSection />
+        <FAQSection />
+      </main>
+      
+      <Footer />
+      
+      <RegistrationModal 
+        isOpen={isRegisterModalOpen} 
+        onClose={handleCloseRegisterModal} 
+      />
     </div>
   );
 };
