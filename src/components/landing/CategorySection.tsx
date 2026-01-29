@@ -9,13 +9,13 @@ const CategorySection = () => {
       title: 'Diamonds',
       description: 'Explore our collection of loose diamonds, certified and conflict-free.',
       image: diamondsImage,
-      href: '#diamonds',
+      href: '/diamonds',
     },
     {
       title: 'Jewellery',
       description: 'Discover handcrafted pieces from engagement rings to everyday elegance.',
       image: jewelleryImage,
-      href: '#jewellery',
+      href: '/jewellery',
     },
   ];
 
