@@ -1,29 +1,14 @@
 import { motion } from 'framer-motion';
-import { Palette, MessageCircle, RotateCcw, Shield } from 'lucide-react';
+import { Palette, MessageCircle, RotateCcw, Shield, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { features } from '@/config/theme';
 
-const features = [
-  {
-    icon: Palette,
-    title: 'Handcrafted Designs',
-    description: 'Design your jewellery in 3 simple steps and our experts will custom-craft it for you.',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Expert Guidance',
-    description: 'Chat with us online, on the phone or book an appointment in one of our showrooms.',
-  },
-  {
-    icon: RotateCcw,
-    title: 'Easy Returns & Resizing',
-    description: 'Return your item in under 30 days, or have it resized for free in under 60 days.',
-  },
-  {
-    icon: Shield,
-    title: 'Sourcing With Care',
-    description: 'Explore our collection of independently certified and conflict-free diamonds.',
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  Palette,
+  MessageCircle,
+  RotateCcw,
+  Shield,
+};
 
 interface FeaturesSectionProps {
   onRegisterClick: () => void;
@@ -62,7 +47,10 @@ const FeaturesSection = ({ onRegisterClick }: FeaturesSectionProps) => {
               className="text-center"
             >
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-secondary flex items-center justify-center">
-                <feature.icon className="w-7 h-7 text-primary" />
+                {(() => {
+                  const IconComponent = iconMap[feature.icon];
+                  return IconComponent ? <IconComponent className="w-7 h-7 text-primary" /> : null;
+                })()}
               </div>
               <h3 className="font-serif text-xl text-foreground mb-3">
                 {feature.title}
