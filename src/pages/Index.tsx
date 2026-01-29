@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import Header from '@/components/landing/Header';
-import HeroSection from '@/components/landing/HeroSection';
 import CategorySection from '@/components/landing/CategorySection';
 import ProductGridSection from '@/components/landing/ProductGridSection';
 import AboutSection from '@/components/landing/AboutSection';
@@ -9,6 +7,7 @@ import InstagramSection from '@/components/landing/InstagramSection';
 import FAQSection from '@/components/landing/FAQSection';
 import Footer from '@/components/landing/Footer';
 import RegistrationModal from '@/components/landing/RegistrationModal';
+import LandingAboveTheFold from '@/components/landing/LandingAboveTheFold';
 
 const Index = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -27,35 +26,25 @@ const Index = () => {
     }
   }, []);
 
-  const handleOpenRegisterModal = () => {
-    setIsRegisterModalOpen(true);
-  };
-
-  const handleCloseRegisterModal = () => {
-    setIsRegisterModalOpen(false);
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <Header onRegisterClick={handleOpenRegisterModal} />
-      
-      <main>
-        <HeroSection />
-        <CategorySection />
-        <ProductGridSection />
-        <AboutSection />
-        <FeaturesSection onRegisterClick={handleOpenRegisterModal} />
-        <InstagramSection />
-        <FAQSection />
-      </main>
-      
+    <>
+      {/* ONE FULL SCREEN */}
+      <LandingAboveTheFold onRegisterClick={() => setIsRegisterModalOpen(true)} />
+
+      {/* SCROLLING CONTENT */}
+      <CategorySection />
+      <ProductGridSection />
+      <AboutSection />
+      <FeaturesSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
+      <InstagramSection />
+      <FAQSection />
       <Footer />
-      
-      <RegistrationModal 
-        isOpen={isRegisterModalOpen} 
-        onClose={handleCloseRegisterModal} 
+
+      <RegistrationModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
       />
-    </div>
+    </>
   );
 };
 

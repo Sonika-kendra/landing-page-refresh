@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { navigationLinks, announcementBar } from '@/config/theme';
+import { navigationLinks } from '@/config/theme';
 
 interface HeaderProps {
   onRegisterClick: () => void;
@@ -14,15 +14,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
   const location = useLocation();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-      {/* Top announcement bar */}
-      {announcementBar.enabled && (
-        <div className="bg-accent text-accent-foreground py-2 text-center">
-          <p className="text-xs md:text-sm font-light tracking-wide">
-            {announcementBar.message}
-          </p>
-        </div>
-      )}
+    <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
 
       {/* Main header */}
       <div className="henig-container">

@@ -2,18 +2,36 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import heroImage from '@/assets/hero-jewelry.jpg';
+import HeroAnnouncement from './HeroAnnouncement';
+import { useEffect, useState } from 'react';
 
-const HeroSection = () => {
+const HeroSection = ({ className = '' }) => {
+  const [heroLoaded, setHeroLoaded] = useState(false);
+
+  useEffect(() => {
+    // Fires after first paint
+    const timeout = setTimeout(() => {
+      setHeroLoaded(true);
+    }, 300); // tweak if needed
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
-    <section className="relative min-h-screen pt-32 md:pt-40 pb-16 overflow-hidden">
-      <div className="henig-container">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+    <section className={`relative w-full h-full flex items-center ${className}`}>
+
+      {/* Announcement inside hero */}
+      <HeroAnnouncement show={heroLoaded} />
+
+      <div className="henig-container flex items-center py-12 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center w-full">
+          
           {/* Text Content */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="order-2 lg:order-1"
+            className="order-2 lg:order-1 flex flex-col justify-center"
           >
             <h1 className="henig-heading-display text-foreground mb-6">
               Helping You Sell More
@@ -38,15 +56,14 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
-            className="order-1 lg:order-2 relative"
+            className="order-1 lg:order-2 relative flex justify-center"
           >
-            <div className="relative aspect-[4/3] lg:aspect-square overflow-hidden rounded-sm shadow-elevated">
+            <div className="relative w-full max-w-md aspect-[4/3] lg:aspect-square overflow-hidden rounded-sm shadow-elevated">
               <img
                 src={heroImage}
                 alt="Elegant diamond ring in luxury box"
                 className="w-full h-full object-cover"
               />
-              {/* Decorative overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-accent/10 to-transparent" />
             </div>
             
@@ -64,8 +81,8 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Decorative element */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+      {/* Scroll indicator */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -78,7 +95,7 @@ const HeroSection = () => {
           />
         </motion.div>
       </div>
-    </section>
+    </section> 
   );
 };
 
