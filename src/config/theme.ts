@@ -35,7 +35,11 @@ export const navigationLinks = [
 
 export const announcementBar = {
   enabled: true,
-  message: 'Christmas except for Castings. Order Castings by 22/12 (9:30AM). We close for Christmas Tuesday 23rd December and will return Monday 6th January 2026.',
+  messages: [
+    'Christmas except for Castings. Order Castings by 22/12 (9:30AM).',
+    'We close for Christmas Tuesday 23rd December.',
+    'We will return Monday 6th January 2026.',
+  ],
 };
 
 export const stats = [

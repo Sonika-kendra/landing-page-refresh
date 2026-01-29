@@ -20,7 +20,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
       <div className="henig-container">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Search - Desktop */}
-          <div className="hidden md:flex items-center w-1/4">
+          {/* <div className="hidden md:flex items-center w-1/4">
             <div className="relative">
               <input
                 type="text"
@@ -29,7 +29,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
               />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             </div>
-          </div>
+          </div> */}
 
           {/* Mobile menu button */}
           <button
