@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { navigationLinks, announcementBar } from '@/config/theme';
 
 interface HeaderProps {
   onRegisterClick: () => void;
@@ -9,23 +11,18 @@ interface HeaderProps {
 
 const Header = ({ onRegisterClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const navLinks = [
-    { label: 'Home', href: '#' },
-    { label: 'Diamonds', href: '#diamonds' },
-    { label: 'Jewellery', href: '#jewellery' },
-    { label: 'Events & Blogs', href: '#blog' },
-    { label: 'Contact us', href: '#contact' },
-  ];
+  const location = useLocation();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       {/* Top announcement bar */}
-      <div className="bg-accent text-accent-foreground py-2 text-center">
-        <p className="text-xs md:text-sm font-light tracking-wide">
-          Christmas except for Castings. Order Castings by 22/12 (9:30AM). We close for Christmas Tuesday 23rd December and will return Monday 6th January 2026.
-        </p>
-      </div>
+      {announcementBar.enabled && (
+        <div className="bg-accent text-accent-foreground py-2 text-center">
+          <p className="text-xs md:text-sm font-light tracking-wide">
+            {announcementBar.message}
+          </p>
+        </div>
+      )}
 
       {/* Main header */}
       <div className="henig-container">
@@ -52,7 +49,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
 
           {/* Logo */}
           <div className="flex-1 md:flex-none text-center">
-            <a href="#" className="inline-block">
+            <Link to="/" className="inline-block">
               <div className="flex flex-col items-center">
                 <span className="text-primary text-lg">✦</span>
                 <h1 className="font-serif text-xl md:text-2xl font-medium tracking-[0.2em] text-foreground">
@@ -62,20 +59,24 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                   Diamonds
                 </span>
               </div>
-            </a>
+            </Link>
           </div>
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center justify-center flex-1">
             <ul className="flex items-center gap-8">
-              {navLinks.map((link) => (
+              {navigationLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm font-normal text-foreground hover:text-primary transition-colors"
+                  <Link
+                    to={link.href}
+                    className={`text-sm font-normal transition-colors ${
+                      location.pathname === link.href
+                        ? 'text-primary'
+                        : 'text-foreground hover:text-primary'
+                    }`}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -115,15 +116,19 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             className="md:hidden bg-background border-t border-border"
           >
             <ul className="py-4 px-4 space-y-4">
-              {navLinks.map((link) => (
+              {navigationLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="block py-2 text-base font-normal text-foreground hover:text-primary transition-colors"
+                  <Link
+                    to={link.href}
+                    className={`block py-2 text-base font-normal transition-colors ${
+                      location.pathname === link.href
+                        ? 'text-primary'
+                        : 'text-foreground hover:text-primary'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
               <li>

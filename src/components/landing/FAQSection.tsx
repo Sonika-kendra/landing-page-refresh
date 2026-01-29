@@ -5,33 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-
-const faqs = [
-  {
-    question: 'Do you offer custom service, and how long does a custom piece take?',
-    answer: 'Yes, we offer bespoke design services. Custom pieces typically take 4-6 weeks from design approval to completion, depending on complexity and materials.',
-  },
-  {
-    question: 'Is a deposit required to make an order?',
-    answer: 'Yes, we require a 50% deposit for all orders. The remaining balance is due upon completion before shipping.',
-  },
-  {
-    question: 'Do you ship internationally?',
-    answer: 'Yes, we ship worldwide. International orders are fully insured and tracked. Shipping times vary by destination.',
-  },
-  {
-    question: 'Can I see the diamond before it is set in the jewellery?',
-    answer: 'Absolutely. We can arrange for you to view and approve your diamond before setting, either in our showroom or via detailed photographs and certificates.',
-  },
-  {
-    question: 'Do you sell natural or lab-grown diamonds?',
-    answer: 'We offer both natural and lab-grown diamonds. Both options come with full certification and our quality guarantee.',
-  },
-  {
-    question: "What is your returns policy?",
-    answer: 'We offer a 30-day return policy for unworn items in original condition. Custom pieces are final sale but we offer free resizing within 60 days.',
-  },
-];
+import { faqItems } from '@/config/theme';
 
 const FAQSection = () => {
   return (
@@ -58,7 +32,7 @@ const FAQSection = () => {
           className="max-w-3xl mx-auto"
         >
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
+            {faqItems.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
