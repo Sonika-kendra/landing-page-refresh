@@ -14,7 +14,7 @@ const instagramPosts = [
 
 const InstagramSection = () => {
   return (
-    <section className="py-16 md:py-24 bg-henig-cream">
+    <section className="py-16 md:py-24">
       <div className="henig-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

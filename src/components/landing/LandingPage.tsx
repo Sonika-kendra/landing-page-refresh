@@ -39,8 +39,8 @@ const LandingPage = () => {
       <AboutSection />
       <FeaturesSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
       <ProductGridSection />
-      <InstagramSection />
       <FAQSection />
+      <InstagramSection />
       <Footer />
 
       {/* MODAL */}

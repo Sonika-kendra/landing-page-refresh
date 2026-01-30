@@ -9,8 +9,10 @@ import { faqItems } from '@/config/theme';
 
 const FAQSection = () => {
   return (
-    <section id="faq" className="py-16 md:py-24">
-      <div className="henig-container">
+    <section id="faq" className="py-8 md:py-12 w-full bg-secondary">
+      {/* Full width container with horizontal padding */}
+      <div className="px-4 sm:px-6 lg:px-12 w-full">
+        {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -24,29 +26,36 @@ const FAQSection = () => {
           <div className="henig-separator mx-auto" />
         </motion.div>
 
+        {/* FAQ Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-3xl mx-auto"
+          className="w-full"
         >
-          <Accordion type="single" collapsible className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-8 w-full">
             {faqItems.map((faq, index) => (
-              <AccordionItem
+              <Accordion
                 key={index}
-                value={`item-${index}`}
-                className="border border-border rounded-sm px-6 data-[state=open]:shadow-subtle"
+                type="single"
+                collapsible
+                className="space-y-4 w-full"
               >
-                <AccordionTrigger className="text-left font-serif text-lg hover:no-underline hover:text-primary py-5">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted pb-5">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem
+                  value={`item-${index}`}
+                  className="border border-border rounded-sm px-6 data-[state=open]:shadow-subtle w-full"
+                >
+                  <AccordionTrigger className="text-left font-serif text-lg hover:no-underline hover:text-primary py-5">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted pb-5">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             ))}
-          </Accordion>
+          </div>
         </motion.div>
       </div>
     </section>
