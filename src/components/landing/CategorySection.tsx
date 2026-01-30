@@ -43,9 +43,9 @@ const CategorySection = () => {
 
               {/* Overlay content */}
               <div className="overlay-text flex-col text-center p-4 md:p-5">
-                <h3 className="font-serif text-2xl md:text-3xl text-secondary mb-2">
+                {/* <h3 className="font-serif text-2xl md:text-3xl text-secondary mb-2">
                   {category.title}
-                </h3>
+                </h3> */}
                 <p className="text-secondary/80 mb-4 max-w-xs text-sm mx-auto">
                   {category.description}
                 </p>
