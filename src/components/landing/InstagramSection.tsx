@@ -37,9 +37,9 @@ const InstagramSection = () => {
     <section className="py-12 md:py-16">
       <div className="henig-container">
         <div className="text-center mb-8">
-          <span className="henig-caption text-muted mb-2 block">What We're Up To</span>
+          {/* <span className="henig-caption text-muted mb-2 block">What We're Up To</span> */}
           <h2 className="henig-heading-section text-foreground mb-2">@HenigDiamonds</h2>
-          <a
+          {/* <a
             href="https://instagram.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -48,7 +48,7 @@ const InstagramSection = () => {
             <Instagram className="w-4 h-4" />
             View Instagram
             <ExternalLink className="w-3 h-3" />
-          </a>
+          </a> */}
         </div>
 
         {/* Carousel with arrows outside */}
