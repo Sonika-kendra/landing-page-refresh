@@ -1,40 +1,36 @@
-import { motion } from 'framer-motion';
-import tennisBracelet from '@/assets/tennis-bracelet.jpg';
-import hoops from '@/assets/hoops.jpg';
-import gemstoneNecklace from '@/assets/gemstone-necklace.jpg';
-import eternityRing from '@/assets/eternity-ring.jpg';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const products = [
-  {
-    id: 1,
-    name: 'Tennis Bracelets',
-    image: tennisBracelet,
-    description: 'Timeless elegance for every occasion',
-  },
-  {
-    id: 2,
-    name: 'Hoops',
-    image: hoops,
-    description: 'Classic designs with modern brilliance',
-  },
-  {
-    id: 3,
-    name: 'Gemstone Necklaces',
-    image: gemstoneNecklace,
-    description: 'Vibrant colors meet exceptional craftsmanship',
-  },
-  {
-    id: 4,
-    name: 'Eternity Rings',
-    image: eternityRing,
-    description: 'Symbols of endless love and commitment',
-  },
-];
+// Load all bestseller images
+const images = Object.values(
+  import.meta.glob('@/assets/landing/bestseller/*.{jpg,jpeg,png,webp}', {
+    eager: true,
+    import: 'default',
+  })
+) as string[];
 
-const ProductGridSection = () => {
+const ProductCarouselSection = () => {
+  const [index, setIndex] = useState(0);
+
+  const next = () => {
+    setIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prev = () => {
+    setIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  // Autoplay
+  useEffect(() => {
+    const interval = setInterval(next, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="py-16 md:py-24 border">
       <div className="henig-container">
+        {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -43,41 +39,47 @@ const ProductGridSection = () => {
           className="text-center mb-12"
         >
           <h2 className="henig-heading-section text-foreground mb-4">
-            Our Collections
+            Our Bestsellers
           </h2>
           <div className="henig-separator mx-auto" />
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group cursor-pointer"
-            >
-              <div className="relative aspect-square overflow-hidden rounded-sm mb-4">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/20 transition-colors duration-300" />
-              </div>
-              <h3 className="font-serif text-lg md:text-xl text-foreground mb-1 group-hover:text-primary transition-colors">
-                {product.name}
-              </h3>
-              <p className="text-sm text-muted">
-                {product.description}
-              </p>
-            </motion.div>
-          ))}
+        {/* Carousel Frame */}
+        <div className="relative mx-auto max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+          {/* Arrows */}
+          <button
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full border bg-background hover:bg-accent transition flex items-center justify-center"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full border bg-background hover:bg-accent transition flex items-center justify-center"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Image Window */}
+          <div className="relative aspect-square overflow-hidden rounded-sm">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={index}
+                src={images[index]}
+                alt={`Bestseller ${index + 1}`}
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -60 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>
   );
 };
 
-export default ProductGridSection;
+export default ProductCarouselSection;
