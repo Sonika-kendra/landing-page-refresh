@@ -1,5 +1,5 @@
 import Header from '@/components/landing/Header';
-import HeroSection from '@/components/landing/HeroSection';
+import HeroSection from './HeroSection';
 
 interface Props {
   onRegisterClick: () => void;

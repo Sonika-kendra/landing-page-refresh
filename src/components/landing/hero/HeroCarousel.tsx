@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Import everything in the hero folder (all images and videos)
-const heroAssets = import.meta.glob('../../assets/hero/*', { eager: true });
+const heroAssets = import.meta.glob('../../../assets/hero/*', { eager: true });
 
 const assets = Object.values(heroAssets).map((file: any) => {
   const src = file.default || file;

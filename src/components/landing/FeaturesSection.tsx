@@ -14,9 +14,13 @@ interface FeaturesSectionProps {
   onRegisterClick: () => void;
 }
 
+// Import all partner images dynamically
+const partnerImages = import.meta.glob('@/assets/partner/*.{jpg,png,webp}', { eager: true });
+const partnerImageList = Object.values(partnerImages).map((img: any) => img.default || img);
+
 const FeaturesSection = ({ onRegisterClick }: FeaturesSectionProps) => {
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-16 md:py-24 bg-secondary">
       <div className="henig-container">
         {/* Partner CTA */}
         <motion.div
@@ -24,7 +28,7 @@ const FeaturesSection = ({ onRegisterClick }: FeaturesSectionProps) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8"
         >
           <Button 
             className="btn-henig-outline"
@@ -33,6 +37,28 @@ const FeaturesSection = ({ onRegisterClick }: FeaturesSectionProps) => {
           >
             Partner With Us
           </Button>
+        </motion.div>
+
+        {/* Partner Images */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-wrap justify-center gap-6 mb-16 items-center"
+        >
+          {partnerImageList.map((src, idx) => (
+            <div
+              key={idx}
+              className="w-20 h-20 rounded-full bg-accent flex items-center justify-center p-2"
+            >
+              <img
+                src={src}
+                alt={`Partner ${idx + 1}`}
+                className="max-h-12 object-contain"
+              />
+            </div>
+          ))}
         </motion.div>
 
         {/* Features grid */}

@@ -33,7 +33,7 @@ const products = [
 
 const ProductGridSection = () => {
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-16 md:py-24 bg-secondary">
       <div className="henig-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

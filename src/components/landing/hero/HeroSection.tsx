@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import HeroAnnouncement from './HeroAnnouncement';
-import HeroCarousel from './HeroImage';
+import HeroCarousel from './HeroCarousel';
 import { useEffect, useState } from 'react';
 
 const HeroSection = ({ className = '' }) => {
@@ -14,7 +14,7 @@ const HeroSection = ({ className = '' }) => {
   }, []);
 
   return (
-    <section className={`relative w-full h-full flex items-center ${className}`}>
+    <section className={`relative w-full min-h-full flex items-center ${className}`}>
 
       {/* Announcement inside hero */}
       <HeroAnnouncement show={heroLoaded} />
