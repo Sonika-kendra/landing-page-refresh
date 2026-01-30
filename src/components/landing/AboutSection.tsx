@@ -10,7 +10,7 @@ const iconMap: Record<number, React.ElementType> = {
 };
 
 // Dynamically import all images from src/assets/certification
-const certificationModules = import.meta.glob('@/assets/certification/*.{png,jpg,jpeg,svg,gif}', { eager: true });
+const certificationModules = import.meta.glob('@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}', { eager: true });
 const certificationImages = Object.values(certificationModules).map((mod: any) => mod.default || mod);
 
 const AboutSection = () => {
