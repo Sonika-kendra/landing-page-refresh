@@ -1,5 +1,7 @@
-import { Mail, Phone, MapPin, Instagram, Facebook, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Twitter, Facebook, Instagram, Linkedin, Youtube } from '@/assets/footer';
+import { brandConfig } from '@/config/theme';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -44,14 +46,20 @@ const Footer = () => {
               A heritage of trust, innovation, and excellence in diamonds since 1973.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <Instagram className="w-5 h-5" />
+              <a target="_blank" href={brandConfig.social.twitter} className="text-accent-foreground/60 hover:text-primary transition-colors">
+                <img src={Twitter} alt="Twitter" className="w-7 h-7 brightness-0 invert" />
               </a>
-              <a href="#" className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <Facebook className="w-5 h-5" />
+              <a target="_blank" href={brandConfig.social.facebook} className="text-accent-foreground/60 hover:text-primary transition-colors">
+                <img src={Facebook} alt="Facebook" className="w-7 h-7 brightness-0 invert" />
               </a>
-              <a href="#" className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <Linkedin className="w-5 h-5" />
+              <a target="_blank" href={brandConfig.social.instagram} className="text-accent-foreground/60 hover:text-primary transition-colors">
+                <img src={Instagram} alt="Instagram" className="w-7 h-7 brightness-0 invert" />
+              </a>
+              <a target="_blank" href={brandConfig.social.linkedin} className="text-accent-foreground/60 hover:text-primary transition-colors">
+                <img src={Linkedin} alt="Linkedin" className="w-7 h-7 brightness-0 invert" />
+              </a>
+              <a target="_blank" href={brandConfig.social.youtube} className="text-accent-foreground/60 hover:text-primary transition-colors">
+                <img src={Youtube} alt="Youtube" className="w-7 h-7 brightness-0 invert" />
               </a>
             </div>
           </div>
@@ -88,7 +96,7 @@ const Footer = () => {
             <h5 className="font-serif text-lg mb-4">Customer Care</h5>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
+                <a href="#faq" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
                   FAQs
                 </a>
               </li>
@@ -116,18 +124,26 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-primary mt-0.5" />
-                <span className="text-sm text-accent-foreground/70">+44 20 7404 0374</span>
+                <span className="text-sm text-accent-foreground/70">+44 (0)207 404 0146</span>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-primary mt-0.5" />
-                <span className="text-sm text-accent-foreground/70">info@henigdiamonds.com</span>
+                <a
+                  href="mailto:info@henigdiamonds.co.uk"
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  info@henigdiamonds.co.uk
+                </a>
               </li>
+
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-primary mt-0.5" />
                 <span className="text-sm text-accent-foreground/70">
-                  Premier House<br />
-                  12-13 Hatton Garden<br />
-                  London EC1N 8AN
+                  Henig Diamonds<br />
+                  Suite Two First Floor<br />
+                  63-66 Hatton Garden<br />
+                  London EC1N 8AN<br />
+                  EC1N 8LE
                 </span>
               </li>
             </ul>
@@ -139,7 +155,7 @@ const Footer = () => {
       <div className="border-t border-accent-foreground/10">
         <div className="henig-container py-6">
           <p className="text-center text-xs text-accent-foreground/50">
-            © {currentYear} Henig Diamonds Ltd. All rights reserved. | Registered in England and Wales
+            © {currentYear} Henig Diamonds Ltd. All rights reserved.
           </p>
         </div>
       </div>
