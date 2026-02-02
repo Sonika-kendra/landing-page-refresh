@@ -9,6 +9,7 @@ import FAQSection from './FAQSection';
 import Footer from './Footer';
 import RegistrationModal from './RegistrationModal';
 import LandingAboveTheFold from './hero/LandingAboveTheFold';
+import BlogSection from './BlogSection';
 
 const LandingPage = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -41,6 +42,7 @@ const LandingPage = () => {
       <ProductGridSection />
       <FAQSection />
       <InstagramSection />
+      <BlogSection />
       <Footer />
 
       {/* MODAL */}
