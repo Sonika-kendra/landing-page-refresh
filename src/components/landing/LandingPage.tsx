@@ -10,6 +10,7 @@ import Footer from './Footer';
 import RegistrationModal from './RegistrationModal';
 import LandingAboveTheFold from './hero/LandingAboveTheFold';
 import BlogSection from './BlogSection';
+import FeaturesGridSection from './FeaturesGridSection';
 
 const LandingPage = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -43,6 +44,7 @@ const LandingPage = () => {
       <FAQSection />
       <InstagramSection />
       <BlogSection />
+      <FeaturesGridSection />
       <Footer />
 
       {/* MODAL */}
