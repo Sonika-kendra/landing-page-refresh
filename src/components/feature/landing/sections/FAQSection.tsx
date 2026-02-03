@@ -5,7 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { faqItems } from '@/config/theme';
+import { faqItems } from '@/config/landing/theme';
 
 const FAQSection = () => {
   return (

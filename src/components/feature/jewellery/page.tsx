@@ -1,26 +1,21 @@
 import { useState } from 'react';
-import Footer from '@/components/shared/Footer';
 import RegistrationModal from '@/components/shared/RegistrationModal';
-import Header from '@/components/shared/Header';
-import { NavigationTabsSection, NewArrivalsSection, CommitmentSection, CategorySection, BestsellersSection, CertificationsSection, CTASection, JewelleryAboveTheFold } from '.';
+import { NewArrivalsSection, CommitmentSection, CategorySection, BestSellersSection, JewelleryHeroSection, CatalogueBespokeSection } from '.';
 import PageLayout from '@/components/shared/PageLayout';
+import CertificationsAndPartnersSection from '@/components/shared/CertificationsAndPartnersSection';
 
 const JewelleryPage = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
-
-      <JewelleryAboveTheFold />
-      <NavigationTabsSection viewMode={viewMode} onViewChange={setViewMode} />
-      <NewArrivalsSection viewMode={viewMode} />
-      <CommitmentSection />
+      <JewelleryHeroSection />
+      <NewArrivalsSection />
+      <BestSellersSection />
       <CategorySection />
-      <BestsellersSection />
-      <CertificationsSection />
-      <CTASection onRegisterClick={() => setIsRegisterModalOpen(true)} />
-
+      <CertificationsAndPartnersSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
+      <CatalogueBespokeSection />
+      <CommitmentSection />
       <RegistrationModal
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}

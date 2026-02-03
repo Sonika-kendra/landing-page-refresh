@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import SectionHeader from '@/components/shared/SectionHeader';
-import { jewelleryCategories } from '@/config/products';
+import { jewelleryCategories } from '@/config/jewellery/products';
 import { motion } from 'framer-motion';
 import jewelleryHero from '@/assets/jewellery-hero.jpg';
 import tennisBracelet from '@/assets/tennis-bracelet.jpg';
@@ -16,8 +16,17 @@ const categoryImages: Record<string, string> = {
 };
 
 const CategorySection = () => (
-  <section className="py-24">
+  <section className="py-5">
 
+    <div className="flex justify-center">
+      <SectionHeader
+        caption=""
+        title="Shop By Category"
+        showSeparator
+        className="!mb-2 md:!mb-4 text-center font-semibold tracking-wide"
+      />
+    </div>
+    
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
       {jewelleryCategories.map((category, index) => (
         <motion.div

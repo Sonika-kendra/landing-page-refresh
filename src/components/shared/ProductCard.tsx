@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
-import type { Product } from '@/config/products';
+import type { Product } from '@/config/jewellery/products';
 
 interface ProductCardProps {
   product: Product;
@@ -44,6 +44,13 @@ const ProductCard = ({
         {product.isNew && (
           <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs px-2 py-1 uppercase tracking-wider">
             New
+          </span>
+        )}
+
+        {/* New badge */}
+        {product.isBestseller && (
+          <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs px-2 py-1 uppercase tracking-wider">
+            Best Seller
           </span>
         )}
         

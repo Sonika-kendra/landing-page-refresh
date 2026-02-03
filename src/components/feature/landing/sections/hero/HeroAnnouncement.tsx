@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { announcementBar } from '@/config/theme';
+import { announcementBar } from '@/config/landing/theme';
 
 const HeroAnnouncement = ({ show }: { show: boolean }) => {
   const [index, setIndex] = useState(0);

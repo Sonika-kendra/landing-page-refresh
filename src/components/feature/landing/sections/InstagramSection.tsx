@@ -1,4 +1,4 @@
-import { brandConfig } from '@/config/theme';
+import { brandConfig } from '@/config/landing/theme';
 import { motion } from 'framer-motion';
 import { Instagram, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';

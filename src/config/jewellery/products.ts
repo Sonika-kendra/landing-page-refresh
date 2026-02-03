@@ -45,49 +45,6 @@ export const sortOptions = [
   { value: 'price-high-low', label: 'Price: High to Low' },
 ];
 
-// Sample products for jewellery page
-export const sampleJewelleryProducts: Product[] = [
-  {
-    id: 'j1',
-    name: 'Mini Polished Interlocking Earrings',
-    price: 25.00,
-    currency: '£',
-    material: '18k Gold Plated',
-    image: '',
-    category: 'earrings',
-    isNew: true
-  },
-  {
-    id: 'j2',
-    name: 'Interlocking Open Circle Necklace',
-    price: 28.00,
-    currency: '£',
-    material: '18k Gold Plated',
-    image: '',
-    category: 'necklaces',
-    isNew: true
-  },
-  {
-    id: 'j3',
-    name: 'Fine Crystal & Wave Wrist Stacking Set',
-    price: 28.00,
-    currency: '£',
-    material: '18k Gold Plated',
-    image: '',
-    category: 'bracelets',
-    isNew: true
-  },
-  {
-    id: 'j4',
-    name: 'Organic Open Circle Drop Earrings',
-    price: 35.00,
-    currency: '£',
-    material: '18k Gold Plated',
-    image: '',
-    category: 'earrings',
-    isNew: true
-  },
-];
 
 // Collection types for home page
 export const homeCollections = [

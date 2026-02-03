@@ -1,7 +1,7 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Twitter, Facebook, Instagram, Linkedin, Youtube } from '@/assets/footer';
-import { brandConfig } from '@/config/theme';
+import { brandConfig } from '@/config/landing/theme';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();

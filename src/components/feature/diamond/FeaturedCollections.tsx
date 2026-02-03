@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import labGrownDiamond from '@/assets/lab-grown-diamond.jpg';
 import diamondPairs from '@/assets/diamond-pairs.jpg';
-import { diamondCollections } from '@/config/products';
+import { diamondCollections } from '@/config/jewellery/products';
 
 const FeaturedCollections = () => {
   const featured = [

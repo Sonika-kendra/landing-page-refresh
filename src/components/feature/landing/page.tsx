@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import Footer from '../../shared/Footer';
 import RegistrationModal from '../../shared/RegistrationModal';
-import { AboutSection, BlogSection, CategorySection, FAQSection, FeaturesGridSection, FeaturesSection, HeroSection, InstagramSection, ProductGridSection } from './index';
+import { AboutSection, BlogSection, CategorySection, FAQSection, HeroSection, InstagramSection, ProductGridSection, SupportSection } from './index';
 import PageLayout from '@/components/shared/PageLayout';
+import CertificationsAndPartnersSection from '@/components/shared/CertificationsAndPartnersSection';
+import FeaturesGridSection from '@/components/shared/FeaturesGridSection';
 
 const LandingPage = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -26,13 +28,13 @@ const LandingPage = () => {
       <HeroSection />
       <CategorySection />
       <AboutSection />
-      <FeaturesSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
+      <CertificationsAndPartnersSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
+      <FeaturesGridSection />
       <ProductGridSection />
       <FAQSection />
       <InstagramSection />
       <BlogSection />
-      <FeaturesGridSection />
-
+      <SupportSection />
       <RegistrationModal
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}

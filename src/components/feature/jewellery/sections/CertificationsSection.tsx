@@ -1,5 +1,5 @@
 import SectionHeader from '@/components/shared/SectionHeader';
-import { certifications, jewellerAssociations } from '@/config/theme';
+import { certifications, jewellerAssociations } from '@/config/landing/theme';
 
 const CertificationsSection = () => (
   <section className="py-24">

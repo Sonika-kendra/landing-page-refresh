@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import SectionHeader from '@/components/shared/SectionHeader';
-import { stats, certifications } from '@/config/theme';
+import { stats, certifications } from '@/config/landing/theme';
 
 const StatsSection = () => {
   return (

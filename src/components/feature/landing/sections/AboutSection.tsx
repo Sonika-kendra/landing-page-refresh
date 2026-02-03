@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Diamond, Gem, Users } from 'lucide-react';
-import { stats, brandConfig } from '@/config/theme';
+import { stats, brandConfig } from '@/config/landing/theme';
 
 // Icon mapping
 const iconMap: Record<number, React.ElementType> = {
@@ -10,8 +10,8 @@ const iconMap: Record<number, React.ElementType> = {
 };
 
 // Dynamically import all images from src/assets/certification
-const certificationModules = import.meta.glob('@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}', { eager: true });
-const certificationImages = Object.values(certificationModules).map((mod: any) => mod.default || mod);
+// const certificationModules = import.meta.glob('@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}', { eager: true });
+// const certificationImages = Object.values(certificationModules).map((mod: any) => mod.default || mod);
 
 const AboutSection = () => {
   return (
@@ -68,7 +68,7 @@ const AboutSection = () => {
         </div>
 
         {/* Certifications */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -89,7 +89,7 @@ const AboutSection = () => {
               </div>
             ))}
           </div>
-        </motion.div>
+        </motion.div> */}
 
       </div>
     </section>

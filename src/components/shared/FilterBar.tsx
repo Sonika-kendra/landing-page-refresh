@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { sortOptions, diamondCategories } from '@/config/products';
+import { sortOptions, diamondCategories } from '@/config/jewellery/products';
 
 interface FilterBarProps {
   onSortChange?: (value: string) => void;
