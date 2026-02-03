@@ -21,7 +21,7 @@ export const brandConfig = {
   social: {
     instagram: 'https://instagram.com/henigdiamonds',
     facebook: 'https://facebook.com/henigdiamonds',
-    linkedin: 'https://linkedin.com/company/henigdiamonds',
+    linkedin: 'https://www.linkedin.com/company/henig-diamonds',
     twitter: 'https://x.com/HenigDiamonds',
     youtube: 'https://youtube.com/henigdiamonds',
   },

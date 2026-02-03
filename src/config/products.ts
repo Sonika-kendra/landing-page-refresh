@@ -55,7 +55,7 @@ export const sampleJewelleryProducts: Product[] = [
     material: '18k Gold Plated',
     image: '',
     category: 'earrings',
-    isNew: true,
+    isNew: true
   },
   {
     id: 'j2',
@@ -65,7 +65,7 @@ export const sampleJewelleryProducts: Product[] = [
     material: '18k Gold Plated',
     image: '',
     category: 'necklaces',
-    isNew: true,
+    isNew: true
   },
   {
     id: 'j3',
@@ -75,7 +75,7 @@ export const sampleJewelleryProducts: Product[] = [
     material: '18k Gold Plated',
     image: '',
     category: 'bracelets',
-    isNew: true,
+    isNew: true
   },
   {
     id: 'j4',
@@ -85,7 +85,7 @@ export const sampleJewelleryProducts: Product[] = [
     material: '18k Gold Plated',
     image: '',
     category: 'earrings',
-    isNew: true,
+    isNew: true
   },
 ];
 

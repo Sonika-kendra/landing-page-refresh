@@ -1,0 +1,10 @@
+// export { default as LandingAboveTheFold }  from './sections/hero/LandingAboveTheFold';
+export { default as HeroSection  } from './sections/HeroSection';
+export { default as BlogSection } from './sections/BlogSection';
+export { default as FeaturesGridSection } from './sections/FeaturesGridSection';
+export { default as CategorySection } from './sections/CategorySection';
+export { default as ProductGridSection } from './sections/ProductGridSection';
+export { default as AboutSection } from './sections/AboutSection';
+export { default as FeaturesSection } from './sections/FeaturesSection';
+export { default as InstagramSection } from './sections/InstagramSection';
+export { default as FAQSection } from './sections/FAQSection';

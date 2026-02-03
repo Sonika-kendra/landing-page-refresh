@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
-
-import CategorySection from './CategorySection';
-import ProductGridSection from './ProductGridSection';
-import AboutSection from './AboutSection';
-import FeaturesSection from './FeaturesSection';
-import InstagramSection from './InstagramSection';
-import FAQSection from './FAQSection';
-import Footer from './Footer';
-import RegistrationModal from './RegistrationModal';
-import LandingAboveTheFold from './hero/LandingAboveTheFold';
-import BlogSection from './BlogSection';
-import FeaturesGridSection from './FeaturesGridSection';
+import Footer from '../../shared/Footer';
+import RegistrationModal from '../../shared/RegistrationModal';
+import { AboutSection, BlogSection, CategorySection, FAQSection, FeaturesGridSection, FeaturesSection, HeroSection, InstagramSection, ProductGridSection } from './index';
+import PageLayout from '@/components/shared/PageLayout';
 
 const LandingPage = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -29,14 +21,9 @@ const LandingPage = () => {
     }
   }, []);
 
-  return (
-    <>
-      {/* HERO / ABOVE THE FOLD */}
-      <LandingAboveTheFold
-        onRegisterClick={() => setIsRegisterModalOpen(true)}
-      />
-
-      {/* PAGE SECTIONS */}
+   return (
+    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+      <HeroSection />
       <CategorySection />
       <AboutSection />
       <FeaturesSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
@@ -45,14 +32,12 @@ const LandingPage = () => {
       <InstagramSection />
       <BlogSection />
       <FeaturesGridSection />
-      <Footer />
 
-      {/* MODAL */}
       <RegistrationModal
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
       />
-    </>
+    </PageLayout>
   );
 };
 

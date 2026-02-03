@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import HeroAnnouncement from './HeroAnnouncement';
-import HeroCarousel from './HeroCarousel';
+import HeroAnnouncement from './hero/HeroAnnouncement';
+import HeroCarousel from './hero/HeroCarousel';
 import { useEffect, useState } from 'react';
 
 const HeroSection = ({ className = '' }) => {
@@ -14,12 +14,12 @@ const HeroSection = ({ className = '' }) => {
   }, []);
 
   return (
-    <section className={`relative w-full min-h-full flex items-center ${className}`}>
+    <section className={`relative w-full min-h-full flex items-center bg-background ${className}`}>
 
       {/* Announcement inside hero */}
       <HeroAnnouncement show={heroLoaded} />
 
-      <div className="henig-container flex items-center py-12 lg:py-20">
+      <div className="henig-container flex items-center my-10 py-12 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center w-full">
 
           {/* Text Content */}

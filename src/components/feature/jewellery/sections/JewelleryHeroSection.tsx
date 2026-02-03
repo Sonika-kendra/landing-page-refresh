@@ -1,0 +1,41 @@
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import jewelleryHero from '@/assets/jewellery-hero.jpg';
+
+const JewelleryHeroSection = () => (
+  <section className="relative min-h-[45vh] pt-28 md:pt-32 pb-12 overflow-hidden">
+    <div className="absolute inset-0">
+      <img
+        src={jewelleryHero}
+        className="w-full h-full object-cover"
+        alt="Jewellery collection"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/40" />
+    </div>
+
+    <div className="henig-container relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-xl"
+      >
+        <h1 className="henig-heading-display mb-4">Jewellery</h1>
+
+        <p className="henig-body-large text-muted mb-6">
+          Discover our handcrafted collection of fine jewellery, from engagement rings
+          to everyday elegance.
+        </p>
+
+        {/* Category Buttons */}
+        <div className="flex flex-wrap gap-3">
+          <Button className="btn-henig-primary">Naturals</Button>
+          <Button className="btn-henig-primary">Lab Grown</Button>
+          <Button className="btn-henig-primary">Gemstones</Button>
+        </div>
+      </motion.div>
+    </div>
+  </section>
+);
+
+export default JewelleryHeroSection;
