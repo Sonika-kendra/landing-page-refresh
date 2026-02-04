@@ -27,11 +27,10 @@ const JewelleryHeroSection = () => (
           to everyday elegance.
         </p>
 
-        {/* Category Buttons */}
         <div className="flex flex-wrap gap-3">
-          <Button className="btn-henig-primary">Naturals</Button>
-          <Button className="btn-henig-primary">Lab Grown</Button>
-          <Button className="btn-henig-primary">Gemstones</Button>
+          <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40"> Naturals </Button>
+          <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40"> Lab Grown </Button>
+          <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40"> Gemstones </Button>
         </div>
       </motion.div>
     </div>

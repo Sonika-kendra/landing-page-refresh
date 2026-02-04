@@ -37,7 +37,7 @@ const BestSellersSection = () => {
   return (
     <section className="py-5 bg-henig-cream">
       <div className="henig-container">
-        <SectionHeader caption="Popular Choices" title="Bestsellers" showSeparator />
+        <SectionHeader caption="" title="Bestsellers" showSeparator />
 
         <div className="flex items-center justify-between">
           {/* Left arrow */}

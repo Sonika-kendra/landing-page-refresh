@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Footer from '../../shared/Footer';
 import RegistrationModal from '../../shared/RegistrationModal';
-import { AboutSection, BlogSection, CategorySection, FAQSection, HeroSection, InstagramSection, ProductGridSection, SupportSection } from './index';
+import { AboutSection, BlogSection, CategorySection, FAQSection, HeroSection, InstagramSection, BestSellerSection, SupportSection } from './index';
 import PageLayout from '@/components/shared/PageLayout';
 import CertificationsAndPartnersSection from '@/components/shared/CertificationsAndPartnersSection';
 import FeaturesGridSection from '@/components/shared/FeaturesGridSection';
@@ -30,7 +30,7 @@ const LandingPage = () => {
       <AboutSection />
       <CertificationsAndPartnersSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
       <FeaturesGridSection />
-      <ProductGridSection />
+      <BestSellerSection />
       <FAQSection />
       <InstagramSection />
       <BlogSection />
