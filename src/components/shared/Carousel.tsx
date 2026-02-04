@@ -1,13 +1,15 @@
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const MotionLink = motion(Link);
 
-type CarouselItem = {
-  src: string;
+export type CarouselItem = {
+  image: string;
   link: string;
+  title?: string;
+  price?: string;
 };
 
 interface CarouselProps {
@@ -15,6 +17,13 @@ interface CarouselProps {
   visibleItems?: number;
   autoplayDelay?: number;
   className?: string;
+  ifTitleVisible?: boolean;
+  ifPriceVisible?: boolean;
+  ifWhishlistVisible?: boolean;
+  ifBadgeVisible?: boolean;
+  badge?: string;
+  ifPurchaseButtonVisible?: boolean;
+  purchaseButton?: string;
 }
 
 const Carousel = ({
@@ -22,6 +31,13 @@ const Carousel = ({
   visibleItems = 5,
   autoplayDelay = 3000,
   className = '',
+  ifTitleVisible = true,
+  ifPriceVisible = true,
+  ifWhishlistVisible = true,
+  ifBadgeVisible = true,
+  badge = '',
+  ifPurchaseButtonVisible = true,
+  purchaseButton = "Shop Now"
 }: CarouselProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,16 +45,28 @@ const Carousel = ({
 
   const [index, setIndex] = useState(visibleItems);
   const [isAnimating, setIsAnimating] = useState(true);
+  const [itemWidth, setItemWidth] = useState(0);
+
+  const transitionDuration = 0.5;
+
+  useEffect(() => {
+    if (carouselRef.current) {
+      setItemWidth(carouselRef.current.offsetWidth / visibleItems);
+    }
+    const handleResize = () => {
+      if (carouselRef.current) {
+        setItemWidth(carouselRef.current.offsetWidth / visibleItems);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [visibleItems]);
 
   const loopedItems = [
     ...items.slice(-visibleItems),
     ...items,
     ...items.slice(0, visibleItems),
   ];
-
-  const itemWidth = carouselRef.current
-    ? carouselRef.current.offsetWidth / visibleItems
-    : 0;
 
   const next = () => setIndex((prev) => prev + 1);
   const prev = () => setIndex((prev) => prev - 1);
@@ -73,14 +101,14 @@ const Carousel = ({
       setTimeout(() => {
         setIsAnimating(false);
         setIndex(visibleItems);
-      }, 500);
+      }, transitionDuration * 1000);
     }
 
     if (index === 0) {
       setTimeout(() => {
         setIsAnimating(false);
         setIndex(items.length);
-      }, 500);
+      }, transitionDuration * 1000);
     }
   }, [index, items.length, visibleItems]);
 
@@ -103,7 +131,7 @@ const Carousel = ({
         startAutoplay();
       }}
     >
-      {/* Prev */}
+      {/* Prev Button */}
       <button
         onClick={() => navigate('prev')}
         className="h-8 w-8 md:h-10 md:w-10 rounded-full border flex items-center justify-center"
@@ -124,37 +152,60 @@ const Carousel = ({
         >
           {loopedItems.map((item, i) => (
             <MotionLink
-              key={i}
+              key={`${i}-${item.link}`}
               to={item.link}
               className="flex-shrink-0 group"
               style={{ width: `calc(100% / ${visibleItems})` }}
             >
+              <div className="space-y-2">
+  
+              {/* Image */}
               <div className="relative aspect-square overflow-hidden rounded-sm">
                 <img
-                  src={item.src}
-                  alt=""
+                  src={item.image}
+                  alt={item.title ?? ''}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
 
-                <div className="absolute inset-0 flex items-end">
-                  <div
-                    className="
-                      w-full text-center py-3
-                      bg-accent/80 text-white text-sm
-                      translate-y-full group-hover:translate-y-0
-                      transition-transform duration-300
-                    "
-                  >
-                    Shop Now
+                {ifBadgeVisible && badge && (
+                  <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs px-2 py-1 uppercase tracking-wider">
+                    {badge}
+                  </span>
+                )}
+
+                {ifWhishlistVisible && (
+                  <button className="absolute top-3 right-3 p-2 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background">
+                    <Heart className="w-4 h-4 text-foreground" />
+                  </button>
+                )}
+
+                {ifPurchaseButtonVisible && purchaseButton && (
+                  <div className="absolute inset-0 flex items-end pointer-events-none">
+                    <div className="w-full text-center py-3 bg-accent/80 text-white text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      {purchaseButton}
+                    </div>
                   </div>
-                </div>
+                )}                
+              </div>
+
+                {/* Title */}
+                {ifTitleVisible && item.title && (
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {item.title}
+                  </p>
+                )}
+
+                {/* Price */}
+                {ifPriceVisible && item.price && (
+                  <p className="text-sm text-gray-600">{item.price}</p>
+                )}
               </div>
             </MotionLink>
           ))}
         </motion.div>
       </div>
 
-      {/* Next */}
+      {/* Next Button */}
       <button
         onClick={() => navigate('next')}
         className="h-8 w-8 md:h-10 md:w-10 rounded-full border flex items-center justify-center"

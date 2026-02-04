@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Footer from '../../shared/Footer';
 import RegistrationModal from '../../shared/RegistrationModal';
 import { AboutSection, BlogSection, CategorySection, FAQSection, HeroSection, InstagramSection, BestSellerSection, SupportSection } from './index';
 import PageLayout from '@/components/shared/PageLayout';
