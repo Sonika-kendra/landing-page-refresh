@@ -38,7 +38,6 @@ const NewArrivalsSection = () => {
             badge='New'
             ifWhishlistVisible={false}
             ifPurchaseButtonVisible={false}
-            purchaseButton="Shop Now"
             ifHoverOverlayVisible={true}
             hoverOverlayBgClass="bg-black/20"
             className="mt-6"

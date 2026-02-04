@@ -49,11 +49,15 @@ const CategorySection = () => (
                   <span className="text-4xl text-muted">✦</span>
                 </div>
               )}
+
+              {/* Overlay */}
               <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/30 transition-colors duration-300" />
+
+              {/* Text on hover */}
+              <h3 className="absolute inset-0 flex items-center justify-center text-white text-xl font-serif opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center px-2">
+                {category.name}
+              </h3>
             </div>
-            <h3 className="font-serif text-lg text-center text-foreground group-hover:text-primary transition-colors">
-              {category.name}
-            </h3>
           </Link>
         </motion.div>
       ))}

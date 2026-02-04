@@ -34,8 +34,9 @@ const BestSellersSection = () => {
           ifWhishlistVisible={false}
           ifBadgeVisible={true}
           badge='Best Seller'
-          ifPurchaseButtonVisible={true}
-          purchaseButton="Shop Now"
+          ifPurchaseButtonVisible={false}
+          ifHoverOverlayVisible={true}
+          hoverOverlayBgClass="bg-black/20"
           className="mt-6"
         />
 
