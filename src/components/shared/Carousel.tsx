@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 const MotionLink = motion(Link);
@@ -17,13 +17,22 @@ interface CarouselProps {
   visibleItems?: number;
   autoplayDelay?: number;
   className?: string;
+
   ifTitleVisible?: boolean;
   ifPriceVisible?: boolean;
   ifWhishlistVisible?: boolean;
+
   ifBadgeVisible?: boolean;
   badge?: string;
+
   ifPurchaseButtonVisible?: boolean;
   purchaseButton?: string;
+
+  ifHoverOverlayVisible?: boolean;
+  hoverOverlayContent?: ReactNode;
+  hoverOverlayBgClass?: string;
+
+  linkTarget?: '_self' | '_blank' | '_parent' | '_top';
 }
 
 const Carousel = ({
@@ -31,13 +40,22 @@ const Carousel = ({
   visibleItems = 5,
   autoplayDelay = 3000,
   className = '',
+
   ifTitleVisible = true,
   ifPriceVisible = true,
   ifWhishlistVisible = true,
+
   ifBadgeVisible = true,
   badge = '',
+
   ifPurchaseButtonVisible = true,
-  purchaseButton = "Shop Now"
+  purchaseButton = 'Shop Now',
+
+  ifHoverOverlayVisible = false,
+  hoverOverlayContent = null,
+  hoverOverlayBgClass = 'bg-accent/30',
+
+  linkTarget = '_self',
 }: CarouselProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
@@ -50,16 +68,15 @@ const Carousel = ({
   const transitionDuration = 0.5;
 
   useEffect(() => {
-    if (carouselRef.current) {
-      setItemWidth(carouselRef.current.offsetWidth / visibleItems);
-    }
-    const handleResize = () => {
+    const updateWidth = () => {
       if (carouselRef.current) {
         setItemWidth(carouselRef.current.offsetWidth / visibleItems);
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
   }, [visibleItems]);
 
   const loopedItems = [
@@ -89,13 +106,11 @@ const Carousel = ({
     if (!isHoveringRef.current) startAutoplay();
   };
 
-  // autoplay init
   useEffect(() => {
     startAutoplay();
     return stopAutoplay;
   }, []);
 
-  // seamless loop reset
   useEffect(() => {
     if (index === items.length + visibleItems) {
       setTimeout(() => {
@@ -112,7 +127,6 @@ const Carousel = ({
     }
   }, [index, items.length, visibleItems]);
 
-  // re-enable animation
   useEffect(() => {
     if (!isAnimating) {
       requestAnimationFrame(() => setIsAnimating(true));
@@ -131,7 +145,7 @@ const Carousel = ({
         startAutoplay();
       }}
     >
-      {/* Prev Button */}
+      {/* Prev */}
       <button
         onClick={() => navigate('prev')}
         className="h-8 w-8 md:h-10 md:w-10 rounded-full border flex items-center justify-center"
@@ -154,39 +168,53 @@ const Carousel = ({
             <MotionLink
               key={`${i}-${item.link}`}
               to={item.link}
+              target={linkTarget}
               className="flex-shrink-0 group"
               style={{ width: `calc(100% / ${visibleItems})` }}
             >
               <div className="space-y-2">
-  
-              {/* Image */}
-              <div className="relative aspect-square overflow-hidden rounded-sm">
-                <img
-                  src={item.image}
-                  alt={item.title ?? ''}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                {/* Image */}
+                <div className="relative aspect-square overflow-hidden rounded-sm">
+                  <img
+                    src={item.image}
+                    alt={item.title ?? ''}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
 
-                {ifBadgeVisible && badge && (
-                  <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs px-2 py-1 uppercase tracking-wider">
-                    {badge}
-                  </span>
-                )}
-
-                {ifWhishlistVisible && (
-                  <button className="absolute top-3 right-3 p-2 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background">
-                    <Heart className="w-4 h-4 text-foreground" />
-                  </button>
-                )}
-
-                {ifPurchaseButtonVisible && purchaseButton && (
-                  <div className="absolute inset-0 flex items-end pointer-events-none">
-                    <div className="w-full text-center py-3 bg-accent/80 text-white text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      {purchaseButton}
+                  {/* 🔥 Hover Overlay */}
+                  {ifHoverOverlayVisible && hoverOverlayContent && (
+                    <div
+                      className={`absolute inset-0 flex items-center justify-center
+                      opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                      ${hoverOverlayBgClass}`}
+                    >
+                      {hoverOverlayContent}
                     </div>
-                  </div>
-                )}                
-              </div>
+                  )}
+
+                  {/* Badge */}
+                  {ifBadgeVisible && badge && (
+                    <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs px-2 py-1 uppercase tracking-wider">
+                      {badge}
+                    </span>
+                  )}
+
+                  {/* Wishlist */}
+                  {ifWhishlistVisible && (
+                    <button className="absolute top-3 right-3 p-2 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background">
+                      <Heart className="w-4 h-4 text-foreground" />
+                    </button>
+                  )}
+
+                  {/* Purchase CTA */}
+                  {ifPurchaseButtonVisible && purchaseButton && (
+                    <div className="absolute inset-0 flex items-end pointer-events-none">
+                      <div className="w-full text-center py-3 bg-accent/80 text-white text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        {purchaseButton}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Title */}
                 {ifTitleVisible && item.title && (
@@ -205,7 +233,7 @@ const Carousel = ({
         </motion.div>
       </div>
 
-      {/* Next Button */}
+      {/* Next */}
       <button
         onClick={() => navigate('next')}
         className="h-8 w-8 md:h-10 md:w-10 rounded-full border flex items-center justify-center"
