@@ -24,6 +24,7 @@ export const brandConfig = {
     linkedin: 'https://www.linkedin.com/company/henig-diamonds',
     twitter: 'https://x.com/HenigDiamonds',
     youtube: 'https://youtube.com/henigdiamonds',
+    whatsApp: 'https://whatsapp.com/channel/0029VbCFMLYE50Ugv30Kw72s'
   },
 };
 

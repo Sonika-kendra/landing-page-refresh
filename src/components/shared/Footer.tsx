@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin, Youtube } from '@/assets/footer';
+import { Twitter, Facebook, Instagram, Linkedin, Youtube, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/landing/theme';
 
 const Footer = () => {
@@ -60,6 +60,9 @@ const Footer = () => {
               </a>
               <a target="_blank" href={brandConfig.social.youtube} className="text-accent-foreground/60 hover:text-primary transition-colors">
                 <img src={Youtube} alt="Youtube" className="w-7 h-7 brightness-0 invert" />
+              </a>
+              <a target="_blank" href={brandConfig.social.whatsApp} className="text-accent-foreground/60 hover:text-primary transition-colors">
+                <img src={Whatsapp} alt="Whatsapp" className="w-7 h-7 brightness-0 invert" />
               </a>
             </div>
           </div>
