@@ -139,16 +139,24 @@ const Footer = () => {
                 </a>
               </li>
 
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-primary mt-0.5" />
-                <span className="text-sm text-accent-foreground/70">
-                  Henig Diamonds<br />
-                  Suite Two First Floor<br />
-                  63-66 Hatton Garden<br />
-                  London EC1N 8AN<br />
-                  EC1N 8LE
-                </span>
+              <li>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Henig+Diamonds+63-66+Hatton+Garden+London+EC1N+8AN"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 group"
+                >
+                  <MapPin className="w-4 h-4 text-primary mt-0.5 group-hover:text-primary/80 transition-colors" />
+                  <span className="text-sm text-accent-foreground/70 group-hover:text-primary transition-colors">
+                    Henig Diamonds<br />
+                    Suite Two First Floor<br />
+                    63-66 Hatton Garden<br />
+                    London EC1N 8AN<br />
+                    EC1N 8LE
+                  </span>
+                </a>
               </li>
+
             </ul>
           </div>
         </div>
