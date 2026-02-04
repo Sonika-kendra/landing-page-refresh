@@ -61,7 +61,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                 <li key={link.label}>
                   <Link
                     to={link.href}
-                    className={`text-sm font-normal transition-colors ${
+                    className={`text-md font-normal transition-colors ${
                       location.pathname === link.href
                         ? 'text-primary'
                         : 'text-foreground hover:text-primary'
