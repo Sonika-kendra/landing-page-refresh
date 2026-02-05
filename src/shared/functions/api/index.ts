@@ -1,15 +1,10 @@
+import { baseURL } from '@/config/config';
 import axs, {
   AxiosInstance,
   AxiosRequestHeaders,
   AxiosResponse,
   CancelTokenSource,
 } from 'axios';
-
-export const baseURL: string = import.meta.env.VITE_API_URL!;
-// export const cdnURL: string | undefined = process.env.REACT_APP_CDN_URL;
-
-console.log(baseURL);
-
 
 const axios: AxiosInstance = axs.create({
   baseURL,

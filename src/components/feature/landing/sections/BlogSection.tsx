@@ -3,6 +3,7 @@ import { fetchBlogPosts, BlogPost } from '@/shared/functions/api/blogPosts';
 import VerticalBlogListWithImage from './blog/VerticalBlogCarousel';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { oldWebsiteURL } from '@/config/config';
 
 const BlogSection = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -24,6 +25,8 @@ const BlogSection = () => {
   }, []);
 
   if (loading || posts.length === 0) return null;
+
+  console.log(oldWebsiteURL);
 
   return (
     <section className="py-20 bg-white">
@@ -47,7 +50,9 @@ const BlogSection = () => {
             size="sm"
             asChild
           >
-            <a href="/news">GO TO OUR BLOG</a>
+            <a href={`${oldWebsiteURL}/news`} >
+              GO TO OUR BLOG
+            </a>
           </Button>
         </motion.div>
       </div>
