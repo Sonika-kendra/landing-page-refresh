@@ -1,31 +1,12 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-
-import diamondsImage from '@/assets/diamonds-category.jpg';
-import jewelleryImage from '@/assets/jewellery-category.jpg';
+import { categories } from '@/config/landing/category';
 
 // Motion-enhanced router link
 const MotionLink = motion(Link);
 
 const CategorySection = () => {
-  const categories = [
-    {
-      title: 'Diamonds',
-      description:
-        'Explore our collection of loose diamonds, certified and conflict-free.',
-      image: diamondsImage,
-      href: '/diamonds',
-    },
-    {
-      title: 'Jewellery',
-      description:
-        'Discover handcrafted pieces from engagement rings to everyday elegance.',
-      image: jewelleryImage,
-      href: '/jewellery',
-    },
-  ];
-
   return (
     <section className="py-4 md:py-6 bg-secondary">
       <div className="henig-container">
