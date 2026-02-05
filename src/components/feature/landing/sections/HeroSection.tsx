@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import HeroAnnouncement from './hero/HeroAnnouncement';
 import HeroCarousel from './hero/HeroCarousel';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = ({ className = '' }) => {
   const [heroLoaded, setHeroLoaded] = useState(false);
@@ -38,11 +39,13 @@ const HeroSection = ({ className = '' }) => {
               Using sample ring boxes enhances bridal jewellery sales by showcasing 
               the elegance awaiting potential buyers on their special day.
             </p>
-            <Button 
+            <Button asChild
               className="btn-henig-outline group w-64 px-6 py-4 text-lg"
             >
-              Shop Collection
-              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <Link to="/jewellery">
+                Shop Collection
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
           </motion.div>
 
