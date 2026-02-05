@@ -3,6 +3,7 @@ import SectionHeader from '@/components/shared/SectionHeader';
 import Carousel, { CarouselItem } from '@/components/shared/Carousel';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
+import { websiteUrlConfig } from '@/config/config';
 
 const BestSellersSection = () => {
   const [carouselItems, setCarouselItems] = useState([]);
@@ -10,7 +11,7 @@ const BestSellersSection = () => {
   useEffect(() => {
     const items = BestSellerProducts.map((p) => ({
       image: p.image,
-      link: `/products/${p.id}`,
+      // link: `${websiteUrlConfig.Jewellery.All}`,
       title: p.name,
       price: `${p.currency}${p.price.toFixed(2)}`,
     }));
@@ -42,9 +43,11 @@ const BestSellersSection = () => {
 
         {/* View Our Bestsellers Button */}
         <div className="text-center mt-6">
-          <Button className="btn-henig-outline px-6 py-2">
-            View Our Bestsellers
-          </Button>
+          <a href={websiteUrlConfig.Jewellery.All}>
+            <Button className="btn-henig-outline px-6 py-2">
+              View Our Bestsellers
+            </Button>
+          </a>
         </div>
       </div>
     </section>

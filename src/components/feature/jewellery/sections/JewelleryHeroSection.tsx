@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import jewelleryHero from '@/assets/jewellery-hero.jpg';
+import { ArrowRight, Link } from 'lucide-react';
+import { websiteUrlConfig } from '@/config/config';
 
 const JewelleryHeroSection = () => (
   <section className="relative min-h-[45vh] pt-28 md:pt-32 pb-12 overflow-hidden">
@@ -28,9 +30,21 @@ const JewelleryHeroSection = () => (
         </p>
 
         <div className="flex flex-wrap gap-3">
-          <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40"> Naturals </Button>
-          <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40"> Lab Grown </Button>
-          <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40"> Gemstones </Button>
+          <a href={websiteUrlConfig.Jewellery.All}>
+            <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40">
+              Naturals
+            </Button>
+          </a>
+          <a href={websiteUrlConfig.Jewellery.All}>
+            <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40">
+              Lab Grown
+            </Button>
+          </a>
+          <a href={websiteUrlConfig.Jewellery.All}>
+            <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40">
+              Gemstones
+            </Button>
+          </a>
         </div>
       </motion.div>
     </div>

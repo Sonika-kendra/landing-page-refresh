@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import SectionHeader from '@/components/shared/SectionHeader';
 import { newArrivalsJewelleryProducts } from '@/config/jewellery/newArrivalsJewelleryProducts';
 import Carousel from '@/components/shared/Carousel';
+import { websiteUrlConfig } from '@/config/config';
 
 const NewArrivalsSection = () => {
   const [carouselItems, setCarouselItems] = useState([]);
@@ -9,7 +10,7 @@ const NewArrivalsSection = () => {
   useEffect(() => {
     const items = newArrivalsJewelleryProducts.map((p) => ({
       image: p.image,
-      link: `/products/${p.id}`,
+      link: `${websiteUrlConfig.Jewellery.All}`,
       title: p.name,
       price: `${p.currency}${p.price.toFixed(2)}`,
     }));
