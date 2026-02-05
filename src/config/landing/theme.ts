@@ -4,7 +4,7 @@
 // All theme-related constants are centralized here.
 // Modify this file to update the entire application theme.
 
-import { oldWebsiteURL, websiteUrlConfig } from "../config";
+import { websiteUrlConfig } from "../config";
 
 export const brandConfig = {
   name: 'Henig Diamonds',
@@ -70,16 +70,16 @@ export const jewellerAssociations = [
 
 export const footerLinks = {
   company: [
-    { label: 'About Us', href: '/about' },
-    { label: 'Why Henig', href: '/why-henig' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Press', href: '/press' },
+    { label: 'About Us', href: websiteUrlConfig.Home },
+    { label: 'Why Henig', href: websiteUrlConfig.Home },
+    { label: 'Careers', href: websiteUrlConfig.Home },
+    { label: 'Press', href: websiteUrlConfig.Contact },
   ],
   customerCare: [
     { label: 'FAQs', href: '/faq' },
-    { label: 'How to Order', href: '/how-to-order' },
-    { label: 'Terms & Conditions', href: '/terms' },
-    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'How to Order', href: websiteUrlConfig.Home },
+    { label: 'Terms & Conditions', href: websiteUrlConfig.Home },
+    { label: 'Privacy Policy', href: websiteUrlConfig.Home },
   ],
 };
 

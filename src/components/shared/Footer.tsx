@@ -2,9 +2,31 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Twitter, Facebook, Instagram, Linkedin, Youtube, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/landing/theme';
+import { websiteUrlConfig } from '@/config/config';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Smooth scroll to FAQ section
+  const handleFaqClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+
+    if (location.pathname === '/') {
+      // Already on homepage, just scroll
+      const faqSection = document.getElementById('faq');
+      faqSection?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Navigate to homepage first, then scroll after a small delay
+      navigate('/', { replace: false });
+      setTimeout(() => {
+        const faqSection = document.getElementById('faq');
+        faqSection?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
 
   return (
     <footer className="bg-accent text-accent-foreground">
@@ -16,15 +38,13 @@ const Footer = () => {
             <p className="text-accent-foreground/70 mb-6 text-sm">
               Subscribe to receive updates on new collections, exclusive offers, and more.
             </p>
-            <form className="flex gap-3">
+            <form className="flex gap-3 items-stretch">
               <input
                 type="email"
                 placeholder="Your email address"
-                className="flex-1 px-4 py-3 bg-accent-foreground/5 border border-accent-foreground/20 rounded-sm text-sm placeholder:text-accent-foreground/40 focus:outline-none focus:border-primary"
+                className="flex-1 h-12 px-4 bg-accent-foreground/5 border border-accent-foreground/20 rounded-sm text-sm placeholder:text-accent-foreground/40 focus:outline-none focus:border-primary"
               />
-              <Button className="btn-henig-gold">
-                Subscribe
-              </Button>
+              <Button className="btn-henig-gold h-12 px-6">Subscribe</Button>
             </form>
           </div>
         </div>
@@ -46,24 +66,24 @@ const Footer = () => {
               A heritage of trust, innovation, and excellence in diamonds since 1973.
             </p>
             <div className="flex gap-4">
-              <a target="_blank" href={brandConfig.social.twitter} className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <img src={Twitter} alt="Twitter" className="w-7 h-7 brightness-0 invert" />
-              </a>
-              <a target="_blank" href={brandConfig.social.facebook} className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <img src={Facebook} alt="Facebook" className="w-7 h-7 brightness-0 invert" />
-              </a>
-              <a target="_blank" href={brandConfig.social.instagram} className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <img src={Instagram} alt="Instagram" className="w-7 h-7 brightness-0 invert" />
-              </a>
-              <a target="_blank" href={brandConfig.social.linkedin} className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <img src={Linkedin} alt="Linkedin" className="w-7 h-7 brightness-0 invert" />
-              </a>
-              <a target="_blank" href={brandConfig.social.youtube} className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <img src={Youtube} alt="Youtube" className="w-7 h-7 brightness-0 invert" />
-              </a>
-              <a target="_blank" href={brandConfig.social.whatsApp} className="text-accent-foreground/60 hover:text-primary transition-colors">
-                <img src={Whatsapp} alt="Whatsapp" className="w-7 h-7 brightness-0 invert" />
-              </a>
+              {[
+                { href: brandConfig.social.twitter, src: Twitter, alt: "Twitter" },
+                { href: brandConfig.social.facebook, src: Facebook, alt: "Facebook" },
+                { href: brandConfig.social.instagram, src: Instagram, alt: "Instagram" },
+                { href: brandConfig.social.linkedin, src: Linkedin, alt: "Linkedin" },
+                { href: brandConfig.social.youtube, src: Youtube, alt: "Youtube" },
+                { href: brandConfig.social.whatsApp, src: Whatsapp, alt: "Whatsapp" },
+              ].map(({ href, src, alt }) => (
+                <a
+                  key={alt}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={href}
+                  className="text-accent-foreground/60 hover:text-primary transition-colors"
+                >
+                  <img src={src} alt={alt} className="w-7 h-7 brightness-0 invert" />
+                </a>
+              ))}
             </div>
           </div>
 
@@ -87,8 +107,11 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
-                  Press
+                <a
+                  href={websiteUrlConfig.Blogs}
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Blog
                 </a>
               </li>
             </ul>
@@ -99,7 +122,11 @@ const Footer = () => {
             <h5 className="font-serif text-lg mb-4">Customer Care</h5>
             <ul className="space-y-3">
               <li>
-                <a href="#faq" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
+                <a
+                  href="#"
+                  onClick={handleFaqClick}
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
                   FAQs
                 </a>
               </li>
@@ -138,7 +165,6 @@ const Footer = () => {
                   info@henigdiamonds.co.uk
                 </a>
               </li>
-
               <li>
                 <a
                   href="https://www.google.com/maps/search/?api=1&query=Henig+Diamonds+63-66+Hatton+Garden+London+EC1N+8AN"
@@ -156,7 +182,6 @@ const Footer = () => {
                   </span>
                 </a>
               </li>
-
             </ul>
           </div>
         </div>

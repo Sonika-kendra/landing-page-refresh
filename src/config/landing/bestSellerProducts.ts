@@ -12,6 +12,7 @@ import jewelleryProduct7 from '@/assets/landing/bestseller/jewellery/product7.jp
 import jewelleryProduct8 from '@/assets/landing/bestseller/jewellery/product8.jpg';
 import jewelleryProduct9 from '@/assets/landing/bestseller/jewellery/product9.jpg';
 import jewelleryProduct10 from '@/assets/landing/bestseller/jewellery/product10.jpg';
+import { websiteUrlConfig } from '../config';
 
 export interface BestSellerProductProps {
   image: string;
@@ -27,85 +28,85 @@ export interface BestSellersSectionProps {
 export const BestSellerProducts: BestSellerProductProps[] = [
   {
     image: diamondsProduct1,
-    link: '/diamonds',
+    link: websiteUrlConfig.Diamonds.All,
     title: 'Mini Polished Interlocking Earrings',
     price: '£25.00'
   },
   {
     image: diamondsProduct2,
-    link: '/diamonds',
+    link: websiteUrlConfig.Diamonds.All,
     title: 'Interlocking Open Circle Necklace',
     price: '£28.00'
   },
   {
     image: diamondsProduct3,
-    link: '/diamonds',
+    link: websiteUrlConfig.Diamonds.All,
     title: 'Fine Crystal & Wave Wrist Stacking Set',
     price: '£28.00'
   },
   {
     image: diamondsProduct4,
-    link: '/diamonds',
+    link: websiteUrlConfig.Diamonds.All,
     title: 'Organic Open Circle Drop Earrings',
     price: '£35.00'
   },
   {
     image: jewelleryProduct1,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Geometric Gold Layered Necklace',
     price: '£32.50'
   },
   {
     image: jewelleryProduct2,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Pearl & Crystal Hoop Earrings',
     price: '£30.00'
   },
   {
     image: jewelleryProduct3,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Delicate Heart Charm Bracelet',
     price: '£22.00'
   },
   {
     image: jewelleryProduct4,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Classic Solitaire Pendant Necklace',
     price: '£40.00'
   },
   {
     image: jewelleryProduct5,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
   {
     image: jewelleryProduct6,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
   {
     image: jewelleryProduct7,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
   {
     image: jewelleryProduct8,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
   {
     image: jewelleryProduct9,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
   {
     image: jewelleryProduct10,
-    link: '/jewellery',
+    link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
