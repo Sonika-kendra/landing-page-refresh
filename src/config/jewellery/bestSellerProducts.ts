@@ -19,8 +19,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '18k Gold Plated',
     image: product1,
-    category: 'earrings',
-    isNew: true,
+    category: 'earrings'
   },
   {
     id: 'j2',
@@ -29,8 +28,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '18k Gold Plated',
     image: product2,
-    category: 'necklaces',
-    isNew: true,
+    category: 'necklaces'
   },
   {
     id: 'j6',
@@ -39,8 +37,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: 'Sterling Silver',
     image: product6,
-    category: 'earrings',
-    isNew: true,
+    category: 'earrings'
   },
   {
     id: 'j3',
@@ -49,8 +46,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '18k Gold Plated',
     image: product3,
-    category: 'bracelets',
-    isNew: true,
+    category: 'bracelets'
   },
   {
     id: 'j4',
@@ -59,8 +55,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '18k Gold Plated',
     image: product4,
-    category: 'earrings',
-    isNew: true,
+    category: 'earrings'
   },
   {
     id: 'j5',
@@ -69,8 +64,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '18k Gold Plated',
     image: product5,
-    category: 'necklaces',
-    isNew: false,
+    category: 'necklaces'
   },
   {
     id: 'j8',
@@ -79,8 +73,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '14k White Gold',
     image: product8,
-    category: 'necklaces',
-    isNew: true,
+    category: 'necklaces'
   },
   {
     id: 'j10',
@@ -89,8 +82,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: 'Rose Gold Plated',
     image: product10,
-    category: 'earrings',
-    isNew: false,
+    category: 'earrings'
   },
   {
     id: 'j7',
@@ -99,8 +91,7 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: '18k Gold Plated',
     image: product7,
-    category: 'bracelets',
-    isNew: false,
+    category: 'bracelets'
   },
   {
     id: 'j9',
@@ -109,7 +100,6 @@ export const BestSellerProducts: Product[] = [
     currency: '£',
     material: 'Rose Gold Plated',
     image: product9,
-    category: 'earrings',
-    isNew: false,
+    category: 'earrings'
   }
 ];

@@ -1,23 +1,10 @@
 import { Link } from 'react-router-dom';
 import SectionHeader from '@/components/shared/SectionHeader';
-import { jewelleryCategories } from '@/config/jewellery/products';
 import { motion } from 'framer-motion';
-import jewelleryHero from '@/assets/jewellery-hero.jpg';
-import tennisBracelet from '@/assets/tennis-bracelet.jpg';
-import hoops from '@/assets/hoops.jpg';
-import gemstoneNecklace from '@/assets/gemstone-necklace.jpg';
-import eternityRing from '@/assets/eternity-ring.jpg';
-
-const categoryImages: Record<string, string> = {
-  earrings: hoops,
-  'engagement-rings': eternityRing,
-  bracelets: tennisBracelet,
-  necklaces: gemstoneNecklace,
-};
+import { jewelleryCategories } from '@/config/jewellery/categoryProducts';
 
 const CategorySection = () => (
   <section className="py-5">
-
     <div className="flex justify-center">
       <SectionHeader
         caption=""
@@ -26,7 +13,7 @@ const CategorySection = () => (
         className="!mb-2 md:!mb-4 text-center font-semibold tracking-wide"
       />
     </div>
-    
+
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
       {jewelleryCategories.map((category, index) => (
         <motion.div
@@ -38,9 +25,9 @@ const CategorySection = () => (
         >
           <Link to={`/jewellery/${category.slug}`} className="group block">
             <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-4 bg-secondary">
-              {categoryImages[category.id] ? (
+              {category.image ? (
                 <img
-                  src={categoryImages[category.id]}
+                  src={category.image}
                   alt={category.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -62,7 +49,6 @@ const CategorySection = () => (
         </motion.div>
       ))}
     </div>
-
   </section>
 );
 
