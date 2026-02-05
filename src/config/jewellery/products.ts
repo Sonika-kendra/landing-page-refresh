@@ -10,6 +10,8 @@ export interface Product {
   material: string;
   image: string;
   category: 'earrings' | 'necklaces' | 'bracelets' | 'rings';
+  isNew?: boolean;
+  isBestseller?: boolean;
 }
 
 export interface Category {
