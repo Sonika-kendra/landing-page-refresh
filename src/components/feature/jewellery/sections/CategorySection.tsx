@@ -23,7 +23,7 @@ const CategorySection = () => (
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Link to={`/jewellery/${category.slug}`} className="group block">
+          <Link to={category.link} className="group block">
             <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-4 bg-secondary">
               {category.image ? (
                 <img
