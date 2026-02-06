@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import jewelleryHero from '@/assets/jewellery-hero.jpg';
-import { ArrowRight, Link } from 'lucide-react';
 import { websiteUrlConfig } from '@/config/config';
 
 const JewelleryHeroSection = () => (

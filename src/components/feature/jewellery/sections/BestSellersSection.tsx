@@ -1,6 +1,6 @@
 import { BestSellerProducts } from '@/config/jewellery/bestSellerProducts';
 import SectionHeader from '@/components/shared/SectionHeader';
-import Carousel, { CarouselItem } from '@/components/shared/Carousel';
+import Carousel from '@/components/shared/Carousel';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { websiteUrlConfig } from '@/config/config';
