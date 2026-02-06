@@ -8,3 +8,4 @@ export { default as CatalogueBespokeSection } from './sections/CatalogueBespokeS
 export { default as CertificationsSection } from './sections/CertificationsSection';
 export { default as CTASection } from './sections/CTASection';
 export { default as NewsletterSection } from './sections/NewsletterSection';
+export { default as NewArrivalsAndBestsellersSection } from './sections/NewArrivalsAndBestsellersSection';
