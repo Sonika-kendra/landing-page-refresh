@@ -64,9 +64,6 @@ const HeroCarousel = () => {
         )}
       </AnimatePresence>
 
-      {/* Dark overlay for better text visibility */}
-      <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent pointer-events-none" />
 
       {/* Badge at Bottom Right */}
       <div className="absolute right-4 bottom-4 pointer-events-none">
