@@ -14,7 +14,7 @@ return (
           className="text-center mb-12"
         >
           <h2 className="henig-heading-section text-foreground mb-4">
-            Our Collections
+            Best Sellers
           </h2>
           <div className="henig-separator mx-auto" />
         </motion.div>
