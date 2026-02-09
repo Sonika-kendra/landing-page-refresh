@@ -30,69 +30,71 @@ const CertificationsAndPartnersSection = ({
   return (
     <section className="py-4 md:py-6 section-ivory">
       <div className="henig-container">
-      {/* Certifications */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="border-b border-border pb-6"
-      >
-        <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
-          {certificationImages.map((src, index) => (
+        {/* Certifications */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="border-b border-border pb-6"
+        >
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
+            {certificationImages.map((src, index) => (
+              <div
+                key={index}
+                className="inline-flex items-center justify-center bg-accent/20 rounded-lg px-3 py-2"
+              >
+                <img
+                  src={src}
+                  alt={`Certification ${index + 1}`}
+                  className="h-8 md:h-12 object-contain"
+                />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Partner CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="text-center my-6"
+        >
+          <Button
+            className="btn-henig-outline"
+            size="sm"
+            onClick={onRegisterClick}
+          >
+            Partner With Us
+          </Button>
+        </motion.div>
+
+        {/* Partner Images */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="flex flex-wrap justify-center gap-6 mb-10 items-center"
+        >
+          {partnerImageList.map((src, idx) => (
             <div
-              key={index}
-              className="inline-flex items-center justify-center bg-accent/20 rounded-lg px-3 py-2"
+              key={idx}
+              className="w-40 h-20 bg-primary flex items-center justify-center p-2"
             >
               <img
                 src={src}
-                alt={`Certification ${index + 1}`}
-                className="h-8 md:h-12 object-contain"
+                alt={`Partner ${idx + 1}`}
+                className="w-full h-full object-contain"
               />
             </div>
           ))}
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Partner CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
-        className="text-center my-6"
-      >
-        <Button
-          className="btn-henig-outline"
-          size="sm"
-          onClick={onRegisterClick}
-        >
-          Partner With Us
-        </Button>
-      </motion.div>
 
-      {/* Partner Images */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
-        className="flex flex-wrap justify-center gap-4 mb-10 items-center"
-      >
-        {partnerImageList.map((src, idx) => (
-          <div
-            key={idx}
-            className="w-14 h-14 rounded-full bg-accent flex items-center justify-center p-1.5"
-          >
-            <img
-              src={src}
-              alt={`Partner ${idx + 1}`}
-              className="max-h-8 object-contain"
-            />
-          </div>
-        ))}
-      </motion.div>
-    </div>
+      </div>
     </section>
   );
 };
