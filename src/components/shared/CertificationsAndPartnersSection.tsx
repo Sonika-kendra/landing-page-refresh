@@ -82,18 +82,16 @@ const CertificationsAndPartnersSection = ({
           {partnerImageList.map((src, idx) => (
             <div
               key={idx}
-              className="w-40 h-20 bg-primary flex items-center justify-center p-2"
+              className="flex items-center justify-center bg-primary p-2 rounded-lg w-36 h-20 md:w-48 md:h-24"
             >
               <img
                 src={src}
                 alt={`Partner ${idx + 1}`}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain"
               />
             </div>
           ))}
         </motion.div>
-
-
       </div>
     </section>
   );
