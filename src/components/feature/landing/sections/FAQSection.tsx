@@ -9,7 +9,7 @@ import { faqItems } from '@/config/landing/theme';
 
 const FAQSection = () => {
   return (
-    <section id="faq" className="py-8 md:py-12 w-full bg-secondary">
+    <section id="faq" className="py-8 md:py-12 w-full bg-secondary section-white">
       {/* Full width container with horizontal padding */}
       <div className="px-4 sm:px-6 lg:px-12 w-full">
         {/* Heading */}

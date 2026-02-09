@@ -5,7 +5,7 @@ import { jewelleryCategories } from '@/config/jewellery/categoryProducts';
 import { ChevronRight } from 'lucide-react';
 
 const CategorySection = () => (
-  <section className="py-5">
+  <section className="py-5 section-white">
     <div className="flex justify-center">
       <SectionHeader
         caption=""

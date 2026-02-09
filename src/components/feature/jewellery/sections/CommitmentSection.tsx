@@ -36,7 +36,7 @@ const CommitmentSection = () => {
   ];
 
   return (
-    <section className="py-12 bg-secondary">
+    <section className="py-10 bg-secondary section-ivory">
       <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-6">
         {items.map((item, index) => (
           <div key={index} className="flex flex-col items-center text-center w-32">

@@ -248,6 +248,15 @@
 }
 
 @layer utilities {
+  /* Section background variants */
+  .section-ivory {
+    background-color: hsl(var(--henig-ivory)); /* #ebebe4 */
+  }
+
+  .section-white {
+    background-color: #ffffff;
+  }
+  
   /* Animation utilities */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out forwards;

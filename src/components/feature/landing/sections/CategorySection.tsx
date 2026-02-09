@@ -8,7 +8,7 @@ const MotionLink = motion(Link);
 
 const CategorySection = () => {
   return (
-    <section className="py-4 md:py-6 bg-secondary">
+    <section className="py-4 md:py-6 section-ivory">
       <div className="henig-container">
         <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           {categories.map((category, index) => (

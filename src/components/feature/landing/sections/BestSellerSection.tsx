@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const BestSellersSection = () => {
 return (
-    <section className="py-5 md:py-5">
+    <section className="py-5 md:py-5 section-ivory">
       <div className="henig-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

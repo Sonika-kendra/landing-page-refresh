@@ -15,7 +15,7 @@ const iconMap: Record<number, React.ElementType> = {
 
 const AboutSection = () => {
   return (
-    <section id="about" className="py-5 md:py-7">
+    <section id="about" className="py-5 md:py-7 section-white">
       <div className="henig-container">
         {/* Header */}
         <motion.div

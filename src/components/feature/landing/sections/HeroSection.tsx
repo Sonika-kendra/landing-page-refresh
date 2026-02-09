@@ -15,7 +15,7 @@ const HeroSection = ({ className = '' }) => {
   }, []);
 
   return (
-    <section className={`relative w-full min-h-full flex items-center bg-background ${className}`}>
+    <section className={`section-white relative w-full min-h-full flex items-center bg-background ${className}`}>
 
       {/* Announcement inside hero */}
       <HeroAnnouncement show={heroLoaded} />

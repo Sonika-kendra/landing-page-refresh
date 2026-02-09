@@ -28,7 +28,7 @@ const CertificationsAndPartnersSection = ({
   onRegisterClick,
 }: CertificationsAndPartnersSectionProps) => {
   return (
-    <section className="py-4 md:py-6 bg-secondary">
+    <section className="py-4 md:py-6 section-ivory">
       <div className="henig-container">
       {/* Certifications */}
       <motion.div

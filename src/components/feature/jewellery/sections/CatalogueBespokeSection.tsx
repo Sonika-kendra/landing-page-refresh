@@ -4,10 +4,10 @@ import BespokeImg from '@/assets/jewellery/catalogue/lab-grown-diamond.jpg';
 
 const CatalogueBespokeSection = () => {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-6 my-12">
+    <section className="grid grid-cols-1 md:grid-cols-2 py-10 section-white">
 
       {/* Catalogue Card */}
-      <div className="relative group overflow-hidden rounded-lg h-80 md:h-96">
+      <div className="relative group overflow-hidden h-80 md:h-96">
         <img
           src={CatalogueImg}
           alt="Catalogue"
@@ -20,14 +20,14 @@ const CatalogueBespokeSection = () => {
             Catalogue
           </span>
 
-          <button className="border border-brown-500 px-6 py-2 bg-white text-black rounded-lg font-medium">
+          <button className="border border-brown-500 px-6 py-2 bg-white text-black font-medium">
             Enquire
           </button>
         </div>
       </div>
 
       {/* Bespoke Card */}
-      <div className="relative group overflow-hidden rounded-lg h-80 md:h-96">
+      <div className="relative group overflow-hidden h-80 md:h-96">
         <img
           src={BespokeImg}
           alt="Bespoke"
@@ -40,7 +40,7 @@ const CatalogueBespokeSection = () => {
             Bespoke
           </span>
 
-          <button className="border border-white px-6 py-2 bg-transparent text-white rounded-lg font-medium">
+          <button className="border border-white px-6 py-2 bg-transparent text-white font-medium">
             Enquire
           </button>
         </div>

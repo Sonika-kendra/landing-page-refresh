@@ -40,7 +40,7 @@ const features: Feature[] = [
 
 const SupportSection = () => {
   return (
-    <section className="py-12 bg-secondary">
+    <section className="py-12 section-ivory">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 text-center">
         {features.map((feature, idx) => (
           <div key={idx} className="flex flex-col items-center">

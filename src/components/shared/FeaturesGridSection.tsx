@@ -18,7 +18,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 const FeaturesGridSection = () => {
     return (
-        <section className="py-4 md:py-6">
+        <section className="py-4 md:py-6 section-white">
             <div className="henig-container">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                     {features.map((feature, index) => (

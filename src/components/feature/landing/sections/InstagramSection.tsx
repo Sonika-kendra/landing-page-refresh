@@ -23,7 +23,7 @@ const InstagramSection = () => {
   }, []);
 
   return (
-    <section className="py-5 md:py-9">
+    <section className="py-5 md:py-9 section-ivory">
       <div className="henig-container">
         {/* Heading */}
         <div className="text-center mb-8">
