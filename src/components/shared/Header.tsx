@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, ShoppingBag, Menu, X, User } from 'lucide-react';
+import { Heart, ShoppingBag, Menu, X, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/landing/theme';
@@ -11,6 +11,7 @@ interface HeaderProps {
 
 const Header = ({ onRegisterClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const location = useLocation();
 
   return (
@@ -41,48 +42,91 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </div>
 
           {/* Navigation - Desktop */}
-<nav className="hidden md:flex items-center justify-center flex-1 relative">
-  <ul className="flex items-center gap-8">
-    {navigationLinks.map((link) => {
-      const hasSubMenu = !!link.subLinks;
+          <nav className="hidden md:flex items-center justify-center flex-1 relative">
+            <ul className="flex items-center gap-8">
+              {navigationLinks.map((link) => {
+                const hasMegaMenu = 'megaMenu' in link && link.megaMenu;
 
-      return (
-        <li key={link.label} className="relative group">
-          <button
-            type="button"
-            className={`flex items-center gap-1 text-md font-normal transition-colors ${
-              location.pathname.startsWith(link.href)
-                ? 'text-primary'
-                : 'text-foreground hover:text-primary'
-            }`}
-          >
-            {link.label}
-
-            {hasSubMenu && (
-              <span className="inline-block w-3 h-3 border-b-2 border-r-2 border-foreground transform rotate-45 transition-transform duration-200 group-hover:rotate-225 group-hover:border-primary" />
-            )}
-          </button>
-
-          {hasSubMenu && (
-            <ul className="absolute top-full left-0 mt-3 w-48 bg-background border border-border rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              {link.subLinks.map((subLink) => (
-                <li key={subLink.label}>
-                  <Link
-                    to={subLink.href}
-                    className="block px-4 py-2 text-sm text-foreground hover:bg-primary hover:text-background"
+                return (
+                  <li
+                    key={link.label}
+                    className="relative group"
+                    onMouseEnter={() => hasMegaMenu && setActiveMegaMenu(link.label)}
+                    onMouseLeave={() => setActiveMegaMenu(null)}
                   >
-                    {subLink.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      );
-    })}
-  </ul>
-</nav>
+                    <button
+                      type="button"
+                      className={`flex items-center gap-1 text-md font-normal transition-colors ${
+                        location.pathname.startsWith(link.href)
+                          ? 'text-primary'
+                          : 'text-foreground hover:text-primary'
+                      }`}
+                    >
+                      {link.label}
+                      {hasMegaMenu && (
+                        <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                      )}
+                    </button>
 
+                    {/* Mega Menu */}
+                    {hasMegaMenu && 'categories' in link && (
+                      <AnimatePresence>
+                        {activeMegaMenu === link.label && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="fixed left-0 right-0 top-full mt-0 bg-background border-t border-border shadow-xl z-50"
+                          >
+                            <div className="henig-container py-8">
+                              <div className="grid grid-cols-4 gap-8">
+                                {link.categories.map((category) => (
+                                  <div key={category.title}>
+                                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                                      {category.title}
+                                    </h3>
+                                    <ul className="space-y-2">
+                                      {category.links.map((subLink) => (
+                                        <li key={subLink.label}>
+                                          {'image' in subLink && subLink.image ? (
+                                            <a
+                                              href={subLink.href}
+                                              className="group/item flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                                            >
+                                              <img
+                                                src={subLink.image}
+                                                alt={subLink.label}
+                                                className="w-12 h-12 object-cover rounded"
+                                              />
+                                              <span className="text-sm text-foreground group-hover/item:text-primary transition-colors">
+                                                {subLink.label}
+                                              </span>
+                                            </a>
+                                          ) : (
+                                            <a
+                                              href={subLink.href}
+                                              className="block py-1.5 text-sm text-muted hover:text-primary transition-colors"
+                                            >
+                                              {subLink.label}
+                                            </a>
+                                          )}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4 w-auto md:w-1/4 justify-end">
@@ -115,54 +159,57 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-t border-border"
+            className="md:hidden bg-background border-t border-border max-h-[80vh] overflow-y-auto"
           >
-            <ul className="py-4 px-4 space-y-4">
-{navigationLinks.map((link) => {
-  const [openSubMenu, setOpenSubMenu] = useState(false);
-  const hasSubMenu = !!link.subLinks;
+            <ul className="py-4 px-4 space-y-2">
+              {navigationLinks.map((link) => {
+                const hasMegaMenu = 'megaMenu' in link && link.megaMenu;
+                const [openSubMenu, setOpenSubMenu] = useState(false);
 
-  return (
-    <li key={link.label}>
-      <button
-        type="button"
-        onClick={() => hasSubMenu && setOpenSubMenu((prev) => !prev)}
-        className={`w-full flex items-center justify-between py-2 text-base font-normal transition-colors ${
-          openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
-        }`}
-      >
-        <span>{link.label}</span>
+                return (
+                  <li key={link.label} className="border-b border-border/50 last:border-0">
+                    <button
+                      type="button"
+                      onClick={() => hasMegaMenu && setOpenSubMenu((prev) => !prev)}
+                      className={`w-full flex items-center justify-between py-3 text-base font-normal transition-colors ${
+                        openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      {hasMegaMenu && (
+                        <ChevronDown className={`w-4 h-4 transition-transform ${openSubMenu ? 'rotate-180' : ''}`} />
+                      )}
+                    </button>
 
-        {hasSubMenu && (
-          <span
-            className={`inline-block w-3 h-3 border-b-2 border-r-2 border-foreground transform transition-transform duration-200 ${
-              openSubMenu ? 'rotate-225 border-primary' : 'rotate-45'
-            }`}
-          />
-        )}
-      </button>
+                    {hasMegaMenu && 'categories' in link && openSubMenu && (
+                      <div className="pl-4 pb-4 space-y-4">
+                        {link.categories.map((category) => (
+                          <div key={category.title}>
+                            <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
+                              {category.title}
+                            </h4>
+                            <ul className="space-y-1">
+                              {category.links.map((subLink) => (
+                                <li key={subLink.label}>
+                                  <a
+                                    href={subLink.href}
+                                    className="block py-1.5 text-sm text-foreground hover:text-primary"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                  >
+                                    {subLink.label}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
 
-      {hasSubMenu && openSubMenu && (
-        <ul className="pl-4 mt-2 space-y-2">
-          {link.subLinks.map((subLink) => (
-            <li key={subLink.label}>
-              <Link
-                to={subLink.href}
-                className="block py-2 text-sm text-foreground hover:text-primary"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {subLink.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </li>
-  );
-})}
-
-
-              <li>
+              <li className="pt-2">
                 <Button
                   variant="outline"
                   className="w-full justify-center"
