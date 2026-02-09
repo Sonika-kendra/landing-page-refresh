@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, Menu, X, User } from 'lucide-react';
+import { Heart, ShoppingBag, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/landing/theme';
@@ -15,22 +15,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-
-      {/* Main header */}
       <div className="henig-container">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Search - Desktop */}
-          {/* <div className="hidden md:flex items-center w-1/4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-48 pl-4 pr-10 py-2 text-sm border border-border rounded bg-transparent focus:outline-none focus:border-primary"
-              />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            </div>
-          </div> */}
-
           {/* Mobile menu button */}
           <button
             className="md:hidden p-2"
@@ -55,24 +41,48 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </div>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center justify-center flex-1">
-            <ul className="flex items-center gap-8">
-              {navigationLinks.map((link) => (
-                <li key={link.label}>
+<nav className="hidden md:flex items-center justify-center flex-1 relative">
+  <ul className="flex items-center gap-8">
+    {navigationLinks.map((link) => {
+      const hasSubMenu = !!link.subLinks;
+
+      return (
+        <li key={link.label} className="relative group">
+          <button
+            type="button"
+            className={`flex items-center gap-1 text-md font-normal transition-colors ${
+              location.pathname.startsWith(link.href)
+                ? 'text-primary'
+                : 'text-foreground hover:text-primary'
+            }`}
+          >
+            {link.label}
+
+            {hasSubMenu && (
+              <span className="inline-block w-3 h-3 border-b-2 border-r-2 border-foreground transform rotate-45 transition-transform duration-200 group-hover:rotate-225 group-hover:border-primary" />
+            )}
+          </button>
+
+          {hasSubMenu && (
+            <ul className="absolute top-full left-0 mt-3 w-48 bg-background border border-border rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              {link.subLinks.map((subLink) => (
+                <li key={subLink.label}>
                   <Link
-                    to={link.href}
-                    className={`text-md font-normal transition-colors ${
-                      location.pathname === link.href
-                        ? 'text-primary'
-                        : 'text-foreground hover:text-primary'
-                    }`}
+                    to={subLink.href}
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-primary hover:text-background"
                   >
-                    {link.label}
+                    {subLink.label}
                   </Link>
                 </li>
               ))}
             </ul>
-          </nav>
+          )}
+        </li>
+      );
+    })}
+  </ul>
+</nav>
+
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4 w-auto md:w-1/4 justify-end">
@@ -108,21 +118,50 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             className="md:hidden bg-background border-t border-border"
           >
             <ul className="py-4 px-4 space-y-4">
-              {navigationLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.href}
-                    className={`block py-2 text-base font-normal transition-colors ${
-                      location.pathname === link.href
-                        ? 'text-primary'
-                        : 'text-foreground hover:text-primary'
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+{navigationLinks.map((link) => {
+  const [openSubMenu, setOpenSubMenu] = useState(false);
+  const hasSubMenu = !!link.subLinks;
+
+  return (
+    <li key={link.label}>
+      <button
+        type="button"
+        onClick={() => hasSubMenu && setOpenSubMenu((prev) => !prev)}
+        className={`w-full flex items-center justify-between py-2 text-base font-normal transition-colors ${
+          openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
+        }`}
+      >
+        <span>{link.label}</span>
+
+        {hasSubMenu && (
+          <span
+            className={`inline-block w-3 h-3 border-b-2 border-r-2 border-foreground transform transition-transform duration-200 ${
+              openSubMenu ? 'rotate-225 border-primary' : 'rotate-45'
+            }`}
+          />
+        )}
+      </button>
+
+      {hasSubMenu && openSubMenu && (
+        <ul className="pl-4 mt-2 space-y-2">
+          {link.subLinks.map((subLink) => (
+            <li key={subLink.label}>
+              <Link
+                to={subLink.href}
+                className="block py-2 text-sm text-foreground hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {subLink.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+})}
+
+
               <li>
                 <Button
                   variant="outline"

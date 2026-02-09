@@ -32,11 +32,28 @@ export const brandConfig = {
 
 export const navigationLinks = [
   { label: 'Home', href: websiteUrlConfig.Home },
-  { label: 'Diamonds', href: websiteUrlConfig.Diamonds.Home },
-  { label: 'Jewellery', href: websiteUrlConfig.Jewellery.Home },
+  {
+    label: 'Diamonds',
+    href: websiteUrlConfig.Diamonds.Home,
+    subLinks: [
+      { label: 'Engagement Rings', href: websiteUrlConfig.Diamonds.Home },
+      { label: 'Wedding Bands', href: websiteUrlConfig.Diamonds.Home },
+      { label: 'Loose Diamonds', href: websiteUrlConfig.Diamonds.Home },
+    ],
+  },
+  {  
+    label: 'Jewellery',
+    href: websiteUrlConfig.Jewellery.Home,
+    subLinks: [
+      { label: 'Necklaces', href: websiteUrlConfig.Jewellery.Necklaces },
+      { label: 'Earrings', href: websiteUrlConfig.Jewellery.Earrings },
+      { label: 'Bracelets', href: websiteUrlConfig.Jewellery.Bracelets },
+    ],
+  },
   { label: 'Events & Blogs', href: websiteUrlConfig.Blogs },
   { label: 'Contact us', href: websiteUrlConfig.Contact },
 ];
+
 
 export const announcementBar = {
   enabled: true,
