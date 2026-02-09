@@ -30,24 +30,102 @@ export const brandConfig = {
   },
 };
 
+// Navigation category images
+import eternityRing from '@/assets/jewellery/category/eternity-ring.jpg';
+import tennisBracelet from '@/assets/jewellery/category/tennis-bracelet.jpg';
+import hoops from '@/assets/jewellery/category/hoops.jpg';
+import gemstoneNecklace from '@/assets/jewellery/category/gemstone-necklace.jpg';
+import diamondsCategory from '@/assets/jewellery/catalogue/diamonds-category.jpg';
+import labGrownDiamond from '@/assets/jewellery/catalogue/lab-grown-diamond.jpg';
+
 export const navigationLinks = [
   { label: 'Home', href: websiteUrlConfig.Home },
   {
     label: 'Diamonds',
     href: websiteUrlConfig.Diamonds.Home,
-    subLinks: [
-      { label: 'Engagement Rings', href: websiteUrlConfig.Diamonds.Home },
-      { label: 'Wedding Bands', href: websiteUrlConfig.Diamonds.Home },
-      { label: 'Loose Diamonds', href: websiteUrlConfig.Diamonds.Home },
+    megaMenu: true,
+    categories: [
+      {
+        title: 'By Type',
+        links: [
+          { label: 'Natural Diamonds', href: websiteUrlConfig.Diamonds.All, image: diamondsCategory },
+          { label: 'Lab-Grown Diamonds', href: websiteUrlConfig.Diamonds.All, image: labGrownDiamond },
+        ],
+      },
+      {
+        title: 'By Shape',
+        links: [
+          { label: 'Round Brilliant', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Princess Cut', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Oval', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Emerald Cut', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Cushion', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Pear', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Marquise', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Radiant', href: websiteUrlConfig.Diamonds.All },
+        ],
+      },
+      {
+        title: 'By Carat',
+        links: [
+          { label: '0.25 - 0.50 ct', href: websiteUrlConfig.Diamonds.All },
+          { label: '0.50 - 1.00 ct', href: websiteUrlConfig.Diamonds.All },
+          { label: '1.00 - 2.00 ct', href: websiteUrlConfig.Diamonds.All },
+          { label: '2.00+ ct', href: websiteUrlConfig.Diamonds.All },
+        ],
+      },
+      {
+        title: 'Pairs & Sets',
+        links: [
+          { label: 'Matched Pairs', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Side Stones', href: websiteUrlConfig.Diamonds.All },
+          { label: 'Melee Diamonds', href: websiteUrlConfig.Diamonds.All },
+        ],
+      },
     ],
   },
   {  
     label: 'Jewellery',
     href: websiteUrlConfig.Jewellery.Home,
-    subLinks: [
-      { label: 'Necklaces', href: websiteUrlConfig.Jewellery.Necklaces },
-      { label: 'Earrings', href: websiteUrlConfig.Jewellery.Earrings },
-      { label: 'Bracelets', href: websiteUrlConfig.Jewellery.Bracelets },
+    megaMenu: true,
+    categories: [
+      {
+        title: 'By Category',
+        links: [
+          { label: 'Rings', href: websiteUrlConfig.Jewellery.Rings, image: eternityRing },
+          { label: 'Earrings', href: websiteUrlConfig.Jewellery.Earrings, image: hoops },
+          { label: 'Bracelets', href: websiteUrlConfig.Jewellery.Bracelets, image: tennisBracelet },
+          { label: 'Necklaces', href: websiteUrlConfig.Jewellery.Necklaces, image: gemstoneNecklace },
+        ],
+      },
+      {
+        title: 'Rings',
+        links: [
+          { label: 'Engagement Rings', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Wedding Bands', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Eternity Rings', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Dress Rings', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Signet Rings', href: websiteUrlConfig.Jewellery.Rings },
+        ],
+      },
+      {
+        title: 'Earrings',
+        links: [
+          { label: 'Studs', href: websiteUrlConfig.Jewellery.Earrings },
+          { label: 'Hoops', href: websiteUrlConfig.Jewellery.Earrings },
+          { label: 'Drop Earrings', href: websiteUrlConfig.Jewellery.Earrings },
+          { label: 'Cluster Earrings', href: websiteUrlConfig.Jewellery.Earrings },
+        ],
+      },
+      {
+        title: 'Bracelets & Necklaces',
+        links: [
+          { label: 'Tennis Bracelets', href: websiteUrlConfig.Jewellery.Bracelets },
+          { label: 'Bangles', href: websiteUrlConfig.Jewellery.Bracelets },
+          { label: 'Pendants', href: websiteUrlConfig.Jewellery.Necklaces },
+          { label: 'Chains', href: websiteUrlConfig.Jewellery.Necklaces },
+        ],
+      },
     ],
   },
   { label: 'Events & Blogs', href: websiteUrlConfig.Blogs },
