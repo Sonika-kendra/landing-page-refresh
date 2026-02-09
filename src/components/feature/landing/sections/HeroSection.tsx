@@ -15,59 +15,38 @@ const HeroSection = ({ className = '' }) => {
   }, []);
 
   return (
-    <section className={`section-white relative w-full min-h-full flex items-center bg-background ${className}`}>
+    <section className="relative w-full section-white">
+      <HeroCarousel />
 
-      {/* Announcement inside hero */}
-      <HeroAnnouncement show={heroLoaded} />
+      {/* Hero overlay and announcement at bottom */}
+      <div className="absolute inset-0 flex flex-col justify-end px-6 md:px-12 lg:px-24 pb-8 md:pb-12 lg:pb-16 text-left z-10 space-y-4">
+        {/* Announcement badge */}
+        <HeroAnnouncement show={true} />
 
-      <div className="henig-container flex items-center my-10 py-12 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center w-full">
-
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="order-2 lg:order-1 flex flex-col justify-center"
-          >
-            <h1 className="henig-heading-display text-foreground mb-6">
-              Helping You Sell More
-              <br />
-              <span className="text-primary">Bridal Jewellery</span>
-            </h1>
-            <p className="henig-body-large text-muted mb-8 max-w-lg">
-              Using sample ring boxes enhances bridal jewellery sales by showcasing 
-              the elegance awaiting potential buyers on their special day.
-            </p>
-            <Button asChild
-              className="btn-henig-outline group w-64 px-6 py-4 text-lg"
-            >
-              <Link to="/jewellery">
-                Shop Collection
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-          </motion.div>
-
-          {/* Hero Image Component */}
-          <HeroCarousel />
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+        {/* Overlay Text */}
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-6 h-10 border-2 border-border rounded-full flex justify-center pt-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="flex flex-col space-y-4"
         >
-          <motion.div
-            animate={{ opacity: [1, 0, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-1 h-2 bg-primary rounded-full"
-          />
+          <h1 className="henig-heading-display text-2xl md:text-3xl lg:text-4xl max-w-2xl">
+            Helping You Sell More
+            <br />
+            <span className="text-primary">Bridal Jewellery</span>
+          </h1>
+          <p className="henig-body-large text-muted max-w-xl text-sm md:text-base">
+            Using sample ring boxes enhances bridal jewellery sales by showcasing 
+            the elegance awaiting potential buyers on their special day.
+          </p>
+          <Button asChild className="btn-henig-outline group w-48 md:w-56 px-4 py-3 md:py-4 text-sm md:text-base">
+            <Link to="/jewellery">
+              Shop Collection
+              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
         </motion.div>
-      </div> */}
+      </div>
     </section>
   );
 };
