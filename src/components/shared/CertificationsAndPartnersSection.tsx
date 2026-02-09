@@ -77,12 +77,12 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="flex flex-wrap justify-center gap-6 mb-10 items-center"
+          className="flex flex-wrap justify-center gap-4 mb-10 items-center"
         >
           {partnerImageList.map((src, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-center bg-primary p-2 rounded-lg w-36 h-20 md:w-48 md:h-24"
+              className="flex items-center justify-center bg-primary p-2 rounded-md w-36 h-18 md:w-40 md:h-20"
             >
               <img
                 src={src}
@@ -92,6 +92,7 @@ const CertificationsAndPartnersSection = ({
             </div>
           ))}
         </motion.div>
+
       </div>
     </section>
   );
