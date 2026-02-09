@@ -47,6 +47,10 @@ export const navigationLinks = [
     categories: [
       {
         title: 'By Type',
+        showAll: {
+          label: 'Show all',
+          href: websiteUrlConfig.Diamonds.All,
+        },
         links: [
           { label: 'Natural Diamonds', href: websiteUrlConfig.Diamonds.All, image: diamondsCategory },
           { label: 'Lab-Grown Diamonds', href: websiteUrlConfig.Diamonds.All, image: labGrownDiamond },
@@ -91,6 +95,10 @@ export const navigationLinks = [
     categories: [
       {
         title: 'By Category',
+        showAll: {
+          label: 'Show all',
+          href: websiteUrlConfig.Jewellery.Home,
+        },
         links: [
           { label: 'Rings', href: websiteUrlConfig.Jewellery.Rings, image: eternityRing },
           { label: 'Earrings', href: websiteUrlConfig.Jewellery.Earrings, image: hoops },

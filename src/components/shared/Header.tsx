@@ -113,6 +113,16 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                                           )}
                                         </li>
                                       ))}
+                                      {category.showAll && (
+                                        <li className="pt-2">
+                                          <a
+                                            href={category.showAll.href}
+                                            className="text-sm font-medium text-primary hover:underline"
+                                          >
+                                            {category.showAll.label} →
+                                          </a>
+                                        </li>
+                                      )}
                                     </ul>
                                   </div>
                                 ))}
