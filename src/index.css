@@ -9,115 +9,123 @@
    Colors: Champagne gold, cream, sage green, dark forest green, warm taupe
 */
 
+/* | Hex       | HSL   |
+| --------- | ------------- |
+| `#ebebe4` | `60 18% 92%`  | - Light background
+| `#f5f5ea` | `60 23% 95%`  | - Ivory
+| `#173731` | `165 41% 15%` | - Dark forest green  
+| `#627672` | `183 10% 43%` | - Sage green
+| `#c3b89e` | `41 28% 69%`  | - Champagne gold  
+| `#716659` | `28 10% 42%`  | - Warm taupe */
 
 @layer base {
   :root {
-    /* Core brand colors - Based on Henig Brand Guidelines */
-    /* #ebebe4 - Background */
-    --background: 60 15% 91%;
-    /* #173731 - Forest Green */
-    --foreground: 169 41% 15%;
+    /* Core brand colors (image-accurate) */
+    --background: 60 18% 92%;        /* #ebebe4 */
+    --foreground: 165 41% 15%;       /* #173731 */
 
-    /* #f5f5ea - Cream */
-    --card: 60 35% 94%;
-    --card-foreground: 169 41% 15%;
+    --card: 60 23% 95%;              /* #f5f5ea */
+    --card-foreground: 165 41% 15%;
 
-    --popover: 60 15% 91%;
-    --popover-foreground: 169 41% 15%;
+    --popover: 60 18% 92%;
+    --popover-foreground: 165 41% 15%;
 
-    /* #c3b89e - Champagne gold - primary accent */
-    --primary: 42 24% 69%;
-    --primary-foreground: 169 41% 15%;
+    /* Champagne gold */
+    --primary: 41 28% 69%;            /* #c3b89e */
+    --primary-foreground: 165 41% 15%;
 
-    /* #f5f5ea - Cream/ivory - secondary surfaces */
-    --secondary: 60 35% 94%;
-    --secondary-foreground: 169 41% 15%;
+    /* Cream / ivory */
+    --secondary: 60 23% 95%;
+    --secondary-foreground: 165 41% 15%;
 
-    /* #627672 - Sage green for muted elements */
-    --muted: 168 7% 42%;
-    --muted-foreground: 60 15% 91%;
+    /* Sage green */
+    --muted: 183 10% 43%;             /* #627672 */
+    --muted-foreground: 60 23% 95%;
 
-    /* #173731 - Dark forest green - accent */
-    --accent: 169 41% 15%;
-    --accent-foreground: 60 15% 91%;
+    /* Forest green */
+    --accent: 165 41% 15%;
+    --accent-foreground: 60 23% 95%;
 
-    /* #716659 - Warm taupe - destructive alternative */
-    --destructive: 32 8% 40%;
-    --destructive-foreground: 60 15% 91%;
+    /* Warm taupe */
+    --destructive: 28 10% 42%;        /* #716659 */
+    --destructive-foreground: 60 23% 95%;
 
-    --border: 42 20% 85%;
-    --input: 42 20% 85%;
-    --ring: 42 24% 69%;
+    --border: 41 22% 80%;
+    --input: 41 22% 80%;
+    --ring: 41 28% 69%;
 
     --radius: 0.25rem;
 
-    /* Brand-specific tokens - Exact hex conversions */
-    /* #c3b89e */ --henig-champagne: 42 24% 69%;
-    /* #f5f5ea */ --henig-cream: 60 35% 94%;
-    /* #ebebe4 */ --henig-ivory: 60 15% 91%;
-    /* #627672 */ --henig-sage: 168 7% 42%;
-    /* #173731 */ --henig-forest: 169 41% 15%;
-    /* #716659 */ --henig-taupe: 32 8% 40%;
-    /* #716659 */ --henig-brown: 32 8% 40%;
-    
-    /* Gradient definitions */
-    --gradient-gold: linear-gradient(135deg, hsl(42, 24%, 69%) 0%, hsl(42, 30%, 75%) 50%, hsl(42, 24%, 69%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(60, 15%, 91%) 0%, hsl(60, 35%, 94%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(169, 41%, 15%) 0%, hsl(169, 41%, 12%) 100%);
-    
-    /* Shadows */
-    --shadow-subtle: 0 2px 8px -2px hsl(169 41% 15% / 0.08);
-    --shadow-elevated: 0 8px 30px -8px hsl(169 41% 15% / 0.12);
-    --shadow-gold: 0 4px 20px -4px hsl(42 24% 69% / 0.3);
+    /* Brand tokens */
+    --henig-champagne: 41 28% 69%;
+    --henig-cream: 60 23% 95%;
+    --henig-ivory: 60 18% 92%;
+    --henig-sage: 183 10% 43%;
+    --henig-forest: 165 41% 15%;
+    --henig-taupe: 28 10% 42%;
+    --henig-brown: 28 10% 42%;
 
-    /* Sidebar variables */
-    --sidebar-background: 50 20% 97%;
-    --sidebar-foreground: 156 37% 15%;
-    --sidebar-primary: 156 37% 15%;
-    --sidebar-primary-foreground: 50 20% 97%;
-    --sidebar-accent: 50 33% 95%;
-    --sidebar-accent-foreground: 156 37% 15%;
-    --sidebar-border: 41 20% 85%;
+    /* Gradients */
+    --gradient-gold: linear-gradient(
+      135deg,
+      hsl(41 28% 69%) 0%,
+      hsl(41 32% 74%) 50%,
+      hsl(41 28% 69%) 100%
+    );
+
+    --gradient-hero: linear-gradient(
+      180deg,
+      hsl(60 18% 92%) 0%,
+      hsl(60 23% 95%) 100%
+    );
+
+    --gradient-dark: linear-gradient(
+      180deg,
+      hsl(165 41% 15%) 0%,
+      hsl(165 41% 12%) 100%
+    );
+
+    /* Shadows */
+    --shadow-subtle: 0 2px 8px -2px hsl(165 41% 15% / 0.08);
+    --shadow-elevated: 0 8px 30px -8px hsl(165 41% 15% / 0.12);
+    --shadow-gold: 0 4px 20px -4px hsl(41 28% 69% / 0.3);
+
+    /* Sidebar (aligned to brand) */
+    --sidebar-background: 60 18% 92%;
+    --sidebar-foreground: 165 41% 15%;
+    --sidebar-primary: 165 41% 15%;
+    --sidebar-primary-foreground: 60 23% 95%;
+    --sidebar-accent: 60 23% 95%;
+    --sidebar-accent-foreground: 165 41% 15%;
+    --sidebar-border: 41 22% 80%;
     --sidebar-ring: 41 28% 69%;
   }
 
   .dark {
-    --background: 156 37% 8%;
-    --foreground: 50 20% 97%;
+    --background: 165 41% 9%;
+    --foreground: 60 23% 95%;
 
-    --card: 156 37% 10%;
-    --card-foreground: 50 20% 97%;
+    --card: 165 41% 11%;
+    --card-foreground: 60 23% 95%;
 
-    --popover: 156 37% 8%;
-    --popover-foreground: 50 20% 97%;
+    --popover: 165 41% 9%;
+    --popover-foreground: 60 23% 95%;
 
     --primary: 41 28% 69%;
-    --primary-foreground: 156 37% 15%;
+    --primary-foreground: 165 41% 15%;
 
-    --secondary: 156 30% 15%;
-    --secondary-foreground: 50 20% 97%;
+    --secondary: 165 30% 16%;
+    --secondary-foreground: 60 23% 95%;
 
-    --muted: 156 20% 25%;
-    --muted-foreground: 50 15% 70%;
+    --muted: 183 10% 30%;
+    --muted-foreground: 60 15% 70%;
 
     --accent: 41 28% 69%;
-    --accent-foreground: 156 37% 15%;
+    --accent-foreground: 165 41% 15%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 50 20% 97%;
-
-    --border: 156 20% 20%;
-    --input: 156 20% 20%;
+    --border: 165 20% 20%;
+    --input: 165 20% 20%;
     --ring: 41 28% 69%;
-
-    --sidebar-background: 156 37% 10%;
-    --sidebar-foreground: 50 20% 97%;
-    --sidebar-primary: 41 28% 69%;
-    --sidebar-primary-foreground: 156 37% 15%;
-    --sidebar-accent: 156 30% 15%;
-    --sidebar-accent-foreground: 50 20% 97%;
-    --sidebar-border: 156 20% 20%;
-    --sidebar-ring: 41 28% 69%;
   }
 }
 

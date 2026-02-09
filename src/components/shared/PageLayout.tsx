@@ -10,7 +10,7 @@ interface PageLayoutProps {
 
 const PageLayout = ({ children, onRegisterClick, className = '' }: PageLayoutProps) => {
   return (
-    <div className={`min-h-screen bg-background ${className}`}>
+    <div className={`min-h-screen ${className}`}>
       <Header onRegisterClick={onRegisterClick} />
       <main>{children}</main>
       <Footer />

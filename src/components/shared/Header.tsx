@@ -43,7 +43,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           <div className="flex-1 md:flex-none text-center">
             <Link to="/" className="inline-block">
               <div className="flex flex-col items-center">
-                <span className="text-primary text-lg">✦</span>
+                <span className="text-primary text-lg">✦✦</span>
                 <h1 className="font-serif text-xl md:text-2xl font-medium tracking-[0.2em] text-foreground">
                   HENIG
                 </h1>
