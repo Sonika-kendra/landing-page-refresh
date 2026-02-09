@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { categories } from '@/config/landing/category';
+import { ArrowRight } from 'lucide-react';
 
 // Motion-enhanced router link
 const MotionLink = motion(Link);
@@ -39,10 +40,12 @@ const CategorySection = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="opacity-100 bg-primary/80 backdrop-blur-sm border-secondary text-secondary pointer-events-auto transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
+                  className="opacity-100 bg-primary/80 backdrop-blur-sm border-secondary text-black pointer-events-auto transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
                 >
                   Shop Now
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
+
 
 
               </div>

@@ -54,19 +54,31 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     onMouseEnter={() => hasMegaMenu && setActiveMegaMenu(link.label)}
                     onMouseLeave={() => setActiveMegaMenu(null)}
                   >
-                    <button
-                      type="button"
-                      className={`flex items-center gap-1 text-md font-normal transition-colors ${
-                        location.pathname.startsWith(link.href)
-                          ? 'text-primary'
-                          : 'text-foreground hover:text-primary'
-                      }`}
-                    >
-                      {link.label}
-                      {hasMegaMenu && (
+                    {/* Desktop: Button for mega menu, Link for normal */}
+                    {hasMegaMenu ? (
+                      <button
+                        type="button"
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
+                          location.pathname.startsWith(link.href)
+                            ? 'text-primary'
+                            : 'text-foreground hover:text-primary'
+                        }`}
+                      >
+                        {link.label}
                         <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
-                      )}
-                    </button>
+                      </button>
+                    ) : (
+                      <Link
+                        to={link.href}
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
+                          location.pathname.startsWith(link.href)
+                            ? 'text-primary'
+                            : 'text-foreground hover:text-primary'
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
 
                     {/* Mega Menu */}
                     {hasMegaMenu && 'categories' in link && (
@@ -178,42 +190,54 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
 
                 return (
                   <li key={link.label} className="border-b border-border/50 last:border-0">
-                    <button
-                      type="button"
-                      onClick={() => hasMegaMenu && setOpenSubMenu((prev) => !prev)}
-                      className={`w-full flex items-center justify-between py-3 text-base font-normal transition-colors ${
-                        openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
-                      }`}
-                    >
-                      <span>{link.label}</span>
-                      {hasMegaMenu && (
-                        <ChevronDown className={`w-4 h-4 transition-transform ${openSubMenu ? 'rotate-180' : ''}`} />
-                      )}
-                    </button>
+                    {hasMegaMenu ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setOpenSubMenu((prev) => !prev)}
+                          className={`w-full flex items-center justify-between py-3 text-base font-normal transition-colors ${
+                            openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
+                          }`}
+                        >
+                          <span>{link.label}</span>
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform ${openSubMenu ? 'rotate-180' : ''}`}
+                          />
+                        </button>
 
-                    {hasMegaMenu && 'categories' in link && openSubMenu && (
-                      <div className="pl-4 pb-4 space-y-4">
-                        {link.categories.map((category) => (
-                          <div key={category.title}>
-                            <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-                              {category.title}
-                            </h4>
-                            <ul className="space-y-1">
-                              {category.links.map((subLink) => (
-                                <li key={subLink.label}>
-                                  <a
-                                    href={subLink.href}
-                                    className="block py-1.5 text-sm text-foreground hover:text-primary"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                  >
-                                    {subLink.label}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
+                        {openSubMenu && 'categories' in link && (
+                          <div className="pl-4 pb-4 space-y-4">
+                            {link.categories.map((category) => (
+                              <div key={category.title}>
+                                <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
+                                  {category.title}
+                                </h4>
+                                <ul className="space-y-1">
+                                  {category.links.map((subLink) => (
+                                    <li key={subLink.label}>
+                                      <a
+                                        href={subLink.href}
+                                        className="block py-1.5 text-sm text-foreground hover:text-primary"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                      >
+                                        {subLink.label}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
+                    ) : (
+                      <Link
+                        to={link.href}
+                        className="w-full block py-3 text-base font-normal text-foreground hover:text-primary transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
                     )}
                   </li>
                 );
