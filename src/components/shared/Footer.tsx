@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin, Youtube, Whatsapp } from '@/assets/footer';
+import { Twitter, Facebook, InstagramSvg, Linkedin, Youtube, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/landing/theme';
 import { websiteUrlConfig } from '@/config/config';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -69,7 +69,7 @@ const Footer = () => {
               {[
                 { href: brandConfig.social.twitter, src: Twitter, alt: "Twitter" },
                 { href: brandConfig.social.facebook, src: Facebook, alt: "Facebook" },
-                { href: brandConfig.social.instagram, src: Instagram, alt: "Instagram" },
+                { href: brandConfig.social.instagram, src: InstagramSvg, alt: "Instagram" },
                 { href: brandConfig.social.linkedin, src: Linkedin, alt: "Linkedin" },
                 { href: brandConfig.social.youtube, src: Youtube, alt: "Youtube" },
                 { href: brandConfig.social.whatsApp, src: Whatsapp, alt: "Whatsapp" },

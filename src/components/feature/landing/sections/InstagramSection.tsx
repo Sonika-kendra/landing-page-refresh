@@ -1,7 +1,8 @@
 import { brandConfig } from '@/config/landing/theme';
 import { useEffect, useState } from 'react';
 import Carousel, { CarouselItem } from '@/components/shared/Carousel';
-import { Instagram, Linkedin, Whatsapp } from '@/assets/footer'; // use same SVGs as Footer
+import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer'; // use same SVGs as Footer
+import { Instagram } from 'lucide-react';
 
 const InstagramSection = () => {
   const [items, setItems] = useState<CarouselItem[]>([]);
@@ -24,7 +25,7 @@ const InstagramSection = () => {
 
   const socialIcons = [
     { src: Linkedin, href: brandConfig.social.linkedin, alt: "LinkedIn" },
-    { src: Instagram, href: brandConfig.social.instagram, alt: "Instagram" },
+    { src: InstagramSvg, href: brandConfig.social.instagram, alt: "Instagram" },
     { src: Whatsapp, href: brandConfig.social.whatsApp, alt: "WhatsApp" },
   ];
 
@@ -50,7 +51,7 @@ const InstagramSection = () => {
           ifHoverOverlayVisible
           hoverOverlayBgClass="bg-accent/30"
           hoverOverlayContent={
-            <img src={Instagram} alt="Instagram" className="w-8 h-8" />
+            <Instagram className="w-8 h-8 text-secondary" />
           }
           linkTarget="_blank"
         />
