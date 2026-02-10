@@ -21,12 +21,12 @@ export const brandConfig = {
     },
   },
   social: {
-    instagram: 'https://instagram.com/henigdiamonds',
+    linkedin: 'https://uk.linkedin.com/company/henig-diamonds',
+    instagram: 'https://www.instagram.com/henigdiamonds?igsh=cjNyZHFkcDZ2enVi&utm_source=qr',
+    whatsApp: 'https://whatsapp.com/channel/0029VbCFMLYE50Ugv30Kw72s',
     facebook: 'https://facebook.com/henigdiamonds',
-    linkedin: 'https://www.linkedin.com/company/henig-diamonds',
     twitter: 'https://x.com/HenigDiamonds',
     youtube: 'https://youtube.com/henigdiamonds',
-    whatsApp: 'https://whatsapp.com/channel/0029VbCFMLYE50Ugv30Kw72s'
   },
 };
 
