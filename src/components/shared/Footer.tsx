@@ -16,11 +16,9 @@ const Footer = () => {
     e.preventDefault();
 
     if (location.pathname === '/') {
-      // Already on homepage, just scroll
       const faqSection = document.getElementById('faq');
       faqSection?.scrollIntoView({ behavior: 'smooth' });
     } else {
-      // Navigate to homepage first, then scroll after a small delay
       navigate('/', { replace: false });
       setTimeout(() => {
         const faqSection = document.getElementById('faq');
@@ -31,6 +29,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-accent text-accent-foreground">
+
       {/* Newsletter Section */}
       <div className="border-b border-accent-foreground/10">
         <div className="henig-container py-12">
@@ -53,7 +52,8 @@ const Footer = () => {
 
       {/* Main Footer */}
       <div className="henig-container py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
+
           {/* Brand */}
           <div>
             <div className="mb-6">
@@ -65,18 +65,16 @@ const Footer = () => {
                 />
               </Link>
             </div>
-          
+
             <p className="text-sm text-accent-foreground/70 mb-6">
               A heritage of trust, innovation, and excellence in diamonds since 1973.
             </p>
+
             <div className="flex gap-4">
               {[
                 { href: brandConfig.social.linkedin, src: Linkedin, alt: "Linkedin" },
                 { href: brandConfig.social.instagram, src: InstagramSvg, alt: "Instagram" },
                 { href: brandConfig.social.whatsApp, src: Whatsapp, alt: "Whatsapp" },
-                // { href: brandConfig.social.twitter, src: Twitter, alt: "Twitter" },
-                // { href: brandConfig.social.facebook, src: Facebook, alt: "Facebook" },
-                // { href: brandConfig.social.youtube, src: Youtube, alt: "Youtube" },
               ].map(({ href, src, alt }) => (
                 <a
                   key={alt}
@@ -156,19 +154,39 @@ const Footer = () => {
           <div>
             <h5 className="font-serif text-lg mb-4">Contact Us</h5>
             <ul className="space-y-4">
+
+              {/* Phone */}
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-primary mt-0.5" />
                 <span className="text-sm text-accent-foreground/70">+44 (0)207 404 0146</span>
               </li>
-              <li className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-primary mt-0.5" />
-                <a
-                  href="mailto:info@henigdiamonds.co.uk"
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  info@henigdiamonds.co.uk
-                </a>
-              </li>
+
+              {/* Emails */}
+              {/* <li>
+                <h6 className="text-sm font-medium text-accent-foreground/80 mb-1">Emails</h6>
+                <ul className="space-y-1 ml-6">
+                  <li className="flex items-center gap-2">
+                    <span className="text-sm text-accent-foreground/70">Purchase Enquiries:</span>
+                    <a
+                      href="mailto:sales@henigdiamonds.co.uk"
+                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                    >
+                      sales@henigdiamonds.co.uk
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-sm text-accent-foreground/70">Info:</span>
+                    <a
+                      href="mailto:info@henigdiamonds.co.uk"
+                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                    >
+                      info@henigdiamonds.co.uk
+                    </a>
+                  </li>
+                </ul>
+              </li> */}
+
+              {/* Address */}
               <li>
                 <a
                   href="https://www.google.com/maps/search/?api=1&query=Henig+Diamonds+63-66+Hatton+Garden+London+EC1N+8AN"
@@ -180,13 +198,53 @@ const Footer = () => {
                   <span className="text-sm text-accent-foreground/70 group-hover:text-primary transition-colors">
                     Henig Diamonds Suite Two,<br />
                     First Floor,<br />
-                    63-66 Hatton Garden<br />
+                    63-66 Hatton Garden,<br />
                     London EC1N 8LE
                   </span>
                 </a>
               </li>
+
             </ul>
           </div>
+
+          {/* Emails */}
+          <div>
+            <h5 className="font-serif text-lg mb-4">Email</h5>
+            <ul className="space-y-4">
+              <li>
+                <ul className="space-y-2">
+                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+                    <span className="text-sm font-medium text-accent-foreground/80 w-40 md:w-auto">
+                      Purchase Enquiries
+                    </span>
+
+                  </li>
+                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ml-2">
+                    <a
+                      href="mailto:sales@henigdiamonds.co.uk"
+                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                    >
+                      sales@henigdiamonds.co.uk
+                    </a>
+                  </li>
+                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+                    <span className="text-sm font-medium text-accent-foreground/80 w-40 md:w-auto">
+                      General Enquiries
+                    </span>
+                  </li>
+                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ml-2">
+                    <a
+                      href="mailto:info@henigdiamonds.co.uk"
+                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                    >
+                      info@henigdiamonds.co.uk
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
         </div>
       </div>
 
@@ -198,6 +256,7 @@ const Footer = () => {
           </p>
         </div>
       </div>
+
     </footer>
   );
 };
