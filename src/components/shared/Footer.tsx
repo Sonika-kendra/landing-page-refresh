@@ -71,12 +71,12 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { href: brandConfig.social.twitter, src: Twitter, alt: "Twitter" },
-                { href: brandConfig.social.facebook, src: Facebook, alt: "Facebook" },
-                { href: brandConfig.social.instagram, src: InstagramSvg, alt: "Instagram" },
                 { href: brandConfig.social.linkedin, src: Linkedin, alt: "Linkedin" },
-                { href: brandConfig.social.youtube, src: Youtube, alt: "Youtube" },
+                { href: brandConfig.social.instagram, src: InstagramSvg, alt: "Instagram" },
                 { href: brandConfig.social.whatsApp, src: Whatsapp, alt: "Whatsapp" },
+                // { href: brandConfig.social.twitter, src: Twitter, alt: "Twitter" },
+                // { href: brandConfig.social.facebook, src: Facebook, alt: "Facebook" },
+                // { href: brandConfig.social.youtube, src: Youtube, alt: "Youtube" },
               ].map(({ href, src, alt }) => (
                 <a
                   key={alt}
@@ -178,11 +178,10 @@ const Footer = () => {
                 >
                   <MapPin className="w-4 h-4 text-primary mt-0.5 group-hover:text-primary/80 transition-colors" />
                   <span className="text-sm text-accent-foreground/70 group-hover:text-primary transition-colors">
-                    Henig Diamonds<br />
-                    Suite Two First Floor<br />
+                    Henig Diamonds Suite Two,<br />
+                    First Floor,<br />
                     63-66 Hatton Garden<br />
-                    London EC1N 8AN<br />
-                    EC1N 8LE
+                    London EC1N 8LE
                   </span>
                 </a>
               </li>
