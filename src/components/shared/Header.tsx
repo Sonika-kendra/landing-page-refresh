@@ -4,6 +4,7 @@ import { Heart, ShoppingBag, Menu, X, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/landing/theme';
+import Logo from '@/assets/icons/logoLight.png';
 
 interface HeaderProps {
   onRegisterClick: () => void;
@@ -28,16 +29,12 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
 
           {/* Logo */}
           <div className="flex-1 md:flex-none text-center">
-            <Link to="/" className="inline-block">
-              <div className="flex flex-col items-center">
-                <span className="text-primary text-lg">✦✦</span>
-                <h1 className="font-serif text-xl md:text-2xl font-medium tracking-[0.2em] text-foreground">
-                  HENIG
-                </h1>
-                <span className="text-[10px] tracking-[0.3em] text-muted uppercase">
-                  Diamonds
-                </span>
-              </div>
+            <Link to="/" className="inline-flex items-center justify-center">
+              <img
+                src={Logo}
+                alt="Henig Diamonds"
+                className="h-10 md:h-12 w-auto object-contain"
+              />
             </Link>
           </div>
 
@@ -58,11 +55,10 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     {hasMegaMenu ? (
                       <button
                         type="button"
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
-                          location.pathname.startsWith(link.href)
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${location.pathname.startsWith(link.href)
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
-                        }`}
+                          }`}
                       >
                         {link.label}
                         <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
@@ -70,11 +66,10 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     ) : (
                       <Link
                         to={link.href}
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
-                          location.pathname.startsWith(link.href)
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${location.pathname.startsWith(link.href)
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
-                        }`}
+                          }`}
                       >
                         {link.label}
                       </Link>
@@ -195,9 +190,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                         <button
                           type="button"
                           onClick={() => setOpenSubMenu((prev) => !prev)}
-                          className={`w-full flex items-center justify-between py-3 text-base font-normal transition-colors ${
-                            openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
-                          }`}
+                          className={`w-full flex items-center justify-between py-3 text-base font-normal transition-colors ${openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
+                            }`}
                         >
                           <span>{link.label}</span>
                           <ChevronDown

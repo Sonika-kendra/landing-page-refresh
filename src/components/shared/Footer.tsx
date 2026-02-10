@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Twitter, Facebook, InstagramSvg, Linkedin, Youtube, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/landing/theme';
 import { websiteUrlConfig } from '@/config/config';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import Logo from '@/assets/icons/logoDark.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -56,12 +57,15 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="mb-6">
-              <span className="text-primary text-lg">✦</span>
-              <h4 className="font-serif text-xl tracking-[0.2em] mt-2">HENIG</h4>
-              <span className="text-[10px] tracking-[0.3em] text-accent-foreground/60 uppercase">
-                Diamonds
-              </span>
+              <Link to="/" className="inline-flex items-center justify-center">
+                <img
+                  src={Logo}
+                  alt="Henig Diamonds"
+                  className="h-10 md:h-12 w-auto object-contain"
+                />
+              </Link>
             </div>
+          
             <p className="text-sm text-accent-foreground/70 mb-6">
               A heritage of trust, innovation, and excellence in diamonds since 1973.
             </p>
