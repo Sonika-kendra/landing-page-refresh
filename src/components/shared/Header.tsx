@@ -56,8 +56,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                       <button
                         type="button"
                         className={`flex items-center gap-1 text-md font-normal transition-colors ${location.pathname.startsWith(link.href)
-                            ? 'text-primary'
-                            : 'text-foreground hover:text-primary'
+                          ? 'text-primary'
+                          : 'text-foreground hover:text-primary'
                           }`}
                       >
                         {link.label}
@@ -67,8 +67,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                       <Link
                         to={link.href}
                         className={`flex items-center gap-1 text-md font-normal transition-colors ${location.pathname.startsWith(link.href)
-                            ? 'text-primary'
-                            : 'text-foreground hover:text-primary'
+                          ? 'text-primary'
+                          : 'text-foreground hover:text-primary'
                           }`}
                       >
                         {link.label}
@@ -151,21 +151,30 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
               variant="ghost"
               size="sm"
               className="hidden md:flex items-center gap-2 text-sm font-normal hover:text-primary"
-              onClick={onRegisterClick}
+              onClick={onRegisterClick} // triggers modal
             >
               <User className="w-4 h-4" />
               <span>Sign In / Register</span>
             </Button>
-            <button className="p-2 hover:text-primary transition-colors">
+
+            <button
+              className="p-2 hover:text-primary transition-colors"
+              onClick={onRegisterClick} // triggers modal
+            >
               <Heart className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:text-primary transition-colors relative">
+
+            <button
+              className="p-2 hover:text-primary transition-colors relative"
+              onClick={onRegisterClick} // triggers modal
+            >
               <ShoppingBag className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
                 0
               </span>
             </button>
           </div>
+
         </div>
       </div>
 
