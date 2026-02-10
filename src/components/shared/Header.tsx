@@ -15,6 +15,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const location = useLocation();
 
+  const isActive = (href: string) => {
+    if (href === '/') return location.pathname === '/';
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="henig-container">
@@ -55,10 +60,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     {hasMegaMenu ? (
                       <button
                         type="button"
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${location.pathname.startsWith(link.href)
-                          ? 'text-primary'
-                          : 'text-foreground hover:text-primary'
-                          }`}
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
+                          isActive(link.href)
+                            ? 'text-primary'
+                            : 'text-foreground hover:text-primary'
+                        }`}
                       >
                         {link.label}
                         <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
@@ -66,10 +72,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     ) : (
                       <Link
                         to={link.href}
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${location.pathname.startsWith(link.href)
-                          ? 'text-primary'
-                          : 'text-foreground hover:text-primary'
-                          }`}
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
+                          isActive(link.href)
+                            ? 'text-primary'
+                            : 'text-foreground hover:text-primary'
+                        }`}
                       >
                         {link.label}
                       </Link>
