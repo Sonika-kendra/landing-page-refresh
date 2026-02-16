@@ -42,7 +42,7 @@ const CertificationsAndPartnersSection = ({
             {certificationImages.map((src, index) => (
               <div
                 key={index}
-                className="inline-flex items-center justify-center bg-accent/20 rounded-lg px-3 py-2"
+                className="inline-flex items-center justify-center px-3 py-2"
               >
                 <img
                   src={src}
@@ -82,7 +82,7 @@ const CertificationsAndPartnersSection = ({
           {partnerImageList.map((src, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-center bg-primary p-2 rounded-md w-36 h-18 md:w-40 md:h-20"
+              className="flex items-center justify-center p-2 w-36 h-18 md:w-40 md:h-20"
             >
               <img
                 src={src}
@@ -92,7 +92,6 @@ const CertificationsAndPartnersSection = ({
             </div>
           ))}
         </motion.div>
-
       </div>
     </section>
   );
