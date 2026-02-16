@@ -30,20 +30,21 @@ const JewelleryHeroSection = () => (
 
         <div className="flex flex-wrap gap-3">
           <a href={websiteUrlConfig.Jewellery.All}>
-            <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40">
-              Naturals
+            <Button className="btn-henig-outline group py-4 px-6 text-md w-auto">
+              Lab Diamonds
             </Button>
           </a>
+
           <a href={websiteUrlConfig.Jewellery.All}>
-            <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40">
-              Lab Grown
+            <Button className="btn-henig-outline group py-4 px-6 text-md w-auto">
+              Natural Diamonds
             </Button>
           </a>
-          <a href={websiteUrlConfig.Jewellery.All}>
+          {/* <a href={websiteUrlConfig.Jewellery.All}>
             <Button className="btn-henig-outline group py-4 text-md w-50 sm:w-40">
               Gemstones
             </Button>
-          </a>
+          </a> */}
         </div>
       </motion.div>
     </div>
