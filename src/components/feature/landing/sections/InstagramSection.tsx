@@ -34,7 +34,7 @@ const InstagramSection = () => {
       <div className="henig-container">
         {/* Heading */}
         <div className="text-center mb-8">
-          <h2 className="henig-heading-section text-foreground mb-2">@HenigDiamonds</h2>
+          <h2 className="henig-heading-section text-foreground mb-2">Follow us for more</h2>
         </div>
 
         {/* Instagram Carousel */}
