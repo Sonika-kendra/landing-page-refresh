@@ -233,23 +233,23 @@ export const faqItems = [
 export const features = [
   {
     icon: 'Palette',
-    title: 'Handcrafted Designs',
-    description: 'Design your jewellery in 3 simple steps and our experts will custom-craft it for you.',
+    title: 'Bespoke Design Service',
+    description: 'Custom design and manufacturing tailored to your specifications.',
+  },
+  {
+    icon: 'Shield',
+    title: 'Responsible Sourcing',
+    description: 'Certified diamonds sourced through trusted partners, ensuring compliance.',
   },
   {
     icon: 'MessageCircle',
     title: 'Expert Guidance',
-    description: 'Chat with us online, on the phone or book an appointment in one of our showrooms.',
+    description: 'Chat with us online, speak with our team by phone, or book a private appointment.',
   },
   {
     icon: 'RotateCcw',
-    title: 'Easy Returns & Resizing',
-    description: 'Return your item in under 30 days, or have it resized for free in under 60 days.',
-  },
-  {
-    icon: 'Shield',
-    title: 'Sourcing With Care',
-    description: 'Explore our collection of independently certified and conflict-free diamonds.',
+    title: 'Straightforward Returns',
+    description: 'Return your item within 30 days with a simple and efficient process.',
   },
 ];
 
