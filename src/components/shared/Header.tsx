@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Heart, ShoppingBag, Menu, X, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,9 @@ interface HeaderProps {
 const Header = ({ onRegisterClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+  const [openMobileMenu, setOpenMobileMenu] = useState<string | null>(null);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
   const location = useLocation();
 
   const isActive = (href: string) => {
@@ -20,11 +23,29 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
     return location.pathname.startsWith(href);
   };
 
+  const handleEnter = (label: string) => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    setActiveMegaMenu(label);
+  };
+
+  const handleLeave = () => {
+    hoverTimeout.current = setTimeout(() => {
+      setActiveMegaMenu(null);
+    }, 120);
+  };
+
+  const activeLink = navigationLinks.find(
+    (link) => link.label === activeMegaMenu
+  );
+
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className="relative sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+
+      {/* ================= HEADER BAR ================= */}
       <div className="henig-container">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Mobile menu button */}
+
+          {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -43,8 +64,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             </Link>
           </div>
 
-          {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center justify-center flex-1 relative">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center justify-center flex-1">
             <ul className="flex items-center gap-8">
               {navigationLinks.map((link) => {
                 const hasMegaMenu = 'megaMenu' in link && link.megaMenu;
@@ -52,99 +73,30 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                 return (
                   <li
                     key={link.label}
-                    className="relative group"
-                    onMouseEnter={() => hasMegaMenu && setActiveMegaMenu(link.label)}
-                    onMouseLeave={() => setActiveMegaMenu(null)}
+                    onMouseEnter={() => hasMegaMenu && handleEnter(link.label)}
+                    onMouseLeave={handleLeave}
                   >
-                    {/* Desktop: Button for mega menu, Link for normal */}
                     {hasMegaMenu ? (
                       <button
                         type="button"
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
-                          isActive(link.href)
+                        className={`flex items-center gap-1 text-md font-normal transition-colors ${isActive(link.href)
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
-                        }`}
+                          }`}
                       >
                         {link.label}
-                        <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                        <ChevronDown className="w-4 h-4" />
                       </button>
                     ) : (
                       <Link
                         to={link.href}
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${
-                          isActive(link.href)
+                        className={`text-md font-normal transition-colors ${isActive(link.href)
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
-                        }`}
+                          }`}
                       >
                         {link.label}
                       </Link>
-                    )}
-
-                    {/* Mega Menu */}
-                    {hasMegaMenu && 'categories' in link && (
-                      <AnimatePresence>
-                        {activeMegaMenu === link.label && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            transition={{ duration: 0.2 }}
-                            className="fixed left-0 right-0 top-full mt-0 bg-background border-t border-border shadow-xl z-50"
-                          >
-                            <div className="henig-container py-8">
-                              <div className="grid grid-cols-4 gap-8">
-                                {link.categories.map((category) => (
-                                  <div key={category.title}>
-                                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                                      {category.title}
-                                    </h3>
-                                    <ul className="space-y-2">
-                                      {category.links.map((subLink) => (
-                                        <li key={subLink.label}>
-                                          {'image' in subLink && subLink.image ? (
-                                            <a
-                                              href={subLink.href}
-                                              className="group/item flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
-                                            >
-                                              <img
-                                                src={subLink.image}
-                                                alt={subLink.label}
-                                                className="w-12 h-12 object-cover rounded"
-                                              />
-                                              <span className="text-sm text-foreground group-hover/item:text-primary transition-colors">
-                                                {subLink.label}
-                                              </span>
-                                            </a>
-                                          ) : (
-                                            <a
-                                              href={subLink.href}
-                                              className="block py-1.5 text-sm text-muted hover:text-primary transition-colors"
-                                            >
-                                              {subLink.label}
-                                            </a>
-                                          )}
-                                        </li>
-                                      ))}
-                                      {category.showAll && (
-                                        <li className="pt-2">
-                                          <a
-                                            href={category.showAll.href}
-                                            className="text-sm font-medium text-primary hover:underline"
-                                          >
-                                            {category.showAll.label} →
-                                          </a>
-                                        </li>
-                                      )}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     )}
                   </li>
                 );
@@ -153,39 +105,102 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 md:gap-4 w-auto md:w-1/4 justify-end">
+          <div className="flex items-center gap-3 md:w-1/4 justify-end">
             <Button
               variant="ghost"
               size="sm"
-              className="hidden md:flex items-center gap-2 text-sm font-normal hover:text-primary"
-              onClick={onRegisterClick} // triggers modal
+              className="hidden md:flex items-center gap-2 text-sm"
+              onClick={onRegisterClick}
             >
               <User className="w-4 h-4" />
               <span>Sign In / Register</span>
             </Button>
 
-            <button
-              className="p-2 hover:text-primary transition-colors"
-              onClick={onRegisterClick} // triggers modal
-            >
+            <button className="p-2" onClick={onRegisterClick}>
               <Heart className="w-5 h-5" />
             </button>
 
-            <button
-              className="p-2 hover:text-primary transition-colors relative"
-              onClick={onRegisterClick} // triggers modal
-            >
+            <button className="p-2 relative" onClick={onRegisterClick}>
               <ShoppingBag className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
                 0
               </span>
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* ================= FULL WIDTH MEGA MENU ================= */}
+      <AnimatePresence>
+        {activeLink && 'categories' in activeLink && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-0 top-full w-screen bg-background border-t border-border shadow-xl z-[999]"
+            onMouseEnter={() => {
+              if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+            }}
+            onMouseLeave={handleLeave}
+          >
+            <div className="henig-container py-10">
+              <div className="grid grid-cols-4 gap-10">
+                {activeLink.categories.map((category) => (
+                  <div key={category.title}>
+                    <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">
+                      {category.title}
+                    </h3>
+
+                    <ul className="space-y-3">
+                      {category.links.map((subLink) => (
+                        <li key={subLink.label}>
+                          {'image' in subLink && subLink.image ? (
+                            <a
+                              href={subLink.href}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                            >
+                              <img
+                                src={subLink.image}
+                                alt={subLink.label}
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                              <span className="text-sm hover:text-primary transition-colors">
+                                {subLink.label}
+                              </span>
+                            </a>
+                          ) : (
+                            <a
+                              href={subLink.href}
+                              className="block py-1.5 text-sm text-muted hover:text-primary transition-colors"
+                            >
+                              {subLink.label}
+                            </a>
+                          )}
+                        </li>
+                      ))}
+
+                      {category.showAll && (
+                        <li className="pt-2">
+                          <a
+                            href={category.showAll.href}
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            {category.showAll.label} →
+                          </a>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+      {/* ================= MOBILE NAV ================= */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.nav
@@ -197,54 +212,50 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             <ul className="py-4 px-4 space-y-2">
               {navigationLinks.map((link) => {
                 const hasMegaMenu = 'megaMenu' in link && link.megaMenu;
-                const [openSubMenu, setOpenSubMenu] = useState(false);
+                const isOpen = openMobileMenu === link.label;
 
                 return (
                   <li key={link.label} className="border-b border-border/50 last:border-0">
                     {hasMegaMenu ? (
                       <>
                         <button
-                          type="button"
-                          onClick={() => setOpenSubMenu((prev) => !prev)}
-                          className={`w-full flex items-center justify-between py-3 text-base font-normal transition-colors ${openSubMenu ? 'text-primary' : 'text-foreground hover:text-primary'
-                            }`}
+                          onClick={() =>
+                            setOpenMobileMenu(isOpen ? null : link.label)
+                          }
+                          className="w-full flex justify-between py-3"
                         >
-                          <span>{link.label}</span>
+                          {link.label}
                           <ChevronDown
-                            className={`w-4 h-4 transition-transform ${openSubMenu ? 'rotate-180' : ''}`}
+                            className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''
+                              }`}
                           />
                         </button>
 
-                        {openSubMenu && 'categories' in link && (
-                          <div className="pl-4 pb-4 space-y-4">
-                            {link.categories.map((category) => (
-                              <div key={category.title}>
-                                <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-                                  {category.title}
-                                </h4>
-                                <ul className="space-y-1">
-                                  {category.links.map((subLink) => (
-                                    <li key={subLink.label}>
-                                      <a
-                                        href={subLink.href}
-                                        className="block py-1.5 text-sm text-foreground hover:text-primary"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                      >
-                                        {subLink.label}
-                                      </a>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        {isOpen &&
+                          'categories' in link &&
+                          link.categories.map((category) => (
+                            <div key={category.title} className="pl-4 pb-4">
+                              <ul className="space-y-1">
+                                {category.links.map((subLink) => (
+                                  <li key={subLink.label}>
+                                    <a
+                                      href={subLink.href}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="block py-1.5 text-sm"
+                                    >
+                                      {subLink.label}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
                       </>
                     ) : (
                       <Link
                         to={link.href}
-                        className="w-full block py-3 text-base font-normal text-foreground hover:text-primary transition-colors"
                         onClick={() => setMobileMenuOpen(false)}
+                        className="block py-3"
                       >
                         {link.label}
                       </Link>
@@ -252,19 +263,6 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                   </li>
                 );
               })}
-
-              <li className="pt-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-center"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onRegisterClick();
-                  }}
-                >
-                  Sign In / Register
-                </Button>
-              </li>
             </ul>
           </motion.nav>
         )}
