@@ -120,7 +120,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
 
                 <p className="text-sm text-muted mt-1">
                   {mode === 'register'
-                    ? 'Access exclusive collections & pricing.'
+                    ? 'Trade access only. Sign up to see prices.'
                     : 'Sign in to continue.'}
                 </p>
               </div>
@@ -226,7 +226,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                     {[
                       'Exclusive collections',
                       'Wholesale pricing',
-                      'Priority support',
                       'Early access',
                     ].map((item) => (
                       <div key={item} className="flex gap-2 text-sm items-center">
