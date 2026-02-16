@@ -9,7 +9,7 @@ const StatsSection = () => {
         <SectionHeader
           caption="Henig Diamonds"
           title="A Heritage of Trust, Innovation, and Excellence"
-          subtitle="Since 1973, we've been crafting timeless pieces that celebrate life's most precious moments."
+          subtitle="Since 1973, supplying the trade with quality diamonds and fine jewellery."
         />
 
         <div className="grid grid-cols-3 gap-6 md:gap-12 mb-16">

@@ -1,17 +1,5 @@
 import { motion } from 'framer-motion';
-import { Diamond, Gem, Users } from 'lucide-react';
 import { stats, brandConfig } from '@/config/landing/theme';
-
-// Icon mapping
-const iconMap: Record<number, React.ElementType> = {
-  0: Diamond,
-  1: Gem,
-  2: Users,
-};
-
-// Dynamically import all images from src/assets/certification
-// const certificationModules = import.meta.glob('@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}', { eager: true });
-// const certificationImages = Object.values(certificationModules).map((mod: any) => mod.default || mod);
 
 const AboutSection = () => {
   return (
@@ -34,14 +22,15 @@ const AboutSection = () => {
           </h2>
 
           <p className="text-base text-muted font-light max-w-xxl mx-auto">
-            Since {brandConfig.foundedYear}, we've been crafting timeless pieces that celebrate life's most precious moments.
+            Since {brandConfig.foundedYear}, supplying the trade with quality diamonds and fine jewellery.
           </p>
         </motion.div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => {
-            const IconComponent = iconMap[index];
+            const Icon = stat.icon;
+
             return (
               <motion.div
                 key={stat.label}
@@ -51,8 +40,8 @@ const AboutSection = () => {
                 transition={{ duration: 0.4, delay: index * 0.08 }}
                 className="text-center"
               >
-                {IconComponent && (
-                  <IconComponent className="w-6 h-6 md:w-8 md:h-8 text-primary mx-auto mb-2" />
+                {Icon && (
+                  <Icon className="w-6 h-6 md:w-8 md:h-8 text-primary mx-auto mb-2" />
                 )}
 
                 <p className="font-serif text-xl md:text-2xl text-foreground leading-tight">
@@ -66,31 +55,6 @@ const AboutSection = () => {
             );
           })}
         </div>
-
-        {/* Certifications */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="border-t border-border pt-6"
-        >
-          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
-            {certificationImages.map((src, index) => (
-              <div
-                key={index}
-                className="inline-flex items-center justify-center bg-accent/20 rounded-lg px-3 py-2"
-              >
-                <img
-                  src={src}
-                  alt={`Certification ${index + 1}`}
-                  className="h-8 md:h-12 object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        </motion.div> */}
-
       </div>
     </section>
   );

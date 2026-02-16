@@ -5,6 +5,14 @@
 // Modify this file to update the entire application theme.
 
 import { websiteUrlConfig } from "../config";
+import { Diamond, Gem, Award, Users } from 'lucide-react';
+// Navigation category images
+import eternityRing from '@/assets/jewellery/category/eternity-ring.jpg';
+import tennisBracelet from '@/assets/jewellery/category/tennis-bracelet.jpg';
+import hoops from '@/assets/jewellery/category/hoops.jpg';
+import gemstoneNecklace from '@/assets/jewellery/category/gemstone-necklace.jpg';
+import diamondsCategory from '@/assets/jewellery/catalogue/diamonds-category.jpg';
+import labGrownDiamond from '@/assets/jewellery/catalogue/lab-grown-diamond.jpg';
 
 export const brandConfig = {
   name: 'Henig Diamonds',
@@ -29,14 +37,6 @@ export const brandConfig = {
     youtube: 'https://youtube.com/henigdiamonds',
   },
 };
-
-// Navigation category images
-import eternityRing from '@/assets/jewellery/category/eternity-ring.jpg';
-import tennisBracelet from '@/assets/jewellery/category/tennis-bracelet.jpg';
-import hoops from '@/assets/jewellery/category/hoops.jpg';
-import gemstoneNecklace from '@/assets/jewellery/category/gemstone-necklace.jpg';
-import diamondsCategory from '@/assets/jewellery/catalogue/diamonds-category.jpg';
-import labGrownDiamond from '@/assets/jewellery/catalogue/lab-grown-diamond.jpg';
 
 export const navigationLinks = [
   { label: 'Home', href: websiteUrlConfig.Home },
@@ -151,9 +151,26 @@ export const announcementBar = {
 };
 
 export const stats = [
-  { value: '50,000+', label: 'Designs Manufactured' },
-  { value: '85,000+', label: 'Production Capacity' },
-  { value: '500+', label: 'Clients Globally' },
+  {
+    value: '1,396+',
+    label: 'Jewellery Designs Produced',
+    icon: Diamond,
+  },
+  {
+    value: '3,000+',
+    label: 'Certified Stones Available',
+    icon: Gem,
+  },
+  {
+    value: '50 Years',
+    label: 'Trade Expertise',
+    icon: Award,
+  },
+  {
+    value: '5,000+',
+    label: 'Clients Worldwide',
+    icon: Users,
+  },
 ];
 
 export const certifications = [
