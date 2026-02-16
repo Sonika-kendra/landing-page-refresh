@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
-import Logo from "@/assets/icons/logoLight.png";
+import Logo from "@/assets/icons/logoDark.png";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ interface RegistrationModalProps {
 type FormMode = 'register' | 'login';
 
 const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
-  const [mode, setMode] = useState<FormMode>('register'); // default to register
+  const [mode, setMode] = useState<FormMode>('register');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +32,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     phone: '',
   });
 
-  /* ------------------ UX ENHANCEMENTS ------------------ */
-
-  // Lock background scroll
+  /* Lock scroll */
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
@@ -42,7 +40,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     };
   }, [isOpen]);
 
-  // Close on ESC
+  /* Close on ESC */
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -51,7 +49,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose]);
 
-  /* ------------------ HANDLERS ------------------ */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -84,24 +81,24 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-foreground/60 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
           />
 
           {/* Modal Wrapper */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: 0 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 0 }}
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto"
           >
-            {/* Modal Box */}
-            <div className="w-full max-w-md bg-background rounded-lg shadow-elevated overflow-hidden">
+            <div className="w-full max-w-md bg-accent text-accent-foreground rounded-lg shadow-elevated overflow-hidden border border-white/10">
+              
               {/* Header */}
-              <div className="relative bg-secondary px-6 py-8 text-center">
+              <div className="relative px-6 py-8 text-center border-b border-white/10">
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-2 text-muted hover:text-foreground"
+                  className="absolute top-4 right-4 p-2 text-white/70 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -114,11 +111,11 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                   />
                 </Link>
 
-                <h3 className="font-serif text-xl mt-4">
+                <h3 className="font-serif text-xl mt-4 text-white">
                   {mode === 'register' ? 'Partner With Us' : 'Welcome Back'}
                 </h3>
 
-                <p className="text-sm text-muted mt-1">
+                <p className="text-sm text-white/70 mt-1">
                   {mode === 'register'
                     ? 'Trade access only. Sign up to see prices.'
                     : 'Sign in to continue.'}
@@ -130,89 +127,98 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                 {mode === 'register' && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label className="text-white/90">First Name</Label>
                       <Input
-                        id="firstName"
                         name="firstName"
-                        placeholder="John"
                         onChange={handleInputChange}
                         required
-                        className="mt-1"
+                        className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label className="text-white/90">Last Name</Label>
                       <Input
-                        id="lastName"
                         name="lastName"
-                        placeholder="Doe"
                         onChange={handleInputChange}
                         required
-                        className="mt-1"
+                        className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
                       />
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <Label>Email</Label>
+                  <Label className="text-white/90">Email</Label>
                   <Input
                     name="email"
                     type="email"
-                    onChange={handleInputChange}
                     required
+                    onChange={handleInputChange}
+                    className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
                   />
                 </div>
 
                 <div>
-                  <Label>Password</Label>
+                  <Label className="text-white/90">Password</Label>
                   <div className="relative">
                     <Input
                       name="password"
                       type={showPassword ? 'text' : 'password'}
-                      onChange={handleInputChange}
                       required
-                      className="pr-10"
+                      onChange={handleInputChange}
+                      className="mt-1 pr-10 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 {mode === 'login' && (
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center text-sm text-white/70">
                     <div className="flex items-center gap-2">
                       <Checkbox
                         checked={rememberMe}
                         onCheckedChange={(v) => setRememberMe(!!v)}
                       />
-                      <span className="text-sm text-muted">Remember me</span>
+                      <span>Remember me</span>
                     </div>
-                    <button className="text-sm text-primary">Forgot password?</button>
+                    <button className="text-primary hover:underline">
+                      Forgot password?
+                    </button>
                   </div>
                 )}
 
                 <Button
                   type="submit"
-                  className="w-full btn-henig-primary"
                   disabled={isLoading}
+                  className="w-full btn-henig-gold"
                 >
-                  {isLoading ? 'Processing…' : mode === 'register' ? 'Create Account' : 'Sign In'}
+                  {isLoading
+                    ? 'Processing…'
+                    : mode === 'register'
+                    ? 'Create Account'
+                    : 'Sign In'}
                 </Button>
 
-                <p className="text-center text-sm text-muted">
-                  {mode === 'register' ? 'Already have an account?' : "Don't have an account?"}
+                <p className="text-center text-sm text-white/70">
+                  {mode === 'register'
+                    ? 'Already have an account?'
+                    : "Don't have an account?"}
                   <button
                     type="button"
                     onClick={() =>
                       setMode(mode === 'register' ? 'login' : 'register')
                     }
-                    className="ml-2 text-primary font-medium"
+                    className="ml-2 text-primary font-medium hover:underline"
                   >
                     {mode === 'register' ? 'Sign In' : 'Register'}
                   </button>
@@ -222,13 +228,13 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
               {/* Benefits */}
               {mode === 'register' && (
                 <div className="px-6 pb-6">
-                  <div className="bg-secondary rounded-sm p-4 space-y-2">
+                  <div className="bg-white/5 border border-white/10 rounded-sm p-4 space-y-2">
                     {[
                       'Exclusive collections',
                       'Wholesale pricing',
                       'Early access',
                     ].map((item) => (
-                      <div key={item} className="flex gap-2 text-sm items-center">
+                      <div key={item} className="flex gap-2 text-sm items-center text-white/80">
                         <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
                         <span>{item}</span>
                       </div>
