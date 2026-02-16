@@ -15,7 +15,7 @@ const JewelleryPage = () => {
       <NewArrivalsAndBestsellersSection />
       <CategorySection />
       <CertificationsAndPartnersSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
-      <CatalogueBespokeSection />
+      <CatalogueBespokeSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
       <CommitmentSection />
       <RegistrationModal
         isOpen={isRegisterModalOpen}

@@ -12,16 +12,20 @@ const items = [
   {
     title: "Catalogue",
     image: CatalogueImg,
-    href: "/catalogue",
+    // href: "/catalogue",
   },
   {
     title: "Bespoke",
     image: BespokeImg,
-    href: "/bespoke",
+    // href: "/bespoke",
   },
 ];
 
-const CatalogueBespokeSection = () => {
+interface CatalogueBespokeSectionProps {
+  onRegisterClick: () => void;
+}
+
+const CatalogueBespokeSection = ({ onRegisterClick }: CatalogueBespokeSectionProps) => {
   return (
     <section className="py-4 md:py-6 section-white">
       <div className="henig-container">
@@ -29,7 +33,6 @@ const CatalogueBespokeSection = () => {
           {items.map((item, index) => (
             <MotionLink
               key={item.title}
-              to={item.href}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -55,6 +58,7 @@ const CatalogueBespokeSection = () => {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={onRegisterClick}
                   className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
                 >
                   Enquire

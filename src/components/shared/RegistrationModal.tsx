@@ -40,6 +40,13 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     };
   }, [isOpen]);
 
+  // Reset to 'register' when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setMode('register');
+    }
+  }, [isOpen]);
+
   /* Close on ESC */
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
