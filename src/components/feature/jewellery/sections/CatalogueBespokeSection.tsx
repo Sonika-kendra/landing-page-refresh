@@ -23,7 +23,7 @@ const items = [
 
 const CatalogueBespokeSection = () => {
   return (
-    <section className="py-4 md:py-6 section-ivory">
+    <section className="py-4 md:py-6 section-white">
       <div className="henig-container">
         <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           {items.map((item, index) => (
