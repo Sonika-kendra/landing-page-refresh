@@ -24,7 +24,7 @@ const CategorySection = () => (
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Link to={category.link} className="group block text-center">
+          <Link to={category.link} className="group block text-left">
             {/* Image */}
             <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-3 bg-secondary">
               {category.image ? (
@@ -43,7 +43,7 @@ const CategorySection = () => (
               <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/10 transition-colors duration-300" />
               {/* Text on hover */}
             </div>
-            <h3 className="flex items-center justify-center gap-1 font-serif text-lg text-foreground transition-colors group-hover:text-primary">
+            <h3 className="flex items-center justify-start gap-1 font-serif text-lg text-foreground transition-colors group-hover:text-primary">
               <ChevronRight
                 size={16}
                 className="transition-transform duration-300 group-hover:translate-x-1"
