@@ -1,4 +1,3 @@
-// CertificationsAndPartnersSection.tsx
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
@@ -28,61 +27,69 @@ const CertificationsAndPartnersSection = ({
   onRegisterClick,
 }: CertificationsAndPartnersSectionProps) => {
   return (
-    <section className="py-4 md:py-6 section-ivory">
+    // 👇 Controlled outer spacing for section separation
+    <section className="py-8 md:py-12 section-ivory">
       <div className="henig-container">
+
         {/* Certifications */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="border-b border-border pb-6"
+          transition={{ duration: 0.4 }}
+          className="pb-4"
         >
-          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
+          <div className="flex flex-wrap justify-center items-center gap-4">
             {certificationImages.map((src, index) => (
               <div
                 key={index}
-                className="inline-flex items-center justify-center px-3 py-2"
+                className="inline-flex items-center justify-center px-2 py-1"
               >
                 <img
                   src={src}
                   alt={`Certification ${index + 1}`}
-                  className="h-8 md:h-12 object-contain"
+                  className="h-8 md:h-10 object-contain"
                 />
               </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Partner CTA */}
+        {/* Divider + CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          className="text-center my-6"
+          transition={{ duration: 0.3 }}
+          className="flex items-center my-6"
         >
-          <Button
-            className="btn-henig-outline"
-            size="sm"
-            onClick={onRegisterClick}
-          >
-            Partner With Us
-          </Button>
+          <div className="flex-1 border-t border-border"></div>
+
+          <div className="px-4">
+            <Button
+              className="btn-henig-outline whitespace-nowrap"
+              size="sm"
+              onClick={onRegisterClick}
+            >
+              Partner With Us
+            </Button>
+          </div>
+
+          <div className="flex-1 border-t border-border"></div>
         </motion.div>
 
         {/* Partner Images */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          className="flex flex-wrap justify-center gap-4 mb-10 items-center"
+          transition={{ duration: 0.3 }}
+          className="flex flex-wrap justify-center gap-4 items-center"
         >
           {partnerImageList.map((src, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-center p-2 w-36 h-18 md:w-40 md:h-20"
+              className="flex items-center justify-center w-32 h-14 md:w-36 md:h-16"
             >
               <img
                 src={src}
@@ -92,6 +99,7 @@ const CertificationsAndPartnersSection = ({
             </div>
           ))}
         </motion.div>
+
       </div>
     </section>
   );
