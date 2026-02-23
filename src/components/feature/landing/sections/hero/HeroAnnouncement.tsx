@@ -42,10 +42,10 @@ const HeroAnnouncement = ({ show }: { show: boolean }) => {
             <AnimatePresence mode="wait">
               <motion.p
                 key={index}
-                initial={{ y: -8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 8, opacity: 0 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.5, ease: 'linear' }}
                 className="text-[10px] md:text-[12px] tracking-[0.12em] text-accent-foreground/80 uppercase whitespace-nowrap"
               >
                 {messages[index]}
