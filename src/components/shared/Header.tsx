@@ -40,8 +40,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
 
   return (
     <header className="relative sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-
-      {/* ================= HEADER BAR ================= */}
+      {/* HEADER BAR */}
       <div className="henig-container">
         <div className="flex items-center justify-between h-16 md:h-20">
 
@@ -50,7 +49,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             className="md:hidden p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
 
           {/* Logo */}
@@ -69,6 +72,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             <ul className="flex items-center gap-8">
               {navigationLinks.map((link) => {
                 const hasMegaMenu = 'megaMenu' in link && link.megaMenu;
+                const isMenuOpen = activeMegaMenu === link.label;
+                const isLinkActive = isActive(link.href);
 
                 return (
                   <li
@@ -77,22 +82,46 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     onMouseLeave={handleLeave}
                   >
                     {hasMegaMenu ? (
-                      <button
-                        type="button"
-                        className={`flex items-center gap-1 text-md font-semibold transition-colors ${
-                          isActive(link.href)
-                            ? 'text-primary'
-                            : 'text-foreground hover:text-primary'
-                        }`}
-                      >
-                        {link.label}
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {/* Label (Navigates) */}
+                        <Link
+                          to={link.href}
+                          className={`text-md font-semibold transition-colors ${
+                            isLinkActive
+                              ? 'text-primary'
+                              : 'text-foreground hover:text-primary'
+                          }`}
+                        >
+                          {link.label}
+                        </Link>
+
+                        {/* Arrow Toggle */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMegaMenu(
+                              isMenuOpen ? null : link.label
+                            );
+                          }}
+                          className={`transition-colors ${
+                            isMenuOpen || isLinkActive
+                              ? 'text-primary'
+                              : 'text-foreground hover:text-primary'
+                          }`}
+                        >
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform duration-200 ${
+                              isMenuOpen ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
+                      </div>
                     ) : (
                       <Link
                         to={link.href}
                         className={`text-md font-semibold transition-colors ${
-                          isActive(link.href)
+                          isLinkActive
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
                         }`}
@@ -132,7 +161,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
         </div>
       </div>
 
-      {/* ================= FULL WIDTH MEGA MENU ================= */}
+      {/* MEGA MENU */}
       <AnimatePresence>
         {activeLink && 'categories' in activeLink && (
           <motion.div
@@ -201,7 +230,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
         )}
       </AnimatePresence>
 
-      {/* ================= MOBILE NAV ================= */}
+      {/* MOBILE NAV unchanged */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.nav
@@ -216,7 +245,10 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                 const isOpen = openMobileMenu === link.label;
 
                 return (
-                  <li key={link.label} className="border-b border-border/50 last:border-0">
+                  <li
+                    key={link.label}
+                    className="border-b border-border/50 last:border-0"
+                  >
                     {hasMegaMenu ? (
                       <>
                         <button
