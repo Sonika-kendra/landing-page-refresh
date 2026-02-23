@@ -32,7 +32,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     phone: '',
   });
 
-  /* Lock scroll */
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
@@ -40,14 +39,12 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     };
   }, [isOpen]);
 
-  // Reset to 'register' when modal opens
   useEffect(() => {
     if (isOpen) {
       setMode('register');
     }
   }, [isOpen]);
 
-  /* Close on ESC */
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -82,7 +79,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -91,7 +87,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
           />
 
-          {/* Modal Wrapper */}
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -100,8 +95,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto"
           >
             <div className="w-full max-w-md bg-accent text-accent-foreground rounded-lg shadow-elevated overflow-hidden border border-white/10">
-              
-              {/* Header */}
+
               <div className="relative px-6 py-8 text-center border-b border-white/10">
                 <button
                   onClick={onClose}
@@ -129,33 +123,66 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                 </p>
               </div>
 
-              {/* Form */}
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
                 {mode === 'register' && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <>
+                    {/* <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white/90">
+                          First Name <span className="text-primary">*</span>
+                        </Label>
+                        <Input
+                          name="firstName"
+                          required
+                          onChange={handleInputChange}
+                          className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white/90">
+                          Last Name <span className="text-primary">*</span>
+                        </Label>
+                        <Input
+                          name="lastName"
+                          required
+                          onChange={handleInputChange}
+                          className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                        />
+                      </div>
+                    </div> */}
+
                     <div>
-                      <Label className="text-white/90">First Name</Label>
+                      <Label className="text-white/90">
+                        First Name <span className="text-primary">*</span>
+                      </Label>
                       <Input
                         name="firstName"
-                        onChange={handleInputChange}
                         required
+                        onChange={handleInputChange}
                         className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
                       />
                     </div>
+
                     <div>
-                      <Label className="text-white/90">Last Name</Label>
+                      <Label className="text-white/90">
+                        Last Name <span className="text-primary">*</span>
+                      </Label>
                       <Input
                         name="lastName"
-                        onChange={handleInputChange}
                         required
+                        onChange={handleInputChange}
                         className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
                       />
                     </div>
-                  </div>
+
+                  </>
                 )}
 
                 <div>
-                  <Label className="text-white/90">Email</Label>
+                  <Label className="text-white/90">
+                    Email <span className="text-primary">*</span>
+                  </Label>
                   <Input
                     name="email"
                     type="email"
@@ -166,7 +193,20 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                 </div>
 
                 <div>
-                  <Label className="text-white/90">Password</Label>
+                  <Label className="text-white/90">
+                    Company Name
+                  </Label>
+                  <Input
+                    name="companyName"
+                    onChange={handleInputChange}
+                    className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white/90">
+                    Password <span className="text-primary">*</span>
+                  </Label>
                   <div className="relative">
                     <Input
                       name="password"
@@ -212,8 +252,8 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                   {isLoading
                     ? 'Processing…'
                     : mode === 'register'
-                    ? 'Create Account'
-                    : 'Sign In'}
+                      ? 'Create Account'
+                      : 'Sign In'}
                 </Button>
 
                 <p className="text-center text-sm text-white/70">
@@ -232,7 +272,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                 </p>
               </form>
 
-              {/* Benefits */}
               {mode === 'register' && (
                 <div className="px-6 pb-6">
                   <div className="bg-white/5 border border-white/10 rounded-sm p-4 space-y-2">
@@ -249,6 +288,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                   </div>
                 </div>
               )}
+
             </div>
           </motion.div>
         </>
