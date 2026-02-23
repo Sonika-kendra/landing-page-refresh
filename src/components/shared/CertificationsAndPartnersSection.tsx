@@ -37,23 +37,22 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="pb-4"
+          className="flex flex-wrap justify-center gap-4 items-center"
         >
-          <div className="flex flex-wrap justify-center items-center gap-4">
-            {certificationImages.map((src, index) => (
-              <div
-                key={index}
-                className="inline-flex items-center justify-center px-2 py-1"
-              >
-                <img
-                  src={src}
-                  alt={`Certification ${index + 1}`}
-                  className="h-8 md:h-10 object-contain"
-                />
-              </div>
-            ))}
-          </div>
+          {certificationImages.map((src, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-center w-32 h-14 md:w-36 md:h-16"
+            >
+              <img
+                src={src}
+                alt={`Certification ${index + 1}`}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          ))}
         </motion.div>
+
 
         {/* Divider + CTA */}
         <motion.div
@@ -67,14 +66,13 @@ const CertificationsAndPartnersSection = ({
 
           <div className="px-4">
             <Button
-              className="btn-henig-outline whitespace-nowrap"
               size="sm"
               onClick={onRegisterClick}
+              className="p-5 whitespace-nowrap bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
             >
               Partner With Us
             </Button>
           </div>
-
           <div className="flex-1 border-t border-border"></div>
         </motion.div>
 
