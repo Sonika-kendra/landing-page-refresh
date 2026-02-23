@@ -55,7 +55,7 @@ const NewArrivalsAndBestsellersSection = () => {
             visibleItems={4}
             autoplayDelay={4000}
             ifTitleVisible
-            ifPriceVisible
+            ifPriceVisible={false}
             ifWhishlistVisible={false}
             ifPurchaseButtonVisible={false}
             ifHoverOverlayVisible
