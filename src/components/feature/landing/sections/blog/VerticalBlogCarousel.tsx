@@ -156,7 +156,7 @@ const VerticalBlogListWithImage = ({ posts, visibleCount = 4 }: Props) => {
                 </p>
 
                 <Link
-                  to={`${oldWebsiteURL}/news`}
+                  to={`/blogs/${post.id}${post.params || ''}`}
                   className="text-gray-800 hover:text-[#b59b6a] block"
                 >
                   {post.title}
