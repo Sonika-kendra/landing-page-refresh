@@ -79,10 +79,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     {hasMegaMenu ? (
                       <button
                         type="button"
-                        className={`flex items-center gap-1 text-md font-normal transition-colors ${isActive(link.href)
+                        className={`flex items-center gap-1 text-md font-semibold transition-colors ${
+                          isActive(link.href)
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
-                          }`}
+                        }`}
                       >
                         {link.label}
                         <ChevronDown className="w-4 h-4" />
@@ -90,10 +91,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     ) : (
                       <Link
                         to={link.href}
-                        className={`text-md font-normal transition-colors ${isActive(link.href)
+                        className={`text-md font-semibold transition-colors ${
+                          isActive(link.href)
                             ? 'text-primary'
                             : 'text-foreground hover:text-primary'
-                          }`}
+                        }`}
                       >
                         {link.label}
                       </Link>
@@ -109,7 +111,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="hidden md:flex items-center gap-2 text-sm"
+              className="hidden md:flex items-center gap-2 text-sm font-semibold"
               onClick={onRegisterClick}
             >
               <User className="w-4 h-4" />
@@ -148,7 +150,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
               <div className="grid grid-cols-4 gap-10">
                 {activeLink.categories.map((category) => (
                   <div key={category.title}>
-                    <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider mb-4">
                       {category.title}
                     </h3>
 
@@ -165,14 +167,14 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                                 alt={subLink.label}
                                 className="w-12 h-12 object-cover rounded"
                               />
-                              <span className="text-sm hover:text-primary transition-colors">
+                              <span className="text-sm font-medium hover:text-primary transition-colors">
                                 {subLink.label}
                               </span>
                             </a>
                           ) : (
                             <a
                               href={subLink.href}
-                              className="block py-1.5 text-sm text-muted hover:text-primary transition-colors"
+                              className="block py-1.5 text-sm text-muted font-medium hover:text-primary transition-colors"
                             >
                               {subLink.label}
                             </a>
@@ -184,7 +186,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                         <li className="pt-2">
                           <a
                             href={category.showAll.href}
-                            className="text-sm font-medium text-primary hover:underline"
+                            className="text-sm font-semibold text-primary hover:underline"
                           >
                             {category.showAll.label} →
                           </a>
@@ -198,7 +200,6 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-
 
       {/* ================= MOBILE NAV ================= */}
       <AnimatePresence>
@@ -222,12 +223,13 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                           onClick={() =>
                             setOpenMobileMenu(isOpen ? null : link.label)
                           }
-                          className="w-full flex justify-between py-3"
+                          className="w-full flex justify-between py-3 font-semibold"
                         >
                           {link.label}
                           <ChevronDown
-                            className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''
-                              }`}
+                            className={`w-4 h-4 transition-transform ${
+                              isOpen ? 'rotate-180' : ''
+                            }`}
                           />
                         </button>
 
@@ -241,7 +243,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                                     <a
                                       href={subLink.href}
                                       onClick={() => setMobileMenuOpen(false)}
-                                      className="block py-1.5 text-sm"
+                                      className="block py-1.5 text-sm font-medium"
                                     >
                                       {subLink.label}
                                     </a>
@@ -255,7 +257,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                       <Link
                         to={link.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block py-3"
+                        className="block py-3 font-semibold"
                       >
                         {link.label}
                       </Link>
