@@ -50,7 +50,7 @@ const BlogSection = () => {
             size="sm"
             asChild
           >
-            <a href={`${oldWebsiteURL}/news`} >
+            <a href="/blogs" >
               GO TO OUR BLOG
             </a>
           </Button>

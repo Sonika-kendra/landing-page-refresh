@@ -109,12 +109,12 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a
-                  href={websiteUrlConfig.Blogs}
+                <Link
+                  to="/blogs"
                   className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Blog
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
