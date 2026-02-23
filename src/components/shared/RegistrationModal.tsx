@@ -29,9 +29,9 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     email: '',
     password: '',
     companyName: '',
-    phone: '',
   });
 
+  // Prevent page scroll
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
@@ -39,12 +39,12 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     };
   }, [isOpen]);
 
+  // Reset mode when opened
   useEffect(() => {
-    if (isOpen) {
-      setMode('register');
-    }
+    if (isOpen) setMode('register');
   }, [isOpen]);
 
+  // Close on ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -61,7 +61,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
 
     toast({
       title: mode === 'register' ? 'Registration Successful!' : 'Welcome Back!',
@@ -79,6 +79,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -87,125 +88,103 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
           />
 
+          {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-            className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
           >
-            <div className="w-full max-w-md bg-accent text-accent-foreground rounded-lg shadow-elevated overflow-hidden border border-white/10">
+            <div className="w-full max-w-md bg-accent text-accent-foreground rounded-lg shadow-elevated border border-white/10 p-6">
 
-              <div className="relative px-6 py-8 text-center border-b border-white/10">
-                <button
-                  onClick={onClose}
-                  className="absolute top-4 right-4 p-2 text-white/70 hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              {/* Close */}
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-6 p-2 text-white/70 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
+              {/* Logo */}
+              <div className="text-center mb-4">
                 <Link to="/" className="inline-flex items-center justify-center">
                   <img
                     src={Logo}
                     alt="Henig Diamonds"
-                    className="h-12 md:h-14 w-auto object-contain"
+                    className="h-12 w-auto object-contain"
                   />
                 </Link>
 
-                <h3 className="font-serif text-xl mt-4 text-white">
+                <h3 className="font-serif text-lg mt-3 text-white">
                   {mode === 'register' ? 'Partner With Us' : 'Welcome Back'}
                 </h3>
 
-                <p className="text-sm text-white/70 mt-1">
+                <p className="text-xs text-white/70 mt-1">
                   {mode === 'register'
                     ? 'Trade access only. Sign up to see prices.'
                     : 'Sign in to continue.'}
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-3">
 
                 {mode === 'register' && (
                   <>
-                    {/* <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-white/90">
-                          First Name <span className="text-primary">*</span>
-                        </Label>
-                        <Input
-                          name="firstName"
-                          required
-                          onChange={handleInputChange}
-                          className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-white/90">
-                          Last Name <span className="text-primary">*</span>
-                        </Label>
-                        <Input
-                          name="lastName"
-                          required
-                          onChange={handleInputChange}
-                          className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
-                        />
-                      </div>
-                    </div> */}
-
                     <div>
-                      <Label className="text-white/90">
-                        First Name <span className="text-primary">*</span>
+                      <Label className="text-white/90 text-sm">
+                        First Name *
                       </Label>
                       <Input
                         name="firstName"
                         required
                         onChange={handleInputChange}
-                        className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                        className="mt-1 bg-transparent border-white/30 text-white"
                       />
                     </div>
 
                     <div>
-                      <Label className="text-white/90">
-                        Last Name <span className="text-primary">*</span>
+                      <Label className="text-white/90 text-sm">
+                        Last Name *
                       </Label>
                       <Input
                         name="lastName"
                         required
                         onChange={handleInputChange}
-                        className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                        className="mt-1 bg-transparent border-white/30 text-white"
                       />
                     </div>
-
                   </>
                 )}
 
                 <div>
-                  <Label className="text-white/90">
-                    Email <span className="text-primary">*</span>
+                  <Label className="text-white/90 text-sm">
+                    Email *
                   </Label>
                   <Input
                     name="email"
                     type="email"
                     required
                     onChange={handleInputChange}
-                    className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                    className="mt-1 bg-transparent border-white/30 text-white"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-white/90">
+                  <Label className="text-white/90 text-sm">
                     Company Name
                   </Label>
                   <Input
                     name="companyName"
                     onChange={handleInputChange}
-                    className="mt-1 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                    className="mt-1 bg-transparent border-white/30 text-white"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-white/90">
-                    Password <span className="text-primary">*</span>
+                  <Label className="text-white/90 text-sm">
+                    Password *
                   </Label>
                   <div className="relative">
                     <Input
@@ -213,7 +192,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                       type={showPassword ? 'text' : 'password'}
                       required
                       onChange={handleInputChange}
-                      className="mt-1 pr-10 bg-transparent border-white/30 text-white placeholder:text-white/60 focus:border-primary focus:ring-primary"
+                      className="mt-1 pr-10 bg-transparent border-white/30 text-white"
                     />
                     <button
                       type="button"
@@ -230,7 +209,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                 </div>
 
                 {mode === 'login' && (
-                  <div className="flex justify-between items-center text-sm text-white/70">
+                  <div className="flex justify-between items-center text-xs text-white/70">
                     <div className="flex items-center gap-2">
                       <Checkbox
                         checked={rememberMe}
@@ -252,11 +231,11 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                   {isLoading
                     ? 'Processing…'
                     : mode === 'register'
-                      ? 'Create Account'
-                      : 'Sign In'}
+                    ? 'Create Account'
+                    : 'Sign In'}
                 </Button>
 
-                <p className="text-center text-sm text-white/70">
+                <p className="text-center text-xs text-white/70">
                   {mode === 'register'
                     ? 'Already have an account?'
                     : "Don't have an account?"}
@@ -265,7 +244,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                     onClick={() =>
                       setMode(mode === 'register' ? 'login' : 'register')
                     }
-                    className="ml-2 text-primary font-medium hover:underline"
+                    className="ml-2 text-primary hover:underline"
                   >
                     {mode === 'register' ? 'Sign In' : 'Register'}
                   </button>
@@ -273,19 +252,20 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
               </form>
 
               {mode === 'register' && (
-                <div className="px-6 pb-6">
-                  <div className="bg-white/5 border border-white/10 rounded-sm p-4 space-y-2">
-                    {[
-                      'Exclusive collections',
-                      'Wholesale pricing',
-                      'Early access',
-                    ].map((item) => (
-                      <div key={item} className="flex gap-2 text-sm items-center text-white/80">
-                        <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-4 bg-white/5 border border-white/10 rounded-sm p-3 space-y-1">
+                  {[
+                    'Exclusive collections',
+                    'Wholesale pricing',
+                    'Early access',
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="flex gap-2 text-xs items-center text-white/80"
+                    >
+                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
                 </div>
               )}
 
