@@ -7,10 +7,10 @@
 import { websiteUrlConfig } from "../config";
 import { Diamond, Gem, Award, Users } from 'lucide-react';
 // Navigation category images
-import eternityRing from '@/assets/jewellery/category/eternity-ring.jpg';
-import tennisBracelet from '@/assets/jewellery/category/tennis-bracelet.jpg';
-import hoops from '@/assets/jewellery/category/hoops.jpg';
-import gemstoneNecklace from '@/assets/jewellery/category/gemstone-necklace.jpg';
+import ring from '@/assets/jewellery/category/ring.png';
+import bracelet from '@/assets/jewellery/category/bracelet.png';
+import earrings from '@/assets/jewellery/category/earrings.png';
+import necklace from '@/assets/jewellery/category/necklace.png';
 import diamondsCategory from '@/assets/jewellery/catalogue/diamonds-category.jpg';
 import labGrownDiamond from '@/assets/jewellery/catalogue/lab-grown-diamond.jpg';
 
@@ -100,10 +100,10 @@ export const navigationLinks = [
           href: websiteUrlConfig.Jewellery.Home,
         },
         links: [
-          { label: 'Rings', href: websiteUrlConfig.Jewellery.Rings, image: eternityRing },
-          { label: 'Earrings', href: websiteUrlConfig.Jewellery.Earrings, image: hoops },
-          { label: 'Bracelets', href: websiteUrlConfig.Jewellery.Bracelets, image: tennisBracelet },
-          { label: 'Necklaces', href: websiteUrlConfig.Jewellery.Necklaces, image: gemstoneNecklace },
+          { label: 'Rings', href: websiteUrlConfig.Jewellery.Rings, image: ring },
+          { label: 'Earrings', href: websiteUrlConfig.Jewellery.Earrings, image: earrings },
+          { label: 'Bracelets', href: websiteUrlConfig.Jewellery.Bracelets, image: bracelet },
+          { label: 'Necklaces', href: websiteUrlConfig.Jewellery.Necklaces, image: necklace },
         ],
       },
       {

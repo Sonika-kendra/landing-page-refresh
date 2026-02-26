@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 import CatalogueImg from "@/assets/jewellery/catalogue/diamonds-category.jpg";
-import BespokeImg from "@/assets/jewellery/catalogue/lab-grown-diamond.jpg";
+import BespokeImg from "@/assets/jewellery/catalogue/bespoke.png";
 
 const MotionLink = motion(Link);
 

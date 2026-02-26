@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import jewelleryHero from '@/assets/jewellery-hero.jpg';
+import jewelleryHero from '@/assets/jewellery/banner.png';
 import { websiteUrlConfig } from '@/config/config';
 
 const JewelleryHeroSection = () => (
