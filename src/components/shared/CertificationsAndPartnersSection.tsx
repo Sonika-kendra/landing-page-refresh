@@ -24,6 +24,12 @@ const partnerImageList = Object.values(partnerImages).map(
   (img: any) => img.default || img
 );
 
+const logoTileClass =
+  'w-full max-w-[190px] h-20 md:h-24 p-2 flex items-center justify-center overflow-hidden';
+const logoWrapperClass =
+  'w-full h-full flex items-center justify-center border px-2';
+const logoImageClass = 'block w-full h-full object-contain object-center';
+
 const CertificationsAndPartnersSection = ({
   onRegisterClick,
 }: CertificationsAndPartnersSectionProps) => {
@@ -38,18 +44,15 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="flex flex-wrap justify-center gap-4 items-center"
+          className="flex flex-wrap justify-center items-center gap-2 md:gap-3"
         >
           {certificationImages.map((src, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-center w-32 h-14 md:w-36 md:h-16"
-            >
+            <div key={index} className={logoTileClass}>
               <ImageWithSkeleton
                 src={src}
                 alt={`Certification ${index + 1}`}
-                wrapperClassName="w-full h-full"
-                className="max-w-full max-h-full object-contain"
+                wrapperClassName={logoWrapperClass}
+                className={logoImageClass}
               />
             </div>
           ))}
@@ -84,18 +87,15 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.3 }}
-          className="flex flex-wrap justify-center gap-4 items-center"
+          className="flex flex-wrap justify-center items-center gap-2 md:gap-3"
         >
           {partnerImageList.map((src, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-center w-32 h-14 md:w-36 md:h-16"
-            >
+            <div key={idx} className={logoTileClass}>
               <ImageWithSkeleton
                 src={src}
                 alt={`Partner ${idx + 1}`}
-                wrapperClassName="w-full h-full"
-                className="max-w-full max-h-full object-contain"
+                wrapperClassName={logoWrapperClass}
+                className={logoImageClass}
               />
             </div>
           ))}
