@@ -3,17 +3,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import HeroAnnouncement from './hero/HeroAnnouncement';
 import HeroCarousel from './hero/HeroCarousel';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const HeroSection = ({ className = '' }) => {
-  const [heroLoaded, setHeroLoaded] = useState(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setHeroLoaded(true), 300);
-    return () => clearTimeout(timeout);
-  }, []);
-
   return (
     <section className="relative w-full section-white overflow-hidden">
       <HeroCarousel />

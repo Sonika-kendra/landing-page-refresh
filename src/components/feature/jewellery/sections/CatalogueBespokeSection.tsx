@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 
 import CatalogueImg from "@/assets/jewellery/catalogue/diamonds-category.jpg";
 import BespokeImg from "@/assets/jewellery/catalogue/bespoke.png";
@@ -28,7 +29,7 @@ interface CatalogueBespokeSectionProps {
 const CatalogueBespokeSection = ({ onRegisterClick }: CatalogueBespokeSectionProps) => {
   return (
     <section className="py-4 md:py-6 section-white">
-      <div className="henig-container">
+      <div className="henig-container px-0 sm:px-0 lg:px-0">
         <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           {items.map((item, index) => (
             <MotionLink
@@ -40,10 +41,13 @@ const CatalogueBespokeSection = ({ onRegisterClick }: CatalogueBespokeSectionPro
               className="group block relative aspect-[3/2] md:aspect-[16/9] rounded-sm overflow-hidden"
             >
               {/* Image */}
-              <img
+              <ImageWithSkeleton
                 src={item.image}
                 alt={item.title}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 z-0"
+                loading="lazy"
+                decoding="async"
+                wrapperClassName="absolute inset-0 w-full h-full z-0"
+                className="w-full h-full transition-transform duration-700 group-hover:scale-105 object-cover"
               />
 
               {/* Permanent Dark Overlay */}

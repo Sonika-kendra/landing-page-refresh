@@ -194,6 +194,8 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                               <img
                                 src={subLink.image}
                                 alt={subLink.label}
+                                loading="lazy"
+                                decoding="async"
                                 className="w-12 h-12 object-cover rounded"
                               />
                               <span className="text-sm font-medium hover:text-primary transition-colors">

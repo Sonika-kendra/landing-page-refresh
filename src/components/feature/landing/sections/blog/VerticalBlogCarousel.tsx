@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/shared/functions/api/blogPosts';
 import { baseURL, oldWebsiteURL } from '@/config/config';
+import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 const AUTO_DURATION = 4000;
 const ITEM_HEIGHT = 80;
@@ -114,15 +115,20 @@ const VerticalBlogListWithImage = ({ posts, visibleCount = 4 }: Props) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         {/* Left: Featured Image */}
         <motion.div className="w-full h-[320px]">
-          <motion.img
+          <motion.div
             key={featuredImage}
-            src={featuredImage}
-            alt={activePost.title}
             initial={{ opacity: 0, scale: 1.04 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
-            className="w-full h-full object-cover rounded-lg"
-          />
+            className="w-full h-full"
+          >
+            <ImageWithSkeleton
+              src={featuredImage}
+              alt={activePost.title}
+              wrapperClassName="w-full h-full"
+              className="w-full h-full object-cover rounded-lg"
+            />
+          </motion.div>
         </motion.div>
 
         {/* Right: Scrollable Blog List */}

@@ -3,6 +3,7 @@ import SectionHeader from '@/components/shared/SectionHeader';
 import { motion } from 'framer-motion';
 import { jewelleryCategories } from '@/config/jewellery/categoryProducts';
 import { ChevronRight } from 'lucide-react';
+import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 const CategorySection = () => (
   <section className="py-5 section-white">
@@ -26,11 +27,14 @@ const CategorySection = () => (
         >
           <Link to={category.link} className="group block text-left">
             {/* Image */}
-            <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-3 bg-secondary">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-3 bg-secondary">
               {category.image ? (
-                <img
+                <ImageWithSkeleton
                   src={category.image}
                   alt={category.name}
+                  loading="lazy"
+                  decoding="async"
+                  wrapperClassName="w-full h-full"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               ) : (

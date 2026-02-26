@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 const heroAssets = import.meta.glob('../../../../../assets/landing/hero/*', { eager: true });
 
-const assets = Object.values(heroAssets).map((file: any) => {
-  const src = file.default || file;
+type HeroAssetModule = { default?: string } | string;
+
+const assets = Object.values(heroAssets).map((file) => {
+  const module = file as HeroAssetModule;
+  const src = typeof module === 'string' ? module : module.default ?? '';
   const extension = src.split('.').pop()?.toLowerCase();
   const type = ['mp4', 'webm', 'mov', 'ogg'].includes(extension!) ? 'video' : 'image';
   return { src, type };
@@ -56,10 +60,8 @@ const HeroCarousel = () => {
     <div className="relative w-full overflow-hidden h-[300px] md:h-[400px] lg:h-[500px]">
       <AnimatePresence initial={false} custom={direction}>
         {currentAsset.type === 'image' ? (
-          <motion.img
+          <motion.div
             key={current}
-            src={currentAsset.src}
-            alt="Luxury jewelry"
             custom={direction}
             variants={slideVariants}
             initial="enter"
@@ -67,7 +69,17 @@ const HeroCarousel = () => {
             exit="exit"
             transition={{ duration: 0.8, ease: 'easeInOut' }}
             className="absolute w-full h-full object-cover"
-          />
+          >
+            <ImageWithSkeleton
+              src={currentAsset.src}
+              alt="Luxury jewelry"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              wrapperClassName="w-full h-full"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
         ) : (
           <motion.video
             key={current}
@@ -76,6 +88,7 @@ const HeroCarousel = () => {
             muted
             loop
             playsInline
+            preload="metadata"
             custom={direction}
             variants={slideVariants}
             initial="enter"

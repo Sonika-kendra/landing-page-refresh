@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 interface CertificationsAndPartnersSectionProps {
   onRegisterClick: () => void;
@@ -44,9 +45,10 @@ const CertificationsAndPartnersSection = ({
               key={index}
               className="flex items-center justify-center w-32 h-14 md:w-36 md:h-16"
             >
-              <img
+              <ImageWithSkeleton
                 src={src}
                 alt={`Certification ${index + 1}`}
+                wrapperClassName="w-full h-full"
                 className="max-w-full max-h-full object-contain"
               />
             </div>
@@ -89,9 +91,10 @@ const CertificationsAndPartnersSection = ({
               key={idx}
               className="flex items-center justify-center w-32 h-14 md:w-36 md:h-16"
             >
-              <img
+              <ImageWithSkeleton
                 src={src}
                 alt={`Partner ${idx + 1}`}
+                wrapperClassName="w-full h-full"
                 className="max-w-full max-h-full object-contain"
               />
             </div>

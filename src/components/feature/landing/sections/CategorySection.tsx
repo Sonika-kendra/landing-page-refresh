@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { categories } from '@/config/landing/category';
 import { ArrowRight } from 'lucide-react';
+import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 // Motion-enhanced router link
 const MotionLink = motion(Link);
@@ -23,9 +24,12 @@ const CategorySection = () => {
               className="group henig-image-overlay block relative aspect-[3/2] md:aspect-[16/9] rounded-sm overflow-hidden"
             >
               {/* Image */}
-              <img
+              <ImageWithSkeleton
                 src={category.image}
                 alt={category.title}
+                loading="lazy"
+                decoding="async"
+                wrapperClassName="w-full h-full"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
 

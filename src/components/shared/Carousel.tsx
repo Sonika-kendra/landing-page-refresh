@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { useEffect, useRef, useState, ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 const MotionLink = motion(Link);
 
@@ -85,31 +86,40 @@ const Carousel = ({
     ...items.slice(0, visibleItems),
   ];
 
-  const next = () => setIndex((prev) => prev + 1);
-  const prev = () => setIndex((prev) => prev - 1);
+  const next = useCallback(() => {
+    setIndex((prev) => prev + 1);
+  }, []);
 
-  const stopAutoplay = () => {
+  const prev = useCallback(() => {
+    setIndex((prev) => prev - 1);
+  }, []);
+
+  const stopAutoplay = useCallback(() => {
     if (autoplayRef.current) {
       clearInterval(autoplayRef.current);
       autoplayRef.current = null;
     }
-  };
+  }, []);
 
-  const startAutoplay = () => {
+  const startAutoplay = useCallback(() => {
     stopAutoplay();
     autoplayRef.current = setInterval(next, autoplayDelay);
-  };
+  }, [autoplayDelay, next, stopAutoplay]);
 
-  const navigate = (dir: 'next' | 'prev') => {
+  const navigate = useCallback((dir: 'next' | 'prev') => {
     stopAutoplay();
-    dir === 'next' ? next() : prev();
+    if (dir === 'next') {
+      next();
+    } else {
+      prev();
+    }
     if (!isHoveringRef.current) startAutoplay();
-  };
+  }, [next, prev, startAutoplay, stopAutoplay]);
 
   useEffect(() => {
     startAutoplay();
     return stopAutoplay;
-  }, []);
+  }, [startAutoplay, stopAutoplay]);
 
   useEffect(() => {
     if (index === items.length + visibleItems) {
@@ -175,9 +185,12 @@ const Carousel = ({
               <div className="space-y-2">
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden rounded-sm">
-                  <img
+                  <ImageWithSkeleton
                     src={item.image}
                     alt={item.title ?? ''}
+                    loading="lazy"
+                    decoding="async"
+                    wrapperClassName="w-full h-full"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
 
