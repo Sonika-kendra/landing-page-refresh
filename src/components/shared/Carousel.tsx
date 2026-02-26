@@ -156,7 +156,7 @@ const Carousel = ({
       {/* Track */}
       <div ref={carouselRef} className="overflow-hidden w-full">
         <motion.div
-          className="flex gap-2"
+          className="flex"
           animate={{ x: -(index * itemWidth) }}
           transition={
             isAnimating
@@ -169,7 +169,7 @@ const Carousel = ({
               key={`${i}-${item.link}`}
               to={item.link}
               target={linkTarget}
-              className="flex-shrink-0 group"
+              className="flex-shrink-0 group px-1"
               style={{ width: `calc(100% / ${visibleItems})` }}
             >
               <div className="space-y-2">
