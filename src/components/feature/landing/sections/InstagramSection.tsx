@@ -1,28 +1,21 @@
 import { brandConfig } from '@/config/landing/theme';
-import { useEffect, useState } from 'react';
 import Carousel, { CarouselItem } from '@/components/shared/Carousel';
 import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer'; // use same SVGs as Footer
 import { Instagram } from 'lucide-react';
 
+const socialMediaImages = Object.values(
+  import.meta.glob('@/assets/landing/socialmedia/*.{jpg,jpeg,png,webp}', {
+    eager: true,
+    import: 'default',
+  })
+) as string[];
+
+const items: CarouselItem[] = socialMediaImages.map((img) => ({
+  image: img,
+  link: brandConfig.social.instagram,
+}));
+
 const InstagramSection = () => {
-  const [items, setItems] = useState<CarouselItem[]>([]);
-
-  useEffect(() => {
-    const images = Object.values(
-      import.meta.glob('@/assets/landing/socialmedia/*.{jpg,jpeg,png,webp}', {
-        eager: true,
-        import: 'default',
-      })
-    ) as string[];
-
-    const carouselItems: CarouselItem[] = images.map((img) => ({
-      image: img,
-      link: brandConfig.social.instagram,
-    }));
-
-    setItems(carouselItems);
-  }, []);
-
   const socialIcons = [
     { src: Linkedin, href: brandConfig.social.linkedin, alt: "LinkedIn" },
     { src: InstagramSvg, href: brandConfig.social.instagram, alt: "Instagram" },

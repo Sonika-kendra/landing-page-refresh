@@ -7,10 +7,10 @@
 import { websiteUrlConfig } from "../config";
 import { Diamond, Gem, Award, Users } from 'lucide-react';
 // Navigation category images
-import ring from '@/assets/jewellery/category/ring.png';
-import bracelet from '@/assets/jewellery/category/bracelet.png';
-import earrings from '@/assets/jewellery/category/earrings.png';
-import necklace from '@/assets/jewellery/category/necklace.png';
+import ring from '@/assets/landing/bestseller/jewellery/product1.jpg';
+import bracelet from '@/assets/landing/bestseller/jewellery/product3.jpg';
+import earrings from '@/assets/landing/bestseller/jewellery/product2.jpg';
+import necklace from '@/assets/landing/bestseller/jewellery/product4.jpg';
 import diamondsCategory from '@/assets/jewellery/catalogue/diamonds-category.jpg';
 import labGrownDiamond from '@/assets/jewellery/catalogue/lab-grown-diamond.jpg';
 

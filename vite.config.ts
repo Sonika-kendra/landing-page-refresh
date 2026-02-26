@@ -18,4 +18,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("framer-motion")) return "framer-motion";
+          if (id.includes("@radix-ui")) return "radix-ui";
+          if (id.includes("react-router-dom")) return "router";
+          if (id.includes("@tanstack/react-query") || id.includes("axios")) return "data";
+          return "vendor";
+        },
+      },
+    },
+  },
 }));

@@ -12,6 +12,8 @@ const ImageWithSkeleton = ({
   skeletonClassName,
   className,
   src,
+  loading = 'lazy',
+  decoding = 'async',
   onLoad,
   onError,
   ...props
@@ -48,6 +50,8 @@ const ImageWithSkeleton = ({
       <img
         ref={imgRef}
         src={src}
+        loading={loading}
+        decoding={decoding}
         className={cn(
           'transition-opacity duration-300',
           isLoaded ? 'opacity-100' : 'opacity-0',
