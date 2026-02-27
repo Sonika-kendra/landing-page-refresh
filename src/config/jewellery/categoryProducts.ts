@@ -2,7 +2,7 @@ import { Category } from "./products";
 import ring from '@/assets/jewellery/category/ring.png';
 import bracelet from '@/assets/jewellery/category/bracelet.png';
 import earrings from '@/assets/jewellery/category/earrings.png';
-import necklace from '@/assets/jewellery/category/necklace.png';
+import necklace from '@/assets/jewellery/category/33cb8070-9fd3-4fbe-8cf7-838a1e473ad3.png';
 import { websiteUrlConfig } from "../config";
 
 // Jewellery Categories
