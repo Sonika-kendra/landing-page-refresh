@@ -35,11 +35,6 @@ const CategorySection = () => {
 
               {/* Container for button + title */}
               <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-                {/* Title: appears above button on hover */}
-                <h3 className="mb-2 text-2xl md:text-4xl font-serif text-secondary bg-black/35 px-3 py-1 rounded-sm md:bg-transparent md:px-0 md:py-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-30 text-center">
-                  {category.title}
-                </h3>
-
                 {/* Shop Now button: always visible */}
                 <Button
                   size="sm"
@@ -49,6 +44,12 @@ const CategorySection = () => {
                   Shop Now
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
+                
+                {/* Title: appears above button on hover */}
+                <h3 className="mb-2 text-2xl md:text-4xl font-serif text-secondary bg-black/35 px-3 py-1 rounded-sm md:bg-transparent md:px-0 md:py-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-30 text-center">
+                  {category.title}
+                </h3>
+
               </div>
             </MotionLink>
           ))}

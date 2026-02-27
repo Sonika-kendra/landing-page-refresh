@@ -1,5 +1,5 @@
-import diamondsImage from '@/assets/diamonds-category.jpg';
-import jewelleryImage from '@/assets/jewellery-category.jpg';
+import diamondsImage from '@/assets/landing/category/Diamonds.png';
+import jewelleryImage from '@/assets/landing/category/Jewellery.png';
 import { websiteUrlConfig } from '../config';
 
 export const categories = [
