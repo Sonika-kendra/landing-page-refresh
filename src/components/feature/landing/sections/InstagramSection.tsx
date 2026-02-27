@@ -2,6 +2,7 @@ import { brandConfig } from '@/config/landing/theme';
 import Carousel, { CarouselItem } from '@/components/shared/Carousel';
 import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer'; // use same SVGs as Footer
 import { Instagram } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const socialMediaImages = Object.values(
   import.meta.glob('@/assets/landing/socialmedia/*.{jpg,jpeg,png,webp}', {
@@ -16,6 +17,7 @@ const items: CarouselItem[] = socialMediaImages.map((img) => ({
 }));
 
 const InstagramSection = () => {
+  const isMobile = useIsMobile();
   const socialIcons = [
     { src: Linkedin, href: brandConfig.social.linkedin, alt: "LinkedIn" },
     { src: InstagramSvg, href: brandConfig.social.instagram, alt: "Instagram" },
@@ -33,7 +35,7 @@ const InstagramSection = () => {
         {/* Instagram Carousel */}
         <Carousel
           items={items}
-          visibleItems={4}
+          visibleItems={isMobile ? 2 : 4}
           autoplayDelay={3500}
           className="mt-6"
           ifTitleVisible={false}

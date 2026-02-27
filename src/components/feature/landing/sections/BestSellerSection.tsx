@@ -1,9 +1,12 @@
-import Carousel, { CarouselItem } from '@/components/shared/Carousel';
+import Carousel from '@/components/shared/Carousel';
 import { BestSellerProducts } from '@/config/landing/bestSellerProducts';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const BestSellersSection = () => {
-return (
+  const isMobile = useIsMobile();
+
+  return (
     <section className="py-5 md:py-5 section-ivory">
       <div className="henig-container">
         <motion.div
@@ -21,7 +24,7 @@ return (
 
         <Carousel
           items={BestSellerProducts}
-          visibleItems={5}  
+          visibleItems={isMobile ? 1 : 5}
           autoplayDelay={4000}
           className="mt-6"
           ifTitleVisible={false}
@@ -29,8 +32,8 @@ return (
           ifWhishlistVisible={false}
           ifBadgeVisible={false}
           badge="Best Seller"
-          ifPurchaseButtonVisible={true}
-          purchaseButton = "Shop Now"
+          ifPurchaseButtonVisible
+          purchaseButton="Shop Now"
         />
       </div>
     </section>

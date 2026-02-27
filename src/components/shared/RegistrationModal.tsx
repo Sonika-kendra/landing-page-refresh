@@ -4,7 +4,6 @@ import { X, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import Logo from "@/assets/icons/logoDark.png";
@@ -19,7 +18,6 @@ type FormMode = "register" | "login";
 const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
   const [mode, setMode] = useState<FormMode>("register");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -94,15 +92,15 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-3 sm:px-4 py-4 sm:py-6 overflow-y-auto"
           >
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-accent text-accent-foreground rounded-lg shadow-elevated border border-white/10 p-6">
+            <div className="relative my-auto w-full max-w-md max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)] overflow-y-auto bg-accent text-accent-foreground rounded-lg shadow-elevated border border-white/10 p-4 sm:p-6">
 
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-5 right-5 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-black transition-all duration-200"
+                className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-black transition-all duration-200"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" strokeWidth={2} />
@@ -114,7 +112,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                   <img
                     src={Logo}
                     alt="Henig Diamonds"
-                    className="h-12 w-auto object-contain"
+                    className="h-10 sm:h-12 w-auto object-contain"
                   />
                 </Link>
 
@@ -130,7 +128,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
 
                 {mode === "register" && (
                   <>
@@ -215,7 +213,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                   className="w-full btn-henig-gold"
                 >
                   {isLoading
-                    ? "Processing…"
+                    ? "Processing..."
                     : mode === "register"
                       ? "Create Account"
                       : "Sign In"}

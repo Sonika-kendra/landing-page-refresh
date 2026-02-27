@@ -11,24 +11,28 @@ const certificationModules = import.meta.glob(
   '@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}',
   { eager: true }
 );
-const certificationImages = Object.values(certificationModules).map(
-  (mod: any) => mod.default || mod
-);
+type ImageModule = string | { default: string };
+const certificationImages = Object.values(certificationModules).map((mod) => {
+  const image = mod as ImageModule;
+  return typeof image === 'string' ? image : image.default;
+});
 
 // Partner images
 const partnerImages = import.meta.glob(
   '@/assets/landing/partner/*.{jpg,png,webp}',
   { eager: true }
 );
-const partnerImageList = Object.values(partnerImages).map(
-  (img: any) => img.default || img
-);
+const partnerImageList = Object.values(partnerImages).map((img) => {
+  const image = img as ImageModule;
+  return typeof image === 'string' ? image : image.default;
+});
 
 const logoTileClass =
-  'w-full max-w-[190px] h-20 md:h-24 p-2 flex items-center justify-center overflow-hidden';
+  'w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] lg:w-[190px] max-w-[190px] h-16 sm:h-[4.5rem] md:h-20 p-1.5 sm:p-2 flex items-center justify-center overflow-hidden';
 const logoWrapperClass =
   'w-full h-full flex items-center justify-center border px-2';
-const logoImageClass = 'block w-full h-full object-contain object-center';
+const logoImageClass =
+  'block max-w-full max-h-full w-auto h-auto object-contain object-center mx-auto';
 
 const CertificationsAndPartnersSection = ({
   onRegisterClick,

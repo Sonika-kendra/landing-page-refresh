@@ -80,6 +80,11 @@ const Carousel = ({
     return () => window.removeEventListener('resize', updateWidth);
   }, [visibleItems]);
 
+  useEffect(() => {
+    setIsAnimating(false);
+    setIndex(visibleItems);
+  }, [visibleItems]);
+
   const loopedItems = [
     ...items.slice(-visibleItems),
     ...items,
@@ -157,8 +162,10 @@ const Carousel = ({
     >
       {/* Prev */}
       <button
+        type="button"
+        aria-label="Previous slide"
         onClick={() => navigate('prev')}
-        className="h-8 w-8 md:h-10 md:w-10 rounded-full border flex items-center justify-center"
+        className="h-10 w-10 md:h-11 md:w-11 rounded-full border bg-background/90 hover:bg-background flex items-center justify-center shrink-0 relative z-10"
       >
         <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
       </button>
@@ -194,7 +201,7 @@ const Carousel = ({
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
 
-                  {/* 🔥 Hover Overlay */}
+                  {/* Hover Overlay */}
                   {ifHoverOverlayVisible && hoverOverlayContent && (
                     <div
                       className={`absolute inset-0 flex items-center justify-center
@@ -207,7 +214,7 @@ const Carousel = ({
 
                   {/* Badge */}
                   {ifBadgeVisible && badge && (
-                    <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs px-2 py-1 uppercase tracking-wider">
+                    <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-accent text-accent-foreground text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 uppercase tracking-wide">
                       {badge}
                     </span>
                   )}
@@ -231,14 +238,14 @@ const Carousel = ({
 
                 {/* Title */}
                 {ifTitleVisible && item.title && (
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                     {item.title}
                   </p>
                 )}
 
                 {/* Price */}
                 {ifPriceVisible && item.price && (
-                  <p className="text-sm text-gray-600">{item.price}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{item.price}</p>
                 )}
               </div>
             </MotionLink>
@@ -248,8 +255,10 @@ const Carousel = ({
 
       {/* Next */}
       <button
+        type="button"
+        aria-label="Next slide"
         onClick={() => navigate('next')}
-        className="h-8 w-8 md:h-10 md:w-10 rounded-full border flex items-center justify-center"
+        className="h-10 w-10 md:h-11 md:w-11 rounded-full border bg-background/90 hover:bg-background flex items-center justify-center shrink-0 relative z-10"
       >
         <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
       </button>

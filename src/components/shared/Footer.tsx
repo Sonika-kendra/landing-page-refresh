@@ -32,19 +32,19 @@ const Footer = () => {
 
       {/* Newsletter Section */}
       <div className="border-b border-accent-foreground/10">
-        <div className="henig-container py-12">
+        <div className="henig-container py-10 md:py-12">
           <div className="max-w-xl mx-auto text-center">
-            <h3 className="font-serif text-2xl mb-4">Newsletter Signup</h3>
-            <p className="text-accent-foreground/70 mb-6 text-sm">
+            <h3 className="font-serif text-xl sm:text-2xl mb-3 md:mb-4">Newsletter Signup</h3>
+            <p className="text-accent-foreground/70 mb-5 md:mb-6 text-xs sm:text-sm leading-relaxed">
               Subscribe to receive updates on new collections, exclusive offers, and more.
             </p>
-            <form className="flex gap-3 items-stretch">
+            <form className="flex flex-col sm:flex-row gap-3 items-stretch">
               <input
                 type="email"
                 placeholder="Your email address"
-                className="flex-1 h-12 px-4 bg-accent-foreground/5 border border-accent-foreground/20 rounded-sm text-sm placeholder:text-accent-foreground/40 focus:outline-none focus:border-primary"
+                className="w-full flex-1 h-12 sm:h-14 px-4 sm:px-5 bg-accent-foreground/5 border border-accent-foreground/20 rounded-sm text-base sm:text-base placeholder:text-accent-foreground/40 focus:outline-none focus:border-primary"
               />
-              <Button className="btn-henig-gold h-12 px-6">Subscribe</Button>
+              <Button className="btn-henig-gold h-12 sm:h-14 px-6 w-full sm:w-auto text-xs sm:text-sm">Subscribe</Button>
             </form>
           </div>
         </div>

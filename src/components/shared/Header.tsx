@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Heart, ShoppingBag, Menu, X, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,12 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const location = useLocation();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setOpenMobileMenu(null);
+    setActiveMegaMenu(null);
+  }, [location.pathname]);
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
@@ -39,14 +45,16 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
   );
 
   return (
-    <header className="relative sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className="relative sticky top-0 z-[1100] bg-background/95 backdrop-blur-sm border-b border-border">
       {/* HEADER BAR */}
       <div className="henig-container">
         <div className="flex items-center justify-between h-16 md:h-20">
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            type="button"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            className="md:hidden p-2 relative z-10"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -136,7 +144,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 md:w-1/4 justify-end">
+          <div className="flex items-center gap-3 md:w-1/4 justify-end relative z-10">
             <Button
               variant="ghost"
               size="sm"
@@ -169,7 +177,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full w-screen bg-background border-t border-border shadow-xl z-[999]"
+            className="hidden md:block absolute left-0 top-full w-screen bg-background border-t border-border shadow-xl z-[999]"
             onMouseEnter={() => {
               if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
             }}
@@ -239,7 +247,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-t border-border max-h-[80vh] overflow-y-auto"
+            className="absolute left-0 top-full w-full z-[1100] md:hidden bg-background border-t border-border shadow-xl max-h-[80vh] overflow-y-auto"
           >
             <ul className="py-4 px-4 space-y-2">
               {navigationLinks.map((link) => {
@@ -254,10 +262,11 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                     {hasMegaMenu ? (
                       <>
                         <button
+                          type="button"
                           onClick={() =>
                             setOpenMobileMenu(isOpen ? null : link.label)
                           }
-                          className="w-full flex justify-between py-3 font-semibold"
+                          className="w-full flex justify-between py-3 font-semibold text-sm"
                         >
                           {link.label}
                           <ChevronDown
@@ -291,7 +300,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
                       <Link
                         to={link.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block py-3 font-semibold"
+                        className="block py-3 font-semibold text-sm"
                       >
                         {link.label}
                       </Link>
