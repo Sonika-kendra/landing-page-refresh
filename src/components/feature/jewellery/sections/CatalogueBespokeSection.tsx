@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 
 import CatalogueImg from "@/assets/jewellery/catalogue/Catalogue.jpg";
-import BespokeImg from "@/assets/jewellery/catalogue/Bespoke.png";
+import BespokeImg from "@/assets/jewellery/catalogue/Bespoke111.png";
 
 const MotionLink = motion(Link);
 
