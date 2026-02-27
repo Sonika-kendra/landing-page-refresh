@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 
-import CatalogueImg from "@/assets/jewellery/catalogue/diamonds-category.jpg";
-import BespokeImg from "@/assets/jewellery/catalogue/bespoke.png";
+import CatalogueImg from "@/assets/jewellery/catalogue/Catalogue.jpg";
+import BespokeImg from "@/assets/jewellery/catalogue/Bespoke.png";
 
 const MotionLink = motion(Link);
 

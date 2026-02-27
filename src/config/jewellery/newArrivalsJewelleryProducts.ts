@@ -1,13 +1,12 @@
 // Import placeholder images
-import product1 from '@/assets/jewellery/newArrivals/product1.jpg';
-import product2 from '@/assets/jewellery/newArrivals/product2.jpg';
-import product3 from '@/assets/jewellery/newArrivals/product3.jpg';
-import product4 from '@/assets/jewellery/newArrivals/product4.jpg';
-import product5 from '@/assets/jewellery/newArrivals/product5.jpg';
-import product6 from '@/assets/jewellery/newArrivals/product6.jpg';
-import product7 from '@/assets/jewellery/newArrivals/product7.jpg';
-import product8 from '@/assets/jewellery/newArrivals/product8.jpg';
-import product9 from '@/assets/jewellery/newArrivals/product9.jpg';
+import product1 from '@/assets/jewellery/newArrivals/product1.png';
+import product2 from '@/assets/jewellery/newArrivals/product2.png';
+import product3 from '@/assets/jewellery/newArrivals/product3.png';
+import product4 from '@/assets/jewellery/newArrivals/product4.png';
+import product5 from '@/assets/jewellery/newArrivals/product5.png';
+import product6 from '@/assets/jewellery/newArrivals/product6.png';
+import product7 from '@/assets/jewellery/newArrivals/product7.png';
+import product8 from '@/assets/jewellery/newArrivals/product8.png';
 import { Product } from './products';
 
 export const newArrivalsJewelleryProducts: Product[] = [
@@ -90,15 +89,5 @@ export const newArrivalsJewelleryProducts: Product[] = [
     image: product8,
     category: 'necklaces',
     isNew: true,
-  },
-  {
-    id: 'j9',
-    name: 'Twist Knot Stud Earrings',
-    price: 18.0,
-    currency: '£',
-    material: 'Rose Gold Plated',
-    image: product9,
-    category: 'earrings',
-    isNew: false,
-  },
+  }
 ];

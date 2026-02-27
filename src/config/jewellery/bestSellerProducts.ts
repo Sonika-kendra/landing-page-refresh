@@ -1,14 +1,12 @@
 // Import placeholder images
 import product1 from '@/assets/jewellery/bestSeller/product1.jpg';
-import product2 from '@/assets/jewellery/bestSeller/product2.jpg';
-import product3 from '@/assets/jewellery/bestSeller/product3.jpg';
+import product2 from '@/assets/jewellery/bestSeller/product2.png';
+import product3 from '@/assets/jewellery/bestSeller/product3.png';
 import product4 from '@/assets/jewellery/bestSeller/product4.jpg';
-import product5 from '@/assets/jewellery/bestSeller/product5.jpg';
-import product6 from '@/assets/jewellery/bestSeller/product6.jpg';
-import product7 from '@/assets/jewellery/bestSeller/product7.jpg';
-import product8 from '@/assets/jewellery/bestSeller/product8.jpg';
-import product9 from '@/assets/jewellery/bestSeller/product9.jpg';
-import product10 from '@/assets/jewellery/bestSeller/product10.jpg';
+import product5 from '@/assets/jewellery/bestSeller/product5.png';
+import product6 from '@/assets/jewellery/bestSeller/product6.png';
+import product7 from '@/assets/jewellery/bestSeller/product7.png';
+import product8 from '@/assets/jewellery/bestSeller/product8.png';
 import { Product } from './products';
 
 export const BestSellerProducts: Product[] = [
@@ -76,15 +74,6 @@ export const BestSellerProducts: Product[] = [
     category: 'necklaces'
   },
   {
-    id: 'j10',
-    name: 'Twist Knot Stud Earrings',
-    price: 18.0,
-    currency: '£',
-    material: 'Rose Gold Plated',
-    image: product10,
-    category: 'earrings'
-  },
-  {
     id: 'j7',
     name: 'Delicate Heart Charm Bracelet',
     price: 22.0,
@@ -92,14 +81,5 @@ export const BestSellerProducts: Product[] = [
     material: '18k Gold Plated',
     image: product7,
     category: 'bracelets'
-  },
-  {
-    id: 'j9',
-    name: 'Twist Knot Stud Earrings',
-    price: 18.0,
-    currency: '£',
-    material: 'Rose Gold Plated',
-    image: product9,
-    category: 'earrings'
   }
 ];
