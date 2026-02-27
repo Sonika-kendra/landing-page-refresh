@@ -1,38 +1,27 @@
-import { brandConfig } from '@/config/landing/theme';
-import Carousel, { CarouselItem } from '@/components/shared/Carousel';
-import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer'; // use same SVGs as Footer
-import { Instagram } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-
-const socialMediaImages = Object.values(
-  import.meta.glob('@/assets/landing/socialmedia/*.{jpg,jpeg,png,webp}', {
-    eager: true,
-    import: 'default',
-  })
-) as string[];
-
-const items: CarouselItem[] = socialMediaImages.map((img) => ({
-  image: img,
-  link: brandConfig.social.instagram,
-}));
+import Carousel from "@/components/shared/Carousel";
+import { Instagram } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { socialConfig, socialIcons } from "@/config/landing/socialMedia";
 
 const InstagramSection = () => {
   const isMobile = useIsMobile();
-  const socialIcons = [
-    { src: Linkedin, href: brandConfig.social.linkedin, alt: "LinkedIn" },
-    { src: InstagramSvg, href: brandConfig.social.instagram, alt: "Instagram" },
-    { src: Whatsapp, href: brandConfig.social.whatsApp, alt: "WhatsApp" },
-  ];
+
+  const items = socialConfig.map((item) => ({
+    image: item.image,
+    link: item.link,
+  }));
 
   return (
     <section className="py-5 md:py-9 section-ivory">
       <div className="henig-container">
         {/* Heading */}
         <div className="text-center mb-8">
-          <h2 className="henig-heading-section text-foreground mb-2">Stay Connected with @Henigdiamonds</h2>
+          <h2 className="henig-heading-section text-foreground mb-2">
+            Stay Connected with @Henigdiamonds
+          </h2>
         </div>
 
-        {/* Instagram Carousel */}
+        {/* Carousel */}
         <Carousel
           items={items}
           visibleItems={isMobile ? 2 : 4}
@@ -51,7 +40,7 @@ const InstagramSection = () => {
           linkTarget="_blank"
         />
 
-        {/* Social Icons as circular buttons */}
+        {/* Social Buttons */}
         <div className="flex justify-center gap-4 mt-6">
           {socialIcons.map(({ src, href, alt }) => (
             <a
@@ -62,7 +51,11 @@ const InstagramSection = () => {
               className="w-10 h-10 flex items-center justify-center rounded-full bg-accent hover:bg-primary transition-colors"
               title={alt}
             >
-              <img src={src} alt={alt} className="w-8 h-8 brightness-0 invert" />
+              <img
+                src={src}
+                alt={alt}
+                className="w-8 h-8 brightness-0 invert"
+              />
             </a>
           ))}
         </div>
