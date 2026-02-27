@@ -1,5 +1,4 @@
 import Carousel from "@/components/shared/Carousel";
-import { Instagram } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { socialConfig, socialIcons } from "@/config/landing/socialMedia";
 
@@ -9,6 +8,13 @@ const InstagramSection = () => {
   const items = socialConfig.map((item) => ({
     image: item.image,
     link: item.link,
+    hoverOverlayContent: item.icon ? (
+      <img
+        src={item.icon.src}
+        alt={item.icon.alt}
+        className="w-12 h-12 object-contain grayscale brightness-0 invert"
+      />
+    ) : null,
   }));
 
   return (
@@ -34,9 +40,6 @@ const InstagramSection = () => {
           ifPurchaseButtonVisible={false}
           ifHoverOverlayVisible
           hoverOverlayBgClass="bg-accent/30"
-          hoverOverlayContent={
-            <Instagram className="w-8 h-8 text-secondary" />
-          }
           linkTarget="_blank"
         />
 

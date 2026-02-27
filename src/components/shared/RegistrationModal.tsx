@@ -83,7 +83,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[1200] bg-black/60 backdrop-blur-sm"
           />
 
           {/* Modal Wrapper */}
@@ -92,7 +92,7 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-3 sm:px-4 py-4 sm:py-6 overflow-y-auto"
+            className="fixed inset-0 z-[1210] flex items-start sm:items-center justify-center px-3 sm:px-4 py-4 sm:py-6 overflow-y-auto"
           >
             {/* Modal Card */}
             <div className="relative my-auto w-full max-w-md max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)] overflow-y-auto bg-accent text-accent-foreground rounded-lg shadow-elevated border border-white/10 p-4 sm:p-6">
@@ -100,7 +100,8 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-black transition-all duration-200"
+                type="button"
+                className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/55 border border-white/50 text-white shadow-md hover:bg-white hover:text-black transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/80 focus:ring-offset-1 focus:ring-offset-black/30"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" strokeWidth={2} />

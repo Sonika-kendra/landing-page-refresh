@@ -1,17 +1,17 @@
-import diamondsProduct1 from '@/assets/landing/bestseller/diamonds/product1.jpg';
-import diamondsProduct2 from '@/assets/landing/bestseller/diamonds/product2.jpg';
-import diamondsProduct3 from '@/assets/landing/bestseller/diamonds/product3.jpg';
-import diamondsProduct4 from '@/assets/landing/bestseller/diamonds/product4.jpg';
+// import diamondsProduct1 from '@/assets/landing/bestseller/diamonds/product1.jpg';
+// import diamondsProduct2 from '@/assets/landing/bestseller/diamonds/product2.jpg';
+// import diamondsProduct3 from '@/assets/landing/bestseller/diamonds/product3.jpg';
+// import diamondsProduct4 from '@/assets/landing/bestseller/diamonds/product4.jpg';
 import jewelleryProduct1 from '@/assets/landing/bestseller/jewellery/product1.jpg';
-import jewelleryProduct2 from '@/assets/landing/bestseller/jewellery/product2.jpg';
-import jewelleryProduct3 from '@/assets/landing/bestseller/jewellery/product3.jpg';
+import jewelleryProduct2 from '@/assets/landing/bestseller/jewellery/product2.png';
+import jewelleryProduct3 from '@/assets/landing/bestseller/jewellery/product3.png';
 import jewelleryProduct4 from '@/assets/landing/bestseller/jewellery/product4.jpg';
-import jewelleryProduct5 from '@/assets/landing/bestseller/jewellery/product5.jpg';
-import jewelleryProduct6 from '@/assets/landing/bestseller/jewellery/product6.jpg';
-import jewelleryProduct7 from '@/assets/landing/bestseller/jewellery/product7.jpg';
-import jewelleryProduct8 from '@/assets/landing/bestseller/jewellery/product8.jpg';
-import jewelleryProduct9 from '@/assets/landing/bestseller/jewellery/product9.jpg';
-import jewelleryProduct10 from '@/assets/landing/bestseller/jewellery/product10.jpg';
+import jewelleryProduct5 from '@/assets/landing/bestseller/jewellery/product5.png';
+import jewelleryProduct6 from '@/assets/landing/bestseller/jewellery/product6.png';
+import jewelleryProduct7 from '@/assets/landing/bestseller/jewellery/product7.png';
+import jewelleryProduct8 from '@/assets/landing/bestseller/jewellery/product8.png';
+// import jewelleryProduct9 from '@/assets/landing/bestseller/jewellery/product9.jpg';
+// import jewelleryProduct10 from '@/assets/landing/bestseller/jewellery/product10.jpg';
 import { websiteUrlConfig } from '../config';
 
 export interface BestSellerProductProps {
@@ -26,30 +26,30 @@ export interface BestSellersSectionProps {
 }
 
 export const BestSellerProducts: BestSellerProductProps[] = [
-  {
-    image: diamondsProduct1,
-    link: websiteUrlConfig.Diamonds.All,
-    title: 'Mini Polished Interlocking Earrings',
-    price: '£25.00'
-  },
-  {
-    image: diamondsProduct2,
-    link: websiteUrlConfig.Diamonds.All,
-    title: 'Interlocking Open Circle Necklace',
-    price: '£28.00'
-  },
-  {
-    image: diamondsProduct3,
-    link: websiteUrlConfig.Diamonds.All,
-    title: 'Fine Crystal & Wave Wrist Stacking Set',
-    price: '£28.00'
-  },
-  {
-    image: diamondsProduct4,
-    link: websiteUrlConfig.Diamonds.All,
-    title: 'Organic Open Circle Drop Earrings',
-    price: '£35.00'
-  },
+  // {
+  //   image: diamondsProduct1,
+  //   link: websiteUrlConfig.Diamonds.All,
+  //   title: 'Mini Polished Interlocking Earrings',
+  //   price: '£25.00'
+  // },
+  // {
+  //   image: diamondsProduct2,
+  //   link: websiteUrlConfig.Diamonds.All,
+  //   title: 'Interlocking Open Circle Necklace',
+  //   price: '£28.00'
+  // },
+  // {
+  //   image: diamondsProduct3,
+  //   link: websiteUrlConfig.Diamonds.All,
+  //   title: 'Fine Crystal & Wave Wrist Stacking Set',
+  //   price: '£28.00'
+  // },
+  // {
+  //   image: diamondsProduct4,
+  //   link: websiteUrlConfig.Diamonds.All,
+  //   title: 'Organic Open Circle Drop Earrings',
+  //   price: '£35.00'
+  // },
   {
     image: jewelleryProduct1,
     link: websiteUrlConfig.Jewellery.All,
@@ -97,17 +97,17 @@ export const BestSellerProducts: BestSellerProductProps[] = [
     link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
-  },
-  {
-    image: jewelleryProduct9,
-    link: websiteUrlConfig.Jewellery.All,
-    title: 'Twist Knot Stud Earrings',
-    price: '£18.00'
-  },
-  {
-    image: jewelleryProduct10,
-    link: websiteUrlConfig.Jewellery.All,
-    title: 'Twist Knot Stud Earrings',
-    price: '£18.00'
-  },
+  }
+  // {
+  //   image: jewelleryProduct9,
+  //   link: websiteUrlConfig.Jewellery.All,
+  //   title: 'Twist Knot Stud Earrings',
+  //   price: '£18.00'
+  // },
+  // {
+  //   image: jewelleryProduct10,
+  //   link: websiteUrlConfig.Jewellery.All,
+  //   title: 'Twist Knot Stud Earrings',
+  //   price: '£18.00'
+  // },
 ];
