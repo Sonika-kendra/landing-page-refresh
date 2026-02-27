@@ -108,9 +108,6 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
                 <X className="w-4 h-4" strokeWidth={2} />
               </button>
 
-
-
-
               {/* Logo */}
               <div className="text-center mb-4">
                 <Link to="/" className="inline-flex items-center justify-center">
@@ -176,10 +173,11 @@ const RegistrationModal = ({ isOpen, onClose }: RegistrationModalProps) => {
 
                 <div>
                   <Label className="text-white/90 text-sm">
-                    Company Name
+                    Company Name {mode === "register" && "*"}
                   </Label>
                   <Input
                     name="companyName"
+                    required={mode === "register"}
                     onChange={handleInputChange}
                     className="mt-1 bg-transparent border-white/30 text-white"
                   />
