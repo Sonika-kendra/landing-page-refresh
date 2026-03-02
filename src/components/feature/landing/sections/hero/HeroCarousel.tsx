@@ -93,10 +93,10 @@ const HeroCarousel = () => {
         )}
       </AnimatePresence>
 
-      <div className="absolute right-4 bottom-4 pointer-events-none">
-        <div className="bg-secondary/90 p-6 rounded shadow-lg text-center backdrop-blur-sm">
-          <p className="text-xs uppercase tracking-widest text-muted mb-2">Since</p>
-          <p className="font-serif text-2xl md:text-3xl text-foreground">1973</p>
+      <div className="absolute right-3 bottom-3 pointer-events-none">
+        <div className="bg-secondary/90 p-4 md:p-5 rounded shadow-lg text-center backdrop-blur-sm">
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted mb-1">Since</p>
+          <p className="font-serif text-xl md:text-2xl text-foreground">1973</p>
         </div>
       </div>
 
