@@ -8,7 +8,7 @@ import { websiteUrlConfig } from "../config";
 import { Diamond, Gem, Award, Users } from 'lucide-react';
 // Navigation category images
 import ring from '@/assets/jewellery/category/ring.png';
-import bracelet from '@/assets/jewellery/category/Bracelet.png';
+import bracelet from '@/assets/jewellery/category/Bracelet-1.png';
 import earrings from '@/assets/jewellery/category/earrings.png';
 import necklace from '@/assets/jewellery/category/33cb8070-9fd3-4fbe-8cf7-838a1e473ad3.png';
 import diamondsCategory from '@/assets/diamonds/diamonds-category.jpg';
