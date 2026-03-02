@@ -1,5 +1,5 @@
 import Linkedin1 from "@/assets/landing/socialmedia/Linkedin-1.png";
-import Instagram2 from "@/assets/landing/socialmedia/Instagram-2.jpg";
+import Instagram2 from "@/assets/landing/socialmedia/Instagram-21.jpg";
 import Linkedin3 from "@/assets/landing/socialmedia/Linkedin-3.jpeg";
 import Instagram4 from "@/assets/landing/socialmedia/Instagram-4.png";
 import Linkedin5 from "@/assets/landing/socialmedia/Linkedin-5.png";
