@@ -61,11 +61,13 @@ const Carousel = ({
 }: CarouselProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
+  const touchResetRef = useRef<NodeJS.Timeout | null>(null);
   const isHoveringRef = useRef(false);
 
   const [index, setIndex] = useState(visibleItems);
   const [isAnimating, setIsAnimating] = useState(true);
   const [itemWidth, setItemWidth] = useState(0);
+  const [touchedItemIndex, setTouchedItemIndex] = useState<number | null>(null);
 
   const transitionDuration = 0.5;
 
@@ -112,6 +114,14 @@ const Carousel = ({
     autoplayRef.current = setInterval(next, autoplayDelay);
   }, [autoplayDelay, next, stopAutoplay]);
 
+  const clearTouchedItem = useCallback(() => {
+    if (touchResetRef.current) {
+      clearTimeout(touchResetRef.current);
+      touchResetRef.current = null;
+    }
+    setTouchedItemIndex(null);
+  }, []);
+
   const navigate = useCallback((dir: 'next' | 'prev') => {
     stopAutoplay();
     if (dir === 'next') {
@@ -124,8 +134,11 @@ const Carousel = ({
 
   useEffect(() => {
     startAutoplay();
-    return stopAutoplay;
-  }, [startAutoplay, stopAutoplay]);
+    return () => {
+      stopAutoplay();
+      clearTouchedItem();
+    };
+  }, [clearTouchedItem, startAutoplay, stopAutoplay]);
 
   useEffect(() => {
     if (index === items.length + visibleItems) {
@@ -184,75 +197,92 @@ const Carousel = ({
         >
           {loopedItems.map((item, i) => {
             const overlayContent = item.hoverOverlayContent ?? hoverOverlayContent;
+            const isTouched = touchedItemIndex === i;
 
             return (
-            <MotionLink
-              key={`${i}-${item.link}`}
-              to={item.link}
-              target={linkTarget}
-              className="flex-shrink-0 group px-1"
-              style={{ width: `calc(100% / ${visibleItems})` }}
-            >
-              <div className="space-y-2">
-                {/* Image */}
-                <div className="relative aspect-square overflow-hidden rounded-sm">
-                  <ImageWithSkeleton
-                    src={item.image}
-                    alt={item.title ?? ''}
-                    loading="lazy"
-                    decoding="async"
-                    wrapperClassName="w-full h-full"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
+              <MotionLink
+                key={`${i}-${item.link}`}
+                to={item.link}
+                target={linkTarget}
+                className={`flex-shrink-0 group px-1 ${isTouched ? 'is-touched' : ''}`}
+                style={{ width: `calc(100% / ${visibleItems})` }}
+                onTouchStart={() => {
+                  if (touchResetRef.current) {
+                    clearTimeout(touchResetRef.current);
+                    touchResetRef.current = null;
+                  }
+                  setTouchedItemIndex(i);
+                }}
+                onTouchEnd={() => {
+                  if (touchResetRef.current) {
+                    clearTimeout(touchResetRef.current);
+                  }
+                  touchResetRef.current = setTimeout(() => {
+                    setTouchedItemIndex(null);
+                  }, 250);
+                }}
+                onTouchCancel={clearTouchedItem}
+              >
+                <div className="space-y-2">
+                  {/* Image */}
+                  <div className="relative aspect-square overflow-hidden rounded-sm">
+                    <ImageWithSkeleton
+                      src={item.image}
+                      alt={item.title ?? ''}
+                      loading="lazy"
+                      decoding="async"
+                      wrapperClassName="w-full h-full"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-active:scale-110 group-focus-visible:scale-110 group-[.is-touched]:scale-110"
+                    />
 
-                  {/* Hover Overlay */}
-                  {ifHoverOverlayVisible && overlayContent && (
-                    <div
-                      className={`absolute inset-0 flex items-center justify-center
-                      opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                    {/* Hover Overlay */}
+                    {ifHoverOverlayVisible && (
+                      <div
+                        className={`absolute inset-0 flex items-center justify-center
+                      opacity-0 group-hover:opacity-100 group-active:opacity-100 group-focus-visible:opacity-100 group-[.is-touched]:opacity-100 transition-opacity duration-300 pointer-events-none
                       ${hoverOverlayBgClass}`}
-                    >
-                      {overlayContent}
-                    </div>
-                  )}
-
-                  {/* Badge */}
-                  {ifBadgeVisible && badge && (
-                    <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-accent text-accent-foreground text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 uppercase tracking-wide">
-                      {badge}
-                    </span>
-                  )}
-
-                  {/* Wishlist */}
-                  {ifWhishlistVisible && (
-                    <button className="absolute top-3 right-3 p-2 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background">
-                      <Heart className="w-4 h-4 text-foreground" />
-                    </button>
-                  )}
-
-                  {/* Purchase CTA */}
-                  {ifPurchaseButtonVisible && purchaseButton && (
-                    <div className="absolute inset-0 flex items-end pointer-events-none">
-                      <div className="w-full text-center py-3 bg-accent/80 text-white text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        {purchaseButton}
+                      >
+                        {overlayContent}
                       </div>
-                    </div>
+                    )}
+
+                    {/* Badge */}
+                    {ifBadgeVisible && badge && (
+                      <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-accent text-accent-foreground text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 uppercase tracking-wide">
+                        {badge}
+                      </span>
+                    )}
+
+                    {/* Wishlist */}
+                    {ifWhishlistVisible && (
+                      <button className="absolute top-3 right-3 p-2 bg-background/80 rounded-full opacity-0 group-hover:opacity-100 group-active:opacity-100 group-focus-visible:opacity-100 group-[.is-touched]:opacity-100 transition-opacity duration-300 hover:bg-background">
+                        <Heart className="w-4 h-4 text-foreground" />
+                      </button>
+                    )}
+
+                    {/* Purchase CTA */}
+                    {ifPurchaseButtonVisible && purchaseButton && (
+                      <div className="absolute inset-0 flex items-end pointer-events-none">
+                        <div className="w-full text-center py-3 bg-accent/80 text-white text-sm translate-y-full group-hover:translate-y-0 group-active:translate-y-0 group-focus-visible:translate-y-0 group-[.is-touched]:translate-y-0 transition-transform duration-300">
+                          {purchaseButton}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Title */}
+                  {ifTitleVisible && item.title && (
+                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                      {item.title}
+                    </p>
+                  )}
+
+                  {/* Price */}
+                  {ifPriceVisible && item.price && (
+                    <p className="text-xs sm:text-sm text-gray-600">{item.price}</p>
                   )}
                 </div>
-
-                {/* Title */}
-                {ifTitleVisible && item.title && (
-                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
-                    {item.title}
-                  </p>
-                )}
-
-                {/* Price */}
-                {ifPriceVisible && item.price && (
-                  <p className="text-xs sm:text-sm text-gray-600">{item.price}</p>
-                )}
-              </div>
-            </MotionLink>
+              </MotionLink>
             );
           })}
         </motion.div>

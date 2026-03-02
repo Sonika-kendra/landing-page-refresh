@@ -46,7 +46,7 @@ const CategorySection = () => {
                 </Button>
                 
                 {/* Title: appears above button on hover */}
-                <h3 className="mb-2 text-2xl md:text-4xl font-serif text-secondary bg-black/35 px-3 py-1 rounded-sm md:bg-transparent md:px-0 md:py-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-30 text-center">
+                <h3 className="mb-2 text-2xl md:text-4xl font-serif text-secondary bg-black/35 px-3 py-1 rounded-sm md:bg-transparent md:px-0 md:py-0 opacity-100 transition-opacity duration-300 z-30 text-center">
                   {category.title}
                 </h3>
 

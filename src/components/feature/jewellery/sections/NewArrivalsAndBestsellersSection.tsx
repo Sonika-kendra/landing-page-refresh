@@ -54,7 +54,7 @@ const NewArrivalsAndBestsellersSection = () => {
         {carouselItems.length > 0 && (
           <Carousel
             items={carouselItems}
-            visibleItems={isMobile ? 2 : 4}
+            visibleItems={isMobile ? 1 : 4}
             autoplayDelay={4000}
             ifTitleVisible
             ifPriceVisible={false}

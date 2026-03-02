@@ -30,7 +30,7 @@ const InstagramSection = () => {
         {/* Carousel */}
         <Carousel
           items={items}
-          visibleItems={isMobile ? 2 : 4}
+          visibleItems={isMobile ? 1 : 4}
           autoplayDelay={3500}
           className="mt-6"
           ifTitleVisible={false}
