@@ -44,7 +44,7 @@ const Footer = () => {
                 placeholder="Your email address"
                 className="w-full flex-1 h-12 sm:h-14 px-4 sm:px-5 bg-accent-foreground/5 border border-accent-foreground/20 rounded-sm text-base sm:text-base placeholder:text-accent-foreground/40 focus:outline-none focus:border-primary"
               />
-              <Button className="btn-henig-gold h-12 sm:h-14 px-6 w-full sm:w-auto text-xs sm:text-sm">Subscribe</Button>
+              <Button className="btn-henig-gold h-10 sm:h-14 py-0 px-6 w-full sm:w-auto text-xs sm:text-sm">Subscribe</Button>
             </form>
           </div>
         </div>
