@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 // import lightweightHero from '@/assets/jewellery-hero.jpg';
@@ -45,6 +45,16 @@ const HeroCarousel = () => {
     if (assets.length <= 1) return;
     setCurrent(([prev]) => [(prev + 1) % assets.length, 1]);
   };
+
+  useEffect(() => {
+    if (assets.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrent(([prev]) => [(prev + 1) % assets.length, 1]);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const currentAsset = assets[current];
   if (!currentAsset) return null;
