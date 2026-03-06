@@ -1,7 +1,3 @@
-// import diamondsProduct1 from '@/assets/landing/bestseller/diamonds/product1.jpg';
-// import diamondsProduct2 from '@/assets/landing/bestseller/diamonds/product2.jpg';
-// import diamondsProduct3 from '@/assets/landing/bestseller/diamonds/product3.jpg';
-// import diamondsProduct4 from '@/assets/landing/bestseller/diamonds/product4.jpg';
 import jewelleryProduct1 from '@/assets/landing/bestseller/jewellery/product1.jpg';
 import jewelleryProduct2 from '@/assets/landing/bestseller/jewellery/product2.png';
 import jewelleryProduct3 from '@/assets/landing/bestseller/jewellery/product3.png';
@@ -10,8 +6,6 @@ import jewelleryProduct5 from '@/assets/landing/bestseller/jewellery/product5.pn
 import jewelleryProduct6 from '@/assets/landing/bestseller/jewellery/product6.png';
 import jewelleryProduct7 from '@/assets/landing/bestseller/jewellery/product7.png';
 import jewelleryProduct8 from '@/assets/landing/bestseller/jewellery/product8.png';
-// import jewelleryProduct9 from '@/assets/landing/bestseller/jewellery/product9.jpg';
-// import jewelleryProduct10 from '@/assets/landing/bestseller/jewellery/product10.jpg';
 import { websiteUrlConfig } from '../config';
 
 export interface BestSellerProductProps {

@@ -32,7 +32,7 @@ const logoTileClass =
 const logoWrapperClass =
   'w-full h-full flex items-center justify-center border px-2';
 const logoImageClass =
-  'block w-full h-full object-contain object-center mx-auto';
+  'block w-full h-full object-contain object-center border mx-auto';
 
 const CertificationsAndPartnersSection = ({
   onRegisterClick,
