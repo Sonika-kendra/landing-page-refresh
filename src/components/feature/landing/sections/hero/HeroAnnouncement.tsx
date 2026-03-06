@@ -45,7 +45,7 @@ const HeroAnnouncement = ({ show }: { show: boolean }) => {
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 20, opacity: 0 }}
-                transition={{ duration: 0.5, ease: 'linear' }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
                 className="text-[10px] md:text-[12px] tracking-[0.12em] text-accent-foreground/80 uppercase whitespace-nowrap"
               >
                 {messages[index]}
