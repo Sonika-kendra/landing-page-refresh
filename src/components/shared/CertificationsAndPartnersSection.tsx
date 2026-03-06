@@ -30,9 +30,9 @@ const partnerImageList = Object.values(partnerImages).map((img) => {
 const logoTileClass =
   'w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] lg:w-[190px] max-w-[190px] h-16 sm:h-[4.5rem] md:h-20 p-1.5 sm:p-2 flex items-center justify-center overflow-hidden';
 const logoWrapperClass =
-  'w-full h-full flex items-center justify-center border px-2';
+  'w-full h-full flex items-center justify-center px-2';
 const logoImageClass =
-  'block w-full h-full object-contain object-center border mx-auto';
+  'block w-full h-full object-contain object-center mx-auto';
 
 const CertificationsAndPartnersSection = ({
   onRegisterClick,
