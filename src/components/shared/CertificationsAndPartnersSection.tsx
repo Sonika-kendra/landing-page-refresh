@@ -19,7 +19,7 @@ const certificationImages = Object.values(certificationModules).map((mod) => {
 
 // Partner images
 const partnerImages = import.meta.glob(
-  '@/assets/landing/partner/*.{jpg,png,webp}',
+  '@/assets/landing/partner/*.{jpg,png,webp,svg}',
   { eager: true }
 );
 const partnerImageList = Object.values(partnerImages).map((img) => {
@@ -32,7 +32,7 @@ const logoTileClass =
 const logoWrapperClass =
   'w-full h-full flex items-center justify-center border px-2';
 const logoImageClass =
-  'block max-w-full max-h-full w-auto h-auto object-contain object-center mx-auto';
+  'block w-full h-full object-contain object-center mx-auto';
 
 const CertificationsAndPartnersSection = ({
   onRegisterClick,
