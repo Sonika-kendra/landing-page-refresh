@@ -1,12 +1,12 @@
 // Import placeholder images
-import product1 from '@/assets/jewellery/bestSeller/product1.jpg';
-import product2 from '@/assets/jewellery/bestSeller/product2.png';
-import product3 from '@/assets/jewellery/bestSeller/product3.png';
-import product4 from '@/assets/jewellery/bestSeller/product4.jpg';
-import product5 from '@/assets/jewellery/bestSeller/product5.png';
-import product6 from '@/assets/jewellery/bestSeller/product6.png';
-import product7 from '@/assets/jewellery/bestSeller/product7.png';
-import product8 from '@/assets/jewellery/bestSeller/product8.png';
+import product1 from '@/assets/jewellery/bestseller/product1.jpg';
+import product2 from '@/assets/jewellery/bestseller/product2.png';
+import product3 from '@/assets/jewellery/bestseller/product3.png';
+import product4 from '@/assets/jewellery/bestseller/product4.jpg';
+import product5 from '@/assets/jewellery/bestseller/product5.png';
+import product6 from '@/assets/jewellery/bestseller/product6.png';
+import product7 from '@/assets/jewellery/bestseller/product7.png';
+import product8 from '@/assets/jewellery/bestseller/product8.png';
 import { Product } from './products';
 
 export const BestSellerProducts: Product[] = [
