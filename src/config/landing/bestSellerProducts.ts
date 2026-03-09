@@ -1,4 +1,4 @@
-import jewelleryProduct1 from '@/assets/landing/bestseller/jewellery/product1.jpg';
+import jewelleryProduct1 from '@/assets/landing/bestseller/jewellery/product1.png';
 import jewelleryProduct2 from '@/assets/landing/bestseller/jewellery/product2.png';
 import jewelleryProduct3 from '@/assets/landing/bestseller/jewellery/product3.png';
 import jewelleryProduct4 from '@/assets/landing/bestseller/jewellery/product4.jpg';
