@@ -40,7 +40,7 @@ const CertificationsAndPartnersSection = ({
   return (
     // 👇 Controlled outer spacing for section separation
     <section className="py-8 md:py-12 section-ivory">
-      <div className="henig-container">
+      <div className="henig-container flex flex-col items-center">
 
         {/* Certifications */}
         <motion.div
@@ -48,7 +48,7 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="flex flex-wrap justify-center items-center gap-2 md:gap-3"
+          className="w-full flex flex-wrap justify-center items-center gap-2 md:gap-3"
         >
           {certificationImages.map((src, index) => (
             <div key={index} className={logoTileClass}>
@@ -69,7 +69,7 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.3 }}
-          className="flex items-center my-6"
+          className="w-full flex items-center my-6"
         >
           <div className="flex-1 border-t border-border"></div>
 
@@ -91,7 +91,7 @@ const CertificationsAndPartnersSection = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.3 }}
-          className="flex flex-wrap justify-center items-center gap-2 md:gap-3"
+          className="w-full flex flex-wrap justify-center items-center gap-2 md:gap-3"
         >
           {partnerImageList.map((src, idx) => (
             <div key={idx} className={logoTileClass}>
