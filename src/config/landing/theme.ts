@@ -153,7 +153,7 @@ export const announcementBar = {
 export const stats = [
   {
     value: '1,396+',
-    label: 'Jewellery Designs Produced',
+    label: '99% Client Satisfaction',
     icon: Diamond,
   },
   {
