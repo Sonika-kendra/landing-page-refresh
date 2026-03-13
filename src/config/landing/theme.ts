@@ -210,15 +210,15 @@ export const faqItems = [
   },
   {
     question: 'Is a deposit required to make an order?',
-    answer: 'For custom pieces and special orders, we require a 50% deposit to begin work. Standard stock items can be purchased without a deposit.',
+    answer: 'For custom pieces and special orders, we require a 50% deposit to begin work. Standard stock items can be purchased without a deposit. T&Cs*',
   },
   {
     question: 'Do you ship internationally?',
     answer: 'Yes, we ship worldwide. All international shipments are fully insured and require a signature upon delivery.',
   },
   {
-    question: 'Can I see the diamond before it is set in the jewellery?',
-    answer: 'Absolutely. We encourage our clients to view and approve their diamonds before setting. We can arrange viewing appointments at our Hatton Garden showroom.',
+    question: 'Can you source specific diamonds for my client?',
+    answer: 'Yes, we can source diamonds to match your client’s exact requirements, including specific carat, cut, colour, clarity, and certification through our global network.',
   },
   {
     question: 'Do you sell natural or lab-grown diamonds?',
