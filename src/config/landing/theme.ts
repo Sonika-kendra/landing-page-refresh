@@ -152,8 +152,8 @@ export const announcementBar = {
 
 export const stats = [
   {
-    value: '1,396+',
-    label: '99% Client Satisfaction',
+    value: '99%',
+    label: 'Client Satisfaction',
     icon: Diamond,
   },
   {
