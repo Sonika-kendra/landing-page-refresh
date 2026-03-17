@@ -381,7 +381,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             onMouseLeave={handleLeave}
           >
             <div className="henig-container py-10">
-              <div className="grid grid-cols-4 gap-10">
+              <div className="grid grid-cols-4 lg:grid-cols-5 gap-10">
                 {activeLink.categories.map((category) => (
                   <div key={category.title}>
                     <h3 className="text-sm font-bold uppercase tracking-wider mb-4">

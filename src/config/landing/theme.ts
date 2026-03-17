@@ -109,29 +109,39 @@ export const navigationLinks = [
       {
         title: 'Rings',
         links: [
-          { label: 'Engagement Rings', href: websiteUrlConfig.Jewellery.Rings },
-          { label: 'Wedding Bands', href: websiteUrlConfig.Jewellery.Rings },
-          { label: 'Eternity Rings', href: websiteUrlConfig.Jewellery.Rings },
-          { label: 'Dress Rings', href: websiteUrlConfig.Jewellery.Rings },
-          { label: 'Signet Rings', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Solitaire', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Trilogy Ring', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Half Eternity', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Hidden Halo', href: websiteUrlConfig.Jewellery.Rings },
+          { label: 'Three Quarter Eternity', href: websiteUrlConfig.Jewellery.Rings },
         ],
       },
       {
         title: 'Earrings',
         links: [
           { label: 'Studs', href: websiteUrlConfig.Jewellery.Earrings },
+          { label: 'Drops', href: websiteUrlConfig.Jewellery.Earrings },
+          { label: 'Huggies', href: websiteUrlConfig.Jewellery.Earrings },
           { label: 'Hoops', href: websiteUrlConfig.Jewellery.Earrings },
-          { label: 'Drop Earrings', href: websiteUrlConfig.Jewellery.Earrings },
-          { label: 'Cluster Earrings', href: websiteUrlConfig.Jewellery.Earrings },
+          { label: 'Halo', href: websiteUrlConfig.Jewellery.Earrings },
         ],
       },
       {
-        title: 'Bracelets & Necklaces',
+        title: 'Bracelets',
         links: [
           { label: 'Tennis Bracelets', href: websiteUrlConfig.Jewellery.Bracelets },
-          { label: 'Bangles', href: websiteUrlConfig.Jewellery.Bracelets },
-          { label: 'Pendants', href: websiteUrlConfig.Jewellery.Necklaces },
-          { label: 'Chains', href: websiteUrlConfig.Jewellery.Necklaces },
+          { label: 'Diamond Bracelets', href: websiteUrlConfig.Jewellery.Necklaces },
+          { label: 'Bangles', href: websiteUrlConfig.Jewellery.Bracelets }
+        ],
+      },
+      {
+        title: 'Necklaces',
+        links: [
+          { label: 'Tennis Necklace', href: websiteUrlConfig.Jewellery.Bracelets },
+          { label: 'Diamond Necklace', href: websiteUrlConfig.Jewellery.Bracelets },
+          { label: 'Single Stone', href: websiteUrlConfig.Jewellery.Necklaces },
+          { label: 'Two Stones', href: websiteUrlConfig.Jewellery.Necklaces },
+          { label: 'Halo', href: websiteUrlConfig.Jewellery.Necklaces },
         ],
       },
     ],
