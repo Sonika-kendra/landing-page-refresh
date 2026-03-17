@@ -33,8 +33,8 @@ const JewelleryHeroSection = () => (
         </h1>
 
         <p className="henig-body-large text-white/90 mb-6">
-          Discover our handcrafted collection of fine jewellery, from engagement rings
-          to everyday elegance.
+          Explore our fine jewellery collection, <br></br>
+          Crafted with your clients in mind.
         </p>
 
         <div className="flex flex-wrap gap-3">
