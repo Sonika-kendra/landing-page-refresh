@@ -1,9 +1,6 @@
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import HeroAnnouncement from './hero/HeroAnnouncement';
 import HeroCarousel from './hero/HeroCarousel';
-import { Link } from 'react-router-dom';
 
 const HeroSection = ({ className = '' }) => {
   return (
@@ -18,18 +15,18 @@ const HeroSection = ({ className = '' }) => {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="flex flex-col max-w-2xl"
+          className="max-w-2xl"
         >
-          {/* Button unchanged */}
-          <Button
-            asChild
-            className="btn-henig-outline group w-56 md:w-64 px-6 py-4 md:py-5 text-base md:text-lg"
-          >
-            <Link to="/jewellery">
-              Shop Collection
-              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </Button>
+          {/* Text overlay only */}
+          <div className="inline-block bg-black/30 px-4 py-3 md:px-6 md:py-4 rounded-lg">
+            <h1 className="text-white text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight">
+              Supplying Fine Diamonds & Jewellery
+            </h1>
+
+            <p className="text-white/80 mt-2 text-md md:text-base">
+              to the Trade Since 1973
+            </p>
+          </div>
         </motion.div>
       </div>
     </section>
