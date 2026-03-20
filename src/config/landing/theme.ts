@@ -154,9 +154,8 @@ export const navigationLinks = [
 export const announcementBar = {
   enabled: true,
   messages: [
-    'Christmas except for Castings. Order Castings by 22/12 (9:30AM).',
-    'We close for Christmas Tuesday 23rd December.',
-    'We will return Monday 6th January 2026.',
+    'We will be closed from 2nd–6th April and on 8th–9th April',
+    'On Fridays, office hours will be until 3:30 PM'
   ],
 };
 
