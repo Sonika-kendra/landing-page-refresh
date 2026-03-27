@@ -1,28 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { baseURL } from '@/config/config';
-import api from '@/shared/functions/api';
+import { fetchBlogPosts, BlogPost as BlogPostType } from '@/shared/functions/api/blogPosts';
 import PageLayout from '@/components/shared/PageLayout';
 import RegistrationModal from '@/components/shared/RegistrationModal';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface FullBlogPost {
-  _id: string;
-  title: string;
-  content?: string;
-  body?: string;
-  date?: string;
-  src?: string;
-  snippet?: string;
-  [key: string]: any;
-}
-
 const BlogPost = () => {
   const [searchParams] = useSearchParams();
   const postId = searchParams.get('id');
-  const [post, setPost] = useState<FullBlogPost | null>(null);
+  const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -36,8 +25,13 @@ const BlogPost = () => {
 
     const loadPost = async () => {
       try {
-        const res = await api.get<FullBlogPost>(`/posts/${postId}`);
-        setPost(res.data);
+        const posts = await fetchBlogPosts('published');
+        const found = posts.find((p) => p._id === postId || p.id === postId);
+        if (found) {
+          setPost(found);
+        } else {
+          setError(true);
+        }
       } catch (err) {
         console.error('Failed to load blog post', err);
         setError(true);
