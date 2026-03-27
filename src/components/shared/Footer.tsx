@@ -31,7 +31,7 @@ const Footer = () => {
     <footer className="bg-accent text-accent-foreground">
 
       {/* Newsletter Section */}
-      <div className="border-b border-accent-foreground/10">
+      {/* <div className="border-b border-accent-foreground/10">
         <div className="henig-container py-10 md:py-12">
           <div className="max-w-xl mx-auto text-center">
             <h3 className="font-serif text-xl sm:text-2xl mb-3 md:mb-4">Newsletter Signup</h3>
@@ -48,7 +48,7 @@ const Footer = () => {
             </form>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Footer */}
       <div className="henig-container py-12 md:py-16">
