@@ -18,13 +18,13 @@ const HeroSection = ({ className = '' }) => {
           className="max-w-2xl"
         >
           {/* Text overlay only */}
-          <div className="inline-block bg-black/30 px-4 py-3 md:px-6 md:py-4 rounded-lg">
-            <h1 className="text-white text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight">
-              Supplying Fine Diamonds & Jewellery
+          <div className="inline-block max-w-[220px] md:max-w-[300px] bg-black/30 px-4 py-3 md:px-6 md:py-4 rounded-lg">
+            <h1 className="text-white text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight break-words">
+              Trusted by the trade since 1973
             </h1>
 
-            <p className="text-white/80 mt-2 text-md md:text-base">
-              to the Trade Since 1973
+            <p className="text-white/80 mt-2 text-sm md:text-base">
+              Fine diamonds and jewellery
             </p>
           </div>
         </motion.div>
