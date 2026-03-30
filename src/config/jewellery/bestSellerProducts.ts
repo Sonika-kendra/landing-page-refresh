@@ -2,9 +2,9 @@
 import product1 from '@/assets/jewellery/bestseller/product1.png';
 import product2 from '@/assets/jewellery/bestseller/product2.png';
 import product3 from '@/assets/jewellery/bestseller/product3.png';
-import product4 from '@/assets/jewellery/bestseller/product4.jpg';
+// import product4 from '@/assets/jewellery/bestseller/product4.jpg';
 import product5 from '@/assets/jewellery/bestseller/product5.png';
-import product6 from '@/assets/jewellery/bestseller/product6.png';
+// import product6 from '@/assets/jewellery/bestseller/product6.png';
 import product7 from '@/assets/jewellery/bestseller/product7.png';
 import product8 from '@/assets/jewellery/bestseller/product8.png';
 import { Product } from './products';
@@ -28,15 +28,15 @@ export const BestSellerProducts: Product[] = [
     image: product2,
     category: 'necklaces'
   },
-  {
-    id: 'j6',
-    name: 'Pearl & Crystal Hoop Earrings',
-    price: 30.0,
-    currency: '£',
-    material: 'Sterling Silver',
-    image: product6,
-    category: 'earrings'
-  },
+  // {
+  //   id: 'j6',
+  //   name: 'Pearl & Crystal Hoop Earrings',
+  //   price: 30.0,
+  //   currency: '£',
+  //   material: 'Sterling Silver',
+  //   image: product6,
+  //   category: 'earrings'
+  // },
   {
     id: 'j3',
     name: 'Fine Crystal & Wave Wrist Stacking Set',
@@ -46,15 +46,15 @@ export const BestSellerProducts: Product[] = [
     image: product3,
     category: 'bracelets'
   },
-  {
-    id: 'j4',
-    name: 'Organic Open Circle Drop Earrings',
-    price: 35.0,
-    currency: '£',
-    material: '18k Gold Plated',
-    image: product4,
-    category: 'earrings'
-  },
+  // {
+  //   id: 'j4',
+  //   name: 'Organic Open Circle Drop Earrings',
+  //   price: 35.0,
+  //   currency: '£',
+  //   material: '18k Gold Plated',
+  //   image: product4,
+  //   category: 'earrings'
+  // },
   {
     id: 'j5',
     name: 'Geometric Gold Layered Necklace',

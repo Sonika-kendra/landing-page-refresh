@@ -1,9 +1,9 @@
 import jewelleryProduct1 from '@/assets/landing/bestseller/jewellery/product1.png';
 import jewelleryProduct2 from '@/assets/landing/bestseller/jewellery/product2.png';
 import jewelleryProduct3 from '@/assets/landing/bestseller/jewellery/product3.png';
-import jewelleryProduct4 from '@/assets/landing/bestseller/jewellery/product4.jpg';
+// import jewelleryProduct4 from '@/assets/landing/bestseller/jewellery/product4.jpg';
 import jewelleryProduct5 from '@/assets/landing/bestseller/jewellery/product5.png';
-import jewelleryProduct6 from '@/assets/landing/bestseller/jewellery/product6.png';
+// import jewelleryProduct6 from '@/assets/landing/bestseller/jewellery/product6.png';
 import jewelleryProduct7 from '@/assets/landing/bestseller/jewellery/product7.png';
 import jewelleryProduct8 from '@/assets/landing/bestseller/jewellery/product8.png';
 import { websiteUrlConfig } from '../config';
@@ -62,24 +62,24 @@ export const BestSellerProducts: BestSellerProductProps[] = [
     title: 'Delicate Heart Charm Bracelet',
     price: '£22.00'
   },
-  {
-    image: jewelleryProduct4,
-    link: websiteUrlConfig.Jewellery.All,
-    title: 'Classic Solitaire Pendant Necklace',
-    price: '£40.00'
-  },
+  // {
+  //   image: jewelleryProduct4,
+  //   link: websiteUrlConfig.Jewellery.All,
+  //   title: 'Classic Solitaire Pendant Necklace',
+  //   price: '£40.00'
+  // },
   {
     image: jewelleryProduct5,
     link: websiteUrlConfig.Jewellery.All,
     title: 'Twist Knot Stud Earrings',
     price: '£18.00'
   },
-  {
-    image: jewelleryProduct6,
-    link: websiteUrlConfig.Jewellery.All,
-    title: 'Twist Knot Stud Earrings',
-    price: '£18.00'
-  },
+  // {
+  //   image: jewelleryProduct6,
+  //   link: websiteUrlConfig.Jewellery.All,
+  //   title: 'Twist Knot Stud Earrings',
+  //   price: '£18.00'
+  // },
   {
     image: jewelleryProduct7,
     link: websiteUrlConfig.Jewellery.All,
