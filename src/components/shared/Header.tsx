@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, ShoppingBag, Menu, X, User, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/landing/theme';
 import Logo from '@/assets/icons/logoLight.png';
@@ -101,6 +100,8 @@ interface HeaderProps {
 }
 
 const Header = ({ onRegisterClick }: HeaderProps) => {
+  void onRegisterClick;
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [openMobileMenus, setOpenMobileMenus] = useState<
@@ -254,7 +255,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </button>
 
           {/* Logo */}
-          <div className="flex-1 md:flex-none text-center">
+          <div className="flex-1 text-center md:flex-none md:text-left">
             <Link to="/" className="inline-flex items-center justify-center">
               <img
                 src={Logo}
@@ -265,7 +266,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center justify-center flex-1">
+          <nav className="hidden md:flex flex-1 items-center justify-end">
             <ul className="flex items-center gap-8">
               {navigationLinks.map((link) => {
                 const hasMegaMenu = 'megaMenu' in link && link.megaMenu;
@@ -332,36 +333,43 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             </ul>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-0.5 md:gap-3 md:w-1/4 justify-end relative z-10">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden md:flex items-center gap-2 text-sm font-semibold"
-              onClick={onRegisterClick}
-            >
-              <User className="w-4 h-4" />
-              <span>Sign In / Register</span>
-            </Button>
+          {/* Actions temporarily hidden */}
+          <div className="w-10 shrink-0 md:hidden" aria-hidden="true">
+            {/*
+            <div className="flex items-center gap-0.5 md:gap-3 justify-end relative z-10">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden md:flex items-center gap-2 text-sm font-semibold"
+                onClick={onRegisterClick}
+              >
+                <User className="w-4 h-4" />
+                <span>Sign In / Register</span>
+              </Button>
 
-            <button
-              className="md:hidden p-1"
-              onClick={onRegisterClick}
-              aria-label="Sign in or register"
-            >
-              <User className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
+              <button
+                className="md:hidden p-1"
+                onClick={onRegisterClick}
+                aria-label="Sign in or register"
+              >
+                <User className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
 
-            <button className="p-1 md:p-2" onClick={onRegisterClick}>
-              <Heart className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
+              <button className="p-1 md:p-2" onClick={onRegisterClick}>
+                <Heart className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
 
-            <button className="p-1 md:p-2 relative" onClick={onRegisterClick}>
-              <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="absolute top-0 right-0 md:-top-1 md:-right-1 w-3 h-3 md:w-4 md:h-4 bg-primary text-primary-foreground text-[8px] md:text-[10px] rounded-full flex items-center justify-center">
-                0
-              </span>
-            </button>
+              <button
+                className="p-1 md:p-2 relative"
+                onClick={onRegisterClick}
+              >
+                <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="absolute top-0 right-0 md:-top-1 md:-right-1 w-3 h-3 md:w-4 md:h-4 bg-primary text-primary-foreground text-[8px] md:text-[10px] rounded-full flex items-center justify-center">
+                  0
+                </span>
+              </button>
+            </div>
+            */}
           </div>
         </div>
       </div>

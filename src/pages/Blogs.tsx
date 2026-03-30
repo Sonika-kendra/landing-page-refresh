@@ -29,23 +29,23 @@ const Blogs = () => {
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
       {/* Hero */}
-      <section className="bg-accent text-accent-foreground py-20 md:py-28">
+      <section className="bg-accent text-accent-foreground py-10 md:py-14">
         <div className="henig-container text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="henig-heading-display mb-4"
           >
-            Events & Blog
+            Our Latest News
           </motion.h1>
-          <motion.p
+          {/* <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className="henig-body-large text-accent-foreground/70 max-w-2xl mx-auto"
           >
             Stay updated with the latest news, events, and insights from Henig Diamonds.
-          </motion.p>
+          </motion.p> */}
         </div>
       </section>
 
