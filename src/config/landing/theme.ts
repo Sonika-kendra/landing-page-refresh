@@ -230,8 +230,8 @@ export const faqItems = [
     answer: 'Yes, we can source diamonds to match your client’s exact requirements, including specific carat, cut, colour, clarity, and certification through our global network.',
   },
   {
-    question: 'Do you sell natural or lab-grown diamonds?',
-    answer: 'We offer both natural and lab-grown diamonds. All our diamonds are certified by leading laboratories including GIA, IGI, and HRD.',
+    question: 'Do you supply only to trade customers (B2B)?',
+    answer: 'Yes, we operate exclusively on a B2B basis, supplying fine diamonds and jewellery to trade professionals, retailers, and industry partners only.',
   },
   {
     question: 'What is your returns policy?',
