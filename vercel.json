@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/new/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/new/(.*\\.[a-zA-Z0-9]+)",
+      "destination": "/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
