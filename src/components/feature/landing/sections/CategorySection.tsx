@@ -34,7 +34,7 @@ const CategorySection = () => {
               />
 
               {/* Container for button + title */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+              <div className="absolute inset-0 flex flex-col items-center justify-start pt-24 md:pt-26 z-20 pointer-events-none">
                 {/* Title: visible by default */}
                 <h3 className="mb-2 text-2xl md:text-4xl font-serif text-secondary bg-black/35 px-3 py-1 rounded-sm md:bg-transparent md:px-0 md:py-0 opacity-100 transition-opacity duration-300 z-30 text-center">
                   {category.title}

@@ -45,10 +45,10 @@ const CategorySection = () => (
               )}
 
               {/* Permanent Dark Overlay */}
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 z-10" />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-300 z-10" />
 
               {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+              <div className="absolute inset-0 flex flex-col items-center justify-start pt-24 md:pt-26 z-20">
                 <h3 className="mb-2 text-2xl md:text-3xl font-serif text-white text-center">
                   {category.name}
                 </h3>
