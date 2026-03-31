@@ -6,10 +6,10 @@ import { ArrowRight, Calendar } from 'lucide-react';
 import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 import PageLayout from '@/components/shared/PageLayout';
 import RegistrationModal from '@/components/shared/RegistrationModal';
-import { baseURL } from '@/config/config';
+import { baseURL, websiteUrlConfig } from '@/config/config';
 import { BlogPost, fetchBlogPosts } from '@/shared/functions/api/blogPosts';
 
-const getPostLink = (post: BlogPost) => `/blogs/${post.id}${post.params || ''}`;
+const getPostLink = (post: BlogPost) => `${websiteUrlConfig.Blogs}/${post.id}${post.params || ''}`;
 
 const getPostImage = (post: BlogPost) => (post.src ? `${baseURL}${post.src}` : '');
 

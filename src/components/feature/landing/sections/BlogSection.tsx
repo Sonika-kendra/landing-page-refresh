@@ -3,7 +3,8 @@ import { fetchBlogPosts, BlogPost } from '@/shared/functions/api/blogPosts';
 import VerticalBlogListWithImage from './blog/VerticalBlogCarousel';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { oldWebsiteURL } from '@/config/config';
+import { Link } from 'react-router-dom';
+import { oldWebsiteURL, websiteUrlConfig } from '@/config/config';
 
 const BlogSection = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -50,9 +51,9 @@ const BlogSection = () => {
             size="sm"
             asChild
           >
-            <a href="/blogs" >
+            <Link to={websiteUrlConfig.Blogs}>
               GO TO OUR BLOG
-            </a>
+            </Link>
           </Button>
         </motion.div>
       </div>

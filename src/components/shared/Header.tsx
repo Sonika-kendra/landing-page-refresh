@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/landing/theme';
+import { websiteUrlConfig } from '@/config/config';
 import Logo from '@/assets/icons/logoLight.png';
 
 type MobileNavItem = {
@@ -118,7 +119,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
   }, [location.pathname]);
 
   const isActive = (href: string) => {
-    if (href === '/') return location.pathname === '/';
+    if (href === websiteUrlConfig.Home) return location.pathname === websiteUrlConfig.Home;
     return location.pathname.startsWith(href);
   };
 
@@ -256,7 +257,7 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
 
           {/* Logo */}
           <div className="flex-1 text-center md:flex-none md:text-left">
-            <Link to="/" className="inline-flex items-center justify-center">
+            <Link to={websiteUrlConfig.Home} className="inline-flex items-center justify-center">
               <img
                 src={Logo}
                 alt="Henig Diamonds"

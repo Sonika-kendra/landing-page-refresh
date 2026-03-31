@@ -15,11 +15,11 @@ const Footer = () => {
   const handleFaqClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
 
-    if (location.pathname === '/') {
+    if (location.pathname === websiteUrlConfig.Home) {
       const faqSection = document.getElementById('faq');
       faqSection?.scrollIntoView({ behavior: 'smooth' });
     } else {
-      navigate('/', { replace: false });
+      navigate(websiteUrlConfig.Home, { replace: false });
       setTimeout(() => {
         const faqSection = document.getElementById('faq');
         faqSection?.scrollIntoView({ behavior: 'smooth' });
@@ -57,7 +57,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="mb-6">
-              <Link to="/" className="inline-flex items-center justify-center">
+              <Link to={websiteUrlConfig.Home} className="inline-flex items-center justify-center">
                 <img
                   src={Logo}
                   alt="Henig Diamonds"
@@ -110,7 +110,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/blogs"
+                  to={websiteUrlConfig.Blogs}
                   className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Blog

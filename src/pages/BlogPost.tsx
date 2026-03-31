@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { baseURL } from '@/config/config';
+import { baseURL, websiteUrlConfig } from '@/config/config';
 import { fetchBlogPosts, BlogPost as BlogPostType } from '@/shared/functions/api/blogPosts';
 import PageLayout from '@/components/shared/PageLayout';
 import RegistrationModal from '@/components/shared/RegistrationModal';
@@ -58,7 +58,7 @@ const BlogPost = () => {
       <section className="py-12 md:py-20 section-ivory min-h-[60vh]">
         <div className="henig-container">
           {/* Back link */}
-          <Link to="/blogs" className="inline-flex items-center gap-2 text-muted hover:text-primary transition-colors mb-8">
+          <Link to={`${websiteUrlConfig.Blogs}`} className="inline-flex items-center gap-2 text-muted hover:text-primary transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm tracking-wide uppercase">Back to Blog</span>
           </Link>
@@ -82,7 +82,7 @@ const BlogPost = () => {
                   <h2 className="henig-heading-section mb-4">Post Not Found</h2>
                   <p className="text-muted mb-8">The blog post you're looking for doesn't exist or couldn't be loaded.</p>
                   <Button className="btn-henig-outline" asChild>
-                    <Link to="/blogs">View All Posts</Link>
+                    <Link to={websiteUrlConfig.Blogs}>View All Posts</Link>
                   </Button>
                 </div>
               ) : (
@@ -156,7 +156,7 @@ const BlogPost = () => {
                         transition={{ delay: index * 0.05 }}
                       >
                         <Link
-                          to={`/blogs/${p.id}${p.params || ''}`}
+                          to={`${websiteUrlConfig.Blogs}/${p.id}${p.params || ''}`}
                           className="group flex gap-3 items-start"
                         >
                           {thumb && (
@@ -189,7 +189,7 @@ const BlogPost = () => {
               )}
 
               <Link
-                to="/blogs"
+                to={websiteUrlConfig.Blogs}
                 className="inline-flex items-center gap-1 text-primary text-sm mt-6 font-medium hover:underline"
               >
                 View All Posts <ArrowRight className="w-3.5 h-3.5" />

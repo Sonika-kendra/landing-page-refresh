@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/shared/functions/api/blogPosts';
-import { baseURL, oldWebsiteURL } from '@/config/config';
+import { baseURL, oldWebsiteURL, websiteUrlConfig } from '@/config/config';
 import ImageWithSkeleton from '@/components/shared/ImageWithSkeleton';
 
 const AUTO_DURATION = 4000;
@@ -162,7 +162,7 @@ const VerticalBlogListWithImage = ({ posts, visibleCount = 4 }: Props) => {
                 </p>
 
                 <Link
-                  to={`/blogs/${post.id}${post.params || ''}`}
+                  to={`${websiteUrlConfig.Blogs}/${post.id}${post.params || ''}`}
                   className="text-gray-800 hover:text-[#b59b6a] block"
                 >
                   {post.title}
