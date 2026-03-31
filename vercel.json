@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/new",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/new/assets/(.*)",
