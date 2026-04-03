@@ -311,11 +311,12 @@ const Blogs = () => {
     loadBlogs();
   }, []);
 
-  const leadPosts = posts.slice(0, 3);
+  const firstRow = posts.slice(0, 3);
   const featuredPost = posts[3];
-  const spotlightPost = posts[4];
-  const sidePosts = posts.slice(5, 6);
-  const archivePosts = posts.slice(6);
+  const secondRow = posts.slice(4, 7);
+  const spotlightPost = posts[7];
+  const sidePosts = posts.slice(8, 9);
+  const archivePosts = posts.slice(9);
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
@@ -346,15 +347,23 @@ const Blogs = () => {
             <EmptyState />
           ) : (
             <>
-              {leadPosts.length > 0 && (
+               {firstRow.length > 0 && (
                 <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
-                  {leadPosts.map((post, index) => (
+                  {firstRow.map((post, index) => (
                     <StandardBlogCard key={post.id || post._id} post={post} index={index} />
                   ))}
                 </div>
               )}
 
               {featuredPost && <FeaturedBlogCard post={featuredPost} />}
+
+              {secondRow.length > 0 && (
+                <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
+                  {secondRow.map((post, index) => (
+                    <StandardBlogCard key={post.id || post._id} post={post} index={index} />
+                  ))}
+                </div>
+              )}
 
               {(spotlightPost || sidePosts.length > 0) && (
                 <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px] xl:gap-10">
