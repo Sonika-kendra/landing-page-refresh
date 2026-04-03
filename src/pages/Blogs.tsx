@@ -347,15 +347,23 @@ const Blogs = () => {
             <EmptyState />
           ) : (
             <>
-              {leadPosts.length > 0 && (
+               {firstRow.length > 0 && (
                 <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
-                  {leadPosts.map((post, index) => (
+                  {firstRow.map((post, index) => (
                     <StandardBlogCard key={post.id || post._id} post={post} index={index} />
                   ))}
                 </div>
               )}
 
               {featuredPost && <FeaturedBlogCard post={featuredPost} />}
+
+              {secondRow.length > 0 && (
+                <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
+                  {secondRow.map((post, index) => (
+                    <StandardBlogCard key={post.id || post._id} post={post} index={index} />
+                  ))}
+                </div>
+              )}
 
               {(spotlightPost || sidePosts.length > 0) && (
                 <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px] xl:gap-10">
