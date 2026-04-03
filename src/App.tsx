@@ -32,6 +32,8 @@ const App = () => (
             <Route path={websiteUrlConfig.Blogs} element={<Blogs />} />
             <Route path={`${websiteUrlConfig.Blogs}/:slug`} element={<BlogPost />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/:id" element={<ProductDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
