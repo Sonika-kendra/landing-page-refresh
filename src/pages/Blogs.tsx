@@ -311,11 +311,12 @@ const Blogs = () => {
     loadBlogs();
   }, []);
 
-  const leadPosts = posts.slice(0, 3);
+  const firstRow = posts.slice(0, 3);
   const featuredPost = posts[3];
-  const spotlightPost = posts[4];
-  const sidePosts = posts.slice(5, 6);
-  const archivePosts = posts.slice(6);
+  const secondRow = posts.slice(4, 7);
+  const spotlightPost = posts[7];
+  const sidePosts = posts.slice(8, 9);
+  const archivePosts = posts.slice(9);
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
