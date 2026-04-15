@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ChevronUp } from 'lucide-react';
 import PageLayout from '@/components/shared/PageLayout';
 import RegistrationModal from '@/components/shared/RegistrationModal';
-import ShopFilterBar from '@/components/feature/shop/ShopFilterBar';
+import AdvancedFilterSort from '@/components/shared/AdvancedFilterSort';
+import type { FilterConfig, FilterValues } from '@/components/shared/AdvancedFilterSort';
 import ShopProductCard from '@/components/feature/shop/ShopProductCard';
 import YouMayAlsoLike from '@/components/feature/shop/YouMayAlsoLike';
 import ShopFeaturesBar from '@/components/feature/shop/ShopFeaturesBar';
@@ -18,33 +19,78 @@ import {
 
 const ITEMS_PER_PAGE = 16;
 
+const toOptions = (arr: string[]) => arr.map((v) => ({ label: v, value: v }));
+
+const shopFilters: FilterConfig[] = [
+  { key: 'search', label: 'Search', type: 'search', placeholder: 'Search products...' },
+  { key: 'category', label: 'Category', type: 'select', options: toOptions(categories) },
+  { key: 'subCategory', label: 'Sub Category', type: 'select', options: toOptions(subCategories) },
+  { key: 'metal', label: 'Metal', type: 'select', options: toOptions(metals) },
+  { key: 'shape', label: 'Shape', type: 'multi-select', options: toOptions(shapes) },
+  { key: 'stockType', label: 'Stock Type', type: 'toggle-group', options: toOptions(stockTypes) },
+  { key: 'price', label: 'Price Range', type: 'range', min: 0, max: 5000, step: 50, prefix: '£' },
+];
+
+const shopSort = {
+  options: [
+    { label: 'Price: Low to High', value: 'price-asc' },
+    { label: 'Price: High to Low', value: 'price-desc' },
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Name: A–Z', value: 'name-asc' },
+  ],
+  defaultValue: 'price-asc',
+};
+
+const defaultValues: FilterValues = {
+  search: '',
+  category: '',
+  subCategory: '',
+  metal: '',
+  shape: [],
+  stockType: '',
+  price: [0, 5000],
+};
+
 const Shop = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    category: '',
-    subCategory: '',
-    metal: '',
-    shape: '',
-    stockType: '',
-    sortBy: 'price-asc',
-  });
+  const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
+  const [sortBy, setSortBy] = useState('price-asc');
   const [page, setPage] = useState(1);
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const handleFilterChange = useCallback((key: string, value: string | string[] | [number, number]) => {
+    setFilterValues((prev) => ({ ...prev, [key]: value }));
     setPage(1);
-  };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setFilterValues(defaultValues);
+    setPage(1);
+  }, []);
 
   const filtered = useMemo(() => {
     let result = [...shopProducts];
-    if (filters.category) result = result.filter((p) => p.category === filters.category);
-    if (filters.subCategory) result = result.filter((p) => p.subCategory === filters.subCategory);
-    if (filters.shape) result = result.filter((p) => p.shape === filters.shape);
-    if (filters.stockType) result = result.filter((p) => p.stockType === filters.stockType);
-    if (filters.sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
-    if (filters.sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
+    const { search, category, subCategory, metal, shape, stockType, price } = filterValues;
+
+    if (search && typeof search === 'string' && search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+    }
+    if (category) result = result.filter((p) => p.category === category);
+    if (subCategory) result = result.filter((p) => p.subCategory === subCategory);
+    if (metal) result = result.filter((p) => p.metal === metal);
+    if (Array.isArray(shape) && shape.length > 0) result = result.filter((p) => (shape as string[]).includes(p.shape));
+    if (stockType) result = result.filter((p) => p.stockType === stockType);
+    if (Array.isArray(price) && typeof price[0] === 'number') {
+      const [lo, hi] = price as [number, number];
+      result = result.filter((p) => p.price >= lo && p.price <= hi);
+    }
+
+    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'name-asc') result.sort((a, b) => a.name.localeCompare(b.name));
+
     return result;
-  }, [filters]);
+  }, [filterValues, sortBy]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -53,27 +99,34 @@ const Shop = () => {
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
-      {/* Static banner / filter bar */}
-      <ShopFilterBar
-        filters={filters}
+      <AdvancedFilterSort
+        filters={shopFilters}
+        sort={shopSort}
+        values={filterValues}
+        sortValue={sortBy}
         onFilterChange={handleFilterChange}
-        categories={categories}
-        subCategories={subCategories}
-        metals={metals}
-        shapes={shapes}
-        stockTypes={stockTypes}
+        onSortChange={setSortBy}
+        onReset={handleReset}
+        totalResults={filtered.length}
       />
 
-      {/* Product grid */}
       <section className="section-ivory py-8 md:py-12">
         <div className="henig-container">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-            {paged.map((product) => (
-              <ShopProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {paged.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <p className="text-lg text-foreground/60">No products match your filters.</p>
+              <button onClick={handleReset} className="mt-3 text-sm text-primary underline hover:text-primary/80">
+                Clear all filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+              {paged.map((product) => (
+                <ShopProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-10">
               <button
@@ -122,13 +175,9 @@ const Shop = () => {
         </div>
       </section>
 
-      {/* You May Also Like */}
       <YouMayAlsoLike items={youMayAlsoLike} />
-
-      {/* Features bar */}
       <ShopFeaturesBar />
 
-      {/* Go to top */}
       <button
         onClick={scrollToTop}
         className="fixed bottom-6 right-6 z-50 h-10 w-10 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:bg-accent/90 transition-colors"
