@@ -32,17 +32,32 @@ const demoImage2 = 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9
 const demoImage3 = 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=400&h=400&fit=crop';
 const demoImage4 = 'https://images.unsplash.com/photo-1515562141589-67f0d1a34db8?w=400&h=400&fit=crop';
 
+export const categories = ['Rings', 'Earrings', 'Bracelets', 'Necklaces', 'Bangles', 'Pendants'];
+export const subCategories = ['Halo', 'Solitaire', 'Three Stone', 'Eternity', 'Cluster'];
+export const metals = ['18K YG', '18K WG', '9K YG', '9K WG', 'Platinum'];
+export const shapes = ['Round', 'Pear', 'Oval', 'Emerald', 'Princess', 'Cushion'];
+export const stockTypes = ['Natural', 'Lab'];
+
+const categoryProductNames: Record<string, string> = {
+  Rings: 'Engagement Ring',
+  Earrings: 'Diamond Earrings',
+  Bracelets: 'Diamond Bracelet',
+  Necklaces: 'Diamond Necklace',
+  Bangles: 'Round Bangle',
+  Pendants: 'Diamond Pendant',
+};
+
 export const shopProducts: ShopProduct[] = Array.from({ length: 24 }, (_, i) => ({
   id: `prod-${i + 1}`,
   sku: `LSE${2110 + i}D`,
-  name: 'Round Diamond Engagement Ring',
-  category: 'Rings',
-  subCategory: i % 3 === 0 ? 'Halo' : i % 3 === 1 ? 'Solitaire' : 'Three Stone',
-  metal: '18K YG',
+  name: `${shapes[i % shapes.length]} Diamond ${categoryProductNames[categories[i % categories.length]]}`,
+  category: categories[i % categories.length],
+  subCategory: subCategories[i % subCategories.length],
+  metal: metals[i % metals.length],
   metalOptions: ['18K', '18K', '9K', '9K'],
-  shape: i % 2 === 0 ? 'Round' : 'Pear',
-  stockType: i % 4 === 0 ? 'Lab' : 'Natural',
-  price: 768,
+  shape: shapes[i % shapes.length],
+  stockType: stockTypes[i % stockTypes.length] as ShopProduct['stockType'],
+  price: 620 + (i % 8) * 185,
   image: i % 4 === 0 ? demoImage : i % 4 === 1 ? demoImage2 : i % 4 === 2 ? demoImage3 : demoImage4,
   hoverImage: i % 4 === 0 ? demoImage2 : demoImage,
   badge: i % 5 === 1 ? 'NEW STOCK' : i % 7 === 0 ? 'ONLY FEW LEFT' : undefined,
@@ -60,12 +75,6 @@ export const shopProducts: ShopProduct[] = Array.from({ length: 24 }, (_, i) => 
   stock: i % 7 === 0 ? 2 : i % 5 === 1 ? 15 : 6,
   images: [demoImage, demoImage2, demoImage3, demoImage4],
 }));
-
-export const categories = ['Rings', 'Earrings', 'Bracelets', 'Necklaces', 'Bangles', 'Pendants'];
-export const subCategories = ['Halo', 'Solitaire', 'Three Stone', 'Eternity', 'Cluster'];
-export const metals = ['18K YG', '18K WG', '9K YG', '9K WG', 'Platinum'];
-export const shapes = ['Round', 'Pear', 'Oval', 'Emerald', 'Princess', 'Cushion'];
-export const stockTypes = ['Natural', 'Lab'];
 
 export const youMayAlsoLike = [
   { name: 'Bezel Setting Solitaire Diamonds Rings', image: demoImage },
