@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChevronUp, Search, X } from 'lucide-react';
 import PageLayout from '@/components/shared/PageLayout';
 import RegistrationModal from '@/components/shared/RegistrationModal';
@@ -149,8 +149,24 @@ const Shop = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
   const [activeFilterTab, setActiveFilterTab] = useState<FilterTabKey>('category');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTabHover = useCallback((key: FilterTabKey) => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    setActiveFilterTab(key);
+    setIsDropdownOpen(true);
+  }, []);
+
+  const handleMenuLeave = useCallback(() => {
+    closeTimeoutRef.current = setTimeout(() => setIsDropdownOpen(false), 150);
+  }, []);
+
+  const handleMenuEnter = useCallback(() => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+  }, []);
 
   const handleFilterChange = useCallback((key: string, value: string | string[] | [number, number]) => {
     setFilterValues((prev) => ({ ...prev, [key]: value }));
@@ -212,18 +228,24 @@ const Shop = () => {
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
-      <section className="section-white border-b border-border/60 py-9 md:py-12">
+      {/* Sticky category bar */}
+      <div
+        className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20"
+        onMouseLeave={handleMenuLeave}
+        onMouseEnter={handleMenuEnter}
+      >
         <div className="henig-container">
           <div className="overflow-x-auto">
-            <div className="mx-auto flex w-max min-w-full items-center justify-center gap-8 px-1 md:gap-12">
+            <div className="mx-auto flex w-max min-w-full items-center justify-center gap-8 px-1 py-4 md:gap-12 md:py-5">
               {filterTabs.map((tab) => {
-                const isActive = activeFilterTab === tab.key;
+                const isActive = activeFilterTab === tab.key && isDropdownOpen;
 
                 return (
                   <button
                     key={tab.key}
                     type="button"
-                    onClick={() => setActiveFilterTab(tab.key)}
+                    onMouseEnter={() => handleTabHover(tab.key)}
+                    onClick={() => { setActiveFilterTab(tab.key); setIsDropdownOpen(true); }}
                     className={`relative whitespace-nowrap pb-2 text-sm font-medium tracking-wide transition-colors md:text-base ${
                       isActive ? 'text-foreground' : 'text-foreground/55 hover:text-foreground'
                     }`}
@@ -237,50 +259,58 @@ const Shop = () => {
             </div>
           </div>
 
-          <div className="mt-9 overflow-x-auto pb-2">
-            <div className="mx-auto flex w-max min-w-full items-start justify-center gap-7 px-1 md:gap-10 lg:gap-14">
-              {activeFilterItems.map((item) => {
-                const value = filterValues[activeFilterTab];
-                const isActive = isFilterItemActive(value, item.value);
-                const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
+          {/* Hover dropdown panel */}
+          {isDropdownOpen && (
+            <div className="overflow-x-auto border-t border-border/40 pb-6 pt-5">
+              <div className="mx-auto flex w-max min-w-full items-start justify-center gap-7 px-1 md:gap-10 lg:gap-14">
+                {activeFilterItems.map((item) => {
+                  const value = filterValues[activeFilterTab];
+                  const isItemActive = isFilterItemActive(value, item.value);
+                  const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
 
-                return (
-                  <button
-                    key={`${activeFilterTab}-${itemKey}`}
-                    type="button"
-                    onClick={() => handleFilterChange(activeFilterTab, item.value)}
-                    className="group flex min-w-[96px] flex-col items-center gap-4 text-center outline-none md:min-w-[128px]"
-                    aria-pressed={isActive}
-                  >
-                    <span
-                      className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 md:h-32 md:w-32 ${
-                        isActive
-                          ? 'border-accent shadow-[0_0_0_3px_hsl(var(--primary)/0.45)]'
-                          : 'border-transparent group-hover:border-primary/70'
-                      }`}
+                  return (
+                    <button
+                      key={`${activeFilterTab}-${itemKey}`}
+                      type="button"
+                      onClick={() => handleFilterChange(activeFilterTab, item.value)}
+                      className="group flex min-w-[96px] flex-col items-center gap-4 text-center outline-none md:min-w-[128px]"
+                      aria-pressed={isItemActive}
                     >
-                      {item.image ? (
-                        <img
-                          src={item.image}
-                          alt={item.label}
-                          className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <span className="flex h-full w-full items-center justify-center rounded-full bg-secondary px-4 text-base font-medium text-foreground/80 md:text-lg">
-                          {item.display}
-                        </span>
-                      )}
-                    </span>
-                    <span className={`text-sm transition-colors md:text-base ${isActive ? 'text-foreground' : 'text-foreground/70'}`}>
-                      {item.label}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span
+                        className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 md:h-32 md:w-32 ${
+                          isItemActive
+                            ? 'border-accent shadow-[0_0_0_3px_hsl(var(--primary)/0.45)]'
+                            : 'border-transparent group-hover:border-primary/70'
+                        }`}
+                      >
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.label}
+                            className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center rounded-full bg-secondary px-4 text-base font-medium text-foreground/80 md:text-lg">
+                            {item.display}
+                          </span>
+                        )}
+                      </span>
+                      <span className={`text-sm transition-colors md:text-base ${isItemActive ? 'text-foreground' : 'text-foreground/70'}`}>
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
+        </div>
+      </div>
 
-          <div className="mt-7 flex flex-col gap-4 border-t border-border/60 pt-5 md:flex-row md:items-center md:justify-between">
+      {/* Search / sort bar */}
+      <section className="section-white border-b border-border/60 py-5">
+        <div className="henig-container">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label className="relative block w-full sm:w-[280px]">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
