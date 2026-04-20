@@ -40,14 +40,6 @@ const stripHtml = (value = '') =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const getPostExcerpt = (post: BlogPost, maxLength = 160) => {
-  const source = stripHtml(post.snippet || post.content || post.body || '');
-  if (!source) return 'Discover more from Henig Diamonds in our latest editorial insights and trade updates.';
-  if (source.length <= maxLength) return source;
-
-  return `${source.slice(0, maxLength).trimEnd()}...`;
-};
-
 const getReadingTime = (post: BlogPost) => {
   if (typeof post.readTime === 'number' && post.readTime > 0) {
     return `${post.readTime} min read`;
@@ -66,6 +58,8 @@ const getReadingTime = (post: BlogPost) => {
 const cardSurfaceClass =
   'border border-[#ecebe5] bg-card shadow-[0_22px_38px_-32px_rgba(16,24,22,0.48)] transition-colors duration-300';
 
+const blogPageContainerClass = 'mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-14';
+
 const MetaRow = ({ post }: { post: BlogPost }) => (
   <div className="flex items-center gap-2 text-[12px] text-foreground/55">
     <Calendar className="h-3.5 w-3.5 shrink-0 text-foreground/45" />
@@ -74,7 +68,7 @@ const MetaRow = ({ post }: { post: BlogPost }) => (
 );
 
 const ReadMoreRow = ({ post }: { post: BlogPost }) => (
-  <div className="mt-auto flex items-center justify-between gap-4 pt-4 text-[0.95rem] text-primary/85">
+  <div className="mt-auto flex items-center justify-between gap-4 pt-4 text-[0.82rem] text-primary/85 md:text-[0.88rem]">
     <span>{getReadingTime(post)}</span>
     <span className="inline-flex items-center gap-1.5 font-medium text-primary">
       Read More
@@ -135,18 +129,17 @@ const StandardBlogCard = ({
     >
       <BlogImage
         post={post}
-        wrapperClassName="aspect-[11/9] overflow-hidden bg-[#ebe8df]"
+        wrapperClassName="mx-auto mt-5 aspect-[11/9] w-[76%] overflow-hidden bg-[#ebe8df]"
         className="h-full w-full object-cover"
         priority={index < 3}
       />
 
-      <div className="flex flex-1 flex-col gap-3 px-6 pb-6 pt-4 md:px-7 md:pb-7">
+      <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4 md:px-6 md:pb-6">
         <MetaRow post={post} />
         <div className="space-y-2.5">
-          <h2 className="font-serif text-[1.9rem] leading-[1.22] text-foreground md:text-[2.15rem]">
+          <h2 className="font-serif text-[1.55rem] leading-[1.22] text-foreground md:text-[1.78rem]">
             {post.title}
           </h2>
-          <p className="text-[0.93rem] leading-7 text-foreground/72">{getPostExcerpt(post, 120)}</p>
         </div>
         <ReadMoreRow post={post} />
       </div>
@@ -171,15 +164,14 @@ const CompactBlogCard = ({
     <Link to={getPostLink(post)} className="flex h-full flex-col">
       <BlogImage
         post={post}
-        wrapperClassName="aspect-[11/9] overflow-hidden bg-[#ebe8df]"
+        wrapperClassName="mx-auto mt-5 aspect-[11/9] w-[76%] overflow-hidden bg-[#ebe8df]"
         className="h-full w-full object-cover"
       />
-      <div className="flex flex-1 flex-col gap-3 px-6 pb-6 pt-4">
+      <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
         <MetaRow post={post} />
-        <h3 className="font-serif text-[2rem] leading-[1.25] text-foreground">
+        <h3 className="font-serif text-[1.45rem] leading-[1.25] text-foreground md:text-[1.6rem]">
           {post.title}
         </h3>
-        <p className="text-[0.93rem] leading-7 text-foreground/72">{getPostExcerpt(post, 92)}</p>
         <ReadMoreRow post={post} />
       </div>
     </Link>
@@ -194,64 +186,54 @@ const FeaturedBlogCard = ({ post }: { post: BlogPost }) => (
     transition={{ duration: 0.5 }}
     className={`overflow-hidden ${cardSurfaceClass}`}
   >
-    <Link to={getPostLink(post)} className="grid lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.88fr)]">
-      <div className="flex flex-col justify-between p-7 md:p-8 lg:p-9">
+    <Link to={getPostLink(post)} className="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="flex flex-col justify-between p-6 md:p-7 lg:p-8">
         <div className="space-y-5">
           <MetaRow post={post} />
-          <h2 className="max-w-[14ch] font-serif text-[2.35rem] leading-[1.2] text-foreground md:text-[2.9rem]">
+          <h2 className="max-w-[16ch] font-serif text-[1.8rem] leading-[1.2] text-foreground md:text-[2.2rem]">
             {post.title}
           </h2>
-          <p className="max-w-[28rem] text-[1.02rem] leading-8 text-foreground/72">
-            {getPostExcerpt(post, 160)}
-          </p>
         </div>
         <ReadMoreRow post={post} />
       </div>
 
       <BlogImage
         post={post}
-        wrapperClassName="h-[230px] overflow-hidden bg-[#ebe8df] md:h-[320px] lg:h-full"
+        wrapperClassName="h-[190px] overflow-hidden bg-[#ebe8df] md:h-[260px] lg:h-full"
         className="h-full w-full object-cover"
       />
     </Link>
   </motion.article>
 );
 
-const SpotlightBlogCard = ({ post }: { post: BlogPost }) => {
-  const leadCopy = getPostExcerpt(post, 200);
-
-  return (
+const SpotlightBlogCard = ({ post }: { post: BlogPost }) => (
     <motion.article
       initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5 }}
-      className={`overflow-hidden ${cardSurfaceClass}`}
+      className={`h-full overflow-hidden ${cardSurfaceClass}`}
     >
       <Link
         to={getPostLink(post)}
-        className="grid gap-0 md:grid-cols-[minmax(0,0.93fr)_minmax(0,1.35fr)] md:items-stretch"
+        className="grid h-full gap-0 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.88fr)] md:items-stretch"
       >
-        <div className="flex flex-col p-7 md:p-8 lg:p-9">
+        <div className="flex flex-col p-6 md:p-7 lg:p-8">
           <MetaRow post={post} />
-          <h2 className="mt-7 font-serif text-[2.3rem] leading-[1.2] text-foreground md:text-[3rem]">
+          <h2 className="mt-6 font-serif text-[1.8rem] leading-[1.2] text-foreground md:text-[2.2rem]">
             {post.title}
           </h2>
-          <div className="mt-8 text-[1.02rem] leading-8 text-foreground/72">
-            <p>{leadCopy}</p>
-          </div>
           <ReadMoreRow post={post} />
         </div>
 
-        <BlogImage
-          post={post}
-          wrapperClassName="h-[230px] overflow-hidden bg-[#ebe8df] md:h-[320px] lg:h-full"
-          className="h-full w-full object-cover"
-        />
+      <BlogImage
+        post={post}
+        wrapperClassName="h-[190px] overflow-hidden bg-[#ebe8df] md:h-[260px] lg:h-full"
+        className="h-full w-full object-cover"
+      />
       </Link>
     </motion.article>
-  );
-};
+);
 
 const EmptyState = () => (
   <div
@@ -290,6 +272,74 @@ const LoadingState = () => (
   </div>
 );
 
+type BlogLayoutGroup = {
+  startIndex: number;
+  firstRow: BlogPost[];
+  secondRow: BlogPost[];
+  featuredPost?: BlogPost;
+  spotlightPost?: BlogPost;
+  sidePosts: BlogPost[];
+};
+
+const postsPerLayoutGroup = 10;
+
+const getPostKey = (post: BlogPost) => post.id || post._id;
+
+const getBlogLayoutGroups = (blogPosts: BlogPost[]): BlogLayoutGroup[] => {
+  const groups: BlogLayoutGroup[] = [];
+
+  for (let startIndex = 0; startIndex < blogPosts.length; startIndex += postsPerLayoutGroup) {
+    const groupPosts = blogPosts.slice(startIndex, startIndex + postsPerLayoutGroup);
+
+    groups.push({
+      startIndex,
+      firstRow: groupPosts.slice(0, 3),
+      secondRow: groupPosts.slice(3, 6),
+      featuredPost: groupPosts[6],
+      spotlightPost: groupPosts[7],
+      sidePosts: groupPosts.slice(8, 10),
+    });
+  }
+
+  return groups;
+};
+
+const BlogLayoutGroupSection = ({ group }: { group: BlogLayoutGroup }) => (
+  <>
+    {group.firstRow.length > 0 && (
+      <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
+        {group.firstRow.map((post, index) => (
+          <StandardBlogCard key={getPostKey(post)} post={post} index={group.startIndex + index} />
+        ))}
+      </div>
+    )}
+
+    {group.secondRow.length > 0 && (
+      <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
+        {group.secondRow.map((post, index) => (
+          <StandardBlogCard key={getPostKey(post)} post={post} index={group.startIndex + group.firstRow.length + index} />
+        ))}
+      </div>
+    )}
+
+    {group.featuredPost && <FeaturedBlogCard post={group.featuredPost} />}
+
+    {(group.spotlightPost || group.sidePosts.length > 0) && (
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px] xl:gap-10">
+        <div>{group.spotlightPost && <SpotlightBlogCard post={group.spotlightPost} />}</div>
+
+        {group.sidePosts.length > 0 && (
+          <div className="space-y-8 self-start">
+            {group.sidePosts.map((post, index) => (
+              <CompactBlogCard key={getPostKey(post)} post={post} index={index} />
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+  </>
+);
+
 const Blogs = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -311,17 +361,12 @@ const Blogs = () => {
     loadBlogs();
   }, []);
 
-  const firstRow = posts.slice(0, 3);
-  const featuredPost = posts[3];
-  const secondRow = posts.slice(4, 7);
-  const spotlightPost = posts[7];
-  const sidePosts = posts.slice(8, 9);
-  const archivePosts = posts.slice(9);
+  const blogLayoutGroups = getBlogLayoutGroups(posts);
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
       <section className="bg-accent py-16 text-accent-foreground md:py-24">
-        <div className="henig-container flex flex-col items-center text-center">
+        <div className={`${blogPageContainerClass} flex flex-col items-center text-center`}>
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -340,52 +385,16 @@ const Blogs = () => {
       </section>
 
       <section className="section-ivory py-12 md:py-16">
-        <div className="henig-container space-y-12 md:space-y-16">
+        <div className={`${blogPageContainerClass} space-y-12 md:space-y-16`}>
           {loading ? (
             <LoadingState />
           ) : posts.length === 0 ? (
             <EmptyState />
           ) : (
             <>
-               {firstRow.length > 0 && (
-                <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
-                  {firstRow.map((post, index) => (
-                    <StandardBlogCard key={post.id || post._id} post={post} index={index} />
-                  ))}
-                </div>
-              )}
-
-              {featuredPost && <FeaturedBlogCard post={featuredPost} />}
-
-              {secondRow.length > 0 && (
-                <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
-                  {secondRow.map((post, index) => (
-                    <StandardBlogCard key={post.id || post._id} post={post} index={index} />
-                  ))}
-                </div>
-              )}
-
-              {(spotlightPost || sidePosts.length > 0) && (
-                <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px] xl:gap-10">
-                  <div>{spotlightPost && <SpotlightBlogCard post={spotlightPost} />}</div>
-
-                  {sidePosts.length > 0 && (
-                    <div className="space-y-8 self-start">
-                      {sidePosts.map((post, index) => (
-                        <CompactBlogCard key={post.id || post._id} post={post} index={index} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {archivePosts.length > 0 && (
-                <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-                  {archivePosts.map((post, index) => (
-                    <StandardBlogCard key={post.id || post._id} post={post} index={index} />
-                  ))}
-                </div>
-              )}
+              {blogLayoutGroups.map((group) => (
+                <BlogLayoutGroupSection key={group.startIndex} group={group} />
+              ))}
             </>
           )}
         </div>
