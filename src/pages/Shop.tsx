@@ -261,7 +261,8 @@ const Shop = () => {
 
           {/* Hover dropdown panel */}
           {isDropdownOpen && (
-            <div className="overflow-x-auto border-t border-border/40 pb-6 pt-5">
+            <div className="border-t border-border/40 pb-6 pt-5">
+              <div className="overflow-x-auto">
               <div className="mx-auto flex w-max min-w-full items-start justify-center gap-7 px-1 md:gap-10 lg:gap-14">
                 {activeFilterItems.map((item) => {
                   const value = filterValues[activeFilterTab];
@@ -302,68 +303,65 @@ const Shop = () => {
                   );
                 })}
               </div>
+              </div>
+
+              {/* Search + Sort row */}
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <label className="relative block w-full sm:w-[280px]">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
+                    <input
+                      value={(filterValues.search as string) || ''}
+                      onChange={(event) => handleFilterChange('search', event.target.value)}
+                      placeholder="Search products"
+                      className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
+                    />
+                    {filterValues.search && (
+                      <button
+                        type="button"
+                        onClick={() => handleFilterChange('search', '')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
+                        aria-label="Clear search"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </label>
+
+                  <span className="text-sm text-foreground/55">
+                    {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
+                  </span>
+
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="w-max text-sm text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+
+                <label className="flex w-full items-center gap-3 text-sm text-foreground/55 sm:w-auto">
+                  <span className="whitespace-nowrap">Sort by</span>
+                  <select
+                    value={sortBy}
+                    onChange={(event) => setSortBy(event.target.value)}
+                    className="h-10 w-full rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-[190px]"
+                  >
+                    {shopSort.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* Search / sort bar */}
-      <section className="section-white border-b border-border/60 py-5">
-        <div className="henig-container">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label className="relative block w-full sm:w-[280px]">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
-                <input
-                  value={(filterValues.search as string) || ''}
-                  onChange={(event) => handleFilterChange('search', event.target.value)}
-                  placeholder="Search products"
-                  className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
-                />
-                {filterValues.search && (
-                  <button
-                    type="button"
-                    onClick={() => handleFilterChange('search', '')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </label>
-
-              <span className="text-sm text-foreground/55">
-                {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
-              </span>
-
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="w-max text-sm text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-
-            <label className="flex w-full items-center gap-3 text-sm text-foreground/55 sm:w-auto">
-              <span className="whitespace-nowrap">Sort by</span>
-              <select
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
-                className="h-10 w-full rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-[190px]"
-              >
-                {shopSort.options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </div>
-      </section>
 
       <section className="section-ivory py-8 md:py-12">
         <div className="henig-container">
