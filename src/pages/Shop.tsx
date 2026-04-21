@@ -5,7 +5,7 @@ import RegistrationModal from '@/components/shared/RegistrationModal';
 import type { FilterValues } from '@/components/shared/AdvancedFilterSort';
 import ShopProductCard from '@/components/feature/shop/ShopProductCard';
 import YouMayAlsoLike from '@/components/feature/shop/YouMayAlsoLike';
-import ShopFeaturesBar from '@/components/feature/shop/ShopFeaturesBar';
+import { CommitmentSection } from '@/components/feature/jewellery';
 import {
   categories,
   metals,
@@ -252,7 +252,7 @@ const Shop = () => {
                     aria-pressed={isActive}
                   >
                     {tab.label}
-                    {isActive && <span className="absolute inset-x-0 bottom-0 mx-auto h-px w-full bg-primary" />}
+                    {isActive && <span className="absolute inset-x-0 bottom-0 mx-auto h-px w-full bg-accent" />}
                   </button>
                 );
               })}
@@ -280,8 +280,8 @@ const Shop = () => {
                       <span
                         className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 md:h-32 md:w-32 ${
                           isItemActive
-                            ? 'border-accent shadow-[0_0_0_3px_hsl(var(--primary)/0.45)]'
-                            : 'border-transparent group-hover:border-primary/70'
+                            ? 'border-accent shadow-[0_0_0_3px_hsl(var(--accent)/0.45)]'
+                            : 'border-transparent group-hover:border-accent'
                         }`}
                       >
                         {item.image ? (
@@ -429,7 +429,7 @@ const Shop = () => {
       </section>
 
       <YouMayAlsoLike items={youMayAlsoLike} />
-      <ShopFeaturesBar />
+      <CommitmentSection />
 
       <button
         onClick={scrollToTop}

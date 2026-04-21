@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Heart, Share2, Copy, Truck, Shield, Maximize
 import PageLayout from '@/components/shared/PageLayout';
 import RegistrationModal from '@/components/shared/RegistrationModal';
 import YouMayAlsoLike from '@/components/feature/shop/YouMayAlsoLike';
-import ShopFeaturesBar from '@/components/feature/shop/ShopFeaturesBar';
+import { CommitmentSection } from '@/components/feature/jewellery';
 import { shopProducts, youMayAlsoLike } from '@/config/shop/products';
 
 const trustBadges = [
@@ -297,7 +297,7 @@ const ProductDetail = () => {
       <YouMayAlsoLike items={youMayAlsoLike} />
 
       {/* Features bar */}
-      <ShopFeaturesBar />
+      <CommitmentSection />
 
       <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
