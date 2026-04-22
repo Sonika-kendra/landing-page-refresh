@@ -6,6 +6,8 @@ import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
+import { getMetalType } from '@/data/shop/metalTypes';
+import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
 const trustBadges = [
   { icon: Truck, label: 'Free UK Delivery' },
@@ -15,19 +17,6 @@ const trustBadges = [
   { icon: HomeIcon, label: 'Handcrafted in the UK' },
   { icon: FileCheck, label: 'Insurance Valuation' },
 ];
-
-const getMetalBadgeClass = (metal: string, isSelected: boolean) => {
-  const isYG = metal.includes('YG');
-  const isWG = metal.includes('WG');
-  const base = 'px-2.5 py-1 text-xs font-semibold border transition-colors cursor-pointer min-w-[36px] text-center';
-  if (isYG) {
-    return `${base} ${isSelected ? 'bg-[#C5A028] text-white border-[#C5A028]' : 'bg-transparent text-foreground border-[#C5A028] hover:bg-[#C5A028]/10'}`;
-  }
-  if (isWG) {
-    return `${base} ${isSelected ? 'bg-accent text-accent-foreground border-accent' : 'bg-transparent text-foreground border-accent/70 hover:bg-accent/10'}`;
-  }
-  return `${base} ${isSelected ? 'bg-foreground/80 text-white border-foreground/80' : 'bg-transparent text-foreground border-border hover:border-foreground/60'}`;
-};
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +29,13 @@ const ProductDetail = () => {
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copySku = () => {
+    navigator.clipboard.writeText(product?.sku ?? '');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   if (!product) {
     return (
@@ -108,25 +104,42 @@ const ProductDetail = () => {
 
             <div>
               <h1 className="font-serif text-2xl md:text-[1.7rem] leading-snug text-foreground mb-1.5">{product.name}</h1>
-              <div className="flex items-center gap-1.5 text-xs text-muted mb-5">
-                <span>SKU #: {product.sku}</span>
-                <button className="text-foreground/30 hover:text-foreground/60 transition-colors"><Copy className="h-3 w-3" /></button>
+              <div className="flex items-center gap-1.5 text-xs mb-5">
+                <span className="text-foreground/60 font-medium">SKU #: {product.sku}</span>
+                <button
+                  onClick={copySku}
+                  title="Copy SKU"
+                  className={`transition-colors ${copied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+                {copied && <span className="text-[10px] text-primary font-medium">Copied!</span>}
               </div>
 
               <div className="space-y-3 mb-5">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-foreground w-28 flex-shrink-0">Metal type:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {product.metalOptions.map((m, i) => (
-                      <button key={i} onClick={() => setSelectedMetal(i)} className={getMetalBadgeClass(m, i === selectedMetal)}>
-                        {m.split(' ')[0]}
-                      </button>
-                    ))}
+                  <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Metal type:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {product.metalOptions.map((m, i) => {
+                      const metal = getMetalType(m);
+                      const isSelected = i === selectedMetal;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedMetal(i)}
+                          title={metal.name}
+                          style={{ backgroundColor: metal.bg, color: metal.color }}
+                          className={`rounded px-2 py-1 text-[10px] font-bold leading-none uppercase tracking-wide transition-all ${isSelected ? 'ring-2 ring-offset-1 ring-foreground/70' : 'opacity-60 hover:opacity-100'}`}
+                        >
+                          {metal.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 {product.caratOptions && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-foreground w-28 flex-shrink-0">Carat Wt.:</span>
+                    <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Carat Wt.:</span>
                     <div className="flex flex-wrap gap-2">
                       {product.caratOptions.map((c, i) => (
                         <button key={i} onClick={() => setSelectedCarat(i)} className={`h-8 w-8 text-xs font-medium border transition-colors ${i === selectedCarat ? 'bg-accent text-accent-foreground border-accent' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{c}</button>
@@ -136,7 +149,7 @@ const ProductDetail = () => {
                 )}
                 {product.sizeOptions && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-foreground w-28 flex-shrink-0">Ring size:</span>
+                    <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Ring size:</span>
                     <div className="flex flex-wrap gap-2">
                       {product.sizeOptions.map((s, i) => (
                         <button key={i} onClick={() => setSelectedSize(i)} className={`h-8 w-8 text-xs font-medium border transition-colors ${i === selectedSize ? 'bg-accent text-accent-foreground border-accent' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{s}</button>
@@ -146,8 +159,11 @@ const ProductDetail = () => {
                 )}
                 {product.certificate && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-foreground w-28 flex-shrink-0">Certificate:</span>
-                    <span className="inline-block px-3 py-1 text-xs font-semibold border border-[#C5A028] text-foreground">{product.certificate}</span>
+                    <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Certificate:</span>
+                    <div className="flex items-center gap-2">
+                      <img src={igiLogo} alt={product.certificate} className="h-7 w-auto object-contain" />
+                      {/* <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">{product.certificate}</span> */}
+                    </div>
                   </div>
                 )}
               </div>
@@ -173,8 +189,8 @@ const ProductDetail = () => {
                           ['Total weight:', product.totalWeight],
                         ] as [string, string | undefined][]).map(([label, value]) => (
                           <tr key={label}>
-                            <td className="py-[3px] text-[11px] text-muted pr-4 w-[110px] align-top">{label}</td>
-                            <td className="py-[3px] text-[11px] text-foreground">{value}</td>
+                            <td className="py-[3px] text-xs text-foreground/55 pr-4 w-[110px] align-top font-medium">{label}</td>
+                            <td className="py-[3px] text-xs text-foreground font-semibold">{value}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -184,7 +200,7 @@ const ProductDetail = () => {
               </div>
 
               <div className="mt-4 flex items-center gap-3">
-                <span className="border border-border/40 px-4 py-2 text-[1.6rem] font-bold text-foreground tracking-tight leading-none">
+                <span className="bg-foreground text-background px-5 py-2.5 text-[1.6rem] font-bold tracking-tight leading-none">
                   £{product.price.toLocaleString()}
                 </span>
                 {product.stock && product.stock <= 5 && (
@@ -196,16 +212,16 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <div className="mt-4 flex">
+              <div className="mt-4 flex gap-3">
                 <button className="flex-1 bg-accent text-accent-foreground py-4 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-accent/90 transition-colors">
                   Add to Bag
                 </button>
                 <button
                   onClick={() => setLiked(!liked)}
                   aria-label="Add to wishlist"
-                  className={`w-[54px] border flex items-center justify-center transition-colors ${liked ? 'border-primary bg-primary/10' : 'border-border border-l-0 hover:border-foreground/40'}`}
+                  className="w-[54px] bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent/90 transition-colors"
                 >
-                  <Heart className={`h-5 w-5 ${liked ? 'fill-primary text-primary' : 'text-foreground/35'}`} />
+                  <Heart className={`h-5 w-5 ${liked ? 'fill-accent-foreground' : ''}`} />
                 </button>
               </div>
 
