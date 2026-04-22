@@ -230,7 +230,7 @@ const Shop = () => {
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
       {/* Sticky category bar */}
       <div
-        className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20"
+        className="relative sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20"
         onMouseLeave={handleMenuLeave}
         onMouseEnter={handleMenuEnter}
       >
@@ -258,51 +258,53 @@ const Shop = () => {
               })}
             </div>
           </div>
+        </div>
 
-          {/* Hover dropdown panel */}
-          {isDropdownOpen && (
-            <div className="border-t border-border/40 pb-6 pt-5">
-              <div className="overflow-x-auto">
-              <div className="mx-auto flex w-max min-w-full items-start justify-center gap-7 px-1 md:gap-10 lg:gap-14">
-                {activeFilterItems.map((item) => {
-                  const value = filterValues[activeFilterTab];
-                  const isItemActive = isFilterItemActive(value, item.value);
-                  const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
+        {/* Hover dropdown panel — absolute overlay so page content doesn't shift */}
+        {isDropdownOpen && (
+          <div className="absolute left-0 right-0 top-full z-50 border-b border-t border-border/40 bg-background/95 pb-6 pt-4 shadow-md backdrop-blur-sm">
+            <div className="henig-container">
+              <div className="overflow-x-auto py-2">
+                <div className="mx-auto flex w-max min-w-full items-start justify-center gap-7 px-1 md:gap-10 lg:gap-14">
+                  {activeFilterItems.map((item) => {
+                    const value = filterValues[activeFilterTab];
+                    const isItemActive = isFilterItemActive(value, item.value);
+                    const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
 
-                  return (
-                    <button
-                      key={`${activeFilterTab}-${itemKey}`}
-                      type="button"
-                      onClick={() => handleFilterChange(activeFilterTab, item.value)}
-                      className="group flex min-w-[96px] flex-col items-center gap-4 text-center outline-none md:min-w-[128px]"
-                      aria-pressed={isItemActive}
-                    >
-                      <span
-                        className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 md:h-32 md:w-32 ${
-                          isItemActive
-                            ? 'border-accent shadow-[0_0_0_3px_hsl(var(--accent)/0.45)]'
-                            : 'border-transparent group-hover:border-accent'
-                        }`}
+                    return (
+                      <button
+                        key={`${activeFilterTab}-${itemKey}`}
+                        type="button"
+                        onClick={() => handleFilterChange(activeFilterTab, item.value)}
+                        className="group flex min-w-[96px] flex-col items-center gap-4 text-center outline-none md:min-w-[128px]"
+                        aria-pressed={isItemActive}
                       >
-                        {item.image ? (
-                          <img
-                            src={item.image}
-                            alt={item.label}
-                            className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center rounded-full bg-secondary px-4 text-base font-medium text-foreground/80 md:text-lg">
-                            {item.display}
-                          </span>
-                        )}
-                      </span>
-                      <span className={`text-sm transition-colors md:text-base ${isItemActive ? 'text-foreground' : 'text-foreground/70'}`}>
-                        {item.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                        <span
+                          className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 md:h-32 md:w-32 ${
+                            isItemActive
+                              ? 'border-accent shadow-[0_0_0_3px_hsl(var(--accent)/0.45)]'
+                              : 'border-transparent group-hover:border-accent'
+                          }`}
+                        >
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.label}
+                              className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <span className="flex h-full w-full items-center justify-center rounded-full bg-secondary px-4 text-base font-medium text-foreground/80 md:text-lg">
+                              {item.display}
+                            </span>
+                          )}
+                        </span>
+                        <span className={`text-sm transition-colors md:text-base ${isItemActive ? 'text-foreground' : 'text-foreground/70'}`}>
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Search + Sort row */}
@@ -359,8 +361,8 @@ const Shop = () => {
                 </label>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <section className="section-ivory py-8 md:py-12">

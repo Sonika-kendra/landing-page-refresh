@@ -34,7 +34,7 @@ const demoImage4 = 'https://images.unsplash.com/photo-1515562141589-67f0d1a34db8
 
 export const categories = ['Rings', 'Earrings', 'Bracelets', 'Necklaces', 'Bangles', 'Pendants'];
 export const subCategories = ['Halo', 'Solitaire', 'Three Stone', 'Eternity', 'Cluster'];
-export const metals = ['18K YG', '18K WG', '9K YG', '9K WG', 'Platinum'];
+export const metals = ['18K_YG', '18K_WG', '9K_YG', '9K_WG', 'Pt950'];
 export const shapes = ['Round', 'Pear', 'Oval', 'Emerald', 'Princess', 'Cushion'];
 export const stockTypes = ['Natural', 'Lab'];
 
@@ -54,7 +54,7 @@ export const shopProducts: ShopProduct[] = Array.from({ length: 24 }, (_, i) => 
   category: categories[i % categories.length],
   subCategory: subCategories[i % subCategories.length],
   metal: metals[i % metals.length],
-  metalOptions: ['18K', '18K', '9K', '9K'],
+  metalOptions: ['18K_YG', '18K_WG', '9K_YG', '9K_WG', '18K_RG', 'Pt950'],
   shape: shapes[i % shapes.length],
   stockType: stockTypes[i % stockTypes.length] as ShopProduct['stockType'],
   price: 620 + (i % 8) * 185,

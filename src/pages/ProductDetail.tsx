@@ -16,6 +16,26 @@ const trustBadges = [
   { icon: FileCheck, label: 'Insurance Valuation' },
 ];
 
+const getMetalBadgeClass = (metal: string, isSelected: boolean) => {
+  const isYG = metal.includes('YG');
+  const isWG = metal.includes('WG');
+  const base = 'px-2.5 py-1 text-xs font-semibold border transition-colors cursor-pointer min-w-[36px] text-center';
+
+  if (isYG) {
+    return `${base} ${isSelected
+      ? 'bg-[#C5A028] text-white border-[#C5A028]'
+      : 'bg-transparent text-foreground border-[#C5A028] hover:bg-[#C5A028]/10'}`;
+  }
+  if (isWG) {
+    return `${base} ${isSelected
+      ? 'bg-accent text-accent-foreground border-accent'
+      : 'bg-transparent text-foreground border-accent/70 hover:bg-accent/10'}`;
+  }
+  return `${base} ${isSelected
+    ? 'bg-foreground/80 text-white border-foreground/80'
+    : 'bg-transparent text-foreground border-border hover:border-foreground/60'}`;
+};
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const product = useMemo(() => shopProducts.find((p) => p.id === id), [id]);
@@ -40,62 +60,66 @@ const ProductDetail = () => {
   }
 
   const images = product.images || [product.image];
-
   const prevImage = () => setSelectedImage((i) => (i === 0 ? images.length - 1 : i - 1));
   const nextImage = () => setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1));
 
   return (
     <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
-      {/* Breadcrumbs */}
+      {/* Breadcrumb */}
       <div className="bg-accent">
         <div className="henig-container py-3">
-          <nav className="flex items-center gap-2 text-sm text-accent-foreground/70">
+          <nav className="flex flex-wrap items-center gap-1 text-xs text-accent-foreground/80">
             <Link to="/" className="hover:text-accent-foreground transition-colors">Home</Link>
-            <span>›</span>
+            <span className="opacity-50">›</span>
             <Link to="/shop" className="hover:text-accent-foreground transition-colors">{product.category}</Link>
-            <span>›</span>
-            <span className="text-accent-foreground">{product.subCategory}</span>
-            <span>›</span>
-            <span className="text-accent-foreground font-medium truncate max-w-[200px]">{product.name}</span>
+            <span className="opacity-50">›</span>
+            <Link to="/shop" className="hover:text-accent-foreground transition-colors">{product.subCategory}</Link>
+            <span className="opacity-50">›</span>
+            <span className="truncate max-w-[240px]">{product.name}</span>
           </nav>
         </div>
       </div>
 
-      {/* Product content */}
+      {/* Product section */}
       <section className="section-ivory py-8 md:py-12">
         <div className="henig-container">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            {/* Left - Image gallery */}
+
+            {/* ── Left column: image gallery ── */}
             <div>
               {/* Main image */}
-              <div className="relative aspect-square bg-white border border-border/30 overflow-hidden mb-4">
+              <div className="relative aspect-square bg-white border border-border/20 overflow-hidden mb-3">
                 <img
                   src={images[selectedImage]}
                   alt={product.name}
-                  className="h-full w-full object-contain p-6"
+                  className="h-full w-full object-contain p-8"
                 />
                 <button
                   onClick={prevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
+                  aria-label="Previous image"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors"
                 >
-                  <ChevronLeft className="h-8 w-8" />
+                  <ChevronLeft className="h-9 w-9" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
+                  aria-label="Next image"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors"
                 >
-                  <ChevronRight className="h-8 w-8" />
+                  <ChevronRight className="h-9 w-9" />
                 </button>
               </div>
 
               {/* Thumbnails */}
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 {images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className={`h-20 w-20 border overflow-hidden bg-white transition-all ${
-                      i === selectedImage ? 'border-primary ring-1 ring-primary' : 'border-border/30'
+                    className={`h-[90px] w-[90px] border bg-white overflow-hidden flex-shrink-0 transition-all ${
+                      i === selectedImage
+                        ? 'border-foreground/60'
+                        : 'border-border/30 hover:border-border/60'
                     }`}
                   >
                     <img src={img} alt="" className="h-full w-full object-contain p-1" />
@@ -103,126 +127,131 @@ const ProductDetail = () => {
                 ))}
               </div>
 
-              {/* Product description accordion */}
-              <div className="mt-8 border-t border-border/40">
+              {/* Product Description accordion */}
+              <div className="mt-8 border-t border-border/30">
                 <button
                   onClick={() => setDescOpen(!descOpen)}
                   className="flex w-full items-center justify-between py-4 text-left"
                 >
-                  <span className="font-medium text-foreground">Product Description</span>
-                  <span className="text-foreground/50">{descOpen ? '−' : '+'}</span>
+                  <span className="text-sm font-medium text-foreground">Product Description</span>
+                  <span className="text-foreground/40 text-xl leading-none">{descOpen ? '−' : '+'}</span>
                 </button>
                 {descOpen && (
-                  <div className="pb-4 text-sm text-foreground/70 leading-relaxed">
-                    <p className="mb-2">Item Ref: {product.itemRef}</p>
+                  <div className="pb-5 text-sm text-foreground/60 leading-relaxed">
+                    <p className="mb-1 text-xs">Item Ref: {product.itemRef}</p>
                     <p>{product.description}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Right - Product info */}
+            {/* ── Right column: product info ── */}
             <div>
-              <h1 className="font-serif text-2xl md:text-3xl text-foreground mb-2">{product.name}</h1>
+              {/* Title */}
+              <h1 className="font-serif text-2xl md:text-[1.7rem] leading-snug text-foreground mb-1.5">
+                {product.name}
+              </h1>
 
-              <div className="flex items-center gap-2 text-sm text-muted mb-6">
+              {/* SKU */}
+              <div className="flex items-center gap-1.5 text-xs text-muted mb-5">
                 <span>SKU #: {product.sku}</span>
-                <button className="text-foreground/40 hover:text-foreground">
-                  <Copy className="h-3.5 w-3.5" />
+                <button className="text-foreground/30 hover:text-foreground/60 transition-colors">
+                  <Copy className="h-3 w-3" />
                 </button>
               </div>
 
-              {/* Metal type */}
-              <div className="mb-5">
-                <span className="text-sm text-foreground mb-2 block">Metal type:</span>
-                <div className="flex gap-2">
-                  {product.metalOptions.map((m, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedMetal(i)}
-                      className={`px-3 py-1.5 text-sm font-medium border rounded transition-colors ${
-                        i === selectedMetal
-                          ? 'bg-accent text-accent-foreground border-accent'
-                          : 'border-border text-foreground hover:border-primary'
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
+              {/* Options — inline label:badges rows */}
+              <div className="space-y-3 mb-5">
+                {/* Metal type */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-foreground w-28 flex-shrink-0">Metal type:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {product.metalOptions.map((m, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedMetal(i)}
+                        className={getMetalBadgeClass(m, i === selectedMetal)}
+                      >
+                        {/* Show only the karat value, e.g. "18K YG" → "18K" */}
+                        {m.split(' ')[0]}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Carat weight */}
+                {product.caratOptions && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-foreground w-28 flex-shrink-0">Carat Wt.:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {product.caratOptions.map((c, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedCarat(i)}
+                          className={`h-8 w-8 text-xs font-medium border transition-colors ${
+                            i === selectedCarat
+                              ? 'bg-accent text-accent-foreground border-accent'
+                              : 'border-border/50 text-foreground hover:border-foreground/50'
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ring size */}
+                {product.sizeOptions && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-foreground w-28 flex-shrink-0">Ring size:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {product.sizeOptions.map((s, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedSize(i)}
+                          className={`h-8 w-8 text-xs font-medium border transition-colors ${
+                            i === selectedSize
+                              ? 'bg-accent text-accent-foreground border-accent'
+                              : 'border-border/50 text-foreground hover:border-foreground/50'
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Certificate */}
+                {product.certificate && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-foreground w-28 flex-shrink-0">Certificate:</span>
+                    <span className="inline-block px-3 py-1 text-xs font-semibold border border-[#C5A028] text-foreground">
+                      {product.certificate}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Carat weight */}
-              {product.caratOptions && (
-                <div className="mb-5">
-                  <span className="text-sm text-foreground mb-2 block">Carat Wt.:</span>
-                  <div className="flex gap-2">
-                    {product.caratOptions.map((c, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedCarat(i)}
-                        className={`h-9 w-9 text-sm font-medium border rounded transition-colors ${
-                          i === selectedCarat
-                            ? 'bg-accent text-accent-foreground border-accent'
-                            : 'border-border text-foreground hover:border-primary'
-                        }`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Ring size */}
-              {product.sizeOptions && (
-                <div className="mb-5">
-                  <span className="text-sm text-foreground mb-2 block">Ring size:</span>
-                  <div className="flex gap-2">
-                    {product.sizeOptions.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedSize(i)}
-                        className={`h-9 w-9 text-sm font-medium border rounded transition-colors ${
-                          i === selectedSize
-                            ? 'bg-accent text-accent-foreground border-accent'
-                            : 'border-border text-foreground hover:border-primary'
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Certificate */}
-              {product.certificate && (
-                <div className="mb-6">
-                  <span className="text-sm text-foreground mb-2 block">Certificate:</span>
-                  <span className="inline-block px-3 py-1.5 text-sm font-medium border border-accent bg-accent text-accent-foreground rounded">
-                    {product.certificate}
-                  </span>
-                </div>
-              )}
-
-              {/* Product specifications accordion */}
-              <div className="border-t border-border/40">
+              {/* Product Specifications accordion */}
+              <div className="border-t border-border/30">
                 <button
                   onClick={() => setSpecsOpen(!specsOpen)}
                   className="flex w-full items-center justify-between py-4 text-left"
                 >
-                  <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground">
                     Product Specifications
                   </span>
-                  <span className="text-foreground/50">{specsOpen ? '−' : '+'}</span>
+                  <span className="text-foreground/50 text-xl leading-none">{specsOpen ? '−' : '+'}</span>
                 </button>
+
                 {specsOpen && (
-                  <div className="pb-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Stone</p>
-                    <table className="w-full text-sm">
+                  <div className="pb-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-2.5">Stone</p>
+                    <table className="w-full">
                       <tbody>
-                        {[
+                        {([
                           ['Stone type:', product.stoneType],
                           ['Shape:', product.shape],
                           ['Colour:', product.colour],
@@ -231,10 +260,10 @@ const ProductDetail = () => {
                           ['Certificate:', product.certificate],
                           ['Gold weight:', product.goldWeight],
                           ['Total weight:', product.totalWeight],
-                        ].map(([label, value]) => (
-                          <tr key={label} className="border-b border-border/20">
-                            <td className="py-1.5 text-muted pr-4">{label}</td>
-                            <td className="py-1.5 font-medium text-foreground">{value}</td>
+                        ] as [string, string | undefined][]).map(([label, value]) => (
+                          <tr key={label}>
+                            <td className="py-[3px] text-[11px] text-muted pr-4 w-[110px] align-top">{label}</td>
+                            <td className="py-[3px] text-[11px] text-foreground">{value}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -243,62 +272,62 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Price */}
-              <div className="mt-6 flex items-center gap-4">
-                <span className="text-3xl font-bold text-foreground border border-primary/30 px-4 py-2">
+              {/* Price row */}
+              <div className="mt-4 flex items-center gap-3">
+                <span className="border border-border/40 px-4 py-2 text-[1.6rem] font-bold text-foreground tracking-tight leading-none">
                   £{product.price.toLocaleString()}
                 </span>
                 {product.stock && product.stock <= 5 && (
-                  <span className="text-sm text-destructive font-medium">
+                  <span className="text-sm text-foreground/55">
                     Only {product.stock} left
                   </span>
                 )}
-                <div className="ml-auto flex items-center gap-2 text-sm text-muted">
-                  <span>SHARE</span>
-                  <Share2 className="h-4 w-4" />
+                <div className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted">
+                  <span>Share</span>
+                  <Share2 className="h-3.5 w-3.5" />
                 </div>
               </div>
 
-              {/* Add to bag + wishlist */}
-              <div className="mt-5 flex gap-3">
-                <button className="flex-1 bg-accent text-accent-foreground py-3.5 text-sm font-semibold uppercase tracking-widest hover:bg-accent/90 transition-colors">
+              {/* CTA */}
+              <div className="mt-4 flex">
+                <button className="flex-1 bg-accent text-accent-foreground py-4 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-accent/90 transition-colors">
                   Add to Bag
                 </button>
                 <button
                   onClick={() => setLiked(!liked)}
-                  className={`h-[50px] w-[50px] border flex items-center justify-center transition-colors ${
-                    liked ? 'border-primary bg-primary/10' : 'border-border hover:border-primary'
+                  aria-label="Add to wishlist"
+                  className={`w-[54px] border flex items-center justify-center transition-colors ${
+                    liked
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border border-l-0 hover:border-foreground/40'
                   }`}
                 >
-                  <Heart className={`h-5 w-5 ${liked ? 'fill-primary text-primary' : 'text-foreground/50'}`} />
+                  <Heart className={`h-5 w-5 ${liked ? 'fill-primary text-primary' : 'text-foreground/35'}`} />
                 </button>
               </div>
 
-              {/* Delivery info */}
-              <p className="mt-3 text-sm text-primary text-center">
+              {/* Delivery note */}
+              <p className="mt-3 text-xs text-primary text-center">
                 Order within 02 hours to receive by Thu, 26 Mar
               </p>
 
               {/* Trust badges */}
-              <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border/40 pt-6">
+              <div className="mt-7 grid grid-cols-3 gap-y-5 gap-x-3 border-t border-border/30 pt-6">
                 {trustBadges.map(({ icon: Icon, label }) => (
                   <div key={label} className="flex flex-col items-center gap-1.5 text-center">
-                    <Icon className="h-6 w-6 text-accent" />
-                    <span className="text-xs text-foreground/70 leading-tight">{label}</span>
+                    <Icon className="h-5 w-5 text-primary" />
+                    <span className="text-[10px] text-foreground/55 leading-tight">{label}</span>
                   </div>
                 ))}
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* You May Also Like */}
       <YouMayAlsoLike items={youMayAlsoLike} />
-
-      {/* Features bar */}
       <CommitmentSection />
-
       <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
   );

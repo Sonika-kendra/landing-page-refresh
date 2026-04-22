@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { ShopProduct } from '@/config/shop/products';
+import { getMetalType } from '@/config/shop/metalTypes';
+import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
 interface ShopProductCardProps {
   product: ShopProduct;
@@ -19,13 +21,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
     >
       {/* Badge */}
       {product.badge && (
-        <span
-          className={`absolute left-3 top-3 z-10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-            product.badge === 'NEW STOCK'
-              ? 'bg-accent text-accent-foreground'
-              : 'bg-destructive text-destructive-foreground'
-          }`}
-        >
+        <span className="absolute left-3 top-3 z-10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded bg-primary text-primary-foreground">
           {product.badge}
         </span>
       )}
@@ -36,9 +32,13 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
           e.preventDefault();
           setLiked(!liked);
         }}
-        className="absolute right-3 top-3 z-10 text-primary/60 hover:text-primary transition-colors"
+        className="absolute right-2.5 top-2.5 z-10 transition-colors"
       >
-        <Heart className={`h-5 w-5 ${liked ? 'fill-primary text-primary' : ''}`} />
+        <Heart
+          className={`h-6 w-6 transition-colors ${
+            liked ? 'fill-primary text-primary' : 'text-primary/70 hover:text-primary'
+          }`}
+        />
       </button>
 
       {/* Image */}
@@ -53,42 +53,51 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
       </Link>
 
       {/* Info */}
-      <div className="px-4 pb-4 pt-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <Link to={`/shop/${product.id}`}>
-              <h3 className="text-sm font-medium text-foreground leading-tight line-clamp-2">
-                {product.name} -...
-              </h3>
-            </Link>
-          </div>
+      <div className="px-3 pb-3 pt-2">
+        {/* Title + certificate */}
+        <div className="flex items-start justify-between gap-1.5">
+          <Link to={`/shop/${product.id}`} className="min-w-0 flex-1">
+            <h3 className="text-[11px] font-medium uppercase tracking-wide text-foreground leading-snug line-clamp-2">
+              {product.name} -...
+            </h3>
+          </Link>
           {product.certificate && (
-            <span className="flex items-center gap-0.5 text-[11px] text-muted shrink-0">
-              <span className="inline-block h-3.5 w-3.5 rounded-full border border-muted text-center text-[8px] leading-[13px]">©</span>
-              {product.certificate}
-            </span>
+            <div className="shrink-0 mt-0.5 flex flex-col items-center gap-0.5">
+              <img
+                src={igiLogo}
+                alt={product.certificate}
+                className="h-6 w-auto object-contain"
+              />
+              <span className="text-[8px] text-foreground/50 leading-none font-medium uppercase tracking-wide">
+                {product.certificate}
+              </span>
+            </div>
           )}
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between">
-          {/* Metal pills */}
-          <div className="flex gap-1">
-            {product.metalOptions.map((m, i) => (
-              <span
-                key={i}
-                className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
-                  m === '18K'
-                    ? 'bg-accent text-accent-foreground'
-                    : 'bg-primary/20 text-foreground'
-                }`}
-              >
-                {m}
-              </span>
-            ))}
+        {/* Metal badges + price */}
+        <div className="mt-2 flex items-end justify-between gap-1">
+          <div className="flex flex-col gap-1">
+            <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-medium leading-none">Metal type</span>
+            <div className="flex flex-wrap gap-1">
+              {product.metalOptions.map((m, i) => {
+                const metal = getMetalType(m);
+                return (
+                  <span
+                    key={i}
+                    title={metal.name}
+                    style={{ backgroundColor: metal.bg, color: metal.color }}
+                    className="rounded px-1.5 py-[3px] text-[9px] font-bold leading-none uppercase tracking-wide"
+                  >
+                    {metal.label}
+                  </span>
+                );
+              })}
+            </div>
           </div>
-          <div className="text-right">
-            <span className="block text-[11px] text-muted">From</span>
-            <span className="text-base font-semibold text-foreground">£{product.price}</span>
+          <div className="shrink-0 flex items-baseline gap-0.5">
+            <span className="text-[9px] text-foreground/50 leading-none mb-0.5">From</span>
+            <span className="text-xl font-bold text-foreground leading-none">£{product.price.toLocaleString()}</span>
           </div>
         </div>
       </div>
