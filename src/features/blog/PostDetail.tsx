@@ -3,7 +3,6 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { baseURL, websiteUrlConfig } from '@/config/site';
 import { fetchBlogPosts, BlogPost as BlogPostType } from '@/api/blog';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,6 @@ const BlogPost = () => {
   const [allPosts, setAllPosts] = useState<BlogPostType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   useEffect(() => {
     if (!postId) { setError(true); setLoading(false); return; }
@@ -43,7 +41,7 @@ const BlogPost = () => {
     .slice(0, 5);
 
   return (
-    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+    <PageLayout>
       <section className="py-12 md:py-20 section-ivory min-h-[60vh]">
         <div className="henig-container">
           <Link to={`${websiteUrlConfig.Blogs}`} className="inline-flex items-center gap-2 text-muted hover:text-primary transition-colors mb-8">
@@ -126,7 +124,6 @@ const BlogPost = () => {
           </div>
         </div>
       </section>
-      <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
   );
 };

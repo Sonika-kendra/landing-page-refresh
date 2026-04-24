@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import { baseURL, websiteUrlConfig } from '@/config/site';
 import { BlogPost, fetchBlogPosts } from '@/api/blog';
 
@@ -196,7 +195,6 @@ const BlogLayoutGroupSection = ({ group }: { group: BlogLayoutGroup }) => (
 const Blogs = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   useEffect(() => {
     const loadBlogs = async () => {
@@ -215,7 +213,7 @@ const Blogs = () => {
   const blogLayoutGroups = getBlogLayoutGroups(posts);
 
   return (
-    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+    <PageLayout>
       <section className="bg-accent py-16 text-accent-foreground md:py-24">
         <div className={`${blogPageContainerClass} flex flex-col items-center text-center`}>
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="font-serif text-[3rem] font-medium tracking-tight md:text-[4.25rem]">
@@ -231,7 +229,6 @@ const Blogs = () => {
           )}
         </div>
       </section>
-      <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
   );
 };

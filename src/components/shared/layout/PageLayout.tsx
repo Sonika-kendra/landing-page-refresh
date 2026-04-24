@@ -4,14 +4,14 @@ import Footer from './Footer';
 
 interface PageLayoutProps {
   children: ReactNode;
-  onRegisterClick: () => void;
+  onRegisterClick?: () => void;
   className?: string;
 }
 
-const PageLayout = ({ children, onRegisterClick, className = '' }: PageLayoutProps) => {
+const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
   return (
     <div className={`min-h-screen ${className}`}>
-      <Header onRegisterClick={onRegisterClick} />
+      <Header />
       <main>{children}</main>
       <Footer />
     </div>

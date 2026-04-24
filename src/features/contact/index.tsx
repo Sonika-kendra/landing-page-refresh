@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,6 @@ const contactInfo = [
 ];
 
 const Contact = () => {
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<ContactFormValues>({
@@ -52,7 +50,7 @@ const Contact = () => {
   };
 
   return (
-    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+    <PageLayout>
       <section className="bg-accent text-accent-foreground py-20 md:py-28">
         <div className="henig-container text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="henig-heading-display mb-4">Contact Us</motion.h1>
@@ -118,7 +116,6 @@ const Contact = () => {
           </div>
         </div>
       </section>
-      <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
   );
 };

@@ -1,4 +1,5 @@
 import api from './client';
+import { API_CONFIG } from './config';
 import { permalink } from '@/lib/string';
 
 export interface BlogPost {
@@ -10,8 +11,10 @@ export interface BlogPost {
   [key: string]: any;
 }
 
+const { base, endpoints } = API_CONFIG.blog;
+
 export const fetchBlogPosts = async (status: string = 'all'): Promise<BlogPost[]> => {
-  const res = await api.get<BlogPost[]>(`/posts/${status}`);
+  const res = await api.get<BlogPost[]>(endpoints.posts(status), undefined, undefined, false, base);
 
   return res.data.map((blogPost) => {
     const title = blogPost.title;

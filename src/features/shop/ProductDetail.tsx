@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, Share2, Copy, Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
@@ -21,7 +20,6 @@ const trustBadges = [
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const product = useMemo(() => shopProducts.find((p) => p.id === id), [id]);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedMetal, setSelectedMetal] = useState(0);
   const [selectedCarat, setSelectedCarat] = useState(0);
@@ -39,7 +37,7 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <PageLayout onRegisterClick={() => {}}>
+      <PageLayout>
         <div className="henig-container py-24 text-center">
           <h1 className="font-serif text-3xl text-foreground">Product not found</h1>
           <Link to="/shop" className="mt-4 inline-block text-primary underline">Back to shop</Link>
@@ -53,7 +51,7 @@ const ProductDetail = () => {
   const nextImage = () => setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1));
 
   return (
-    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+    <PageLayout>
       <div className="bg-accent">
         <div className="henig-container py-3">
           <nav className="flex flex-wrap items-center gap-1 text-xs text-accent-foreground/80">
@@ -242,7 +240,6 @@ const ProductDetail = () => {
 
       <YouMayAlsoLike items={youMayAlsoLike} />
       <CommitmentSection />
-      <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
   );
 };

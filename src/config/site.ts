@@ -1,4 +1,5 @@
 export const baseURL: string = import.meta.env.VITE_API_URL!;
+export const newApiURL: string = import.meta.env.VITE_NEW_API_URL!;
 export const oldWebsiteURL: string = 'https://henigdiamonds.co.uk';
 export const oldJewelleryWebsiteURL: string = 'https://jewellery.henigdiamonds.co.uk';
 

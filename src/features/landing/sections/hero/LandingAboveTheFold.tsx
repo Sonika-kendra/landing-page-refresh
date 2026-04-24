@@ -1,22 +1,11 @@
-import Header from '@/components/shared/layout/Header';
 import HeroSection from '../HeroSection';
 
-interface Props {
-  onRegisterClick: () => void;
-}
-
-const LandingAboveTheFold = ({ onRegisterClick }: Props) => {
-  return (
-    <section className="h-screen flex flex-col bg-background">
-      {/* Header */}
-      {/* <Header onRegisterClick={onRegisterClick} /> */}
-
-      {/* Hero fills remaining space */}
-      <div className="flex-1">
-        <HeroSection />
-      </div>
-    </section>
-  );
-};
+const LandingAboveTheFold = () => (
+  <section className="h-screen flex flex-col bg-background">
+    <div className="flex-1">
+      <HeroSection />
+    </div>
+  </section>
+);
 
 export default LandingAboveTheFold;

@@ -1,9 +1,9 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
-import RegistrationModal from '@/components/shared/common/RegistrationModal';
+import { useEffect, lazy, Suspense } from 'react';
 import AboutSection from './sections/AboutSection';
 import CategorySection from './sections/CategorySection';
 import HeroSection from './sections/HeroSection';
 import PageLayout from '@/components/shared/layout/PageLayout';
+import { useAuth } from '@/context/AuthContext';
 
 const BlogSection = lazy(() => import('./sections/BlogSection'));
 const FAQSection = lazy(() => import('./sections/FAQSection'));
@@ -14,26 +14,27 @@ const CertificationsAndPartnersSection = lazy(() => import('@/components/shared/
 const FeaturesGridSection = lazy(() => import('@/components/shared/common/FeaturesGridSection'));
 
 const LandingPage = () => {
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const { openModal, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    if (isAuthenticated) return;
     const hasSeenModal = sessionStorage.getItem('henig-modal-shown');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {
-        setIsRegisterModalOpen(true);
+        openModal('register');
         sessionStorage.setItem('henig-modal-shown', 'true');
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isAuthenticated, openModal]);
 
   return (
-    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+    <PageLayout>
       <HeroSection />
       <CategorySection />
       <AboutSection />
       <Suspense fallback={<div className="min-h-32" />}>
-        <CertificationsAndPartnersSection onRegisterClick={() => setIsRegisterModalOpen(true)} />
+        <CertificationsAndPartnersSection />
         <FeaturesGridSection />
         <BestSellerSection />
         <FAQSection />
@@ -41,10 +42,6 @@ const LandingPage = () => {
         <BlogSection />
         <SupportSection />
       </Suspense>
-      <RegistrationModal
-        isOpen={isRegisterModalOpen}
-        onClose={() => setIsRegisterModalOpen(false)}
-      />
     </PageLayout>
   );
 };

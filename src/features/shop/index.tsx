@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChevronUp, Search, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
@@ -142,7 +141,6 @@ const isFilterItemActive = (currentValue: FilterValues[string], itemValue: Visua
 };
 
 const ShopPage = () => {
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
   const [activeFilterTab, setActiveFilterTab] = useState<FilterTabKey>('category');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -228,7 +226,7 @@ const ShopPage = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <PageLayout onRegisterClick={() => setIsRegisterModalOpen(true)}>
+    <PageLayout>
       {/* Sticky category bar */}
       <div
         className="relative sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20"
@@ -432,7 +430,6 @@ const ShopPage = () => {
         <ChevronUp className="h-5 w-5" />
       </button>
 
-      <RegistrationModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
     </PageLayout>
   );
 };

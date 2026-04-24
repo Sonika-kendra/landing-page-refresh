@@ -39,8 +39,8 @@
     --secondary-foreground: 165 41% 15%;
 
     /* Sage green */
-    --muted: 183 10% 43%;             /* #627672 */
-    --muted-foreground: 60 23% 95%;
+    --muted: 183 10% 88%;             /* light sage tint for bg-muted */
+    --muted-foreground: 183 10% 43%;  /* #627672 sage green — readable on beige/ivory */
 
     /* Forest green */
     --accent: 165 41% 15%;

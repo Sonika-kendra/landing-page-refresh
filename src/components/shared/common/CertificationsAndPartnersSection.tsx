@@ -1,10 +1,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
-
-interface CertificationsAndPartnersSectionProps {
-  onRegisterClick: () => void;
-}
+import { useAuth } from '@/context/AuthContext';
 
 // Certifications images
 const certificationModules = import.meta.glob(
@@ -34,9 +31,9 @@ const logoWrapperClass =
 const logoImageClass =
   'block w-full h-full object-contain object-center mx-auto';
 
-const CertificationsAndPartnersSection = ({
-  onRegisterClick,
-}: CertificationsAndPartnersSectionProps) => {
+const CertificationsAndPartnersSection = () => {
+  const { openModal } = useAuth();
+
   return (
     // 👇 Controlled outer spacing for section separation
     <section className="py-8 md:py-12 section-ivory">
@@ -76,7 +73,7 @@ const CertificationsAndPartnersSection = ({
           <div className="px-4">
             <Button
               size="sm"
-              onClick={onRegisterClick}
+              onClick={() => openModal('register')}
               className="p-5 whitespace-nowrap bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
             >
               Partner With Us

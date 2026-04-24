@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/theme';
 import { websiteUrlConfig } from '@/config/site';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
 import Logo from '@/assets/icons/logoLight.png';
 
 type MobileNavItem = {
@@ -96,13 +98,8 @@ const mobileNavItems: MobileNavItem[] = navigationLinks.map((link) => {
   };
 });
 
-interface HeaderProps {
-  onRegisterClick: () => void;
-}
-
-const Header = ({ onRegisterClick }: HeaderProps) => {
-  void onRegisterClick;
-
+const Header = () => {
+  const { isAuthenticated, user, openModal, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [openMobileMenus, setOpenMobileMenus] = useState<
@@ -334,43 +331,43 @@ const Header = ({ onRegisterClick }: HeaderProps) => {
             </ul>
           </nav>
 
-          {/* Actions temporarily hidden */}
-          <div className="w-10 shrink-0 md:hidden" aria-hidden="true">
-            {/*
-            <div className="flex items-center gap-0.5 md:gap-3 justify-end relative z-10">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hidden md:flex items-center gap-2 text-sm font-semibold"
-                onClick={onRegisterClick}
-              >
-                <User className="w-4 h-4" />
-                <span>Sign In / Register</span>
-              </Button>
-
-              <button
-                className="md:hidden p-1"
-                onClick={onRegisterClick}
-                aria-label="Sign in or register"
-              >
-                <User className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-
-              <button className="p-1 md:p-2" onClick={onRegisterClick}>
-                <Heart className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-
-              <button
-                className="p-1 md:p-2 relative"
-                onClick={onRegisterClick}
-              >
-                <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" />
-                <span className="absolute top-0 right-0 md:-top-1 md:-right-1 w-3 h-3 md:w-4 md:h-4 bg-primary text-primary-foreground text-[8px] md:text-[10px] rounded-full flex items-center justify-center">
-                  0
+          {/* Auth Actions */}
+          <div className="flex items-center gap-1 md:gap-2 relative z-10">
+            {isAuthenticated && user ? (
+              <>
+                <span className="hidden md:block text-sm font-medium text-foreground truncate max-w-[120px]">
+                  {user.firstName}
                 </span>
-              </button>
-            </div>
-            */}
+                <button
+                  type="button"
+                  onClick={logout}
+                  aria-label="Sign out"
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden md:flex items-center gap-2 text-sm font-semibold"
+                  onClick={() => openModal('login')}
+                >
+                  <User className="w-4 h-4" />
+                  <span>Sign In / Register</span>
+                </Button>
+                <button
+                  type="button"
+                  className="md:hidden p-2"
+                  onClick={() => openModal('login')}
+                  aria-label="Sign in or register"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

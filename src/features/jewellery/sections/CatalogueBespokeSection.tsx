@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import ImageWithSkeleton from "@/components/shared/common/ImageWithSkeleton";
+import { useAuth } from "@/context/AuthContext";
 
 import CatalogueImg from "@/assets/jewellery/catalogue/Catalogue.jpg";
 import BespokeImg from "@/assets/jewellery/catalogue/Bespoke111.png";
@@ -22,11 +23,9 @@ const items = [
   },
 ];
 
-interface CatalogueBespokeSectionProps {
-  onRegisterClick: () => void;
-}
+const CatalogueBespokeSection = () => {
+  const { openModal } = useAuth();
 
-const CatalogueBespokeSection = ({ onRegisterClick }: CatalogueBespokeSectionProps) => {
   return (
     <section className="py-4 md:py-6 section-white">
       <div className="henig-container px-0 sm:px-0 lg:px-0">
@@ -62,7 +61,7 @@ const CatalogueBespokeSection = ({ onRegisterClick }: CatalogueBespokeSectionPro
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={onRegisterClick}
+                  onClick={() => openModal('register')}
                   className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
                 >
                   Enquire

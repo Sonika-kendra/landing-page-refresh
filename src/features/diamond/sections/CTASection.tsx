@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
-interface CTAProps {
-  onRegisterClick: () => void;
-}
+const CTASection = () => {
+  const { openModal } = useAuth();
 
-const CTASection = ({ onRegisterClick }: CTAProps) => {
   return (
     <section className="py-16 md:py-24 bg-accent text-secondary">
       <div className="henig-container text-center">
@@ -17,10 +16,10 @@ const CTASection = ({ onRegisterClick }: CTAProps) => {
         >
           <h2 className="henig-heading-section mb-6">Register With Us</h2>
           <p className="henig-body-large text-secondary/80 mb-8 max-w-2xl mx-auto">
-            Join our network of trusted jewellers and gain access to our full inventory, 
+            Join our network of trusted jewellers and gain access to our full inventory,
             competitive pricing, and expert support.
           </p>
-          <Button className="btn-henig-gold" size="lg" onClick={onRegisterClick}>
+          <Button className="btn-henig-gold" size="lg" onClick={() => openModal('register')}>
             Partner With Us
           </Button>
         </motion.div>
