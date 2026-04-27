@@ -15,15 +15,18 @@ import {
 } from '@/components/ui/select';
 import { adminApi } from '@/api/admin';
 
-type StatusKey = 'approved' | 'pending' | 'rejected';
+type StatusKey = 'draft' | 'pending' | 'approved' | 'inactive' | 'blocked' | 'rejected';
 
 const STATUS_CONFIG: Record<
   StatusKey,
-  { label: string; variant: 'default' | 'outline' | 'destructive' }
+  { label: string; variant: 'default' | 'outline' | 'destructive' | 'secondary' }
 > = {
-  approved: { label: 'Active', variant: 'default' },
-  pending: { label: 'Pending', variant: 'outline' },
-  rejected: { label: 'Rejected', variant: 'destructive' },
+  draft:    { label: 'Draft',     variant: 'secondary' },
+  pending:  { label: 'Pending',   variant: 'outline' },
+  approved: { label: 'Active',    variant: 'default' },
+  inactive: { label: 'Inactive',  variant: 'secondary' },
+  blocked:  { label: 'Blocked',   variant: 'destructive' },
+  rejected: { label: 'Rejected',  variant: 'destructive' },
 };
 
 const PAGE_SIZE = 20;
@@ -90,8 +93,11 @@ const AllUsers = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="approved">Active</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="blocked">Blocked</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>

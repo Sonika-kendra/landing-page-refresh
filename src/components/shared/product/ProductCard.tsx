@@ -67,7 +67,7 @@ const ProductCard = ({
       </h3>
       
       {showMaterial && (
-        <p className="text-xs text-muted mb-1">{product.material}</p>
+        <p className="text-xs text-muted-foreground mb-1">{product.material}</p>
       )}
       
       {showPrice && (

@@ -43,7 +43,7 @@ const FeaturesGridSection = () => {
                                 {feature.title}
                             </h3>
 
-                            <p className="text-sm text-muted leading-snug">
+                            <p className="text-sm text-muted-foreground leading-snug">
                                 {feature.description}
                             </p>
                         </motion.div>

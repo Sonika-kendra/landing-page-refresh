@@ -4,6 +4,15 @@ import { authApi } from '@/api/auth';
 const TOKEN_KEY = 'henig-auth-token';
 const USER_KEY = 'henig-auth-user';
 
+const PERMISSIONS: Record<string, Record<string, string[]>> = {
+  admin:        { users: ['create','read','update','delete','manage'], products: ['create','read','update','delete'], orders: ['create','read','update','delete'], reports: ['read'], settings: ['read','update'], roles: ['assign'] },
+  internalUser: { products: ['read','update'], orders: ['read','update'], reports: ['read'], users: ['read'] },
+  client:       { products: ['read'], orders: ['create','read'], profile: ['read','update'] },
+  user:         { products: ['read'], orders: ['create','read'], profile: ['read','update'] },
+  sales:        { products: ['read'], orders: ['create','read','update'], reports: ['read'], profile: ['read','update'] },
+  api:          { products: ['read'], orders: ['create','read'] },
+};
+
 export interface AuthUser {
   _id: string;
   title?: string;
@@ -28,6 +37,8 @@ interface AuthContextValue {
   closeModal: () => void;
   setAuth: (token: string, user: AuthUser) => void;
   logout: () => void;
+  hasRole: (role: string | string[]) => boolean;
+  hasPermission: (module: string, action: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,10 +81,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    // Fire-and-forget: invalidate token server-side before clearing local state
+    authApi.logout().catch(() => {});
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
+  };
+
+  const hasRole = (role: string | string[]) => {
+    if (!user) return false;
+    return Array.isArray(role) ? role.includes(user.role) : user.role === role;
+  };
+
+  const hasPermission = (module: string, action: string) => {
+    if (!user) return false;
+    const rolePerms = PERMISSIONS[user.role];
+    return !!(rolePerms && rolePerms[module]?.includes(action));
   };
 
   const openModal = (view: ModalInitialView = 'login') => {
@@ -85,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAuthenticated: !!token, isModalOpen, initialView, openModal, closeModal, setAuth, logout }}
+      value={{ user, token, isAuthenticated: !!token, isModalOpen, initialView, openModal, closeModal, setAuth, logout, hasRole, hasPermission }}
     >
       {children}
     </AuthContext.Provider>

@@ -13,7 +13,7 @@ const AboutSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <span className="henig-caption text-muted mb-2 block">
+          <span className="henig-caption text-muted-foreground mb-2 block">
             {brandConfig.name}
           </span>
 
@@ -21,7 +21,7 @@ const AboutSection = () => {
             A Heritage of Trust, Innovation, and Excellence in Diamonds
           </h2>
 
-          <p className="text-base text-muted font-light max-w-xxl mx-auto">
+          <p className="text-base text-muted-foreground font-light max-w-xxl mx-auto">
             Since {brandConfig.foundedYear}, supplying the trade with quality diamonds and fine jewellery.
           </p>
         </motion.div>
@@ -48,7 +48,7 @@ const AboutSection = () => {
                   {stat.value}
                 </p>
 
-                <p className="text-xs md:text-sm text-muted">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   {stat.label}
                 </p>
               </motion.div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Navigate, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { adminApi } from '@/api/admin';
@@ -8,15 +8,17 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/assets/icons/logoDark.png';
 
 const NAV_ITEMS = [
-  { to: '/admin',           label: 'Dashboard',        icon: LayoutDashboard, exact: true },
-  { to: '/admin/approvals', label: 'Pending Approvals', icon: UserCheck },
-  { to: '/admin/users',     label: 'All Users',         icon: Users },
-  { to: '/admin/posts',     label: 'Blog Posts',        icon: FileText },
-  { to: '/admin/settings',  label: 'Settings',          icon: SettingsIcon },
+  { to: '/admin',           label: 'Dashboard',        icon: LayoutDashboard, exact: true, countKey: undefined },
+  { to: '/admin/draft',     label: 'Draft Users',      icon: FileEdit,        countKey: 'draftUsers' as const },
+  { to: '/admin/approvals', label: 'Pending Approvals', icon: UserCheck,      countKey: 'pendingApprovals' as const },
+  { to: '/admin/users',     label: 'All Users',        icon: Users,           countKey: undefined },
+  { to: '/admin/posts',     label: 'Blog Posts',       icon: FileText,        countKey: undefined },
+  { to: '/admin/settings',  label: 'Settings',         icon: SettingsIcon,    countKey: undefined },
+  { to: '/admin/zoho',      label: 'Zoho Sync',        icon: RefreshCw,       countKey: undefined },
 ];
 
 interface SidebarNavProps {
-  pendingCount: number;
+  counts: Record<string, number>;
   userName: string;
   userEmail: string;
   userInitials: string;
@@ -27,7 +29,7 @@ interface SidebarNavProps {
 // Sidebar is rendered on dark forest-green (bg-accent = #173731)
 // so all text / icons use accent-foreground (cream #f5f5ea) palette
 const SidebarNav = ({
-  pendingCount,
+  counts,
   userName,
   userEmail,
   userInitials,
@@ -45,29 +47,32 @@ const SidebarNav = ({
 
     {/* Nav links */}
     <nav className="flex-1 px-3 py-4 space-y-0.5">
-      {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={exact}
-          onClick={onNavClick}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-colors ${
-              isActive
-                ? 'bg-accent-foreground/15 text-accent-foreground font-medium'
-                : 'text-accent-foreground/60 hover:bg-accent-foreground/10 hover:text-accent-foreground'
-            }`
-          }
-        >
-          <Icon className="h-4 w-4 shrink-0" />
-          <span className="flex-1">{label}</span>
-          {label === 'Pending Approvals' && pendingCount > 0 && (
-            <span className="min-w-[1.25rem] h-5 px-1.5 text-[11px] bg-primary text-primary-foreground rounded-sm flex items-center justify-center font-medium">
-              {pendingCount}
-            </span>
-          )}
-        </NavLink>
-      ))}
+      {NAV_ITEMS.map(({ to, label, icon: Icon, exact, countKey }) => {
+        const count = countKey ? (counts[countKey] ?? 0) : 0;
+        return (
+          <NavLink
+            key={to}
+            to={to}
+            end={exact}
+            onClick={onNavClick}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-colors ${
+                isActive
+                  ? 'bg-accent-foreground/15 text-accent-foreground font-medium'
+                  : 'text-accent-foreground/60 hover:bg-accent-foreground/10 hover:text-accent-foreground'
+              }`
+            }
+          >
+            <Icon className="h-4 w-4 shrink-0" />
+            <span className="flex-1">{label}</span>
+            {count > 0 && (
+              <span className="min-w-[1.25rem] h-5 px-1.5 text-[11px] bg-primary text-primary-foreground rounded-sm flex items-center justify-center font-medium">
+                {count}
+              </span>
+            )}
+          </NavLink>
+        );
+      })}
     </nav>
 
     {/* User + logout */}
@@ -109,17 +114,19 @@ const AdminLayout = () => {
     return <Navigate to="/" replace />;
   }
 
-  const pendingCount   = stats?.pendingApprovals ?? 0;
-  const userName       = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email;
-  const userInitials   = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() || user.email[0].toUpperCase();
+  const userName     = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email;
+  const userInitials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() || user.email[0].toUpperCase();
 
   const sidebarProps: SidebarNavProps = {
-    pendingCount,
+    counts: {
+      draftUsers:       stats?.draftUsers       ?? 0,
+      pendingApprovals: stats?.pendingApprovals  ?? 0,
+    },
     userName,
-    userEmail:    user.email,
+    userEmail:  user.email,
     userInitials,
-    onNavClick:   () => setSidebarOpen(false),
-    onLogout:     logout,
+    onNavClick: () => setSidebarOpen(false),
+    onLogout:   logout,
   };
 
   return (

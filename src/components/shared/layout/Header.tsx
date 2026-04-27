@@ -416,7 +416,7 @@ const Header = () => {
                           ) : (
                             <a
                               href={subLink.href}
-                              className="block py-1.5 text-sm text-muted font-medium hover:text-primary transition-colors"
+                              className="block py-1.5 text-sm text-muted-foreground font-medium hover:text-primary transition-colors"
                             >
                               {subLink.label}
                             </a>

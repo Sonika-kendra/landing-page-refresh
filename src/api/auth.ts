@@ -66,4 +66,7 @@ export const authApi = {
 
   getProfile: () =>
     apiClient.get<AuthUser>(endpoints.profile, undefined, undefined, false, base),
+
+  logout: () =>
+    apiClient.post<{ message: string }>(endpoints.logout, undefined, undefined, base),
 };

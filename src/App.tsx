@@ -41,7 +41,9 @@ const AdminUserApprovals = lazy(() => import('@/features/admin/sections/UserAppr
 const AdminAllUsers = lazy(() => import('@/features/admin/sections/AllUsers'));
 const AdminUserDetail = lazy(() => import('@/features/admin/sections/UserDetail'));
 const AdminPosts = lazy(() => import('@/features/admin/sections/Posts'));
-const AdminSettings = lazy(() => import('@/features/admin/sections/Settings'));
+const AdminSettings  = lazy(() => import('@/features/admin/sections/Settings'));
+const AdminDraftUsers = lazy(() => import('@/features/admin/sections/DraftUsers'));
+const AdminZohoSync  = lazy(() => import('@/features/admin/sections/ZohoSync'));
 const NotFound = lazy(() => import('@/features/not-found'));
 
 const queryClient = new QueryClient();
@@ -62,11 +64,13 @@ const AppRoutes = () => (
         <Route path="/reset/:id" element={<ResetPassword />} />
         <Route path="/admin" element={<AdminErrorBoundary><AdminLayout /></AdminErrorBoundary>}>
           <Route index element={<AdminDashboard />} />
+          <Route path="draft"     element={<AdminDraftUsers />} />
           <Route path="approvals" element={<AdminUserApprovals />} />
           <Route path="users" element={<AdminAllUsers />} />
           <Route path="users/:id" element={<AdminUserDetail />} />
           <Route path="posts" element={<AdminPosts />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="zoho"     element={<AdminZohoSync />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

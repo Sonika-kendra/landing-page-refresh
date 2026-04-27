@@ -26,11 +26,11 @@ const SectionHeader = ({
       className={`${centered ? 'text-center' : ''} mb-12 ${className}`}
     >
       {caption && (
-        <span className="henig-caption text-muted mb-4 block">{caption}</span>
+        <span className="henig-caption text-muted-foreground mb-4 block">{caption}</span>
       )}
       <h2 className="henig-heading-section text-foreground mb-4">{title}</h2>
       {subtitle && (
-        <p className="text-lg text-muted font-light max-w-2xl mx-auto">{subtitle}</p>
+        <p className="text-lg text-muted-foreground font-light max-w-2xl mx-auto">{subtitle}</p>
       )}
       {showSeparator && <div className="henig-separator mx-auto mt-4" />}
     </motion.div>

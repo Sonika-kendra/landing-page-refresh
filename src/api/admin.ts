@@ -11,7 +11,7 @@ export interface AdminUser {
   phone?: string;
   email: string;
   role: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'draft' | 'pending' | 'approved' | 'inactive' | 'blocked' | 'rejected';
   verified: boolean;
   createdAt: string;
 }
@@ -31,9 +31,12 @@ export interface AdminUserDetail extends AdminUser {
 
 export interface AdminStats {
   totalUsers: number;
+  draftUsers: number;
   pendingApprovals: number;
   activeUsers: number;
   rejectedUsers: number;
+  inactiveUsers: number;
+  blockedUsers: number;
 }
 
 export interface Post {
@@ -55,6 +58,56 @@ export interface SiteConfig {
   fields: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+}
+
+export type UserStatus = 'draft' | 'pending' | 'approved' | 'inactive' | 'blocked' | 'rejected';
+
+export interface UserStatusLogEntry {
+  _id: string;
+  userId: string;
+  fromStatus?: string;
+  toStatus: string;
+  action: string;
+  reason?: string;
+  changedBy?: { _id: string; firstName: string; lastName?: string; email: string };
+  createdAt: string;
+}
+
+export interface CreateUserPayload {
+  firstName: string;
+  lastName?: string;
+  email: string;
+  password: string;
+  role?: string;
+  phone?: string;
+  city?: string;
+  country?: string;
+}
+
+export interface ZohoStatus {
+  ok: boolean;
+  configured: boolean;
+  modules: string[];
+}
+
+export interface ZohoSyncLog {
+  _id: string;
+  module: string;
+  zohoId?: string;
+  mongoId?: string;
+  direction: 'zoho_to_mongo' | 'mongo_to_zoho';
+  action: 'create' | 'update';
+  status: 'success' | 'error';
+  error?: string;
+  createdAt: string;
+}
+
+export interface ZohoSyncResult {
+  ok: boolean;
+  synced?: number;
+  errors?: number;
+  total?: number;
+  message?: string;
 }
 
 const { base, endpoints } = API_CONFIG.admin;
@@ -143,5 +196,79 @@ export const adminApi = {
       data,
       undefined,
       API_CONFIG.adminConfigs.base
+    ),
+
+  // ── User status actions ────────────────────────────────────────────────────
+  createAdminUser: (data: CreateUserPayload) =>
+    apiClient.post<AdminUser>(
+      '/users',
+      data,
+      undefined,
+      API_CONFIG.admin.base
+    ),
+
+  blockUser: (id: string, reason?: string) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.blockUser(id), { reason }, undefined, base),
+
+  unblockUser: (id: string) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.unblockUser(id), undefined, undefined, base),
+
+  activateUser: (id: string) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.activateUser(id), undefined, undefined, base),
+
+  deactivateUser: (id: string, reason?: string) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.deactivateUser(id), { reason }, undefined, base),
+
+  deleteUser: (id: string) =>
+    apiClient.delete<{ message: string }>(endpoints.deleteUser(id), undefined, undefined, base),
+
+  getStatusLog: (id: string) =>
+    apiClient.get<{ logs: UserStatusLogEntry[] }>(endpoints.statusLog(id), undefined, undefined, false, base),
+
+  assignRole: (id: string, role: string) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.assignRole(id), { role }, undefined, base),
+
+  assignScopes: (id: string, scopes: string[]) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.assignScopes(id), { scopes }, undefined, base),
+
+  getDraftUsers: () =>
+    apiClient.get<{ users: AdminUser[] }>(endpoints.draftUsers, undefined, undefined, false, base),
+
+  submitDraftUser: (id: string) =>
+    apiClient.patch<{ user: AdminUser }>(endpoints.submitDraftUser(id), undefined, undefined, base),
+
+  // ── Zoho ───────────────────────────────────────────────────────────────────
+  getZohoStatus: () =>
+    apiClient.get<ZohoStatus>(
+      API_CONFIG.adminZoho.endpoints.status,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminZoho.base
+    ),
+
+  getZohoLogs: (params?: { module?: string; direction?: string; status?: string }) =>
+    apiClient.get<{ ok: boolean; logs: ZohoSyncLog[] }>(
+      API_CONFIG.adminZoho.endpoints.logs,
+      params,
+      undefined,
+      false,
+      API_CONFIG.adminZoho.base
+    ),
+
+  zohoSyncAll: () =>
+    apiClient.post<ZohoSyncResult>(
+      API_CONFIG.adminZoho.endpoints.syncAll,
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
+  zohoSyncModule: (module: string) =>
+    apiClient.post<ZohoSyncResult>(
+      API_CONFIG.adminZoho.endpoints.syncModule(module),
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
     ),
 };
