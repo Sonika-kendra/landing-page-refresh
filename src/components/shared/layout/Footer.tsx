@@ -1,54 +1,48 @@
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Phone, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, InstagramSvg, Linkedin, Youtube, Whatsapp } from '@/assets/footer';
+import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/theme';
 import { websiteUrlConfig } from '@/config/site';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Logo from '@/assets/icons/logoDark.png';
+
+// Certification & partner logos for footer strip
+const certificationModules = import.meta.glob(
+  '@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}',
+  { eager: true }
+);
+const partnerModules = import.meta.glob(
+  '@/assets/landing/partner/*.{jpg,png,webp,svg}',
+  { eager: true }
+);
+type ImageModule = string | { default: string };
+const footerLogos = [
+  ...Object.values(certificationModules),
+  ...Object.values(partnerModules),
+].map((mod) => {
+  const image = mod as ImageModule;
+  return typeof image === 'string' ? image : image.default;
+});
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Smooth scroll to FAQ section
   const handleFaqClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-
     if (location.pathname === websiteUrlConfig.Home) {
-      const faqSection = document.getElementById('faq');
-      faqSection?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
     } else {
       navigate(websiteUrlConfig.Home, { replace: false });
       setTimeout(() => {
-        const faqSection = document.getElementById('faq');
-        faqSection?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
   };
 
   return (
     <footer className="bg-accent text-accent-foreground">
-
-      {/* Newsletter Section */}
-      {/* <div className="border-b border-accent-foreground/10">
-        <div className="henig-container py-10 md:py-12">
-          <div className="max-w-xl mx-auto text-center">
-            <h3 className="font-serif text-xl sm:text-2xl mb-3 md:mb-4">Newsletter Signup</h3>
-            <p className="text-accent-foreground/70 mb-5 md:mb-6 text-xs sm:text-sm leading-relaxed">
-              Subscribe to receive updates on new collections, exclusive offers, and more.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-3 items-stretch">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="w-full flex-1 h-12 sm:h-14 px-4 sm:px-5 bg-accent-foreground/5 border border-accent-foreground/20 rounded-sm text-base sm:text-base placeholder:text-accent-foreground/40 focus:outline-none focus:border-primary"
-              />
-              <Button className="btn-henig-gold h-8 sm:h-14 py-0 px-6 w-full sm:w-auto text-xs sm:text-sm">Subscribe</Button>
-            </form>
-          </div>
-        </div>
-      </div> */}
 
       {/* Main Footer */}
       <div className="henig-container py-12 md:py-16">
@@ -94,19 +88,12 @@ const Footer = () => {
             <h5 className="font-serif text-lg mb-4">Company</h5>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
+                <Link
+                  to={websiteUrlConfig.Home}
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
                   About Us
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
-                  Why Henig
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
-                  Careers
-                </a>
+                </Link>
               </li>
               <li>
                 <Link
@@ -115,6 +102,26 @@ const Footer = () => {
                 >
                   Blog
                 </Link>
+              </li>
+              <li>
+                <a
+                  href={websiteUrlConfig.TermsAndConditions}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Terms &amp; Conditions
+                </a>
+              </li>
+              <li>
+                <a
+                  href={websiteUrlConfig.PrivacyPolicy}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Privacy Policy
+                </a>
               </li>
             </ul>
           </div>
@@ -137,64 +144,69 @@ const Footer = () => {
                   How to Order
                 </a>
               </li>
-              <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
-                  Terms & Conditions
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
-                  Privacy Policy
-                </a>
-              </li>
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
+          {/* Contact Us — spans 2 columns */}
+          <div className="lg:col-span-2">
             <h5 className="font-serif text-lg mb-4">Contact Us</h5>
             <ul className="space-y-4">
 
+              {/* Opening Hours */}
+              <li className="flex items-start gap-3">
+                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div className="text-sm text-accent-foreground/70 space-y-0.5">
+                  <p><span className="text-accent-foreground/90 font-medium">Mon – Thu:</span> 9:00am – 6:00pm</p>
+                  <p><span className="text-accent-foreground/90 font-medium">Friday:</span> 9:00am – 3:30pm</p>
+                  <p><span className="text-accent-foreground/90 font-medium">Weekends &amp; Bank Holidays:</span> Closed</p>
+                </div>
+              </li>
+
               {/* Phone */}
               <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-primary mt-0.5" />
-                <span className="text-sm text-accent-foreground/70">+44 (0)207 404 0146</span>
+                <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <a
+                  href="tel:+442074040146"
+                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  +44 (0)207 404 0146
+                </a>
               </li>
 
               {/* Emails */}
-              {/* <li>
-                <h6 className="text-sm font-medium text-accent-foreground/80 mb-1">Emails</h6>
-                <ul className="space-y-1 ml-6">
-                  <li className="flex items-center gap-2">
-                    <span className="text-sm text-accent-foreground/70">Purchase Enquiries:</span>
+              <li className="flex items-start gap-3">
+                <span className="w-4 h-4 shrink-0 mt-0.5 text-primary text-xs font-bold">@</span>
+                <div className="space-y-1.5">
+                  <div>
+                    <p className="text-xs text-accent-foreground/60 mb-0.5">Purchase Enquiries</p>
                     <a
                       href="mailto:sales@henigdiamonds.co.uk"
                       className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                     >
                       sales@henigdiamonds.co.uk
                     </a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-sm text-accent-foreground/70">Info:</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-accent-foreground/60 mb-0.5">General Enquiries</p>
                     <a
                       href="mailto:info@henigdiamonds.co.uk"
                       className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                     >
                       info@henigdiamonds.co.uk
                     </a>
-                  </li>
-                </ul>
-              </li> */}
+                  </div>
+                </div>
+              </li>
 
               {/* Address */}
               <li>
                 <a
-                  href="https://www.google.com/maps/search/?api=1&query=Henig+Diamonds+63-66+Hatton+Garden+London+EC1N+8AN"
+                  href="https://www.google.com/maps/search/?api=1&query=Henig+Diamonds+63-66+Hatton+Garden+London+EC1N+8LE"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-3 group"
                 >
-                  <MapPin className="w-4 h-4 text-primary mt-0.5 group-hover:text-primary/80 transition-colors" />
+                  <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0 group-hover:text-primary/80 transition-colors" />
                   <span className="text-sm text-accent-foreground/70 group-hover:text-primary transition-colors">
                     Henig Diamonds Suite Two,<br />
                     First Floor,<br />
@@ -204,49 +216,45 @@ const Footer = () => {
                 </a>
               </li>
 
-            </ul>
-          </div>
-
-          {/* Emails */}
-          <div>
-            <h5 className="font-serif text-lg mb-4">Email</h5>
-            <ul className="space-y-4">
-              <li>
-                <ul className="space-y-2">
-                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                    <span className="text-sm font-medium text-accent-foreground/80 w-40 md:w-auto">
-                      Purchase Enquiries
-                    </span>
-
-                  </li>
-                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ml-2">
-                    <a
-                      href="mailto:sales@henigdiamonds.co.uk"
-                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
-                    >
-                      sales@henigdiamonds.co.uk
-                    </a>
-                  </li>
-                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                    <span className="text-sm font-medium text-accent-foreground/80 w-40 md:w-auto">
-                      General Enquiries
-                    </span>
-                  </li>
-                  <li className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ml-2">
-                    <a
-                      href="mailto:info@henigdiamonds.co.uk"
-                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
-                    >
-                      info@henigdiamonds.co.uk
-                    </a>
-                  </li>
-                </ul>
+              {/* Send Enquiry CTA */}
+              <li className="pt-1">
+                <a
+                  href={websiteUrlConfig.Contact}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="sm"
+                    className="bg-accent-foreground/10 border border-accent-foreground/20 text-accent-foreground hover:bg-accent-foreground/20 transition-colors px-5"
+                  >
+                    Send an Enquiry
+                  </Button>
+                </a>
               </li>
+
             </ul>
           </div>
 
         </div>
       </div>
+
+      {/* Logo Strip */}
+      {footerLogos.length > 0 && (
+        <div className="border-t border-accent-foreground/10">
+          <div className="henig-container py-6">
+            <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8">
+              {footerLogos.map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`Partner logo ${idx + 1}`}
+                  className="h-8 md:h-10 w-auto object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Copyright */}
       <div className="border-t border-accent-foreground/10">

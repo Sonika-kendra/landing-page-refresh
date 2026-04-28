@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, Share2, Copy, Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
@@ -7,6 +7,8 @@ import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
 import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
+
+const Diamond3DViewer = lazy(() => import('@/components/shared/product/Diamond3DViewer'));
 
 const trustBadges = [
   { icon: Truck, label: 'Free UK Delivery' },
@@ -21,6 +23,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const product = useMemo(() => shopProducts.find((p) => p.id === id), [id]);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [show3D, setShow3D] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState(0);
   const [selectedCarat, setSelectedCarat] = useState(0);
   const [selectedSize, setSelectedSize] = useState(0);
@@ -71,20 +74,35 @@ const ProductDetail = () => {
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <div className="relative aspect-square bg-white border border-border/20 overflow-hidden mb-3">
-                <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
-                <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors">
-                  <ChevronLeft className="h-9 w-9" />
-                </button>
-                <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors">
-                  <ChevronRight className="h-9 w-9" />
-                </button>
+                {show3D ? (
+                  <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-foreground/30 text-xs tracking-widest uppercase">Loading 3D view…</div>}>
+                    <Diamond3DViewer />
+                  </Suspense>
+                ) : (
+                  <>
+                    <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
+                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors">
+                      <ChevronLeft className="h-9 w-9" />
+                    </button>
+                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors">
+                      <ChevronRight className="h-9 w-9" />
+                    </button>
+                  </>
+                )}
               </div>
               <div className="flex gap-2">
                 {images.map((img, i) => (
-                  <button key={i} onClick={() => setSelectedImage(i)} className={`h-[90px] w-[90px] border bg-white overflow-hidden flex-shrink-0 transition-all ${i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
+                  <button key={i} onClick={() => { setSelectedImage(i); setShow3D(false); }} className={`h-[90px] w-[90px] border bg-white overflow-hidden flex-shrink-0 transition-all ${!show3D && i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
                     <img src={img} alt="" className="h-full w-full object-contain p-1" />
                   </button>
                 ))}
+                <button
+                  onClick={() => setShow3D((v) => !v)}
+                  className={`h-[90px] w-[90px] border bg-white flex-shrink-0 flex flex-col items-center justify-center gap-1.5 transition-all ${show3D ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
+                >
+                  <Gem className="h-6 w-6 text-foreground/40" />
+                  <span className="text-[9px] text-foreground/40 font-medium tracking-wider uppercase">3D View</span>
+                </button>
               </div>
               <div className="mt-8 border-t border-border/30">
                 <button onClick={() => setDescOpen(!descOpen)} className="flex w-full items-center justify-between py-4 text-left">

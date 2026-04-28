@@ -8,6 +8,8 @@ export const websiteUrlConfig = {
     Blogs: `/blogs`,
     // Contact: `/contact`,
     Contact: `${oldWebsiteURL}/contact-us`,
+    TermsAndConditions: `${oldWebsiteURL}/terms-and-conditions`,
+    PrivacyPolicy: `${oldWebsiteURL}/privacy-policy`,
     Landing: {
         ShopCollection: `${oldJewelleryWebsiteURL}/collections/all`,
         BestSeller: `${oldJewelleryWebsiteURL}/collections/all`

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
@@ -29,18 +29,38 @@ const getReadingTime = (post: BlogPost) => {
   return `${Math.max(3, Math.ceil(wordCount / 180))} min read`;
 };
 
-const cardSurfaceClass = 'border border-[#ecebe5] bg-card shadow-[0_22px_38px_-32px_rgba(16,24,22,0.48)] transition-colors duration-300';
+const getExcerpt = (post: BlogPost, maxLength = 160) => {
+  const title = (post.title || '').trim().toLowerCase();
+  const candidates = [post.snippet, post.excerpt, post.summary, post.description, post.subtitle, stripHtml(post.content || post.body || '')];
+  const text = candidates.find(c => {
+    if (!c) return false;
+    const t = c.trim();
+    return t.length > 0 && t.toLowerCase() !== title;
+  }) || '';
+  if (!text) return 'Read our latest insights and stories from the world of fine diamonds and jewellery.';
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return trimmed.slice(0, maxLength).replace(/\s+\S*$/, '') + '…';
+};
+
+const cardSurfaceClass = 'border border-[#ecebe5] bg-card shadow-[0_22px_38px_-32px_rgba(16,24,22,0.48)] transition-all duration-300 hover:shadow-[0_28px_52px_-18px_rgba(16,24,22,0.32)]';
 const blogPageContainerClass = 'mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-14';
 
-const MetaRow = ({ post }: { post: BlogPost }) => (
-  <div className="flex items-center gap-2 text-[12px] text-foreground/55">
-    <Calendar className="h-3.5 w-3.5 shrink-0 text-foreground/45" />
-    <span className="font-medium">{formatPostDate(post.date)}</span>
-  </div>
-);
+const MetaRow = ({ post }: { post: BlogPost }) => {
+  const category = post.category || (Array.isArray(post.categories) ? post.categories[0] : null) || (Array.isArray(post.tags) ? post.tags[0] : null) || (typeof post.tags === 'string' ? post.tags : null);
+  const author = post.author || post.authorName || post.author_name;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-foreground/55">
+      {category && <span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary/75">{category}</span>}
+      <Calendar className="h-3.5 w-3.5 shrink-0 text-foreground/45" />
+      <span className="font-medium">{formatPostDate(post.date)}</span>
+      {author && <><span className="text-foreground/30">·</span><span className="font-medium">{author}</span></>}
+    </div>
+  );
+};
 
 const ReadMoreRow = ({ post }: { post: BlogPost }) => (
-  <div className="mt-auto flex items-center justify-between gap-4 pt-4 text-[0.82rem] text-primary/85 md:text-[0.88rem]">
+  <div className="mt-auto flex items-center justify-between gap-4 pt-4 text-[0.9rem] text-primary/85 md:text-[0.95rem]">
     <span>{getReadingTime(post)}</span>
     <span className="inline-flex items-center gap-1.5 font-medium text-primary">Read More <ArrowRight className="h-3.5 w-3.5" /></span>
   </div>
@@ -59,13 +79,14 @@ const BlogImage = ({ post, className, wrapperClassName, priority = false }: { po
 };
 
 const StandardBlogCard = ({ post, index }: { post: BlogPost; index: number }) => (
-  <motion.article initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.06, duration: 0.45 }} className="group h-full">
+  <motion.article id={`post-${post._id}`} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} whileHover={{ y: -4, transition: { duration: 0.18 } }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.06, duration: 0.45 }} className="group h-full">
     <Link to={getPostLink(post)} className={`flex h-full flex-col overflow-hidden ${cardSurfaceClass} hover:border-primary/40`}>
-      <BlogImage post={post} wrapperClassName="mx-auto mt-5 aspect-[11/9] w-[76%] overflow-hidden bg-[#ebe8df]" className="h-full w-full object-cover" priority={index < 3} />
+      <BlogImage post={post} wrapperClassName="mx-auto mt-5 aspect-[11/9] w-[76%] overflow-hidden bg-[#ebe8df]" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" priority={index < 3} />
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4 md:px-6 md:pb-6">
         <MetaRow post={post} />
         <div className="space-y-2.5">
-          <h2 className="font-serif text-[1.55rem] leading-[1.22] text-foreground md:text-[1.78rem]">{post.title}</h2>
+          <h2 className="font-serif text-[1.35rem] leading-[1.22] text-foreground md:text-[1.55rem] line-clamp-2">{post.title}</h2>
+          <p className="text-[0.9rem] text-foreground/60 leading-snug line-clamp-2">{getExcerpt(post, 120)}</p>
         </div>
         <ReadMoreRow post={post} />
       </div>
@@ -74,12 +95,13 @@ const StandardBlogCard = ({ post, index }: { post: BlogPost; index: number }) =>
 );
 
 const CompactBlogCard = ({ post, index }: { post: BlogPost; index: number }) => (
-  <motion.article initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.05, duration: 0.4 }} className={`group overflow-hidden ${cardSurfaceClass}`}>
+  <motion.article id={`post-${post._id}`} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} whileHover={{ y: -4, transition: { duration: 0.18 } }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.05, duration: 0.4 }} className={`group overflow-hidden ${cardSurfaceClass}`}>
     <Link to={getPostLink(post)} className="flex h-full flex-col">
-      <BlogImage post={post} wrapperClassName="mx-auto mt-5 aspect-[11/9] w-[76%] overflow-hidden bg-[#ebe8df]" className="h-full w-full object-cover" />
+      <BlogImage post={post} wrapperClassName="mx-auto mt-5 aspect-[11/9] w-[76%] overflow-hidden bg-[#ebe8df]" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
         <MetaRow post={post} />
-        <h3 className="font-serif text-[1.45rem] leading-[1.25] text-foreground md:text-[1.6rem]">{post.title}</h3>
+        <h3 className="font-serif text-[1.25rem] leading-[1.25] text-foreground md:text-[1.4rem] line-clamp-2">{post.title}</h3>
+        <p className="text-[0.9rem] text-foreground/60 leading-snug line-clamp-2">{getExcerpt(post, 180)}</p>
         <ReadMoreRow post={post} />
       </div>
     </Link>
@@ -87,29 +109,41 @@ const CompactBlogCard = ({ post, index }: { post: BlogPost; index: number }) => 
 );
 
 const FeaturedBlogCard = ({ post }: { post: BlogPost }) => (
-  <motion.article initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5 }} className={`overflow-hidden ${cardSurfaceClass}`}>
-    <Link to={getPostLink(post)} className="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+  <motion.article id={`post-${post._id}`} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} whileHover={{ y: -4, transition: { duration: 0.18 } }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5 }} className={`group overflow-hidden lg:h-[420px] ${cardSurfaceClass}`}>
+    <Link to={getPostLink(post)} className="grid h-full lg:grid-cols-[minmax(0,2fr)_minmax(0,4fr)]">
       <div className="flex flex-col justify-between p-6 md:p-7 lg:p-8">
         <div className="space-y-5">
           <MetaRow post={post} />
-          <h2 className="max-w-[16ch] font-serif text-[1.8rem] leading-[1.2] text-foreground md:text-[2.2rem]">{post.title}</h2>
+          <div className="space-y-2.5">
+            <h2 className="font-serif text-[1.6rem] leading-[1.2] text-foreground md:text-[2rem]">{post.title}</h2>
+            <p className="text-[1rem] text-foreground/60 leading-snug line-clamp-6">{getExcerpt(post, 400)}</p>
+          </div>
         </div>
         <ReadMoreRow post={post} />
       </div>
-      <BlogImage post={post} wrapperClassName="h-[190px] overflow-hidden bg-[#ebe8df] md:h-[260px] lg:h-full" className="h-full w-full object-cover" />
+      <div className="flex flex-col overflow-hidden h-[190px] md:h-[260px] lg:h-full p-5">
+        <BlogImage post={post} wrapperClassName="flex-1 overflow-hidden bg-[#ebe8df]" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+      </div>
     </Link>
   </motion.article>
 );
 
 const SpotlightBlogCard = ({ post }: { post: BlogPost }) => (
-  <motion.article initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5 }} className={`h-full overflow-hidden ${cardSurfaceClass}`}>
-    <Link to={getPostLink(post)} className="grid h-full gap-0 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.88fr)] md:items-stretch">
-      <div className="flex flex-col p-6 md:p-7 lg:p-8">
-        <MetaRow post={post} />
-        <h2 className="mt-6 font-serif text-[1.8rem] leading-[1.2] text-foreground md:text-[2.2rem]">{post.title}</h2>
+  <motion.article id={`post-${post._id}`} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} whileHover={{ y: -4, transition: { duration: 0.18 } }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5 }} className={`group h-full overflow-hidden ${cardSurfaceClass}`}>
+    <Link to={getPostLink(post)} className="grid h-full md:grid-cols-[2fr_3fr] md:items-stretch">
+      <div className="flex flex-col justify-between p-6 md:p-7 lg:p-8">
+        <div className="space-y-5">
+          <MetaRow post={post} />
+          <div className="space-y-2.5">
+            <h2 className="font-serif text-[2rem] leading-[1.2] text-foreground md:text-[2.5rem]">{post.title}</h2>
+            {getExcerpt(post, 300) && <p className="text-[1.1rem] text-foreground/60 leading-relaxed">{getExcerpt(post, 875)}</p>}
+          </div>
+        </div>
         <ReadMoreRow post={post} />
       </div>
-      <BlogImage post={post} wrapperClassName="h-[190px] overflow-hidden bg-[#ebe8df] md:h-[260px] lg:h-full" className="h-full w-full object-cover" />
+      <div className="flex flex-col overflow-hidden h-[190px] md:h-full p-3">
+        <BlogImage post={post} wrapperClassName="flex-1 overflow-hidden bg-[#ebe8df]" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+      </div>
     </Link>
   </motion.article>
 );
@@ -143,11 +177,12 @@ type BlogLayoutGroup = {
   firstRow: BlogPost[];
   secondRow: BlogPost[];
   featuredPost?: BlogPost;
+  thirdRow: BlogPost[];
   spotlightPost?: BlogPost;
   sidePosts: BlogPost[];
 };
 
-const postsPerLayoutGroup = 10;
+const postsPerLayoutGroup = 13;
 const getPostKey = (post: BlogPost) => post.id || post._id;
 
 const getBlogLayoutGroups = (blogPosts: BlogPost[]): BlogLayoutGroup[] => {
@@ -159,8 +194,9 @@ const getBlogLayoutGroups = (blogPosts: BlogPost[]): BlogLayoutGroup[] => {
       firstRow: groupPosts.slice(0, 3),
       secondRow: groupPosts.slice(3, 6),
       featuredPost: groupPosts[6],
-      spotlightPost: groupPosts[7],
-      sidePosts: groupPosts.slice(8, 10),
+      thirdRow: groupPosts.slice(7, 10),
+      spotlightPost: groupPosts[10],
+      sidePosts: groupPosts.slice(11, 13),
     });
   }
   return groups;
@@ -179,8 +215,13 @@ const BlogLayoutGroupSection = ({ group }: { group: BlogLayoutGroup }) => (
       </div>
     )}
     {group.featuredPost && <FeaturedBlogCard post={group.featuredPost} />}
+    {group.thirdRow.length > 0 && (
+      <div className="grid gap-8 lg:grid-cols-3 xl:gap-10">
+        {group.thirdRow.map((post, index) => <StandardBlogCard key={getPostKey(post)} post={post} index={group.startIndex + group.firstRow.length + group.secondRow.length + 1 + index} />)}
+      </div>
+    )}
     {(group.spotlightPost || group.sidePosts.length > 0) && (
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px] xl:gap-10">
+      <div className="grid gap-8 xl:grid-cols-[2fr_1fr] xl:gap-10">
         <div>{group.spotlightPost && <SpotlightBlogCard post={group.spotlightPost} />}</div>
         {group.sidePosts.length > 0 && (
           <div className="space-y-8 self-start">
@@ -195,6 +236,7 @@ const BlogLayoutGroupSection = ({ group }: { group: BlogLayoutGroup }) => (
 const Blogs = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const loadBlogs = async () => {
@@ -210,19 +252,29 @@ const Blogs = () => {
     loadBlogs();
   }, []);
 
+  useEffect(() => {
+    if (!loading && posts.length > 0 && location.state?.scrollToPost) {
+      const id = location.state.scrollToPost as string;
+      setTimeout(() => {
+        const el = document.getElementById(`post-${id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
+  }, [loading, posts.length, location.state]);
+
   const blogLayoutGroups = getBlogLayoutGroups(posts);
 
   return (
     <PageLayout>
-      <section className="bg-accent py-16 text-accent-foreground md:py-24">
+      <section className="bg-accent py-16 md:py-24 text-accent-foreground">
         <div className={`${blogPageContainerClass} flex flex-col items-center text-center`}>
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="font-serif text-[3rem] font-medium tracking-tight md:text-[4.25rem]">
-            Our Latest news
+            Our Latest News
           </motion.h1>
           <motion.span initial={{ opacity: 0, scaleX: 0.8 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.1, duration: 0.45 }} className="mt-5 h-px w-52 origin-center bg-primary/80" />
         </div>
       </section>
-      <section className="section-ivory py-12 md:py-16">
+      <section className="py-12 md:py-16 bg-white">
         <div className={`${blogPageContainerClass} space-y-12 md:space-y-16`}>
           {loading ? <LoadingState /> : posts.length === 0 ? <EmptyState /> : (
             <>{blogLayoutGroups.map((group) => <BlogLayoutGroupSection key={group.startIndex} group={group} />)}</>

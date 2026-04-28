@@ -251,6 +251,10 @@
   /* Section background variants */
   .section-ivory {
     background-color: hsl(var(--henig-ivory)); /* #ebebe4 */
+    color: hsl(165, 41%, 15%);
+    --foreground: 165 41% 15%;
+    --muted-foreground: 183 10% 43%;
+    --muted: 183 10% 43%;
   }
 
   .section-white {
