@@ -44,6 +44,8 @@ const AdminPosts = lazy(() => import('@/features/admin/sections/Posts'));
 const AdminSettings  = lazy(() => import('@/features/admin/sections/Settings'));
 const AdminDraftUsers = lazy(() => import('@/features/admin/sections/DraftUsers'));
 const AdminZohoSync  = lazy(() => import('@/features/admin/sections/ZohoSync'));
+const PrivacyPolicy = lazy(() => import('@/features/privacy'));
+const TermsAndConditions = lazy(() => import('@/features/terms'));
 const NotFound = lazy(() => import('@/features/not-found'));
 
 const queryClient = new QueryClient();
@@ -62,6 +64,8 @@ const AppRoutes = () => (
         <Route path="/shop/:id" element={<ProductDetail />} />
         <Route path="/verify/:id" element={<VerifyEmail />} />
         <Route path="/reset/:id" element={<ResetPassword />} />
+        <Route path={websiteUrlConfig.PrivacyPolicy} element={<PrivacyPolicy />} />
+        <Route path={websiteUrlConfig.TermsAndConditions} element={<TermsAndConditions />} />
         <Route path="/admin" element={<AdminErrorBoundary><AdminLayout /></AdminErrorBoundary>}>
           <Route index element={<AdminDashboard />} />
           <Route path="draft"     element={<AdminDraftUsers />} />

@@ -8,18 +8,11 @@ import Logo from '@/assets/icons/logoDark.png';
 
 // Certification & partner logos for footer strip
 const certificationModules = import.meta.glob(
-  '@/assets/landing/certification/*.{png,jpg,jpeg,svg,gif}',
-  { eager: true }
-);
-const partnerModules = import.meta.glob(
-  '@/assets/landing/partner/*.{jpg,png,webp,svg}',
+  '@/assets/footer/certification/*.{png,jpg,jpeg,svg,gif}',
   { eager: true }
 );
 type ImageModule = string | { default: string };
-const footerLogos = [
-  ...Object.values(certificationModules),
-  ...Object.values(partnerModules),
-].map((mod) => {
+const footerLogos = Object.values(certificationModules).map((mod) => {
   const image = mod as ImageModule;
   return typeof image === 'string' ? image : image.default;
 });
@@ -45,8 +38,8 @@ const Footer = () => {
     <footer className="bg-accent text-accent-foreground">
 
       {/* Main Footer */}
-      <div className="henig-container py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
+      <div className="henig-container py-14 md:py-18">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:grid-cols-[1.1fr_1fr_1fr_1.4fr]">
 
           {/* Brand */}
           <div>
@@ -97,70 +90,35 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to={websiteUrlConfig.Blogs}
+                  to={websiteUrlConfig.PrivacyPolicy}
                   className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                 >
-                  Blog
+                  Privacy
                 </Link>
               </li>
               <li>
-                <a
-                  href={websiteUrlConfig.TermsAndConditions}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to={websiteUrlConfig.TermsAndConditions}
                   className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                 >
-                  Terms &amp; Conditions
-                </a>
+                  T&amp;Cs
+                </Link>
               </li>
               <li>
-                <a
-                  href={websiteUrlConfig.PrivacyPolicy}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to={websiteUrlConfig.Blogs}
                   className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
                 >
-                  Privacy Policy
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Customer Care */}
-          <div>
-            <h5 className="font-serif text-lg mb-4">Customer Care</h5>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href="#"
-                  onClick={handleFaqClick}
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  FAQs
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-accent-foreground/70 hover:text-primary transition-colors">
-                  How to Order
-                </a>
+                  Blogs
+                </Link>
               </li>
             </ul>
           </div>
 
           {/* Contact Us — spans 2 columns */}
-          <div className="lg:col-span-2">
+          <div>
             <h5 className="font-serif text-lg mb-4">Contact Us</h5>
             <ul className="space-y-4">
-
-              {/* Opening Hours */}
-              <li className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <div className="text-sm text-accent-foreground/70 space-y-0.5">
-                  <p><span className="text-accent-foreground/90 font-medium">Mon – Thu:</span> 9:00am – 6:00pm</p>
-                  <p><span className="text-accent-foreground/90 font-medium">Friday:</span> 9:00am – 3:30pm</p>
-                  <p><span className="text-accent-foreground/90 font-medium">Weekends &amp; Bank Holidays:</span> Closed</p>
-                </div>
-              </li>
 
               {/* Phone */}
               <li className="flex items-start gap-3">
@@ -171,31 +129,6 @@ const Footer = () => {
                 >
                   +44 (0)207 404 0146
                 </a>
-              </li>
-
-              {/* Emails */}
-              <li className="flex items-start gap-3">
-                <span className="w-4 h-4 shrink-0 mt-0.5 text-primary text-xs font-bold">@</span>
-                <div className="space-y-1.5">
-                  <div>
-                    <p className="text-xs text-accent-foreground/60 mb-0.5">Purchase Enquiries</p>
-                    <a
-                      href="mailto:sales@henigdiamonds.co.uk"
-                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
-                    >
-                      sales@henigdiamonds.co.uk
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-xs text-accent-foreground/60 mb-0.5">General Enquiries</p>
-                    <a
-                      href="mailto:info@henigdiamonds.co.uk"
-                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
-                    >
-                      info@henigdiamonds.co.uk
-                    </a>
-                  </div>
-                </div>
               </li>
 
               {/* Address */}
@@ -216,20 +149,58 @@ const Footer = () => {
                 </a>
               </li>
 
+            </ul>
+          </div>
+
+          <div>
+            <ul className="space-y-4">
+
+              {/* Opening Hours */}
+              <li className="flex items-start gap-3">
+                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div className="text-sm text-accent-foreground/70 space-y-0.5">
+                  <p>Monday To Thursday - 9:00am – 6:00pm</p>
+                  <p>Friday - 9:00am – 3:30pm</p>
+                  <p>Weekends &amp; Bank Holidays Closed</p>
+                </div>
+              </li>
+
+              {/* Emails */}
+              <li className="pl-7">
+                <div className="space-y-1.5">
+                  <div>
+                    <a
+                      href="mailto:sales@henigdiamonds.co.uk"
+                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                    >
+                      sales@henigdiamonds.co.uk
+                    </a>
+                  </div>
+                  <div>
+                    <a
+                      href="mailto:info@henigdiamonds.co.uk"
+                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                    >
+                      info@henigdiamonds.co.uk
+                    </a>
+                  </div>
+                </div>
+              </li>
+
               {/* Send Enquiry CTA */}
-              <li className="pt-1">
-                <a
-                  href={websiteUrlConfig.Contact}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <li className="pl-7 pt-1">
+                <Button
+                  size="sm"
+                  className="btn-henig-outline"
+                  asChild
                 >
-                  <Button
-                    size="sm"
-                    className="bg-accent-foreground/10 border border-accent-foreground/20 text-accent-foreground hover:bg-accent-foreground/20 transition-colors px-5"
+                  <a
+                    href={websiteUrlConfig.Contact}
+                    rel="noopener noreferrer"
                   >
-                    Send an Enquiry
-                  </Button>
-                </a>
+                    SEND AN ENQUIRY
+                  </a>
+                </Button>
               </li>
 
             </ul>

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:henigdiamonds.co.uk)",
+      "WebFetch(domain:www.queensmith.co.uk)"
+    ]
+  }
+}
