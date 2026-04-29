@@ -144,7 +144,13 @@ const ProductDetail = () => {
                           key={i}
                           onClick={() => setSelectedMetal(i)}
                           title={metal.name}
-                          style={{ backgroundColor: metal.bg, color: metal.color }}
+                          style={{
+                            backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                            backgroundColor: metal.image ? undefined : metal.bg,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            color: metal.color,
+                          }}
                           className={`rounded px-2 py-1 text-[10px] font-bold leading-none uppercase tracking-wide transition-all ${isSelected ? 'ring-2 ring-offset-1 ring-foreground/70' : 'opacity-60 hover:opacity-100'}`}
                         >
                           {metal.label}

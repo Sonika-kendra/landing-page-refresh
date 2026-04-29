@@ -6,6 +6,7 @@ export const oldJewelleryWebsiteURL: string = 'https://jewellery.henigdiamonds.c
 export const websiteUrlConfig = {
     Home: `/`,
     Blogs: `/blogs`,
+    Careers: `/careers`,
     // Contact: `/contact`,
     Contact: `${oldWebsiteURL}/contact-us`,
     TermsAndConditions: `/terms-and-conditions`,

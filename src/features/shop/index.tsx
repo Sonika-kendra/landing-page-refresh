@@ -1,10 +1,13 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { ChevronUp, Search, X } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   categories,
   metals,
@@ -142,25 +145,10 @@ const isFilterItemActive = (currentValue: FilterValues[string], itemValue: Visua
 
 const ShopPage = () => {
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
-  const [activeFilterTab, setActiveFilterTab] = useState<FilterTabKey>('category');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['category']);
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleTabHover = useCallback((key: FilterTabKey) => {
-    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    setActiveFilterTab(key);
-    setIsDropdownOpen(true);
-  }, []);
-
-  const handleMenuLeave = useCallback(() => {
-    closeTimeoutRef.current = setTimeout(() => setIsDropdownOpen(false), 150);
-  }, []);
-
-  const handleMenuEnter = useCallback(() => {
-    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-  }, []);
 
   const handleFilterChange = useCallback(
     (key: string, value: string | string[] | [number, number]) => {
@@ -221,140 +209,182 @@ const ShopPage = () => {
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-  const activeFilterItems = visualFilters[activeFilterTab];
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
     <PageLayout>
-      {/* Sticky category bar */}
-      <div
-        className="relative sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20"
-        onMouseLeave={handleMenuLeave}
-        onMouseEnter={handleMenuEnter}
-      >
+      <div className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20">
         <div className="henig-container">
-          <div className="overflow-x-auto">
-            <div className="mx-auto flex w-max min-w-full items-center justify-center gap-8 px-1 py-4 md:gap-12 md:py-5">
-              {filterTabs.map((tab) => {
-                const isActive = activeFilterTab === tab.key && isDropdownOpen;
-                return (
+          <div className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between md:gap-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Sheet open={isFilterSidebarOpen} onOpenChange={setIsFilterSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="justify-start gap-2 sm:w-auto">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Filter
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-xl">
+                  <SheetHeader>
+                    <SheetTitle>Filter Products</SheetTitle>
+                    <SheetDescription>Choose a category and refine the product listing.</SheetDescription>
+                  </SheetHeader>
+
+                  <div className="mt-8">
+                    <Accordion
+                      type="multiple"
+                      value={openAccordionItems}
+                      onValueChange={setOpenAccordionItems}
+                      className="space-y-4"
+                    >
+                      {filterTabs.map((tab) => (
+                        <AccordionItem
+                          key={tab.key}
+                          value={tab.key}
+                          className="rounded-2xl border border-border/70 bg-background px-4"
+                        >
+                          <AccordionTrigger className="py-5 text-left font-normal no-underline hover:no-underline">
+                            <div className="flex w-full items-center justify-between gap-3 pr-3">
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80">
+                                  {tab.label}
+                                </span>
+                                {Boolean(filterValues[tab.key]) &&
+                                  !(tab.key === 'price' && Array.isArray(filterValues.price) && isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)) && (
+                                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+                                      Active
+                                    </span>
+                                  )}
+                              </div>
+                              <span className="flex items-center gap-3">
+                                <span className="grid h-7 w-7 place-items-center rounded-full border border-border/70 text-base font-light text-foreground/70">
+                                  {openAccordionItems.includes(tab.key) ? '-' : '+'}
+                                </span>
+                              </span>
+                            </div>
+                          </AccordionTrigger>
+
+                          <AccordionContent className="pb-5 pt-1">
+                            {Boolean(filterValues[tab.key]) &&
+                              !(tab.key === 'price' && Array.isArray(filterValues.price) && isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)) && (
+                                <div className="mb-4 flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleFilterChange(
+                                        tab.key,
+                                        tab.key === 'price' ? DEFAULT_PRICE_RANGE : ''
+                                      )
+                                    }
+                                    className="text-xs text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
+                                  >
+                                    Clear
+                                  </button>
+                                </div>
+                              )}
+                            <div className="grid grid-cols-2 gap-3">
+                              {visualFilters[tab.key].map((item) => {
+                                const value = filterValues[tab.key];
+                                const isItemActive = isFilterItemActive(value, item.value);
+                                const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
+
+                                return (
+                                  <button
+                                    key={`${tab.key}-${itemKey}`}
+                                    type="button"
+                                    onClick={() => handleFilterChange(tab.key, item.value)}
+                                    className={`group flex flex-col items-center gap-3 rounded-2xl border p-3 text-center transition-all duration-300 ${
+                                      isItemActive
+                                        ? 'border-accent bg-accent/10 shadow-[0_0_0_1px_hsl(var(--accent)/0.4)]'
+                                        : 'border-border/70 hover:border-accent/60 hover:bg-secondary/30'
+                                    }`}
+                                    aria-pressed={isItemActive}
+                                  >
+                                    <span className="flex h-24 w-full items-center justify-center overflow-hidden rounded-xl bg-secondary/40">
+                                      {item.image ? (
+                                        <img
+                                          src={item.image}
+                                          alt={item.label}
+                                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                      ) : (
+                                        <span className="px-3 text-sm font-medium text-foreground/80">
+                                          {item.display}
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span className="text-sm text-foreground/80">{item.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+
+                    {hasActiveFilters && (
+                      <Button variant="ghost" onClick={handleReset} className="mt-6 w-full justify-center">
+                        Clear all filters
+                      </Button>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <label className="relative block w-full sm:w-[320px]">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
+                <input
+                  value={(filterValues.search as string) || ''}
+                  onChange={(event) => handleFilterChange('search', event.target.value)}
+                  placeholder="Search products"
+                  className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
+                />
+                {filterValues.search && (
                   <button
-                    key={tab.key}
                     type="button"
-                    onMouseEnter={() => handleTabHover(tab.key)}
-                    onClick={() => { setActiveFilterTab(tab.key); setIsDropdownOpen(true); }}
-                    className={`relative whitespace-nowrap pb-2 text-sm font-medium tracking-wide transition-colors md:text-base ${
-                      isActive ? 'text-foreground' : 'text-foreground/55 hover:text-foreground'
-                    }`}
-                    aria-pressed={isActive}
+                    onClick={() => handleFilterChange('search', '')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
+                    aria-label="Clear search"
                   >
-                    {tab.label}
-                    {isActive && <span className="absolute inset-x-0 bottom-0 mx-auto h-px w-full bg-accent" />}
+                    <X className="h-4 w-4" />
                   </button>
-                );
-              })}
+                )}
+              </label>
+
+              <span className="text-sm text-foreground/55">
+                {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="w-max text-sm text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
+                >
+                  Clear filters
+                </button>
+              )}
+              <label className="flex w-full items-center gap-3 text-sm text-foreground/55 sm:w-auto">
+                <span className="whitespace-nowrap">Sort by</span>
+                <select
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                  className="h-10 w-full rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-[220px]"
+                >
+                  {shopSort.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
           </div>
         </div>
-
-        {isDropdownOpen && (
-          <div className="absolute left-0 right-0 top-full z-50 border-b border-t border-border/40 bg-background/95 pb-6 pt-4 shadow-md backdrop-blur-sm">
-            <div className="henig-container">
-              <div className="overflow-x-auto py-2">
-                <div className="mx-auto flex w-max min-w-full items-start justify-center gap-7 px-1 md:gap-10 lg:gap-14">
-                  {activeFilterItems.map((item) => {
-                    const value = filterValues[activeFilterTab];
-                    const isItemActive = isFilterItemActive(value, item.value);
-                    const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
-                    return (
-                      <button
-                        key={`${activeFilterTab}-${itemKey}`}
-                        type="button"
-                        onClick={() => handleFilterChange(activeFilterTab, item.value)}
-                        className="group flex min-w-[96px] flex-col items-center gap-4 text-center outline-none md:min-w-[128px]"
-                        aria-pressed={isItemActive}
-                      >
-                        <span
-                          className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 md:h-32 md:w-32 ${
-                            isItemActive
-                              ? 'border-accent shadow-[0_0_0_3px_hsl(var(--accent)/0.45)]'
-                              : 'border-transparent group-hover:border-accent'
-                          }`}
-                        >
-                          {item.image ? (
-                            <img
-                              src={item.image}
-                              alt={item.label}
-                              className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <span className="flex h-full w-full items-center justify-center rounded-full bg-secondary px-4 text-base font-medium text-foreground/80 md:text-lg">
-                              {item.display}
-                            </span>
-                          )}
-                        </span>
-                        <span className={`text-sm transition-colors md:text-base ${isItemActive ? 'text-foreground' : 'text-foreground/70'}`}>
-                          {item.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <label className="relative block w-full sm:w-[280px]">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
-                    <input
-                      value={(filterValues.search as string) || ''}
-                      onChange={(event) => handleFilterChange('search', event.target.value)}
-                      placeholder="Search products"
-                      className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
-                    />
-                    {filterValues.search && (
-                      <button
-                        type="button"
-                        onClick={() => handleFilterChange('search', '')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
-                        aria-label="Clear search"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </label>
-                  <span className="text-sm text-foreground/55">
-                    {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
-                  </span>
-                  {hasActiveFilters && (
-                    <button
-                      type="button"
-                      onClick={handleReset}
-                      className="w-max text-sm text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
-                    >
-                      Clear filters
-                    </button>
-                  )}
-                </div>
-                <label className="flex w-full items-center gap-3 text-sm text-foreground/55 sm:w-auto">
-                  <span className="whitespace-nowrap">Sort by</span>
-                  <select
-                    value={sortBy}
-                    onChange={(event) => setSortBy(event.target.value)}
-                    className="h-10 w-full rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-[190px]"
-                  >
-                    {shopSort.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <section className="section-ivory py-8 md:py-12">

@@ -86,7 +86,13 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
                   <span
                     key={i}
                     title={metal.name}
-                    style={{ backgroundColor: metal.bg, color: metal.color }}
+                    style={{
+                      backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                      backgroundColor: metal.image ? undefined : metal.bg,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      color: metal.color,
+                    }}
                     className="rounded px-1.5 py-[3px] text-[9px] font-bold leading-none uppercase tracking-wide"
                   >
                     {metal.label}
