@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
 import { useAuth } from '@/context/AuthContext';
+import { Link } from 'react-router-dom';
+import { websiteUrlConfig } from '@/config/site';
 
 // Certifications images
 const certificationModules = import.meta.glob(
@@ -73,10 +75,12 @@ const CertificationsAndPartnersSection = () => {
           <div className="px-4">
             <Button
               size="sm"
-              onClick={() => openModal('register')}
-              className="p-5 whitespace-nowrap bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+              className="p-5 whitespace-nowrap bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300"
+              asChild
             >
-              Partner With Us
+              <Link to={websiteUrlConfig.Contact}>
+                Partner With Us
+              </Link>
             </Button>
           </div>
           <div className="flex-1 border-t border-border"></div>

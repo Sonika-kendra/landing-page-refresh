@@ -216,15 +216,14 @@ const ShopPage = () => {
     <PageLayout>
       <div className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20">
         <div className="henig-container">
-          <div className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between md:gap-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Sheet open={isFilterSidebarOpen} onOpenChange={setIsFilterSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="justify-start gap-2 sm:w-auto">
-                    <SlidersHorizontal className="h-4 w-4" />
-                    Filter
-                  </Button>
-                </SheetTrigger>
+          <div className="flex flex-wrap items-center gap-3 py-4">
+            <Sheet open={isFilterSidebarOpen} onOpenChange={setIsFilterSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="justify-start gap-2 sm:w-auto">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Filter
+                </Button>
+              </SheetTrigger>
                 <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-xl">
                   <SheetHeader>
                     <SheetTitle>Filter Products</SheetTitle>
@@ -333,61 +332,58 @@ const ShopPage = () => {
                 </SheetContent>
               </Sheet>
 
-              <label className="relative block w-full sm:w-[320px]">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
-                <input
-                  value={(filterValues.search as string) || ''}
-                  onChange={(event) => handleFilterChange('search', event.target.value)}
-                  placeholder="Search products"
-                  className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
-                />
-                {filterValues.search && (
-                  <button
-                    type="button"
-                    onClick={() => handleFilterChange('search', '')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </label>
-
-              <span className="text-sm text-foreground/55">
-                {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              {hasActiveFilters && (
+            <label className="relative block flex-1 min-w-[200px] sm:max-w-[320px]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
+              <input
+                value={(filterValues.search as string) || ''}
+                onChange={(event) => handleFilterChange('search', event.target.value)}
+                placeholder="Search products"
+                className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
+              />
+              {filterValues.search && (
                 <button
                   type="button"
-                  onClick={handleReset}
-                  className="w-max text-sm text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
+                  onClick={() => handleFilterChange('search', '')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
+                  aria-label="Clear search"
                 >
-                  Clear filters
+                  <X className="h-4 w-4" />
                 </button>
               )}
-              <label className="flex w-full items-center gap-3 text-sm text-foreground/55 sm:w-auto">
-                <span className="whitespace-nowrap">Sort by</span>
-                <select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
-                  className="h-10 w-full rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-[220px]"
-                >
-                  {shopSort.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            </label>
+
+            <label className="flex items-center gap-2 text-sm text-foreground/55">
+              <span className="whitespace-nowrap">Sort by</span>
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="h-10 rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary w-[180px]"
+              >
+                {shopSort.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <span className="text-sm text-foreground/55 ml-auto">
+              {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
+            </span>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-sm text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <section className="section-ivory py-8 md:py-12">
+      <section className="bg-white py-8 md:py-12">
         <div className="henig-container">
           {paged.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">

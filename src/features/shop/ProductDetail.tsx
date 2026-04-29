@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, Share2, Copy, Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
-import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
 import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
@@ -183,7 +182,7 @@ const ProductDetail = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Certificate:</span>
                     <div className="flex items-center gap-2">
-                      <img src={igiLogo} alt={product.certificate} className="h-7 w-auto object-contain" />
+                      <img src={igiLogo} alt={product.certificate} className="h-5 w-auto object-contain" />
                       {/* <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">{product.certificate}</span> */}
                     </div>
                   </div>
@@ -222,7 +221,7 @@ const ProductDetail = () => {
               </div>
 
               <div className="mt-4 flex items-center gap-3">
-                <span className="bg-foreground text-background px-5 py-2.5 text-[1.6rem] font-bold tracking-tight leading-none">
+                <span className="bg-gray-100 text-foreground px-5 py-2.5 text-[1.6rem] font-bold tracking-tight leading-none border border-border/30">
                   £{product.price.toLocaleString()}
                 </span>
                 {product.stock && product.stock <= 5 && (
@@ -249,13 +248,17 @@ const ProductDetail = () => {
 
               <p className="mt-3 text-xs text-primary text-center">Order within 02 hours to receive by Thu, 26 Mar</p>
 
-              <div className="mt-7 grid grid-cols-3 gap-y-5 gap-x-3 border-t border-border/30 pt-6">
-                {trustBadges.map(({ icon: Icon, label }) => (
-                  <div key={label} className="flex flex-col items-center gap-1.5 text-center">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <span className="text-[10px] text-foreground/55 leading-tight">{label}</span>
-                  </div>
-                ))}
+              <div className="mt-7 border-t border-border/30 pt-6">
+                <div className="grid grid-cols-3 gap-3 bg-secondary/60 rounded p-4 border border-border/20">
+                  {trustBadges.map(({ icon: Icon, label }) => (
+                    <div key={label} className="flex flex-col items-center gap-2 text-center">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <span className="text-xs font-semibold text-foreground/70 leading-tight">{label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -263,7 +266,6 @@ const ProductDetail = () => {
       </section>
 
       <YouMayAlsoLike items={youMayAlsoLike} />
-      <CommitmentSection />
     </PageLayout>
   );
 };

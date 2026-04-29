@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 const policyNav = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
   { label: 'Terms & Conditions', href: '/terms-and-conditions' },
+  { label: 'Cancellation & Returns', href: '/cancellation-returns-policy' },
+  { label: 'Quality Policy', href: '/quality-policy' },
+  { label: 'Cookies Policy', href: '/cookies-policy' },
 ];
 
 const sections = [

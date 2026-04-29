@@ -123,25 +123,36 @@ const BlogPost = () => {
                   })}
                 </ul>
               )}
-              <div className="mt-6 pt-5 border-t border-border flex items-center justify-between gap-2">
-                {sidebarPage > 0 ? (
-                  <button onClick={() => setSidebarPage((p) => p - 1)} className="inline-flex items-center gap-1 text-xs font-medium text-foreground/65 hover:text-primary transition-colors group">
-                    <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-                    <span>Previous</span>
-                  </button>
-                ) : (
-                  <span className="w-14" />
+              <div className="mt-6 pt-5 border-t border-border space-y-3">
+                {prevPost && (
+                  <Link
+                    to={`${websiteUrlConfig.Blogs}/${prevPost.id}${prevPost.params || ''}`}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex items-center gap-2 text-xs font-medium text-foreground/65 hover:text-primary transition-colors group"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5 shrink-0 transition-transform group-hover:-translate-x-1" />
+                    <span className="line-clamp-1">Previous: {prevPost.title}</span>
+                  </Link>
                 )}
-                <Link to={websiteUrlConfig.Blogs} state={{ scrollToPost: postId }} className="text-[0.7rem] font-medium tracking-widest text-primary/80 hover:text-primary transition-colors hover:underline underline-offset-4">
-                  View All
-                </Link>
-                {sidebarPage < totalSidebarPages - 1 ? (
-                  <button onClick={() => setSidebarPage((p) => p + 1)} className="inline-flex items-center gap-1 text-xs font-medium text-foreground/65 hover:text-primary transition-colors group">
-                    <span>Next</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </button>
-                ) : (
-                  <span className="w-14" />
+                {nextPost && (
+                  <Link
+                    to={`${websiteUrlConfig.Blogs}/${nextPost.id}${nextPost.params || ''}`}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex items-center justify-end gap-2 text-xs font-medium text-foreground/65 hover:text-primary transition-colors group"
+                  >
+                    <span className="line-clamp-1 text-right">Next: {nextPost.title}</span>
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                )}
+                {(sidebarPage > 0 || sidebarPage < totalSidebarPages - 1) && (
+                  <div className="flex items-center justify-between gap-2 pt-2">
+                    {sidebarPage > 0 ? (
+                      <button onClick={() => setSidebarPage((p) => p - 1)} className="text-[0.65rem] text-foreground/45 hover:text-foreground/70 transition-colors">← More posts</button>
+                    ) : <span />}
+                    {sidebarPage < totalSidebarPages - 1 ? (
+                      <button onClick={() => setSidebarPage((p) => p + 1)} className="text-[0.65rem] text-foreground/45 hover:text-foreground/70 transition-colors">More posts →</button>
+                    ) : <span />}
+                  </div>
                 )}
               </div>
             </aside>

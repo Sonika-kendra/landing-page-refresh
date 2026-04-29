@@ -35,16 +35,22 @@ const NewArrivalsAndBestsellersSection = () => {
         {/* Tabs */}
         <div className="flex justify-center mb-6 flex-wrap gap-2 sm:gap-3">
           <Button
-            variant={activeTab === 'new' ? 'default' : 'outline'}
             onClick={() => setActiveTab('new')}
-            className="min-h-10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium"
+            className={`min-h-10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium transition-all duration-300 ${
+              activeTab === 'new'
+                ? 'bg-accent text-accent-foreground hover:bg-primary hover:text-accent'
+                : 'bg-accent/80 text-accent-foreground hover:bg-primary hover:text-accent'
+            }`}
           >
             New Arrivals
           </Button>
           <Button
-            variant={activeTab === 'best' ? 'default' : 'outline'}
             onClick={() => setActiveTab('best')}
-            className="min-h-10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium"
+            className={`min-h-10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium transition-all duration-300 ${
+              activeTab === 'best'
+                ? 'bg-accent text-accent-foreground hover:bg-primary hover:text-accent'
+                : 'bg-accent/80 text-accent-foreground hover:bg-primary hover:text-accent'
+            }`}
           >
             Bestsellers
           </Button>

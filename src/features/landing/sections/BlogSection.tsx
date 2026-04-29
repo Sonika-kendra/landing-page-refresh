@@ -47,8 +47,8 @@ const BlogSection = () => {
           className="text-center mt-12"
         >
           <Button
-            className="btn-henig-outline"
             size="sm"
+            className="bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300 px-8 py-3 text-sm font-normal tracking-widest uppercase"
             asChild
           >
             <Link to={websiteUrlConfig.Blogs}>

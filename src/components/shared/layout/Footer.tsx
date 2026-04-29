@@ -2,7 +2,7 @@ import { Phone, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/theme';
-import { websiteUrlConfig } from '@/config/site';
+import { websiteUrlConfig, oldWebsiteURL } from '@/config/site';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Logo from '@/assets/icons/logoDark.png';
 
@@ -35,7 +35,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-accent text-accent-foreground">
+    <footer className="relative z-10 bg-accent text-accent-foreground">
 
       {/* Main Footer */}
       <div className="henig-container py-14 md:py-18">
@@ -48,12 +48,12 @@ const Footer = () => {
                 <img
                   src={Logo}
                   alt="Henig Diamonds"
-                  className="h-10 md:h-12 w-auto object-contain"
+                  className="h-14 md:h-18 w-auto object-contain"
                 />
               </Link>
             </div>
 
-            <p className="text-sm text-accent-foreground/70 mb-6">
+            <p className="text-base text-accent-foreground/70 mb-6">
               A heritage of trust, innovation, and excellence in diamonds since 1973.
             </p>
 
@@ -78,36 +78,62 @@ const Footer = () => {
 
           {/* Company */}
           <div>
-            <h5 className="font-serif text-lg mb-4">Company</h5>
+            <h5 className="font-serif text-xl font-bold mb-4">Company</h5>
             <ul className="space-y-3">
               <li>
-                <Link
-                  to={websiteUrlConfig.Home}
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                <a
+                  href={`${oldWebsiteURL}/about-us`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   About Us
-                </Link>
+                </a>
               </li>
               <li>
                 <Link
                   to={websiteUrlConfig.PrivacyPolicy}
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
-                  Privacy
+                  Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link
                   to={websiteUrlConfig.TermsAndConditions}
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   T&amp;Cs
                 </Link>
               </li>
               <li>
                 <Link
+                  to={websiteUrlConfig.CancellationReturnsPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Cancellation &amp; Returns
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.QualityPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Quality Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.CookiesPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Cookies Policy
+                </Link>
+              </li>
+              <li>
+                <Link
                   to={websiteUrlConfig.Blogs}
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Blogs
                 </Link>
@@ -115,7 +141,7 @@ const Footer = () => {
               <li>
                 <Link
                   to={websiteUrlConfig.Careers}
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Careers
                 </Link>
@@ -125,15 +151,15 @@ const Footer = () => {
 
           {/* Contact Us — spans 2 columns */}
           <div>
-            <h5 className="font-serif text-lg mb-4">Contact Us</h5>
+            <h5 className="font-serif text-xl font-bold mb-4">Contact Us</h5>
             <ul className="space-y-4">
 
               {/* Phone */}
               <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <Phone className="w-4 h-4 text-primary mt-1 shrink-0" />
                 <a
                   href="tel:+442074040146"
-                  className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   +44 (0)207 404 0146
                 </a>
@@ -147,8 +173,8 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   className="flex items-start gap-3 group"
                 >
-                  <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0 group-hover:text-primary/80 transition-colors" />
-                  <span className="text-sm text-accent-foreground/70 group-hover:text-primary transition-colors">
+                  <MapPin className="w-4 h-4 text-primary mt-1 shrink-0 group-hover:text-primary/80 transition-colors" />
+                  <span className="text-base text-accent-foreground/70 group-hover:text-primary transition-colors">
                     Henig Diamonds Suite Two,<br />
                     First Floor,<br />
                     63-66 Hatton Garden,<br />
@@ -165,8 +191,8 @@ const Footer = () => {
 
               {/* Opening Hours */}
               <li className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <div className="text-sm text-accent-foreground/70 space-y-0.5">
+                <Clock className="w-4 h-4 text-primary mt-1 shrink-0" />
+                <div className="text-base text-accent-foreground/70 space-y-0.5">
                   <p>Monday To Thursday - 9:00am – 6:00pm</p>
                   <p>Friday - 9:00am – 3:30pm</p>
                   <p>Weekends &amp; Bank Holidays Closed</p>
@@ -175,11 +201,12 @@ const Footer = () => {
 
               {/* Emails */}
               <li className="pl-7">
+                <p className="text-xs font-semibold uppercase tracking-widest text-accent-foreground/50 mb-2">General Enquiries</p>
                 <div className="space-y-1.5">
                   <div>
                     <a
                       href="mailto:sales@henigdiamonds.co.uk"
-                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                      className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                     >
                       sales@henigdiamonds.co.uk
                     </a>
@@ -187,7 +214,7 @@ const Footer = () => {
                   <div>
                     <a
                       href="mailto:info@henigdiamonds.co.uk"
-                      className="text-sm text-accent-foreground/70 hover:text-primary transition-colors"
+                      className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                     >
                       info@henigdiamonds.co.uk
                     </a>

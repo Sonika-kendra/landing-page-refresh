@@ -21,7 +21,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
     >
       {/* Badge */}
       {product.badge && (
-        <span className="absolute left-3 top-3 z-10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded bg-primary text-primary-foreground">
+        <span className="absolute left-3 top-3 z-10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded text-white" style={{ backgroundColor: '#C3AC88' }}>
           {product.badge}
         </span>
       )}
@@ -57,8 +57,8 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
         {/* Title + certificate */}
         <div className="flex items-start justify-between gap-1.5">
           <Link to={`/shop/${product.id}`} className="min-w-0 flex-1">
-            <h3 className="text-[11px] font-medium uppercase tracking-wide text-foreground leading-snug line-clamp-2">
-              {product.name} -...
+            <h3 className="text-xs font-medium uppercase tracking-wide text-foreground leading-snug line-clamp-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              {product.name}
             </h3>
           </Link>
           {product.certificate && (
@@ -66,9 +66,9 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
               <img
                 src={igiLogo}
                 alt={product.certificate}
-                className="h-6 w-auto object-contain"
+                className="h-4 w-auto object-contain"
               />
-              <span className="text-[8px] text-foreground/50 leading-none font-medium uppercase tracking-wide">
+              <span className="text-[7px] text-foreground/50 leading-none font-medium uppercase tracking-wide">
                 {product.certificate}
               </span>
             </div>
@@ -102,7 +102,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
             </div>
           </div>
           <div className="shrink-0 flex items-baseline gap-0.5">
-            <span className="text-[9px] text-foreground/50 leading-none mb-0.5">From</span>
+            <span className="text-[10px] text-foreground/50 leading-none mb-0.5">From</span>
             <span className="text-xl font-bold text-foreground leading-none">£{product.price.toLocaleString()}</span>
           </div>
         </div>

@@ -46,6 +46,9 @@ const AdminDraftUsers = lazy(() => import('@/features/admin/sections/DraftUsers'
 const AdminZohoSync  = lazy(() => import('@/features/admin/sections/ZohoSync'));
 const PrivacyPolicy = lazy(() => import('@/features/privacy'));
 const TermsAndConditions = lazy(() => import('@/features/terms'));
+const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
+const QualityPolicy = lazy(() => import('@/features/quality-policy'));
+const CookiesPolicy = lazy(() => import('@/features/cookies-policy'));
 const NotFound = lazy(() => import('@/features/not-found'));
 
 const queryClient = new QueryClient();
@@ -66,6 +69,9 @@ const AppRoutes = () => (
         <Route path="/reset/:id" element={<ResetPassword />} />
         <Route path={websiteUrlConfig.PrivacyPolicy} element={<PrivacyPolicy />} />
         <Route path={websiteUrlConfig.TermsAndConditions} element={<TermsAndConditions />} />
+        <Route path={websiteUrlConfig.CancellationReturnsPolicy} element={<CancellationReturnsPolicy />} />
+        <Route path={websiteUrlConfig.QualityPolicy} element={<QualityPolicy />} />
+        <Route path={websiteUrlConfig.CookiesPolicy} element={<CookiesPolicy />} />
         <Route path="/admin" element={<AdminErrorBoundary><AdminLayout /></AdminErrorBoundary>}>
           <Route index element={<AdminDashboard />} />
           <Route path="draft"     element={<AdminDraftUsers />} />

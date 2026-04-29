@@ -43,7 +43,7 @@ const getExcerpt = (post: BlogPost, maxLength = 160) => {
   return trimmed.slice(0, maxLength).replace(/\s+\S*$/, '') + '…';
 };
 
-const cardSurfaceClass = 'border border-[#ecebe5] bg-card shadow-[0_22px_38px_-32px_rgba(16,24,22,0.48)] transition-all duration-300 hover:shadow-[0_28px_52px_-18px_rgba(16,24,22,0.32)]';
+const cardSurfaceClass = 'border border-[#ecebe5] bg-card shadow-[0_22px_38px_-32px_rgba(16,24,22,0.48)] transition-all duration-300 hover:shadow-[0_32px_60px_-12px_rgba(16,24,22,0.42)] hover:border-primary/40';
 const blogPageContainerClass = 'mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-14';
 
 const MetaRow = ({ post }: { post: BlogPost }) => {
@@ -271,7 +271,10 @@ const Blogs = () => {
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="font-serif text-[3rem] font-medium tracking-tight md:text-[4.25rem]">
             Our Latest News
           </motion.h1>
-          <motion.span initial={{ opacity: 0, scaleX: 0.8 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.1, duration: 0.45 }} className="mt-5 h-px w-52 origin-center bg-primary/80" />
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} className="mt-4 text-base md:text-lg text-accent-foreground/70 max-w-xl">
+            Insights, stories and updates from the world of fine diamonds and jewellery.
+          </motion.p>
+          <motion.span initial={{ opacity: 0, scaleX: 0.8 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.2, duration: 0.45 }} className="mt-5 h-px w-52 origin-center bg-primary/80" />
         </div>
       </section>
       <section className="py-12 md:py-16 bg-white">
