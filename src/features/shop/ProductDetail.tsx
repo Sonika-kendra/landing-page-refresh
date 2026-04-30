@@ -68,7 +68,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <section className="section-ivory py-8 md:py-12">
+      <section className="bg-white py-8 md:py-12">
         <div className="henig-container">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
@@ -148,7 +148,7 @@ const ProductDetail = () => {
                             backgroundColor: metal.image ? undefined : metal.bg,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
-                            color: metal.color,
+                            color: '#000',
                           }}
                           className={`rounded px-2 py-1 text-[10px] font-bold leading-none uppercase tracking-wide transition-all ${isSelected ? 'ring-2 ring-offset-1 ring-foreground/70' : 'opacity-60 hover:opacity-100'}`}
                         >
@@ -196,7 +196,7 @@ const ProductDetail = () => {
                 </button>
                 {specsOpen && (
                   <div className="pb-5">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-2.5">Stone</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2.5">Stone</p>
                     <table className="w-full">
                       <tbody>
                         {([
@@ -227,7 +227,7 @@ const ProductDetail = () => {
                 {product.stock && product.stock <= 5 && (
                   <span className="text-sm text-foreground/55">Only {product.stock} left</span>
                 )}
-                <div className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted">
+                <div className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground">
                   <span>Share</span>
                   <Share2 className="h-3.5 w-3.5" />
                 </div>

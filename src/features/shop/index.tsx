@@ -7,7 +7,8 @@ import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { getMetalType } from '@/data/shop/metalTypes';
 import {
   categories,
   metals,
@@ -46,6 +47,7 @@ const shopSort = {
 
 type FilterTabKey = 'category' | 'subCategory' | 'metal' | 'shape' | 'stockType' | 'price';
 type VisualFilterValue = string | [number, number];
+type FilterChangeHandler = (key: string, value: string | string[] | [number, number]) => void;
 
 type VisualFilterItem = {
   label: string;
@@ -98,11 +100,10 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: 'All Collections', value: '', image: jewelleryImage },
   ],
   metal: [
-    ...metals.map((metal) => ({
-      label: metal.replace('YG', 'Yellow Gold').replace('WG', 'White Gold'),
-      value: metal,
-      display: metal,
-    })),
+    ...metals.map((metal) => {
+      const m = getMetalType(metal);
+      return { label: m.name, value: metal, display: m.label, image: m.image };
+    }),
     { label: 'All Metals', value: '', display: 'All' },
   ],
   shape: [
@@ -115,11 +116,11 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: stockTypes[1], value: stockTypes[1], image: labDiamondImage },
   ],
   price: [
-    { label: 'Under £750', value: [0, 750], display: '<750' },
-    { label: '£750 - £1,000', value: [750, 1000], display: '750-1k' },
-    { label: '£1,000 - £1,500', value: [1000, 1500], display: '1k-1.5k' },
-    { label: '£1,500+', value: [1500, 5000], display: '1.5k+' },
-    { label: 'All Prices', value: DEFAULT_PRICE_RANGE, display: 'All' },
+    { label: 'Under £750', value: [0, 750] },
+    { label: '£750 – £1,000', value: [750, 1000] },
+    { label: '£1,000 – £1,500', value: [1000, 1500] },
+    { label: '£1,500+', value: [1500, 5000] },
+    { label: 'All Prices', value: DEFAULT_PRICE_RANGE },
   ],
 };
 
@@ -142,6 +143,247 @@ const isFilterItemActive = (currentValue: FilterValues[string], itemValue: Visua
   }
   return currentValue === itemValue || (!currentValue && itemValue === '');
 };
+
+const renderFilterItems = (
+  tab: { key: FilterTabKey; label: string },
+  currentValue: FilterValues[string],
+  onChange: FilterChangeHandler
+) => {
+  const items = visualFilters[tab.key];
+
+  if (tab.key === 'metal') {
+    return (
+      <div className="grid grid-cols-3 gap-2">
+        {items.map((item) => {
+          const isActive = isFilterItemActive(currentValue, item.value);
+          const itemKey = (item.value as string) || 'all';
+          return (
+            <button
+              key={`metal-${itemKey}`}
+              type="button"
+              onClick={() => onChange(tab.key, item.value)}
+              aria-pressed={isActive}
+              className={`flex flex-col items-center gap-1.5 rounded-xl p-2 transition-all duration-200 ${
+                isActive ? 'bg-accent/10' : 'hover:bg-secondary/40'
+              }`}
+            >
+              <span
+                className={`h-11 w-11 overflow-hidden rounded-full border-2 transition-all duration-200 ${
+                  isActive
+                    ? 'border-accent shadow-[0_0_0_2px_hsl(var(--accent)/0.25)]'
+                    : 'border-border/40'
+                }`}
+              >
+                {item.image ? (
+                  <img src={item.image} alt={item.label} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center bg-secondary/60 text-[9px] font-semibold text-foreground/50">
+                    All
+                  </span>
+                )}
+              </span>
+              <span
+                className={`text-center text-[10px] leading-tight transition-colors ${
+                  isActive ? 'font-semibold text-accent' : 'text-foreground/55'
+                }`}
+              >
+                {item.display || item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (tab.key === 'shape') {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) => {
+          const isActive = isFilterItemActive(currentValue, item.value);
+          const itemKey = (item.value as string) || 'all';
+          return (
+            <button
+              key={`shape-${itemKey}`}
+              type="button"
+              onClick={() => onChange(tab.key, item.value as string)}
+              aria-pressed={isActive}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                isActive
+                  ? 'border-accent bg-accent text-accent-foreground shadow-sm'
+                  : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
+              }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (tab.key === 'price') {
+    return (
+      <div className="space-y-0.5">
+        {items.map((item) => {
+          const isActive = isFilterItemActive(currentValue, item.value);
+          const itemKey = Array.isArray(item.value) ? item.value.join('-') : 'all';
+          return (
+            <button
+              key={`price-${itemKey}`}
+              type="button"
+              onClick={() => onChange(tab.key, item.value)}
+              aria-pressed={isActive}
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-accent/10 text-accent'
+                  : 'text-foreground/60 hover:bg-secondary/40 hover:text-foreground'
+              }`}
+            >
+              <span className={isActive ? 'font-semibold' : ''}>{item.label}</span>
+              {isActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Default: 2-column image cards (category, subCategory, stockType)
+  return (
+    <div className="grid grid-cols-2 gap-2.5">
+      {items.map((item) => {
+        const isActive = isFilterItemActive(currentValue, item.value);
+        const itemKey = (item.value as string) || 'all';
+        return (
+          <button
+            key={`${tab.key}-${itemKey}`}
+            type="button"
+            onClick={() => onChange(tab.key, item.value)}
+            aria-pressed={isActive}
+            className={`group flex flex-col items-center gap-2 rounded-2xl border p-2.5 text-center transition-all duration-300 ${
+              isActive
+                ? 'border-accent bg-accent/10 shadow-[0_0_0_1px_hsl(var(--accent)/0.35)]'
+                : 'border-border/60 hover:border-accent/50 hover:bg-secondary/30'
+            }`}
+          >
+            <span className="flex h-[72px] w-full items-center justify-center overflow-hidden rounded-xl bg-secondary/40">
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.label}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <span className="px-2 text-xs font-medium text-foreground/70">{item.display}</span>
+              )}
+            </span>
+            <span
+              className={`text-xs leading-tight transition-colors ${
+                isActive ? 'font-semibold text-accent' : 'text-foreground/65'
+              }`}
+            >
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+type FilterSidebarContentProps = {
+  filterValues: FilterValues;
+  openAccordionItems: string[];
+  setOpenAccordionItems: (items: string[]) => void;
+  handleFilterChange: FilterChangeHandler;
+  handleReset: () => void;
+  hasActiveFilters: boolean;
+};
+
+const FilterSidebarContent = ({
+  filterValues,
+  openAccordionItems,
+  setOpenAccordionItems,
+  handleFilterChange,
+  handleReset,
+  hasActiveFilters,
+}: FilterSidebarContentProps) => (
+  <div>
+    <div className="mb-5 flex items-center justify-between">
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-foreground/45">
+        Refine By
+      </h2>
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={handleReset}
+          className="text-xs text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground"
+        >
+          Clear all
+        </button>
+      )}
+    </div>
+
+    <Accordion
+      type="multiple"
+      value={openAccordionItems}
+      onValueChange={setOpenAccordionItems}
+      className="space-y-2"
+    >
+      {filterTabs.map((tab) => {
+        const isFilterActive =
+          Boolean(filterValues[tab.key]) &&
+          !(
+            tab.key === 'price' &&
+            Array.isArray(filterValues.price) &&
+            isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
+          );
+
+        return (
+          <AccordionItem
+            key={tab.key}
+            value={tab.key}
+            className="overflow-hidden rounded-2xl border border-border/60 bg-background px-3.5"
+          >
+            <AccordionTrigger className="py-3.5 hover:no-underline [&>svg]:hidden">
+              <div className="flex w-full items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/70">
+                    {tab.label}
+                  </span>
+                  {isFilterActive && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  )}
+                </div>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground/70">
+                  {openAccordionItems.includes(tab.key) ? '−' : '+'}
+                </span>
+              </div>
+            </AccordionTrigger>
+
+            <AccordionContent className="pb-4 pt-0">
+              {isFilterActive && (
+                <div className="mb-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleFilterChange(tab.key, tab.key === 'price' ? DEFAULT_PRICE_RANGE : '')
+                    }
+                    className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+              {renderFilterItems(tab, filterValues[tab.key], handleFilterChange)}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
+  </div>
+);
 
 const ShopPage = () => {
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
@@ -207,6 +449,31 @@ const ShopPage = () => {
     );
   }, [filterValues]);
 
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: FilterTabKey; label: string }[] = [];
+    if (typeof filterValues.category === 'string' && filterValues.category)
+      chips.push({ key: 'category', label: filterValues.category });
+    if (typeof filterValues.subCategory === 'string' && filterValues.subCategory)
+      chips.push({ key: 'subCategory', label: filterValues.subCategory });
+    if (typeof filterValues.metal === 'string' && filterValues.metal)
+      chips.push({ key: 'metal', label: getMetalType(filterValues.metal).name });
+    if (typeof filterValues.shape === 'string' && filterValues.shape)
+      chips.push({ key: 'shape', label: filterValues.shape });
+    if (typeof filterValues.stockType === 'string' && filterValues.stockType)
+      chips.push({ key: 'stockType', label: filterValues.stockType });
+    if (
+      Array.isArray(filterValues.price) &&
+      !isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
+    ) {
+      const [lo, hi] = filterValues.price as [number, number];
+      const priceItem = visualFilters.price.find(
+        (p) => Array.isArray(p.value) && isSameRange(p.value as [number, number], [lo, hi])
+      );
+      chips.push({ key: 'price', label: priceItem?.label ?? `£${lo}–£${hi}` });
+    }
+    return chips;
+  }, [filterValues]);
+
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
@@ -214,125 +481,47 @@ const ShopPage = () => {
 
   return (
     <PageLayout>
+      {/* Sticky toolbar */}
       <div className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20">
         <div className="henig-container">
           <div className="flex flex-wrap items-center gap-3 py-4">
+            {/* Filter button */}
             <Sheet open={isFilterSidebarOpen} onOpenChange={setIsFilterSidebarOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="justify-start gap-2 sm:w-auto">
+                <Button className="justify-start gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
                   <SlidersHorizontal className="h-4 w-4" />
                   Filter
+                  {activeFilterChips.length > 0 && (
+                    <span className="ml-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/20 text-[10px] font-bold">
+                      {activeFilterChips.length}
+                    </span>
+                  )}
                 </Button>
               </SheetTrigger>
-                <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-xl">
-                  <SheetHeader>
+              <SheetContent side="left" className="flex w-[340px] flex-col p-0 sm:w-[400px]">
+                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-4">
+                  <SheetHeader className="text-left">
                     <SheetTitle>Filter Products</SheetTitle>
-                    <SheetDescription>Choose a category and refine the product listing.</SheetDescription>
+                    <SheetDescription>Choose a category and refine the products.</SheetDescription>
                   </SheetHeader>
+                  <SheetClose className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 text-foreground transition-colors hover:bg-foreground/20">
+                    <X className="h-4 w-4" />
+                  </SheetClose>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 py-6">
+                  <FilterSidebarContent
+                    filterValues={filterValues}
+                    openAccordionItems={openAccordionItems}
+                    setOpenAccordionItems={setOpenAccordionItems}
+                    handleFilterChange={handleFilterChange}
+                    handleReset={handleReset}
+                    hasActiveFilters={hasActiveFilters}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
 
-                  <div className="mt-8">
-                    <Accordion
-                      type="multiple"
-                      value={openAccordionItems}
-                      onValueChange={setOpenAccordionItems}
-                      className="space-y-4"
-                    >
-                      {filterTabs.map((tab) => (
-                        <AccordionItem
-                          key={tab.key}
-                          value={tab.key}
-                          className="rounded-2xl border border-border/70 bg-background px-4"
-                        >
-                          <AccordionTrigger className="py-5 text-left font-normal no-underline hover:no-underline">
-                            <div className="flex w-full items-center justify-between gap-3 pr-3">
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80">
-                                  {tab.label}
-                                </span>
-                                {Boolean(filterValues[tab.key]) &&
-                                  !(tab.key === 'price' && Array.isArray(filterValues.price) && isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)) && (
-                                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
-                                      Active
-                                    </span>
-                                  )}
-                              </div>
-                              <span className="flex items-center gap-3">
-                                <span className="grid h-7 w-7 place-items-center rounded-full border border-border/70 text-base font-light text-foreground/70">
-                                  {openAccordionItems.includes(tab.key) ? '-' : '+'}
-                                </span>
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-
-                          <AccordionContent className="pb-5 pt-1">
-                            {Boolean(filterValues[tab.key]) &&
-                              !(tab.key === 'price' && Array.isArray(filterValues.price) && isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)) && (
-                                <div className="mb-4 flex justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleFilterChange(
-                                        tab.key,
-                                        tab.key === 'price' ? DEFAULT_PRICE_RANGE : ''
-                                      )
-                                    }
-                                    className="text-xs text-foreground/55 underline underline-offset-4 transition-colors hover:text-foreground"
-                                  >
-                                    Clear
-                                  </button>
-                                </div>
-                              )}
-                            <div className="grid grid-cols-2 gap-3">
-                              {visualFilters[tab.key].map((item) => {
-                                const value = filterValues[tab.key];
-                                const isItemActive = isFilterItemActive(value, item.value);
-                                const itemKey = Array.isArray(item.value) ? item.value.join('-') : item.value || 'all';
-
-                                return (
-                                  <button
-                                    key={`${tab.key}-${itemKey}`}
-                                    type="button"
-                                    onClick={() => handleFilterChange(tab.key, item.value)}
-                                    className={`group flex flex-col items-center gap-3 rounded-2xl border p-3 text-center transition-all duration-300 ${
-                                      isItemActive
-                                        ? 'border-accent bg-accent/10 shadow-[0_0_0_1px_hsl(var(--accent)/0.4)]'
-                                        : 'border-border/70 hover:border-accent/60 hover:bg-secondary/30'
-                                    }`}
-                                    aria-pressed={isItemActive}
-                                  >
-                                    <span className="flex h-24 w-full items-center justify-center overflow-hidden rounded-xl bg-secondary/40">
-                                      {item.image ? (
-                                        <img
-                                          src={item.image}
-                                          alt={item.label}
-                                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                      ) : (
-                                        <span className="px-3 text-sm font-medium text-foreground/80">
-                                          {item.display}
-                                        </span>
-                                      )}
-                                    </span>
-                                    <span className="text-sm text-foreground/80">{item.label}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-
-                    {hasActiveFilters && (
-                      <Button variant="ghost" onClick={handleReset} className="mt-6 w-full justify-center">
-                        Clear all filters
-                      </Button>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-            <label className="relative block flex-1 min-w-[200px] sm:max-w-[320px]">
+            <label className="relative block min-w-[200px] flex-1 sm:max-w-[320px]">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
               <input
                 value={(filterValues.search as string) || ''}
@@ -357,7 +546,7 @@ const ShopPage = () => {
               <select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value)}
-                className="h-10 rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary w-[180px]"
+                className="h-10 w-[180px] rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
               >
                 {shopSort.options.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -367,7 +556,7 @@ const ShopPage = () => {
               </select>
             </label>
 
-            <span className="text-sm text-foreground/55 ml-auto">
+            <span className="ml-auto text-sm text-foreground/55">
               {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
             </span>
             {hasActiveFilters && (
@@ -383,66 +572,107 @@ const ShopPage = () => {
         </div>
       </div>
 
-      <section className="bg-white py-8 md:py-12">
-        <div className="henig-container">
-          {paged.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-lg text-foreground/60">No products match your filters.</p>
-              <button onClick={handleReset} className="mt-3 text-sm text-primary underline hover:text-primary/80">
-                Clear all filters
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-              {paged.map((product) => (
-                <ShopProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-
-          {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
-              >
-                &lsaquo;
-              </button>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = i + 1;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${
-                      page === pageNum ? 'bg-accent text-accent-foreground' : 'text-foreground/60 hover:bg-border/40'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-              {totalPages > 5 && <span className="text-foreground/40">...</span>}
-              {totalPages > 5 && (
+      {/* Active filter chips */}
+      {activeFilterChips.length > 0 && (
+        <div className="border-b border-border/30 bg-white/70">
+          <div className="henig-container py-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] uppercase tracking-wider text-foreground/40">Active:</span>
+              {activeFilterChips.map((chip) => (
                 <button
-                  onClick={() => setPage(totalPages)}
-                  className={`h-8 w-8 rounded-full text-sm font-medium ${
-                    page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
-                  }`}
+                  key={chip.key}
+                  type="button"
+                  onClick={() =>
+                    handleFilterChange(chip.key, chip.key === 'price' ? DEFAULT_PRICE_RANGE : '')
+                  }
+                  className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >
-                  {totalPages}
+                  {chip.label}
+                  <X className="h-3 w-3 opacity-70" />
+                </button>
+              ))}
+              {activeFilterChips.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground"
+                >
+                  Clear all
                 </button>
               )}
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
-              >
-                &rsaquo;
-              </button>
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      {/* Main content */}
+      <section className="bg-white py-8 md:py-12">
+        <div className="henig-container">
+          <div>
+            {paged.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-lg text-foreground/60">No products match your filters.</p>
+                <button
+                  onClick={handleReset}
+                  className="mt-3 text-sm text-primary underline hover:text-primary/80"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                {paged.map((product) => (
+                  <ShopProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="mt-10 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
+                >
+                  &lsaquo;
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${
+                        page === pageNum
+                          ? 'bg-accent text-accent-foreground'
+                          : 'text-foreground/60 hover:bg-border/40'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                {totalPages > 5 && <span className="text-foreground/40">...</span>}
+                {totalPages > 5 && (
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    className={`h-8 w-8 rounded-full text-sm font-medium ${
+                      page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
+                    }`}
+                  >
+                    {totalPages}
+                  </button>
+                )}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
+                >
+                  &rsaquo;
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -455,7 +685,6 @@ const ShopPage = () => {
       >
         <ChevronUp className="h-5 w-5" />
       </button>
-
     </PageLayout>
   );
 };

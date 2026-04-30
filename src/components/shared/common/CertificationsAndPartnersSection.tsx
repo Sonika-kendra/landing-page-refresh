@@ -4,6 +4,7 @@ import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
 import { useAuth } from '@/context/AuthContext';
 import { Link } from 'react-router-dom';
 import { websiteUrlConfig } from '@/config/site';
+import { ArrowRight } from 'lucide-react';
 
 // Certifications images
 const certificationModules = import.meta.glob(
@@ -75,11 +76,12 @@ const CertificationsAndPartnersSection = () => {
           <div className="px-4">
             <Button
               size="sm"
-              className="p-5 whitespace-nowrap bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300"
+              className="group p-5 whitespace-nowrap bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300"
               asChild
             >
               <Link to={websiteUrlConfig.Contact}>
                 Partner With Us
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </div>

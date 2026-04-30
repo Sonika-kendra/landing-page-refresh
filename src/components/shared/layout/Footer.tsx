@@ -1,4 +1,4 @@
-import { Phone, MapPin, Clock } from 'lucide-react';
+import { Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/theme';
@@ -146,6 +146,14 @@ const Footer = () => {
                   Careers
                 </Link>
               </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.Careers}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Warranty Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -226,7 +234,7 @@ const Footer = () => {
               <li className="pl-7 pt-1">
                 <Button
                   size="sm"
-                  className="btn-henig-outline"
+                  className="btn-henig-outline !hover:bg-secondary !hover:text-accent group"
                   asChild
                 >
                   <a
@@ -234,6 +242,7 @@ const Footer = () => {
                     rel="noopener noreferrer"
                   >
                     SEND AN ENQUIRY
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </a>
                 </Button>
               </li>

@@ -233,7 +233,7 @@ const Header = () => {
   };
 
   return (
-    <header className="relative sticky top-0 z-[1100] bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className="relative sticky top-0 z-[1100] bg-background/95 backdrop-blur-sm border-b-4 border-accent">
       {/* HEADER BAR */}
       <div className="henig-container">
         <div className="flex items-center justify-between h-16 md:h-20">

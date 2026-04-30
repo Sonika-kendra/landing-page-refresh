@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { oldWebsiteURL, websiteUrlConfig } from '@/config/site';
+import { ArrowRight } from 'lucide-react';
 
 const BlogSection = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -48,11 +49,12 @@ const BlogSection = () => {
         >
           <Button
             size="sm"
-            className="bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300 px-8 py-3 text-sm font-normal tracking-widest uppercase"
+            className="group bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300 px-8 py-3 text-sm font-normal tracking-widest uppercase"
             asChild
           >
             <Link to={websiteUrlConfig.Blogs}>
               GO TO OUR BLOG
+              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
         </motion.div>
