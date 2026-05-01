@@ -31,10 +31,27 @@ const ProductDetail = () => {
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const [shared, setShared] = useState(false);
+
   const copySku = () => {
     navigator.clipboard.writeText(product?.sku ?? '');
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product?.name, url });
+      } catch {
+        // user cancelled or error — do nothing
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+    }
   };
 
   if (!product) {
@@ -227,10 +244,13 @@ const ProductDetail = () => {
                 {product.stock && product.stock <= 5 && (
                   <span className="text-sm text-foreground/55">Only {product.stock} left</span>
                 )}
-                <div className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground">
-                  <span>Share</span>
-                  <Share2 className="h-3.5 w-3.5" />
-                </div>
+                <button
+                  onClick={handleShare}
+                  className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span>{shared ? 'Copied!' : 'Share'}</span>
+                  {shared ? <Copy className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+                </button>
               </div>
 
               <div className="mt-4 flex gap-3">
