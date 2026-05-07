@@ -1,7 +1,29 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, FileText, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus } from 'lucide-react';
 import { Editor } from '@tinymce/tinymce-react';
+
+// Bundled TinyMCE — no CDN, no API key required
+import 'tinymce/tinymce';
+import 'tinymce/models/dom';
+import 'tinymce/themes/silver';
+import 'tinymce/icons/default';
+import 'tinymce/skins/ui/oxide/skin.min.css';
+import 'tinymce/plugins/link';
+import 'tinymce/plugins/lists';
+import 'tinymce/plugins/image';
+import 'tinymce/plugins/wordcount';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/media';
+import 'tinymce/plugins/fullscreen';
+import 'tinymce/plugins/preview';
+import 'tinymce/plugins/searchreplace';
+import 'tinymce/plugins/charmap';
+import 'tinymce/plugins/anchor';
+import 'tinymce/plugins/codesample';
+import 'tinymce/plugins/insertdatetime';
+import 'tinymce/plugins/visualblocks';
+import 'tinymce/plugins/quickbars';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -42,13 +64,27 @@ const toDateTimeLocal = (iso: string) => {
   catch { return new Date().toISOString().slice(0, 16); }
 };
 
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+type ImageEntry = {
+  id: string;
+  file: File | null;
+  preview: string;
+  serverUrl: string;
+};
+
+type ButtonEntry = {
+  id: string;
+  label: string;
+  url: string;
+};
+
 type PostForm = {
   title: string;
   date: string;
   snippet: string;
   content: string;
   status: PostStatus;
-  src: string;
   related: string;
 };
 
@@ -58,9 +94,21 @@ const EMPTY_FORM: PostForm = {
   snippet: '',
   content: '',
   status: 'draft',
-  src: '',
   related: '',
 };
+
+const postToImages = (post: Post): ImageEntry[] => {
+  if (post.images?.length) {
+    return post.images.map(url => ({ id: uid(), file: null, preview: url, serverUrl: url }));
+  }
+  if (post.src) {
+    return [{ id: uid(), file: null, preview: post.src, serverUrl: post.src }];
+  }
+  return [];
+};
+
+const postToButtons = (post: Post): ButtonEntry[] =>
+  (post.buttons || []).map(b => ({ ...b, id: uid() }));
 
 const Posts = () => {
   const queryClient = useQueryClient();
@@ -71,10 +119,11 @@ const Posts = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | PostStatus>('all');
   const [editPost, setEditPost] = useState<Post | null>(null);
   const [form, setForm] = useState<PostForm>(EMPTY_FORM);
+  const [images, setImages] = useState<ImageEntry[]>([]);
+  const [buttons, setButtons] = useState<ButtonEntry[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['admin', 'posts'],
@@ -93,7 +142,8 @@ const Posts = () => {
   const openCreate = () => {
     setEditPost(null);
     setForm(EMPTY_FORM);
-    setImagePreview(null);
+    setImages([]);
+    setButtons([]);
     setView('form');
   };
 
@@ -105,16 +155,17 @@ const Posts = () => {
       snippet: post.snippet,
       content: post.content,
       status:  post.status,
-      src:     post.src || '',
       related: (post.related || []).join(', '),
     });
-    setImagePreview(post.src || null);
+    setImages(postToImages(post));
+    setButtons(postToButtons(post));
     setView('form');
   };
 
   const handleBack = () => {
     setView('list');
-    setImagePreview(null);
+    setImages([]);
+    setButtons([]);
   };
 
   const handleReset = () => {
@@ -125,50 +176,78 @@ const Posts = () => {
         snippet: editPost.snippet,
         content: editPost.content,
         status:  editPost.status,
-        src:     editPost.src || '',
         related: (editPost.related || []).join(', '),
       });
-      setImagePreview(editPost.src || null);
+      setImages(postToImages(editPost));
+      setButtons(postToButtons(editPost));
     } else {
       setForm(EMPTY_FORM);
-      setImagePreview(null);
+      setImages([]);
+      setButtons([]);
     }
   };
 
   const handleFormField = (name: keyof PostForm, value: string) =>
     setForm(prev => ({ ...prev, [name]: value }));
 
+  const addImageFiles = useCallback((files: FileList | File[]) => {
+    const valid = Array.from(files).filter(f => f.type.startsWith('image/'));
+    setImages(prev => [
+      ...prev,
+      ...valid.map(file => ({
+        id: uid(),
+        file,
+        preview: URL.createObjectURL(file),
+        serverUrl: '',
+      })),
+    ]);
+  }, []);
+
   const handleImageDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file?.type.startsWith('image/')) {
-      setImagePreview(URL.createObjectURL(file));
-    }
-  }, []);
+    if (e.dataTransfer.files.length) addImageFiles(e.dataTransfer.files);
+  }, [addImageFiles]);
 
-  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setImagePreview(URL.createObjectURL(file));
-  }, []);
+  const updateButton = (id: string, field: 'label' | 'url', value: string) =>
+    setButtons(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
+
+  const removeButton = (id: string) =>
+    setButtons(prev => prev.filter(b => b.id !== id));
+
+  const addButton = () =>
+    setButtons(prev => [...prev, { id: uid(), label: '', url: '' }]);
+
+  const buildFormData = () => {
+    const fd = new FormData();
+    fd.append('title',   form.title);
+    fd.append('date',    new Date(form.date).toISOString());
+    fd.append('snippet', form.snippet);
+    fd.append('content', form.content);
+    fd.append('status',  form.status);
+    if (form.related) fd.append('related', form.related);
+
+    const existingUrls: string[] = [];
+    images.forEach((img, i) => {
+      if (img.file) {
+        if (i === 0) fd.append('src', img.file);
+        fd.append('images', img.file);
+      } else if (img.serverUrl) {
+        if (i === 0) fd.append('src', img.serverUrl);
+        existingUrls.push(img.serverUrl);
+      }
+    });
+    fd.append('existingImages', JSON.stringify(existingUrls));
+    fd.append('buttons', JSON.stringify(buttons.map(({ label, url }) => ({ label, url }))));
+    return fd;
+  };
 
   const saveMutation = useMutation({
     mutationFn: () => {
-      const related = form.related
-        ? form.related.split(',').map(s => s.trim()).filter(Boolean)
-        : undefined;
-      const data = {
-        title:   form.title,
-        date:    new Date(form.date).toISOString(),
-        snippet: form.snippet,
-        content: form.content,
-        status:  form.status,
-        ...(form.src && { src: form.src }),
-        ...(related?.length && { related }),
-      };
+      const fd = buildFormData();
       return editPost
-        ? adminApi.updatePost(editPost._id, data)
-        : adminApi.createPost(data as Parameters<typeof adminApi.createPost>[0]);
+        ? adminApi.updatePost(editPost._id, fd)
+        : adminApi.createPost(fd);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'posts'] });
@@ -214,53 +293,194 @@ const Posts = () => {
           className="rounded-none h-12 border-border focus-visible:ring-0 focus-visible:border-foreground"
         />
 
-        {/* Editor + Image drop zone */}
-        <div className="flex border border-border">
-          <div className="flex-[3] min-w-0">
-            <Editor
-              tinymceScriptSrc={`https://cdn.tiny.cloud/1/${import.meta.env.VITE_TINYMCE_API_KEY ?? 'no-api-key'}/tinymce/7/tinymce.min.js`}
-              value={form.content}
-              onEditorChange={content => handleFormField('content', content)}
-              init={{
-                height: 380,
-                menubar: false,
-                statusbar: true,
-                resize: false,
-                plugins: ['emoticons', 'link', 'lists', 'image', 'wordcount'],
-                toolbar: 'emoticons | undo redo | blocks | fontsize | bold italic forecolor | link | alignleft aligncenter alignright alignjustify | bullist numlist',
-                content_style: 'body { font-family: inherit; font-size: 12pt; margin: 8px; }',
-              }}
-            />
-          </div>
+        {/* Editor */}
+        <div className="border border-border">
+          <Editor
+            value={form.content}
+            onEditorChange={content => handleFormField('content', content)}
+            init={{
+              licenseKey: 'gpl',
+              model: 'dom',
+              skin: false,
+              content_css: false,
+              height: 520,
+              menubar: true,
+              statusbar: true,
+              resize: false,
+              plugins: [
+                'link', 'lists', 'image', 'wordcount',
+                'table', 'media', 'fullscreen', 'preview',
+                'searchreplace', 'charmap', 'anchor', 'codesample',
+                'insertdatetime', 'visualblocks', 'quickbars',
+              ],
+              toolbar: [
+                'undo redo | blocks fontsize | bold italic underline strikethrough | forecolor backcolor | removeformat',
+                'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link anchor | image media table | charmap | insertbutton | fullscreen preview',
+              ],
+              toolbar_mode: 'wrap',
+              quickbars_selection_toolbar: 'bold italic | link h2 h3 blockquote',
+              quickbars_insert_toolbar: 'image media table',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              setup: (editor: any) => {
+                editor.ui.registry.addButton('insertbutton', {
+                  text: 'Button',
+                  tooltip: 'Insert a styled CTA button',
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onAction: () => {
+                    editor.windowManager.open({
+                      title: 'Insert Button',
+                      body: {
+                        type: 'panel',
+                        items: [
+                          { type: 'input', name: 'label', label: 'Button Label', placeholder: 'Shop Now' },
+                          { type: 'input', name: 'url',   label: 'URL',          placeholder: 'https://' },
+                        ],
+                      },
+                      buttons: [
+                        { type: 'cancel', text: 'Cancel' },
+                        { type: 'submit', text: 'Insert', buttonType: 'primary' },
+                      ],
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      onSubmit: (api: any) => {
+                        const { label, url } = api.getData();
+                        if (label && url) {
+                          editor.insertContent(
+                            `<a href="${url}" style="display:inline-block;padding:10px 24px;background-color:#173731;color:#f5f5ea;text-decoration:none;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;font-family:inherit;" target="_blank">${label}</a>`
+                          );
+                        }
+                        api.close();
+                      },
+                    });
+                  },
+                });
+              },
+              image_title: true,
+              automatic_uploads: true,
+              file_picker_types: 'image',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              file_picker_callback: (callback: any) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = async () => {
+                  const file = input.files?.[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.append('src', file);
+                  try {
+                    const res = await adminApi.uploadPostImage(fd);
+                    callback(res.data.url, { title: file.name });
+                  } catch {
+                    // fallback: let TinyMCE handle it without a URL
+                  }
+                };
+                input.click();
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              images_upload_handler: async (blobInfo: any) => {
+                const fd = new FormData();
+                fd.append('src', blobInfo.blob(), blobInfo.filename());
+                const res = await adminApi.uploadPostImage(fd);
+                return res.data.url;
+              },
+              content_style: 'body { font-family: inherit; font-size: 12pt; margin: 8px; line-height: 1.6; color: #173731; }',
+            }}
+          />
+        </div>
 
-          {/* Image drop zone */}
+        {/* Images */}
+        <div>
+          <h3 className="text-sm font-medium tracking-wide mb-2">Images</h3>
           <div
-            className={`flex-[1] border-l border-border flex flex-col items-center justify-center min-h-[200px] cursor-pointer select-none transition-colors ${
-              isDragOver ? 'bg-muted/40' : 'bg-muted/10 hover:bg-muted/20'
+            className={`flex flex-wrap gap-3 border border-border p-3 min-h-[96px] transition-colors ${
+              isDragOver ? 'bg-muted/40' : ''
             }`}
             onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleImageDrop}
-            onClick={() => fileInputRef.current?.click()}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageSelect}
-            />
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full h-full object-cover"
+            {images.map((img, index) => (
+              <div key={img.id} className="relative w-24 h-24 border border-border group shrink-0">
+                <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                {index === 0 && (
+                  <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-black/60 text-white tracking-wider py-0.5 uppercase">
+                    Cover
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+
+            {/* Add image slot */}
+            <div
+              className="w-24 h-24 border border-dashed border-border flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-muted/20 transition-colors shrink-0"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => {
+                  if (e.target.files?.length) addImageFiles(e.target.files);
+                  e.target.value = '';
+                }}
               />
-            ) : (
-              <p className="text-center text-muted-foreground text-[11px] tracking-[0.2em] uppercase leading-relaxed px-4">
-                CLICK / DROP<br />FILE<br />HERE
-              </p>
+              <ImagePlus className="w-5 h-5 text-muted-foreground" />
+              <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Add</span>
+            </div>
+          </div>
+          {images.length === 0 && (
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Drag images above or click Add. First image becomes the cover.
+            </p>
+          )}
+        </div>
+
+        {/* Button Links */}
+        <div>
+          <h3 className="text-sm font-medium tracking-wide mb-2">Button Links</h3>
+          <div className="border border-border divide-y divide-border">
+            {buttons.length === 0 && (
+              <p className="text-xs text-muted-foreground px-4 py-3">No buttons added yet.</p>
             )}
+            {buttons.map(btn => (
+              <div key={btn.id} className="flex items-center">
+                <Input
+                  value={btn.label}
+                  onChange={e => updateButton(btn.id, 'label', e.target.value)}
+                  placeholder="Button label"
+                  className="rounded-none border-0 border-r border-border h-10 w-40 shrink-0 focus-visible:ring-0 focus-visible:border-foreground"
+                />
+                <Input
+                  value={btn.url}
+                  onChange={e => updateButton(btn.id, 'url', e.target.value)}
+                  placeholder="https://…"
+                  className="rounded-none border-0 flex-1 h-10 focus-visible:ring-0 focus-visible:border-foreground"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeButton(btn.id)}
+                  className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-destructive flex-shrink-0 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <div
+              className="flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-muted/20 transition-colors text-muted-foreground text-xs tracking-widest uppercase select-none"
+              onClick={addButton}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Button
+            </div>
           </div>
         </div>
 

@@ -20,7 +20,7 @@ export type ApiBase = keyof typeof API_BASES;
 
 export const API_CONFIG = {
   blog: {
-    base: 'legacy' as ApiBase,
+    base: 'new' as ApiBase,
     endpoints: {
       posts: (status: string = 'all') => `/posts/${status}`,
     },
@@ -65,13 +65,14 @@ export const API_CONFIG = {
   },
 
   adminPosts: {
-    base: 'legacy' as ApiBase,
+    base: 'new' as ApiBase,
     endpoints: {
       all: '/posts/all',
       post: (id: string) => `/posts/${id}`,
       create: '/posts',
       update: (id: string) => `/posts/${id}`,
       delete: (id: string) => `/posts/${id}`,
+      uploadImage: '/posts/upload-image',
     },
   },
 

@@ -44,10 +44,12 @@ export interface Post {
   title: string;
   date: string;
   src?: string;
+  images?: string[];
   snippet: string;
   content: string;
   status: 'draft' | 'published';
   related?: string[];
+  buttons?: { label: string; url: string }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -156,7 +158,7 @@ export const adminApi = {
       API_CONFIG.adminPosts.base
     ),
 
-  createPost: (data: Omit<Post, '_id' | 'createdAt' | 'updatedAt'>) =>
+  createPost: (data: FormData) =>
     apiClient.post<Post>(
       API_CONFIG.adminPosts.endpoints.create,
       data,
@@ -164,9 +166,17 @@ export const adminApi = {
       API_CONFIG.adminPosts.base
     ),
 
-  updatePost: (id: string, data: Partial<Omit<Post, '_id' | 'createdAt' | 'updatedAt'>>) =>
+  updatePost: (id: string, data: FormData) =>
     apiClient.patch<Post>(
       API_CONFIG.adminPosts.endpoints.update(id),
+      data,
+      undefined,
+      API_CONFIG.adminPosts.base
+    ),
+
+  uploadPostImage: (data: FormData) =>
+    apiClient.post<{ url: string }>(
+      API_CONFIG.adminPosts.endpoints.uploadImage,
       data,
       undefined,
       API_CONFIG.adminPosts.base
