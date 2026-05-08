@@ -44,6 +44,19 @@ const AdminPosts = lazy(() => import('@/features/admin/sections/Posts'));
 const AdminSettings  = lazy(() => import('@/features/admin/sections/Settings'));
 const AdminDraftUsers = lazy(() => import('@/features/admin/sections/DraftUsers'));
 const AdminZohoSync  = lazy(() => import('@/features/admin/sections/ZohoSync'));
+const AdminCategories = lazy(() => import('@/features/admin/sections/Categories'));
+const AdminProducts   = lazy(() => import('@/features/admin/sections/Products'));
+const AdminOrders     = lazy(() => import('@/features/admin/sections/Orders'));
+const AdminOrderDetail= lazy(() => import('@/features/admin/sections/OrderDetail'));
+const AdminStock      = lazy(() => import('@/features/admin/sections/Stock'));
+const AdminCartMonitor= lazy(() => import('@/features/admin/sections/CartMonitor'));
+const Cart            = lazy(() => import('@/features/cart'));
+const Checkout        = lazy(() => import('@/features/checkout'));
+const AccountLayout   = lazy(() => import('@/features/account/AccountLayout'));
+const MyOrders        = lazy(() => import('@/features/account/MyOrders'));
+const MyOrderDetail   = lazy(() => import('@/features/account/MyOrderDetail'));
+const AddressBook     = lazy(() => import('@/features/account/AddressBook'));
+const AccountProfile  = lazy(() => import('@/features/account/Profile'));
 const PrivacyPolicy = lazy(() => import('@/features/privacy'));
 const TermsAndConditions = lazy(() => import('@/features/terms'));
 const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
@@ -81,6 +94,21 @@ const AppRoutes = () => (
           <Route path="posts" element={<AdminPosts />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="zoho"     element={<AdminZohoSync />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="products"   element={<AdminProducts />} />
+          <Route path="orders"     element={<AdminOrders />} />
+          <Route path="orders/:id" element={<AdminOrderDetail />} />
+          <Route path="stock"      element={<AdminStock />} />
+          <Route path="carts"      element={<AdminCartMonitor />} />
+        </Route>
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/account" element={<AccountLayout />}>
+          <Route index element={<MyOrders />} />
+          <Route path="orders" element={<MyOrders />} />
+          <Route path="orders/:id" element={<MyOrderDetail />} />
+          <Route path="addresses" element={<AddressBook />} />
+          <Route path="profile" element={<AccountProfile />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
