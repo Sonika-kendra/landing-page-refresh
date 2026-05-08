@@ -140,7 +140,7 @@ const CookiesPolicy = () => {
 
   return (
     <PageLayout>
-      <section className="bg-accent text-accent-foreground py-20 md:py-28">
+      <section className="bg-accent text-accent-foreground py-10 md:py-14">
         <div className="henig-container text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -162,36 +162,29 @@ const CookiesPolicy = () => {
 
       <section className="py-16 md:py-24 section-ivory">
         <div className="henig-container">
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-12 lg:gap-16 items-start">
+          <div>
 
-            <aside className="lg:sticky lg:top-8">
-              <div className="bg-card border border-border rounded-sm p-6">
-                <h3 className="font-serif text-base text-foreground mb-4 pb-3 border-b border-border">
-                  Legal
-                </h3>
-                <nav>
-                  <ul className="space-y-1">
-                    {policyNav.map((link) => {
-                      const isActive = pathname === link.href;
-                      return (
-                        <li key={link.href}>
-                          <Link
-                            to={link.href}
-                            className={`block text-sm py-2 px-3 rounded-sm transition-colors ${
-                              isActive
-                                ? 'bg-primary/10 text-primary font-medium'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                            }`}
-                          >
-                            {link.label}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
-              </div>
-            </aside>
+            <nav className="mb-10 border-b border-border">
+              <ul className="flex flex-wrap gap-x-1 justify-center">
+                {policyNav.map((link) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        to={link.href}
+                        className={`block text-sm py-2 px-4 -mb-px border-b-2 transition-colors ${
+                          isActive
+                            ? 'border-primary text-primary font-medium'
+                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
 
             <article>
               <div className="bg-card border border-border rounded-sm p-6 mb-10">

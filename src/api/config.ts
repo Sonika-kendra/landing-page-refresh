@@ -95,22 +95,64 @@ export const API_CONFIG = {
     },
   },
 
-  // ── Future groups ─────────────────────────────────────────────────────────
-  // Uncomment and fill in as new API endpoints go live.
-  //
-  // shop: {
-  //   base: 'new' as ApiBase,
-  //   endpoints: {
-  //     products: '/products',
-  //     product: (id: string) => `/products/${id}`,
-  //   },
-  // },
-  //
-  // diamond: {
-  //   base: 'new' as ApiBase,
-  //   endpoints: {
-  //     list: '/diamonds',
-  //     detail: (id: string) => `/diamonds/${id}`,
-  //   },
-  // },
+  categories: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      all: '/categories',
+      tree: '/categories/tree',
+      one: (id: string) => `/categories/${id}`,
+      create: '/categories',
+      update: (id: string) => `/categories/${id}`,
+      delete: (id: string) => `/categories/${id}`,
+    },
+  },
+
+  products: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      all: '/products',
+      one: (id: string) => `/products/${id}`,
+      create: '/products',
+      update: (id: string) => `/products/${id}`,
+      updateTags: (zohoId: string) => `/products/${zohoId}/tags`,
+      delete: (id: string) => `/products/${id}`,
+    },
+  },
+
+  cart: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      create: '/cart',
+      get: (id: string) => `/cart/${id}`,
+      update: (id: string) => `/cart/${id}`,
+      removeItem: (id: string, lineItemId: string) => `/cart/${id}/items/${lineItemId}`,
+      checkout: (id: string) => `/cart/${id}/checkout`,
+      delete: (id: string) => `/cart/${id}`,
+    },
+  },
+
+  orders: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      all: '/orders',
+      one: (id: string) => `/orders/${id}`,
+      create: '/orders',
+      update: (id: string) => `/orders/${id}`,
+      confirm: (id: string) => `/orders/${id}/confirm`,
+      updateStatus: (id: string) => `/orders/${id}/status`,
+      cancel: (id: string) => `/orders/${id}`,
+    },
+  },
+
+  addresses: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      all: '/addresses',
+      one: (id: string) => `/addresses/${id}`,
+      create: '/addresses',
+      update: (id: string) => `/addresses/${id}`,
+      delete: (id: string) => `/addresses/${id}`,
+      setDefault: (id: string) => `/addresses/${id}/set-default`,
+    },
+  },
 } as const;
