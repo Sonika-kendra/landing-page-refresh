@@ -370,8 +370,9 @@ const Posts = () => {
                   try {
                     const res = await adminApi.uploadPostImage(fd);
                     callback(res.data.url, { title: file.name });
-                  } catch {
-                    // fallback: let TinyMCE handle it without a URL
+                  } catch (err: any) {
+                    const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
+                    toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
                   }
                 };
                 input.click();
@@ -380,8 +381,14 @@ const Posts = () => {
               images_upload_handler: async (blobInfo: any) => {
                 const fd = new FormData();
                 fd.append('src', blobInfo.blob(), blobInfo.filename());
-                const res = await adminApi.uploadPostImage(fd);
-                return res.data.url;
+                try {
+                  const res = await adminApi.uploadPostImage(fd);
+                  return res.data.url;
+                } catch (err: any) {
+                  const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
+                  toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
+                  throw err;
+                }
               },
               content_style: 'body { font-family: inherit; font-size: 12pt; margin: 8px; line-height: 1.6; color: #173731; }',
             }}
