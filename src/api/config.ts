@@ -20,7 +20,7 @@ export type ApiBase = keyof typeof API_BASES;
 
 export const API_CONFIG = {
   blog: {
-    base: 'legacy' as ApiBase,
+    base: 'new' as ApiBase,
     endpoints: {
       posts: (status: string = 'all') => `/posts/${status}`,
     },
@@ -153,6 +153,15 @@ export const API_CONFIG = {
       update: (id: string) => `/addresses/${id}`,
       delete: (id: string) => `/addresses/${id}`,
       setDefault: (id: string) => `/addresses/${id}/set-default`,
+    },
+  },
+
+  wishlist: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      get: '/wishlist',
+      add: (productId: string) => `/wishlist/${productId}`,
+      remove: (productId: string) => `/wishlist/${productId}`,
     },
   },
 } as const;

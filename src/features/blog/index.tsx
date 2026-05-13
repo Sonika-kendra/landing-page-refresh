@@ -4,11 +4,16 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import { baseURL, websiteUrlConfig } from '@/config/site';
+import { newApiURL, websiteUrlConfig } from '@/config/site';
 import { BlogPost, fetchBlogPosts } from '@/api/blog';
 
 const getPostLink = (post: BlogPost) => `${websiteUrlConfig.Blogs}/${post.id}${post.params || ''}`;
-const getPostImage = (post: BlogPost) => (post.src ? `${baseURL}${post.src}` : '');
+const getPostImage = (post: BlogPost) => {
+  if (!post.src) return '';
+  // WorkDrive images are served via the proxy; use relative path
+  if (post.src.startsWith('/posts/image/')) return post.src;
+  return post.src.startsWith('http') ? post.src : `${newApiURL}${post.src}`;
+};
 const getPostTimestamp = (date?: string) => {
   if (!date) return 0;
   const timestamp = new Date(date).getTime();

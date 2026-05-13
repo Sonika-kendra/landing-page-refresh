@@ -1,10 +1,16 @@
 import { useState, useMemo, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Heart, Share2, Copy, Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck } from 'lucide-react';
+import {
+  ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
+  Heart, Share2, Copy, Mail,
+  Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck,
+} from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
+import { useFavourites } from '@/context/FavouritesContext';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
 const Diamond3DViewer = lazy(() => import('@/components/shared/product/Diamond3DViewer'));
@@ -28,30 +34,39 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState(0);
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [justLiked, setJustLiked] = useState(false);
+  const [bagJustAdded, setBagJustAdded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [skuCopied, setSkuCopied] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
-  const [shared, setShared] = useState(false);
+  const { isFavourite, toggleFavourite } = useFavourites();
+  const liked = product ? isFavourite(product.id) : false;
 
   const copySku = () => {
     navigator.clipboard.writeText(product?.sku ?? '');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setSkuCopied(true);
+    setTimeout(() => setSkuCopied(false), 1500);
   };
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: product?.name, url });
-      } catch {
-        // user cancelled or error — do nothing
-      }
-    } else {
-      await navigator.clipboard.writeText(url);
-      setShared(true);
-      setTimeout(() => setShared(false), 2000);
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => { setCopied(false); setShareOpen(false); }, 2000);
+  };
+
+  const handleToggleLiked = () => {
+    if (!product) return;
+    toggleFavourite(product.id);
+    if (!liked) {
+      setJustLiked(true);
+      setTimeout(() => setJustLiked(false), 400);
     }
+  };
+
+  const handleAddToBag = () => {
+    setBagJustAdded(true);
+    setTimeout(() => setBagJustAdded(false), 600);
   };
 
   if (!product) {
@@ -71,16 +86,24 @@ const ProductDetail = () => {
 
   return (
     <PageLayout>
+      {/* Breadcrumb */}
       <div className="bg-accent">
         <div className="henig-container py-3">
-          <nav className="flex flex-wrap items-center gap-1 text-xs text-accent-foreground/80">
-            <Link to="/" className="hover:text-accent-foreground transition-colors">Home</Link>
-            <span className="opacity-50">›</span>
-            <Link to="/shop" className="hover:text-accent-foreground transition-colors">{product.category}</Link>
-            <span className="opacity-50">›</span>
-            <Link to="/shop" className="hover:text-accent-foreground transition-colors">{product.subCategory}</Link>
-            <span className="opacity-50">›</span>
-            <span className="truncate max-w-[240px]">{product.name}</span>
+          <nav className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+            <Link to="/" className="flex items-center gap-1 font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+              <HomeIcon className="h-3.5 w-3.5" />
+              <span>Home</span>
+            </Link>
+            <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
+            <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+              {product.category}
+            </Link>
+            <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
+            <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+              {product.subCategory}
+            </Link>
+            <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
+            <span className="max-w-[240px] truncate font-semibold text-accent-foreground">{product.name}</span>
           </nav>
         </div>
       </div>
@@ -89,18 +112,18 @@ const ProductDetail = () => {
         <div className="henig-container">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
-              <div className="relative aspect-square bg-white border border-border/20 overflow-hidden mb-3">
+              <div className="relative mb-3 aspect-square overflow-hidden border border-border/20 bg-white">
                 {show3D ? (
-                  <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-foreground/30 text-xs tracking-widest uppercase">Loading 3D view…</div>}>
+                  <Suspense fallback={<div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-widest text-foreground/30">Loading 3D view…</div>}>
                     <Diamond3DViewer />
                   </Suspense>
                 ) : (
                   <>
                     <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
-                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors">
+                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
                       <ChevronLeft className="h-9 w-9" />
                     </button>
-                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/60 transition-colors">
+                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
                       <ChevronRight className="h-9 w-9" />
                     </button>
                   </>
@@ -108,25 +131,25 @@ const ProductDetail = () => {
               </div>
               <div className="flex gap-2">
                 {images.map((img, i) => (
-                  <button key={i} onClick={() => { setSelectedImage(i); setShow3D(false); }} className={`h-[90px] w-[90px] border bg-white overflow-hidden flex-shrink-0 transition-all ${!show3D && i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
+                  <button key={i} onClick={() => { setSelectedImage(i); setShow3D(false); }} className={`h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${!show3D && i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
                     <img src={img} alt="" className="h-full w-full object-contain p-1" />
                   </button>
                 ))}
                 <button
                   onClick={() => setShow3D((v) => !v)}
-                  className={`h-[90px] w-[90px] border bg-white flex-shrink-0 flex flex-col items-center justify-center gap-1.5 transition-all ${show3D ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
+                  className={`flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border bg-white transition-all ${show3D ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
                 >
                   <Gem className="h-6 w-6 text-foreground/40" />
-                  <span className="text-[9px] text-foreground/40 font-medium tracking-wider uppercase">3D View</span>
+                  <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">3D View</span>
                 </button>
               </div>
               <div className="mt-8 border-t border-border/30">
                 <button onClick={() => setDescOpen(!descOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-sm font-medium text-foreground">Product Description</span>
-                  <span className="text-foreground/40 text-xl leading-none">{descOpen ? '−' : '+'}</span>
+                  <span className="text-xl leading-none text-foreground/40">{descOpen ? '−' : '+'}</span>
                 </button>
                 {descOpen && (
-                  <div className="pb-5 text-sm text-foreground/60 leading-relaxed">
+                  <div className="pb-5 text-sm leading-relaxed text-foreground/60">
                     <p className="mb-1 text-xs">Item Ref: {product.itemRef}</p>
                     <p>{product.description}</p>
                   </div>
@@ -135,22 +158,22 @@ const ProductDetail = () => {
             </div>
 
             <div>
-              <h1 className="font-serif text-2xl md:text-[1.7rem] leading-snug text-foreground mb-1.5">{product.name}</h1>
-              <div className="flex items-center gap-1.5 text-xs mb-5">
-                <span className="text-foreground/60 font-medium">SKU #: {product.sku}</span>
+              <h1 className="mb-1.5 font-serif text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
+              <div className="mb-5 flex items-center gap-1.5 text-xs">
+                <span className="font-medium text-foreground/60">SKU #: {product.sku}</span>
                 <button
                   onClick={copySku}
                   title="Copy SKU"
-                  className={`transition-colors ${copied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`}
+                  className={`transition-colors ${skuCopied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`}
                 >
                   <Copy className="h-3.5 w-3.5" />
                 </button>
-                {copied && <span className="text-[10px] text-primary font-medium">Copied!</span>}
+                {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </div>
 
-              <div className="space-y-3 mb-5">
+              <div className="mb-5 space-y-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Metal type:</span>
+                  <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal type:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {product.metalOptions.map((m, i) => {
                       const metal = getMetalType(m);
@@ -167,7 +190,7 @@ const ProductDetail = () => {
                             backgroundPosition: 'center',
                             color: '#000',
                           }}
-                          className={`rounded px-2 py-1 text-[10px] font-bold leading-none uppercase tracking-wide transition-all ${isSelected ? 'ring-2 ring-offset-1 ring-foreground/70' : 'opacity-60 hover:opacity-100'}`}
+                          className={`rounded px-2 py-1 text-[10px] font-bold uppercase leading-none tracking-wide transition-all ${isSelected ? 'ring-2 ring-foreground/70 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
                         >
                           {metal.label}
                         </button>
@@ -177,31 +200,28 @@ const ProductDetail = () => {
                 </div>
                 {product.caratOptions && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Carat Wt.:</span>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Carat Wt.:</span>
                     <div className="flex flex-wrap gap-2">
                       {product.caratOptions.map((c, i) => (
-                        <button key={i} onClick={() => setSelectedCarat(i)} className={`h-8 w-8 text-xs font-medium border transition-colors ${i === selectedCarat ? 'bg-accent text-accent-foreground border-accent' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{c}</button>
+                        <button key={i} onClick={() => setSelectedCarat(i)} className={`h-8 w-8 border text-xs font-medium transition-colors ${i === selectedCarat ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{c}</button>
                       ))}
                     </div>
                   </div>
                 )}
                 {product.sizeOptions && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Ring size:</span>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Ring size:</span>
                     <div className="flex flex-wrap gap-2">
                       {product.sizeOptions.map((s, i) => (
-                        <button key={i} onClick={() => setSelectedSize(i)} className={`h-8 w-8 text-xs font-medium border transition-colors ${i === selectedSize ? 'bg-accent text-accent-foreground border-accent' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{s}</button>
+                        <button key={i} onClick={() => setSelectedSize(i)} className={`h-8 w-8 border text-xs font-medium transition-colors ${i === selectedSize ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{s}</button>
                       ))}
                     </div>
                   </div>
                 )}
                 {product.certificate && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-foreground w-28 flex-shrink-0">Certificate:</span>
-                    <div className="flex items-center gap-2">
-                      <img src={igiLogo} alt={product.certificate} className="h-5 w-auto object-contain" />
-                      {/* <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">{product.certificate}</span> */}
-                    </div>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
+                    <img src={igiLogo} alt={product.certificate} className="h-5 w-auto object-contain" />
                   </div>
                 )}
               </div>
@@ -209,11 +229,11 @@ const ProductDetail = () => {
               <div className="border-t border-border/30">
                 <button onClick={() => setSpecsOpen(!specsOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground">Product Specifications</span>
-                  <span className="text-foreground/50 text-xl leading-none">{specsOpen ? '−' : '+'}</span>
+                  <span className="text-xl leading-none text-foreground/50">{specsOpen ? '−' : '+'}</span>
                 </button>
                 {specsOpen && (
                   <div className="pb-5">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2.5">Stone</p>
+                    <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stone</p>
                     <table className="w-full">
                       <tbody>
                         {([
@@ -222,15 +242,22 @@ const ProductDetail = () => {
                           ['Colour:', product.colour],
                           ['Clarity:', product.clarity],
                           ['Setting:', product.setting],
-                          ['Certificate:', product.certificate],
                           ['Gold weight:', product.goldWeight],
                           ['Total weight:', product.totalWeight],
                         ] as [string, string | undefined][]).map(([label, value]) => (
                           <tr key={label}>
-                            <td className="py-[3px] text-xs text-foreground/55 pr-4 w-[110px] align-top font-medium">{label}</td>
-                            <td className="py-[3px] text-xs text-foreground font-semibold">{value}</td>
+                            <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">{label}</td>
+                            <td className="py-[3px] text-xs font-semibold text-foreground">{value}</td>
                           </tr>
                         ))}
+                        {product.certificate && (
+                          <tr>
+                            <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">Certificate:</td>
+                            <td className="py-[3px]">
+                              <img src={igiLogo} alt={product.certificate} className="h-4 w-auto object-contain" />
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -238,44 +265,89 @@ const ProductDetail = () => {
               </div>
 
               <div className="mt-4 flex items-center gap-3">
-                <span className="bg-gray-100 text-foreground px-5 py-2.5 text-[1.6rem] font-bold tracking-tight leading-none border border-border/30">
+                <span className="border border-border/30 bg-gray-100 px-5 py-2.5 text-[1.6rem] font-bold leading-none tracking-tight text-foreground">
                   £{product.price.toLocaleString()}
                 </span>
                 {product.stock && product.stock <= 5 && (
                   <span className="text-sm text-foreground/55">Only {product.stock} left</span>
                 )}
-                <button
-                  onClick={handleShare}
-                  className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <span>{shared ? 'Copied!' : 'Share'}</span>
-                  {shared ? <Copy className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                </button>
+
+                {/* Share popover */}
+                <Popover open={shareOpen} onOpenChange={setShareOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="ml-auto flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground">
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span>Share</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="end">
+                    <div className="space-y-0.5">
+                      <button
+                        onClick={handleCopyLink}
+                        className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors hover:bg-secondary"
+                      >
+                        <Copy className="h-4 w-4 text-foreground/60" />
+                        <span>{copied ? 'Copied!' : 'Copy link'}</span>
+                      </button>
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(product.name + ' — ' + window.location.href)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setShareOpen(false)}
+                        className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors hover:bg-secondary"
+                      >
+                        <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                        <span>WhatsApp</span>
+                      </a>
+                      <a
+                        href={`mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(window.location.href)}`}
+                        onClick={() => setShareOpen(false)}
+                        className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors hover:bg-secondary"
+                      >
+                        <Mail className="h-4 w-4 text-foreground/60" />
+                        <span>Email</span>
+                      </a>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="mt-4 flex gap-3">
-                <button className="flex-1 bg-accent text-accent-foreground py-4 text-sm font-semibold uppercase tracking-[0.18em] hover:bg-accent/90 transition-colors">
-                  Add to Bag
+                <button
+                  onClick={handleAddToBag}
+                  className={`flex-1 py-4 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 ${
+                    bagJustAdded
+                      ? 'bg-accent/80 scale-[0.98] text-accent-foreground'
+                      : 'bg-accent text-accent-foreground hover:bg-accent/90'
+                  }`}
+                >
+                  {bagJustAdded ? 'Added!' : 'Add to Bag'}
                 </button>
                 <button
-                  onClick={() => setLiked(!liked)}
-                  aria-label="Add to wishlist"
-                  className="w-[54px] bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent/90 transition-colors"
+                  onClick={handleToggleLiked}
+                  aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
+                  className={`flex w-[54px] items-center justify-center bg-accent text-accent-foreground transition-all duration-200 hover:bg-accent/90 ${justLiked ? 'scale-95' : ''}`}
                 >
-                  <Heart className={`h-5 w-5 ${liked ? 'fill-accent-foreground' : ''}`} />
+                  <Heart
+                    className={`h-5 w-5 transition-all duration-200 ${
+                      liked ? 'fill-white scale-110' : 'scale-100'
+                    }`}
+                  />
                 </button>
               </div>
 
-              <p className="mt-3 text-xs text-primary text-center">Order within 02 hours to receive by Thu, 26 Mar</p>
+              <p className="mt-3 text-center text-xs text-primary">Order within 02 hours to receive by Thu, 26 Mar</p>
 
               <div className="mt-7 border-t border-border/30 pt-6">
-                <div className="grid grid-cols-3 gap-3 bg-secondary/60 rounded p-4 border border-border/20">
+                <div className="grid grid-cols-3 gap-3 rounded border border-border/20 bg-secondary/60 p-4">
                   {trustBadges.map(({ icon: Icon, label }) => (
                     <div key={label} className="flex flex-col items-center gap-2 text-center">
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                         <Icon className="h-5 w-5 text-primary" />
                       </div>
-                      <span className="text-xs font-semibold text-foreground/70 leading-tight">{label}</span>
+                      <span className="text-xs font-semibold leading-tight text-foreground/70">{label}</span>
                     </div>
                   ))}
                 </div>

@@ -89,7 +89,7 @@ export const shopProducts: ShopProduct[] = Array.from({ length: 24 }, (_, i) => 
     category,
     subCategory: subCategories[i % subCategories.length],
     metal: metals[i % metals.length],
-    metalOptions: ['18K_YG', '18K_WG', '9K_YG', '9K_WG', '18K_RG', 'Pt950'],
+    metalOptions: ['18K_YG', '18K_WG', '9K_YG', '9K_WG', 'Pt950'],
     shape: shapes[i % shapes.length],
     stockType: stockTypes[i % stockTypes.length] as ShopProduct['stockType'],
     price: 620 + (i % 8) * 185,

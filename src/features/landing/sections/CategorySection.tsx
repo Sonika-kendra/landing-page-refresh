@@ -44,10 +44,10 @@ const CategorySection = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="opacity-100 bg-primary/80 backdrop-blur-sm border-secondary text-black pointer-events-auto transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
+                  className="opacity-100 bg-primary/80 backdrop-blur-sm border-secondary text-black pointer-events-auto transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent [&:hover_svg]:translate-x-2"
                 >
                   Shop Now
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
                 </Button>
 
               </div>

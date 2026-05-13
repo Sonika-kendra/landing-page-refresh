@@ -7,7 +7,7 @@ import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { getMetalType } from '@/data/shop/metalTypes';
 import {
   categories,
@@ -153,45 +153,43 @@ const renderFilterItems = (
 
   if (tab.key === 'metal') {
     return (
-      <div className="grid grid-cols-3 gap-2">
-        {items.map((item) => {
-          const isActive = isFilterItemActive(currentValue, item.value);
-          const itemKey = (item.value as string) || 'all';
-          return (
-            <button
-              key={`metal-${itemKey}`}
-              type="button"
-              onClick={() => onChange(tab.key, item.value)}
-              aria-pressed={isActive}
-              className={`flex flex-col items-center gap-1.5 rounded-xl p-2 transition-all duration-200 ${
-                isActive ? 'bg-accent/10' : 'hover:bg-secondary/40'
-              }`}
-            >
-              <span
-                className={`h-11 w-11 overflow-hidden rounded-full border-2 transition-all duration-200 ${
-                  isActive
-                    ? 'border-accent shadow-[0_0_0_2px_hsl(var(--accent)/0.25)]'
-                    : 'border-border/40'
-                }`}
+      <div className="space-y-0.5">
+        {items
+          .filter((item) => item.value !== '')
+          .map((item) => {
+            const isActive = isFilterItemActive(currentValue, item.value);
+            const itemKey = item.value as string;
+            const metalConfig = getMetalType(itemKey);
+            return (
+              <label
+                key={`metal-${itemKey}`}
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/40"
               >
-                {item.image ? (
-                  <img src={item.image} alt={item.label} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center bg-secondary/60 text-[9px] font-semibold text-foreground/50">
-                    All
-                  </span>
-                )}
-              </span>
-              <span
-                className={`text-center text-[10px] leading-tight transition-colors ${
-                  isActive ? 'font-semibold text-accent' : 'text-foreground/55'
-                }`}
-              >
-                {item.display || item.label}
-              </span>
-            </button>
-          );
-        })}
+                <input
+                  type="checkbox"
+                  checked={isActive}
+                  onChange={() => onChange(tab.key, isActive ? '' : item.value)}
+                  className="h-4 w-4 flex-shrink-0 cursor-pointer accent-[hsl(var(--accent))]"
+                />
+                <span
+                  className="h-4 w-4 flex-shrink-0 overflow-hidden rounded-full border border-border/50"
+                  style={{
+                    backgroundImage: metalConfig.image ? `url(${metalConfig.image})` : undefined,
+                    backgroundColor: metalConfig.image ? undefined : metalConfig.bg,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+                <span
+                  className={`text-sm transition-colors ${
+                    isActive ? 'font-semibold text-foreground' : 'text-foreground'
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </label>
+            );
+          })}
       </div>
     );
   }
@@ -249,45 +247,35 @@ const renderFilterItems = (
     );
   }
 
-  // Default: 2-column image cards (category, subCategory, stockType)
+  // Default: checkbox list (category, subCategory, stockType)
   return (
-    <div className="grid grid-cols-2 gap-2.5">
-      {items.map((item) => {
-        const isActive = isFilterItemActive(currentValue, item.value);
-        const itemKey = (item.value as string) || 'all';
-        return (
-          <button
-            key={`${tab.key}-${itemKey}`}
-            type="button"
-            onClick={() => onChange(tab.key, item.value)}
-            aria-pressed={isActive}
-            className={`group flex flex-col items-center gap-2 rounded-2xl border p-2.5 text-center transition-all duration-300 ${
-              isActive
-                ? 'border-accent bg-accent/10 shadow-[0_0_0_1px_hsl(var(--accent)/0.35)]'
-                : 'border-border/60 hover:border-accent/50 hover:bg-secondary/30'
-            }`}
-          >
-            <span className="flex h-[72px] w-full items-center justify-center overflow-hidden rounded-xl bg-secondary/40">
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.label}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <span className="px-2 text-xs font-medium text-foreground/70">{item.display}</span>
-              )}
-            </span>
-            <span
-              className={`text-xs leading-tight transition-colors ${
-                isActive ? 'font-semibold text-accent' : 'text-foreground/65'
-              }`}
+    <div className="space-y-0.5">
+      {items
+        .filter((item) => item.value !== '')
+        .map((item) => {
+          const isActive = isFilterItemActive(currentValue, item.value);
+          const itemKey = (item.value as string) || 'all';
+          return (
+            <label
+              key={`${tab.key}-${itemKey}`}
+              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/40"
             >
-              {item.label}
-            </span>
-          </button>
-        );
-      })}
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={() => onChange(tab.key, isActive ? '' : item.value)}
+                className="h-4 w-4 flex-shrink-0 cursor-pointer accent-[hsl(var(--accent))]"
+              />
+              <span
+                className={`text-sm transition-colors ${
+                  isActive ? 'font-semibold text-foreground' : 'text-foreground'
+                }`}
+              >
+                {item.label}
+              </span>
+            </label>
+          );
+        })}
     </div>
   );
 };
@@ -349,14 +337,14 @@ const FilterSidebarContent = ({
             <AccordionTrigger className="py-3.5 hover:no-underline [&>svg]:hidden">
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/70">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
                     {tab.label}
                   </span>
                   {isFilterActive && (
                     <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                   )}
                 </div>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground/70">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground">
                   {openAccordionItems.includes(tab.key) ? '−' : '+'}
                 </span>
               </div>
@@ -498,11 +486,12 @@ const ShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[340px] flex-col p-0 sm:w-[400px]">
-                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-4">
+              <SheetContent side="left" className="flex w-[340px] flex-col p-0 sm:w-[400px] top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
+                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
                   <SheetHeader className="text-left">
-                    <SheetTitle>Filter Products</SheetTitle>
-                    <SheetDescription>Choose a category and refine the products.</SheetDescription>
+                    <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">
+                      Filters
+                    </SheetTitle>
                   </SheetHeader>
                   <SheetClose className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 text-foreground transition-colors hover:bg-foreground/20">
                     <X className="h-4 w-4" />
@@ -517,6 +506,16 @@ const ShopPage = () => {
                     handleReset={handleReset}
                     hasActiveFilters={hasActiveFilters}
                   />
+                </div>
+                <div className="shrink-0 border-t border-border/40 px-6 py-4">
+                  <SheetClose asChild>
+                    <button
+                      type="button"
+                      className="w-full rounded bg-accent py-3 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90"
+                    >
+                      View {filtered.length.toLocaleString()} {filtered.length === 1 ? 'Product' : 'Products'}
+                    </button>
+                  </SheetClose>
                 </div>
               </SheetContent>
             </Sheet>

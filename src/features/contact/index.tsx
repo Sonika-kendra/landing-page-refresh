@@ -51,7 +51,7 @@ const Contact = () => {
 
   return (
     <PageLayout>
-      <section className="bg-accent text-accent-foreground py-20 md:py-28">
+      <section className="bg-accent text-accent-foreground py-14 md:py-20">
         <div className="henig-container text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="henig-heading-display mb-4">Contact Us</motion.h1>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="henig-body-large text-accent-foreground/70 max-w-2xl mx-auto">
@@ -60,7 +60,7 @@ const Contact = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 section-ivory">
+      <section className="py-10 md:py-16 section-ivory">
         <div className="henig-container">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
             <div className="lg:col-span-2 space-y-8">

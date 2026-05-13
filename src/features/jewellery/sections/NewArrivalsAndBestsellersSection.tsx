@@ -65,7 +65,7 @@ const NewArrivalsAndBestsellersSection = () => {
             ifTitleVisible={false}
             ifPriceVisible={false}
             ifWhishlistVisible={false}
-            ifPurchaseButtonVisible={false}
+            ifPurchaseButtonVisible
             ifHoverOverlayVisible
             ifBadgeVisible
             badge={activeTab === 'new' ? 'New' : 'Best Seller'}

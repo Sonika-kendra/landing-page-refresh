@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus } from 'lucide-react';
+import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus, MoreVertical, Eye, ArrowLeft, Calendar } from 'lucide-react';
 import { Editor } from '@tinymce/tinymce-react';
 
 // Bundled TinyMCE — no CDN, no API key required
@@ -47,7 +47,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { adminApi, Post } from '@/api/admin';
+import { newApiURL } from '@/config/site';
 
 type PostStatus = 'draft' | 'published';
 
@@ -97,12 +104,19 @@ const EMPTY_FORM: PostForm = {
   related: '',
 };
 
+const resolveImageUrl = (src: string) => {
+  if (src.startsWith('http')) return src;
+  // WorkDrive images are served via the proxy; use relative path
+  if (src.startsWith('/posts/image/')) return src;
+  return `${newApiURL}${src}`;
+};
+
 const postToImages = (post: Post): ImageEntry[] => {
   if (post.images?.length) {
-    return post.images.map(url => ({ id: uid(), file: null, preview: url, serverUrl: url }));
+    return post.images.map(url => ({ id: uid(), file: null, preview: resolveImageUrl(url), serverUrl: url }));
   }
   if (post.src) {
-    return [{ id: uid(), file: null, preview: post.src, serverUrl: post.src }];
+    return [{ id: uid(), file: null, preview: resolveImageUrl(post.src), serverUrl: post.src }];
   }
   return [];
 };
@@ -114,7 +128,7 @@ const Posts = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const [view, setView] = useState<'list' | 'form'>('list');
+  const [view, setView] = useState<'list' | 'form' | 'preview'>('list');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | PostStatus>('all');
   const [editPost, setEditPost] = useState<Post | null>(null);
@@ -218,20 +232,20 @@ const Posts = () => {
   const addButton = () =>
     setButtons(prev => [...prev, { id: uid(), label: '', url: '' }]);
 
-  const buildFormData = () => {
+  const buildFormData = (statusOverride?: PostStatus) => {
     const fd = new FormData();
     fd.append('title',   form.title);
     fd.append('date',    new Date(form.date).toISOString());
     fd.append('snippet', form.snippet);
     fd.append('content', form.content);
-    fd.append('status',  form.status);
+    fd.append('status',  statusOverride ?? form.status);
     if (form.related) fd.append('related', form.related);
 
     const existingUrls: string[] = [];
     images.forEach((img, i) => {
       if (img.file) {
         if (i === 0) fd.append('src', img.file);
-        fd.append('images', img.file);
+        else fd.append('images', img.file);
       } else if (img.serverUrl) {
         if (i === 0) fd.append('src', img.serverUrl);
         existingUrls.push(img.serverUrl);
@@ -243,14 +257,15 @@ const Posts = () => {
   };
 
   const saveMutation = useMutation({
-    mutationFn: () => {
-      const fd = buildFormData();
+    mutationFn: (statusOverride?: PostStatus) => {
+      const fd = buildFormData(statusOverride);
       return editPost
         ? adminApi.updatePost(editPost._id, fd)
         : adminApi.createPost(fd);
     },
-    onSuccess: () => {
+    onSuccess: (_, statusOverride) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'posts'] });
+      if (statusOverride) setForm(prev => ({ ...prev, status: statusOverride }));
       setView('list');
       toast({ title: editPost ? 'Post updated' : 'Post created' });
     },
@@ -271,11 +286,109 @@ const Posts = () => {
 
   const isFormValid = form.title.trim() && form.content.trim() && form.date;
 
+  // ── Preview View ───────────────────────────────────────────────────────────
+  if (view === 'preview') {
+    const previewImage = images[0]
+      ? images[0].preview
+      : null;
+
+    return (
+      <div className="w-full">
+        {/* Admin toolbar */}
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+          <button
+            onClick={() => setView('form')}
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Edit
+          </button>
+          <div className="flex items-center gap-3">
+            <Badge variant={STATUS_CONFIG[form.status].variant} className="text-[10px] px-2">
+              {STATUS_CONFIG[form.status].label}
+            </Badge>
+            {form.status !== 'published' && (
+              <Button
+                className="tracking-widest uppercase text-xs rounded-none"
+                onClick={() => saveMutation.mutate('published')}
+                disabled={!isFormValid || saveMutation.isPending}
+              >
+                {saveMutation.isPending ? 'Publishing…' : 'Publish'}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Blog post preview — mirrors PostDetail layout */}
+        <article className="section-ivory py-10 px-8">
+          <h1 className="henig-heading-display text-3xl md:text-4xl mb-4 text-foreground">
+            {form.title || <span className="text-muted-foreground italic">Untitled Post</span>}
+          </h1>
+
+          {form.date && (
+            <div className="flex items-center gap-2 text-muted-foreground mb-8">
+              <Calendar className="w-4 h-4" />
+              <span className="text-sm">
+                {new Date(form.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </span>
+            </div>
+          )}
+
+          {previewImage && (
+            <div className="mb-10 overflow-hidden">
+              <img
+                src={previewImage}
+                alt={form.title}
+                className="w-full h-auto object-cover max-h-[500px]"
+              />
+            </div>
+          )}
+
+          {form.snippet && (
+            <p className="text-base text-foreground/70 italic mb-6 border-l-2 border-border pl-4">
+              {form.snippet}
+            </p>
+          )}
+
+          {form.content ? (
+            <div
+              className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary"
+              dangerouslySetInnerHTML={{ __html: form.content }}
+            />
+          ) : (
+            <p className="text-muted-foreground italic">No content yet.</p>
+          )}
+        </article>
+      </div>
+    );
+  }
+
   // ── Form View ──────────────────────────────────────────────────────────────
   if (view === 'form') {
     return (
-      <div className="max-w-5xl space-y-5">
-        <h2 className="text-base font-medium tracking-wide">News Post</h2>
+      <div className="w-full space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" className="tracking-widest uppercase text-xs gap-1.5 px-0 hover:bg-transparent" onClick={handleBack}>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back
+            </Button>
+            <span className="text-muted-foreground/40">|</span>
+            <h2 className="text-base font-medium tracking-wide">News Post</h2>
+            <Badge variant={STATUS_CONFIG[form.status].variant} className="text-[10px] px-2">
+              {STATUS_CONFIG[form.status].label}
+            </Badge>
+          </div>
+          <Button
+            variant="outline"
+            className="tracking-widest uppercase text-xs rounded-none gap-1.5"
+            onClick={() => setView('preview')}
+            disabled={!isFormValid}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Preview
+          </Button>
+        </div>
 
         {/* Title */}
         <Input
@@ -292,6 +405,62 @@ const Posts = () => {
           placeholder="Snippet"
           className="rounded-none h-12 border-border focus-visible:ring-0 focus-visible:border-foreground"
         />
+
+        {/* Cover Image */}
+        <div>
+          <h3 className="text-sm font-medium tracking-wide mb-2">Cover Image</h3>
+          <div
+            className={`flex flex-wrap gap-3 border border-border p-3 min-h-[96px] transition-colors ${
+              isDragOver ? 'bg-muted/40' : ''
+            }`}
+            onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={handleImageDrop}
+          >
+            {images.map((img, index) => (
+              <div key={img.id} className="relative w-24 h-24 border border-border group shrink-0">
+                <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                {index === 0 && (
+                  <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-black/60 text-white tracking-wider py-0.5 uppercase">
+                    Cover
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+
+            {/* Add image slot */}
+            <div
+              className="w-24 h-24 border border-dashed border-border flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-muted/20 transition-colors shrink-0"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => {
+                  if (e.target.files?.length) addImageFiles(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+              <ImagePlus className="w-5 h-5 text-muted-foreground" />
+              <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Add</span>
+            </div>
+          </div>
+          {images.length === 0 && (
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Drag images above or click Add. First image becomes the cover.
+            </p>
+          )}
+        </div>
 
         {/* Editor */}
         <div className="border border-border">
@@ -367,6 +536,7 @@ const Posts = () => {
                   if (!file) return;
                   const fd = new FormData();
                   fd.append('src', file);
+                  if (editPost) fd.append('postId', editPost._id);
                   try {
                     const res = await adminApi.uploadPostImage(fd);
                     callback(res.data.url, { title: file.name });
@@ -381,6 +551,7 @@ const Posts = () => {
               images_upload_handler: async (blobInfo: any) => {
                 const fd = new FormData();
                 fd.append('src', blobInfo.blob(), blobInfo.filename());
+                if (editPost) fd.append('postId', editPost._id);
                 try {
                   const res = await adminApi.uploadPostImage(fd);
                   return res.data.url;
@@ -393,102 +564,6 @@ const Posts = () => {
               content_style: 'body { font-family: inherit; font-size: 12pt; margin: 8px; line-height: 1.6; color: #173731; }',
             }}
           />
-        </div>
-
-        {/* Images */}
-        <div>
-          <h3 className="text-sm font-medium tracking-wide mb-2">Images</h3>
-          <div
-            className={`flex flex-wrap gap-3 border border-border p-3 min-h-[96px] transition-colors ${
-              isDragOver ? 'bg-muted/40' : ''
-            }`}
-            onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={handleImageDrop}
-          >
-            {images.map((img, index) => (
-              <div key={img.id} className="relative w-24 h-24 border border-border group shrink-0">
-                <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                {index === 0 && (
-                  <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-black/60 text-white tracking-wider py-0.5 uppercase">
-                    Cover
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-
-            {/* Add image slot */}
-            <div
-              className="w-24 h-24 border border-dashed border-border flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-muted/20 transition-colors shrink-0"
-              onClick={() => imageInputRef.current?.click()}
-            >
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={e => {
-                  if (e.target.files?.length) addImageFiles(e.target.files);
-                  e.target.value = '';
-                }}
-              />
-              <ImagePlus className="w-5 h-5 text-muted-foreground" />
-              <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Add</span>
-            </div>
-          </div>
-          {images.length === 0 && (
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Drag images above or click Add. First image becomes the cover.
-            </p>
-          )}
-        </div>
-
-        {/* Button Links */}
-        <div>
-          <h3 className="text-sm font-medium tracking-wide mb-2">Button Links</h3>
-          <div className="border border-border divide-y divide-border">
-            {buttons.length === 0 && (
-              <p className="text-xs text-muted-foreground px-4 py-3">No buttons added yet.</p>
-            )}
-            {buttons.map(btn => (
-              <div key={btn.id} className="flex items-center">
-                <Input
-                  value={btn.label}
-                  onChange={e => updateButton(btn.id, 'label', e.target.value)}
-                  placeholder="Button label"
-                  className="rounded-none border-0 border-r border-border h-10 w-40 shrink-0 focus-visible:ring-0 focus-visible:border-foreground"
-                />
-                <Input
-                  value={btn.url}
-                  onChange={e => updateButton(btn.id, 'url', e.target.value)}
-                  placeholder="https://…"
-                  className="rounded-none border-0 flex-1 h-10 focus-visible:ring-0 focus-visible:border-foreground"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeButton(btn.id)}
-                  className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-destructive flex-shrink-0 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-            <div
-              className="flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-muted/20 transition-colors text-muted-foreground text-xs tracking-widest uppercase select-none"
-              onClick={addButton}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add Button
-            </div>
-          </div>
         </div>
 
         {/* Options */}
@@ -506,39 +581,11 @@ const Posts = () => {
               />
             </div>
 
-            {/* Status */}
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-sm text-muted-foreground">Status</span>
-              <Select value={form.status} onValueChange={v => handleFormField('status', v as PostStatus)}>
-                <SelectTrigger className="w-36 rounded-none focus:ring-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Related News */}
-            <div className="px-4 py-3 space-y-2">
-              <span className="text-sm text-muted-foreground block">Related News</span>
-              <Textarea
-                value={form.related}
-                onChange={e => handleFormField('related', e.target.value)}
-                placeholder="Comma-separated post IDs…"
-                rows={3}
-                className="rounded-none resize-none focus-visible:ring-0 focus-visible:border-foreground"
-              />
-            </div>
           </div>
         </div>
 
         {/* Buttons */}
-        <div className="flex items-center justify-between pt-1">
-          <Button variant="ghost" className="tracking-widest uppercase text-xs" onClick={handleBack}>
-            Back
-          </Button>
+        <div className="flex items-center justify-end pt-1">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -548,11 +595,12 @@ const Posts = () => {
               Reset
             </Button>
             <Button
+              variant="outline"
               className="tracking-widest uppercase text-xs rounded-none"
-              onClick={() => saveMutation.mutate()}
+              onClick={() => saveMutation.mutate('draft')}
               disabled={!isFormValid || saveMutation.isPending}
             >
-              {saveMutation.isPending ? 'Saving…' : 'Save / Upload'}
+              {saveMutation.isPending && saveMutation.variables === 'draft' ? 'Saving…' : 'Save Draft'}
             </Button>
           </div>
         </div>
@@ -599,11 +647,11 @@ const Posts = () => {
         </Select>
       </div>
 
-      {/* Post List */}
+      {/* Post Grid */}
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-[4/3] w-full" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -612,48 +660,52 @@ const Posts = () => {
           <p className="text-sm">No posts found.</p>
         </div>
       ) : (
-        <div className="bg-background rounded-sm border border-border overflow-hidden">
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-3 border-b border-border bg-muted/50">
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Title</span>
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground hidden sm:block">Date</span>
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Status</span>
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Actions</span>
-          </div>
-
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map(post => {
             const sc = STATUS_CONFIG[post.status] ?? STATUS_CONFIG.draft;
+            const coverSrc = post.src ? resolveImageUrl(post.src) : (post.images?.[0] ? resolveImageUrl(post.images[0]) : null);
             return (
-              <div
-                key={post._id}
-                className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-4 py-3.5 border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{post.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{post.snippet}</p>
+              <div key={post._id} className="group relative aspect-[4/3] overflow-hidden bg-muted/40 border border-border cursor-pointer" onClick={() => openEdit(post)}>
+                {/* Image */}
+                {coverSrc
+                  ? <img src={coverSrc} alt={post.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  : <div className="absolute inset-0 flex items-center justify-center bg-muted/20"><FileText className="w-10 h-10 text-muted-foreground/30" /></div>
+                }
+
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+                {/* Status badge top-left */}
+                <div className="absolute top-2 left-2">
+                  <Badge variant={sc.variant} className="text-[10px] px-1.5 py-0">{sc.label}</Badge>
                 </div>
-                <div className="hidden sm:block">
-                  <p className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(post.date)}</p>
+
+                {/* Three-dot menu top-right */}
+                <div className="absolute top-1 right-1" onClick={e => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-7 h-7 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                      <DropdownMenuItem onClick={() => openEdit(post)}>
+                        <Pencil className="w-3.5 h-3.5 mr-2" />Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setDeleteTarget(post)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-2" />Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <Badge variant={sc.variant} className="text-xs whitespace-nowrap">{sc.label}</Badge>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => openEdit(post)}
-                    aria-label="Edit post"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => setDeleteTarget(post)}
-                    aria-label="Delete post"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+
+                {/* Title + date overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <p className="text-white text-[13px] font-medium leading-snug line-clamp-2">{post.title}</p>
+                  <p className="text-white/60 text-[11px] mt-0.5">{formatDate(post.date)}</p>
                 </div>
               </div>
             );

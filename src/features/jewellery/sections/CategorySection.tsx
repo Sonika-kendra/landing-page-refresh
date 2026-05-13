@@ -57,11 +57,11 @@ const CategorySection = () => (
                   asChild
                   size="sm"
                   variant="outline"
-                  className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
+                  className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent [&:hover_svg]:translate-x-2"
                 >
                   <span>
                     Shop Now
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
                   </span>
                 </Button>
               </div>

@@ -23,6 +23,12 @@ export default defineConfig(async ({ mode }) => {
       hmr: {
         overlay: false,
       },
+      proxy: {
+        '/posts/image': {
+          target: process.env.VITE_NEW_API_URL || 'http://localhost:4000',
+          changeOrigin: true,
+        },
+      },
     },
     plugins,
     resolve: {
@@ -33,7 +39,7 @@ export default defineConfig(async ({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks: (id: string) => {
             if (!id.includes("node_modules")) return;
             if (id.includes("framer-motion")) return "framer-motion";
             if (id.includes("@radix-ui")) return "radix-ui";

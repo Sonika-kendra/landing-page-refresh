@@ -7,6 +7,7 @@ import { Suspense, lazy, Component, ReactNode } from "react";
 import { websiteUrlConfig } from '@/config/site';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { FavouritesProvider } from '@/context/FavouritesContext';
 import RegistrationModal from '@/components/shared/common/RegistrationModal';
 
 class AdminErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -63,6 +64,7 @@ const TermsAndConditions = lazy(() => import('@/features/terms'));
 const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
 const QualityPolicy = lazy(() => import('@/features/quality-policy'));
 const CookiesPolicy = lazy(() => import('@/features/cookies-policy'));
+const Wishlist = lazy(() => import('@/features/wishlist'));
 const NotFound = lazy(() => import('@/features/not-found'));
 
 const queryClient = new QueryClient();
@@ -103,6 +105,7 @@ const AppRoutes = () => (
           <Route path="carts"      element={<AdminCartMonitor />} />
         </Route>
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/account" element={<AccountLayout />}>
           <Route index element={<MyOrders />} />
@@ -120,6 +123,7 @@ const AppRoutes = () => (
 
 const App = () => (
   <AuthProvider>
+    <FavouritesProvider>
     <CartProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -131,6 +135,7 @@ const App = () => (
         </TooltipProvider>
       </QueryClientProvider>
     </CartProvider>
+    </FavouritesProvider>
   </AuthProvider>
 );
 

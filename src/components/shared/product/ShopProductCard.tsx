@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { ShopProduct } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
+import { useFavourites } from '@/context/FavouritesContext';
 import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
 interface ShopProductCardProps {
@@ -11,7 +12,18 @@ interface ShopProductCardProps {
 
 const ShopProductCard = ({ product }: ShopProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [justLiked, setJustLiked] = useState(false);
+  const { isFavourite, toggleFavourite } = useFavourites();
+  const liked = isFavourite(product.id);
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toggleFavourite(product.id);
+    if (!liked) {
+      setJustLiked(true);
+      setTimeout(() => setJustLiked(false), 400);
+    }
+  };
 
   return (
     <div
@@ -21,22 +33,22 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
     >
       {/* Badge */}
       {product.badge && (
-        <span className="absolute left-3 top-3 z-10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded text-white" style={{ backgroundColor: '#C3AC88' }}>
+        <span className="absolute left-3 top-3 z-10 rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white" style={{ backgroundColor: '#C3AC88' }}>
           {product.badge}
         </span>
       )}
 
       {/* Wishlist */}
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          setLiked(!liked);
-        }}
-        className="absolute right-2.5 top-2.5 z-10 transition-colors"
+        onClick={handleLike}
+        className={`absolute right-2.5 top-2.5 z-10 transition-all duration-200 ${justLiked ? 'scale-125' : 'scale-100'}`}
+        aria-label={liked ? 'Remove from favourites' : 'Add to favourites'}
       >
         <Heart
-          className={`h-6 w-6 transition-colors ${
-            liked ? 'fill-primary text-primary' : 'text-primary/70 hover:text-primary'
+          className={`h-6 w-6 transition-all duration-200 ${
+            liked
+              ? 'fill-red-500 text-red-500'
+              : 'text-primary/70 hover:text-primary'
           }`}
         />
       </button>
@@ -57,20 +69,17 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
         {/* Title + certificate */}
         <div className="flex items-start justify-between gap-1.5">
           <Link to={`/shop/${product.id}`} className="min-w-0 flex-1">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-foreground leading-snug line-clamp-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <h3 className="line-clamp-2 text-xs font-medium uppercase leading-snug tracking-wide text-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {product.name}
             </h3>
           </Link>
           {product.certificate && (
-            <div className="shrink-0 mt-0.5 flex flex-col items-center gap-0.5">
+            <div className="mt-0.5 shrink-0">
               <img
                 src={igiLogo}
                 alt={product.certificate}
                 className="h-4 w-auto object-contain"
               />
-              <span className="text-[7px] text-foreground/50 leading-none font-medium uppercase tracking-wide">
-                {product.certificate}
-              </span>
             </div>
           )}
         </div>
@@ -78,7 +87,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
         {/* Metal badges + price */}
         <div className="mt-2 flex items-end justify-between gap-1">
           <div className="flex flex-col gap-1">
-            <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-medium leading-none">Metal type</span>
+            <span className="text-[8px] font-medium uppercase leading-none tracking-widest text-foreground/40">Metal type</span>
             <div className="flex flex-wrap gap-1">
               {product.metalOptions.map((m, i) => {
                 const metal = getMetalType(m);
@@ -93,7 +102,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
                       backgroundPosition: 'center',
                       color: metal.color,
                     }}
-                    className="rounded px-1.5 py-[3px] text-[9px] font-bold leading-none uppercase tracking-wide"
+                    className="rounded px-1.5 py-[3px] text-[9px] font-bold uppercase leading-none tracking-wide"
                   >
                     {metal.label}
                   </span>
@@ -101,9 +110,9 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
               })}
             </div>
           </div>
-          <div className="shrink-0 flex items-baseline gap-0.5">
-            <span className="text-[10px] text-foreground/50 leading-none mb-0.5">From</span>
-            <span className="text-xl font-bold text-foreground leading-none">£{product.price.toLocaleString()}</span>
+          <div className="flex shrink-0 items-baseline gap-0.5">
+            <span className="mb-0.5 text-[10px] leading-none text-foreground/50">From</span>
+            <span className="text-xl font-bold leading-none text-foreground">£{product.price.toLocaleString()}</span>
           </div>
         </div>
       </div>

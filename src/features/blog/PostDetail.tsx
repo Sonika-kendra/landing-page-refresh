@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { baseURL, websiteUrlConfig } from '@/config/site';
+import { newApiURL, websiteUrlConfig } from '@/config/site';
 import { fetchBlogPosts, BlogPost as BlogPostType } from '@/api/blog';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import { motion } from 'framer-motion';
@@ -35,7 +35,13 @@ const BlogPost = () => {
     loadPost();
   }, [postId]);
 
-  const featuredImage = post?.src ? `${baseURL}${post.src}` : '';
+  const resolveImageSrc = (src?: string) => {
+    if (!src) return '';
+    if (src.startsWith('http')) return src;
+    if (src.startsWith('/posts/image/')) return src;
+    return `${newApiURL}${src}`;
+  };
+  const featuredImage = resolveImageSrc(post?.src);
   const htmlContent = post?.content || post?.body || '';
   const sortedByDate = [...allPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const currentPostIndex = sortedByDate.findIndex((p) => p._id === postId || p.id === postId);
@@ -108,7 +114,7 @@ const BlogPost = () => {
               ) : (
                 <ul className="space-y-5">
                   {recentPosts.map((p, index) => {
-                    const thumb = p.src ? `${baseURL}${p.src}` : '';
+                    const thumb = resolveImageSrc(p.src);
                     return (
                       <motion.li key={p._id || p.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }}>
                         <Link to={`${websiteUrlConfig.Blogs}/${p.id}${p.params || ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="group flex gap-3 items-start">
