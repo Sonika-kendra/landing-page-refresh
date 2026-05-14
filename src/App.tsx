@@ -9,6 +9,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { FavouritesProvider } from '@/context/FavouritesContext';
 import RegistrationModal from '@/components/shared/common/RegistrationModal';
+import ProtectedRoute from '@/components/shared/common/ProtectedRoute';
 
 class AdminErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -59,6 +60,7 @@ const MyOrders        = lazy(() => import('@/features/account/MyOrders'));
 const MyOrderDetail   = lazy(() => import('@/features/account/MyOrderDetail'));
 const AddressBook     = lazy(() => import('@/features/account/AddressBook'));
 const AccountProfile  = lazy(() => import('@/features/account/Profile'));
+const AccountWishlist = lazy(() => import('@/features/account/MyWishlist'));
 const PrivacyPolicy = lazy(() => import('@/features/privacy'));
 const TermsAndConditions = lazy(() => import('@/features/terms'));
 const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
@@ -104,13 +106,14 @@ const AppRoutes = () => (
           <Route path="stock"      element={<AdminStock />} />
           <Route path="carts"      element={<AdminCartMonitor />} />
         </Route>
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/account" element={<AccountLayout />}>
+        <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/account" element={<ProtectedRoute><AccountLayout /></ProtectedRoute>}>
           <Route index element={<MyOrders />} />
           <Route path="orders" element={<MyOrders />} />
           <Route path="orders/:id" element={<MyOrderDetail />} />
+          <Route path="wishlist" element={<AccountWishlist />} />
           <Route path="addresses" element={<AddressBook />} />
           <Route path="profile" element={<AccountProfile />} />
         </Route>

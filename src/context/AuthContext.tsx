@@ -31,6 +31,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  isAuthLoading: boolean;
   isModalOpen: boolean;
   initialView: ModalInitialView;
   openModal: (view?: ModalInitialView) => void;
@@ -53,8 +54,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return null;
     }
   });
+  const [isAuthLoading, setIsAuthLoading] = useState(() => !!localStorage.getItem(TOKEN_KEY));
+
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setIsAuthLoading(false);
+      return;
+    }
     authApi.getProfile()
       .then(res => {
         const fresh = res.data;
@@ -66,7 +72,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem(USER_KEY);
         setToken(null);
         setUser(null);
-      });
+      })
+      .finally(() => setIsAuthLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -109,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAuthenticated: !!token, isModalOpen, initialView, openModal, closeModal, setAuth, logout, hasRole, hasPermission }}
+      value={{ user, token, isAuthenticated: !!token, isAuthLoading, isModalOpen, initialView, openModal, closeModal, setAuth, logout, hasRole, hasPermission }}
     >
       {children}
     </AuthContext.Provider>

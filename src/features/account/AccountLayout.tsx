@@ -1,10 +1,11 @@
 import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Package, MapPin, User } from 'lucide-react';
+import { Package, MapPin, User, Heart } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 
 const NAV = [
   { to: '/account/orders',    label: 'My Orders',    icon: Package },
+  { to: '/account/wishlist',  label: 'My Wishlist',  icon: Heart },
   { to: '/account/addresses', label: 'Address Book', icon: MapPin },
   { to: '/account/profile',   label: 'Profile',      icon: User },
 ];

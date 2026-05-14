@@ -164,4 +164,13 @@ export const API_CONFIG = {
       remove: (productId: string) => `/wishlist/${productId}`,
     },
   },
+
+  profile: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      get: '/profile',
+      update: '/profile',
+      changePassword: '/profile/changePassword',
+    },
+  },
 } as const;

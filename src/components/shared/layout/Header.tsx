@@ -423,6 +423,12 @@ const Header = () => {
                       >
                         {user.role === 'admin' ? (
                           <>
+                            <Link
+                              to="/account/profile"
+                              className="block px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors border-b border-border"
+                            >
+                              Profile
+                            </Link>
                             <button
                               type="button"
                               onClick={() => setAdminPanelExpanded((v) => !v)}

@@ -6,6 +6,15 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface ProfileUpdatePayload {
+  title?: string;
+  firstName: string;
+  lastName?: string;
+  companyName: string;
+  phone: string;
+  mobileTelephone?: string;
+}
+
 export interface RegisterPayload {
   title?: string;
   firstName: string;
@@ -69,4 +78,20 @@ export const authApi = {
 
   logout: () =>
     apiClient.post<{ message: string }>(endpoints.logout, undefined, undefined, base),
+
+  updateProfile: (data: ProfileUpdatePayload) =>
+    apiClient.patch<AuthUser>(
+      API_CONFIG.profile.endpoints.update,
+      data,
+      undefined,
+      API_CONFIG.profile.base,
+    ),
+
+  changePassword: (oldPassword: string, newPassword: string) =>
+    apiClient.post<{ msg: string }>(
+      API_CONFIG.profile.endpoints.changePassword,
+      { oldPassword, newPassword },
+      undefined,
+      API_CONFIG.profile.base,
+    ),
 };

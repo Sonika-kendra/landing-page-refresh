@@ -28,9 +28,12 @@ const ERROR_MAP: Record<string, string> = {
 };
 
 const mapApiError = (err: unknown): string => {
-  const axiosErr = err as { response?: { data?: { error?: string; errors?: { msg: string }[] } } };
+  const axiosErr = err as { response?: { data?: { error?: string; errors?: { msg: string } | { msg: string }[] } } };
   const data = axiosErr?.response?.data;
-  const code = data?.error ?? data?.errors?.[0]?.msg ?? '';
+  const errors = data?.errors;
+  const code = data?.error
+    ?? (Array.isArray(errors) ? errors[0]?.msg : errors?.msg)
+    ?? '';
   return ERROR_MAP[code] ?? 'Something went wrong. Please try again.';
 };
 
