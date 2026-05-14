@@ -374,7 +374,7 @@ const Header = () => {
             <Link
               to="/wishlist"
               aria-label={`Wishlist${favCount > 0 ? ` (${favCount})` : ''}`}
-              className="relative p-2 text-foreground/70 hover:text-foreground transition-colors"
+              className="relative p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <Heart className="w-5 h-5" />
               {favCount > 0 && (
@@ -387,15 +387,13 @@ const Header = () => {
             {/* Cart */}
             <Link
               to="/cart"
-              aria-label={`Cart${cartCount > 0 ? ` (${cartCount} items)` : ''}`}
-              className="relative p-2 text-foreground/70 hover:text-foreground transition-colors"
+              aria-label={`Cart (${cartCount} items)`}
+              className="relative p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <ShoppingBag className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-accent-foreground">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-accent-foreground">
+                {cartCount > 9 ? '9+' : cartCount}
+              </span>
             </Link>
 
             {/* Sign In / User */}
@@ -528,7 +526,6 @@ const Header = () => {
                   onClick={() => openModal('login')}
                 >
                   <User className="w-4 h-4" />
-                  <span>Sign In / Register</span>
                 </Button>
                 <button
                   type="button"

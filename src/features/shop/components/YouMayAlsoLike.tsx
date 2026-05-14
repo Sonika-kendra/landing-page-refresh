@@ -1,3 +1,11 @@
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
 interface Suggestion {
   name: string;
   image: string;
@@ -8,8 +16,6 @@ interface YouMayAlsoLikeProps {
 }
 
 const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
-  const capped = items.slice(0, 5);
-
   return (
     <section className="border-t border-border/30 bg-gray-50 py-12 md:py-16">
       <div className="henig-container">
@@ -21,19 +27,27 @@ const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
           <div className="h-px flex-1 bg-foreground/20" />
         </div>
 
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-5">
-          {capped.map((item, i) => (
-            <div key={i} className="group cursor-pointer text-center">
-              <div className="mb-3 aspect-square overflow-hidden bg-white">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <p className="text-sm leading-tight text-foreground">{item.name}</p>
-            </div>
-          ))}
+        <div className="relative px-12">
+          <Carousel opts={{ align: "start" }}>
+            <CarouselContent>
+              {items.map((item, i) => (
+                <CarouselItem key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                  <div className="group cursor-pointer px-2 text-center">
+                    <div className="mb-3 aspect-square overflow-hidden bg-white">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <p className="text-sm leading-tight text-foreground">{item.name}</p>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
       </div>
     </section>
