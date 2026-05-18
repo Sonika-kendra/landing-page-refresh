@@ -425,18 +425,19 @@ const Header = () => {
                           <>
                             <Link
                               to="/account/profile"
-                              className="block px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors border-b border-border"
+                              className="group flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary hover:text-primary transition-colors border-b border-border"
                             >
-                              Profile
+                              <span className="flex-1">Profile</span>
+                              <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
                             </Link>
                             <button
                               type="button"
                               onClick={() => setAdminPanelExpanded((v) => !v)}
-                              className="flex w-full items-center justify-between px-3 py-2"
+                              className="flex w-full items-center justify-between px-4 py-2"
                             >
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              <span className="text-sm font-semibold text-foreground">
                                 Admin Panel
-                              </p>
+                              </span>
                               <ChevronDown
                                 className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 ${
                                   adminPanelExpanded ? 'rotate-180' : ''
@@ -498,11 +499,11 @@ const Header = () => {
                           </ul>
                         )}
 
-                        <div className="border-t border-border mt-1 py-1">
+                        <div className="border-t border-border mt-1">
                           <button
                             type="button"
                             onClick={logout}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            className="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-foreground hover:text-primary hover:bg-secondary transition-colors"
                           >
                             <LogOut className="w-3.5 h-3.5" />
                             Sign out

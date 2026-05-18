@@ -45,7 +45,7 @@ const shopSort = {
   defaultValue: 'price-asc',
 };
 
-type FilterTabKey = 'category' | 'subCategory' | 'metal' | 'shape' | 'stockType' | 'price';
+type FilterTabKey = 'category' | 'subCategory' | 'metal' | 'shape' | 'stockType' | 'price' | 'inStock';
 type VisualFilterValue = string | [number, number];
 type FilterChangeHandler = (key: string, value: string | string[] | [number, number]) => void;
 
@@ -132,6 +132,7 @@ const defaultValues: FilterValues = {
   shape: '',
   stockType: '',
   price: DEFAULT_PRICE_RANGE,
+  inStock: '',
 };
 
 const isSameRange = (left: [number, number], right: [number, number]) =>
@@ -313,6 +314,32 @@ const FilterSidebarContent = ({
       )}
     </div>
 
+    <div className="mb-2 overflow-hidden rounded-2xl border border-border/60 bg-background px-3.5 py-3.5">
+      <div className="mb-3">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
+          Availability
+        </span>
+      </div>
+      <label className="flex cursor-pointer items-center justify-between gap-3 px-2 py-1">
+        <span className="text-sm text-foreground">In-Stock and Ready to Ship</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={filterValues.inStock === 'true'}
+          onClick={() => handleFilterChange('inStock', filterValues.inStock === 'true' ? '' : 'true')}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+            filterValues.inStock === 'true' ? 'bg-accent' : 'bg-foreground/20'
+          }`}
+        >
+          <span
+            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+              filterValues.inStock === 'true' ? 'translate-x-5' : 'translate-x-0'
+            }`}
+          />
+        </button>
+      </label>
+    </div>
+
     <Accordion
       type="multiple"
       value={openAccordionItems}
@@ -395,7 +422,7 @@ const ShopPage = () => {
 
   const filtered = useMemo(() => {
     let result = [...shopProducts];
-    const { search, category, subCategory, metal, shape, stockType, price } = filterValues;
+    const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
 
     if (search && typeof search === 'string' && search.trim()) {
       const q = search.toLowerCase();
@@ -410,6 +437,7 @@ const ShopPage = () => {
     else if (Array.isArray(shape) && shape.length > 0)
       result = result.filter((p) => (shape as string[]).includes(p.shape));
     if (stockType) result = result.filter((p) => p.stockType === stockType);
+    if (inStock === 'true') result = result.filter((p) => (p.stock ?? 0) > 0);
     if (Array.isArray(price) && typeof price[0] === 'number') {
       const [lo, hi] = price as [number, number];
       result = result.filter((p) => p.price >= lo && p.price <= hi);
@@ -423,7 +451,7 @@ const ShopPage = () => {
   }, [filterValues, sortBy]);
 
   const hasActiveFilters = useMemo(() => {
-    const { search, category, subCategory, metal, shape, stockType, price } = filterValues;
+    const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
     return Boolean(
       (typeof search === 'string' && search.trim()) ||
@@ -433,6 +461,7 @@ const ShopPage = () => {
         (typeof shape === 'string' && shape) ||
         (Array.isArray(shape) && shape.length > 0) ||
         stockType ||
+        inStock === 'true' ||
         !isSameRange([lo, hi], DEFAULT_PRICE_RANGE)
     );
   }, [filterValues]);
@@ -449,6 +478,8 @@ const ShopPage = () => {
       chips.push({ key: 'shape', label: filterValues.shape });
     if (typeof filterValues.stockType === 'string' && filterValues.stockType)
       chips.push({ key: 'stockType', label: filterValues.stockType });
+    if (filterValues.inStock === 'true')
+      chips.push({ key: 'inStock', label: 'In-Stock & Ready to Ship' });
     if (
       Array.isArray(filterValues.price) &&
       !isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)

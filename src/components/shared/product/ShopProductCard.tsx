@@ -47,7 +47,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
         <Heart
           className={`h-6 w-6 transition-all duration-200 ${
             liked
-              ? 'fill-red-500 text-red-500'
+              ? 'fill-primary text-primary'
               : 'text-primary/70 hover:text-primary'
           }`}
         />
