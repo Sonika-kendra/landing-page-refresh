@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, Navigate, NavLink } from 'react-router-dom';
+import { Outlet, Navigate, NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, FolderTree, Package, ShoppingBag, Boxes, ShoppingCart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
@@ -44,7 +44,7 @@ const SidebarNav = ({
   <div className="flex flex-col h-full">
     {/* Logo */}
     <div className="px-6 py-5 border-b border-accent-foreground/10">
-      <img src={Logo} alt="Henig Admin" className="h-8 w-auto object-contain" />
+      <Link to="/"><img src={Logo} alt="Henig Admin" className="h-8 w-auto object-contain" /></Link>
       <p className="text-[10px] text-accent-foreground/50 mt-1.5 tracking-widest uppercase">
         Admin Panel
       </p>
@@ -167,7 +167,8 @@ const AdminLayout = () => {
           </button>
           <div className="flex-1" />
           <span className="text-xs text-foreground/40 tracking-widest uppercase">
-            Henig Diamonds · Admin
+            <Link to="/" className="hover:text-foreground/70 transition-colors">Henig Diamonds</Link>
+            {' · Admin'}
           </span>
         </header>
 
