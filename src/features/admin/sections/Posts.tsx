@@ -1,29 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus, MoreVertical, Eye, ArrowLeft, Calendar } from 'lucide-react';
-import { Editor } from '@tinymce/tinymce-react';
-
-// Bundled TinyMCE — no CDN, no API key required
-import 'tinymce/tinymce';
-import 'tinymce/models/dom';
-import 'tinymce/themes/silver';
-import 'tinymce/icons/default';
-import 'tinymce/skins/ui/oxide/skin.min.css';
-import 'tinymce/plugins/link';
-import 'tinymce/plugins/lists';
-import 'tinymce/plugins/image';
-import 'tinymce/plugins/wordcount';
-import 'tinymce/plugins/table';
-import 'tinymce/plugins/media';
-import 'tinymce/plugins/fullscreen';
-import 'tinymce/plugins/preview';
-import 'tinymce/plugins/searchreplace';
-import 'tinymce/plugins/charmap';
-import 'tinymce/plugins/anchor';
-import 'tinymce/plugins/codesample';
-import 'tinymce/plugins/insertdatetime';
-import 'tinymce/plugins/visualblocks';
-import 'tinymce/plugins/quickbars';
+import BlogBuilder, { BlogBuilderHandle, isCraftJSON } from '@/features/admin/builder/BlogBuilder';
+import CraftRenderer from '@/features/blog/CraftRenderer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -137,7 +116,9 @@ const Posts = () => {
   const [buttons, setButtons] = useState<ButtonEntry[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [previewContent, setPreviewContent] = useState('');
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const builderRef = useRef<BlogBuilderHandle>(null);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['admin', 'posts'],
@@ -237,7 +218,7 @@ const Posts = () => {
     fd.append('title',   form.title);
     fd.append('date',    new Date(form.date).toISOString());
     fd.append('snippet', form.snippet);
-    fd.append('content', form.content);
+    fd.append('content', builderRef.current?.getContent() ?? form.content);
     fd.append('status',  statusOverride ?? form.status);
     if (form.related) fd.append('related', form.related);
 
@@ -284,7 +265,7 @@ const Posts = () => {
       toast({ title: 'Error', description: 'Failed to delete post.', variant: 'destructive' }),
   });
 
-  const isFormValid = form.title.trim() && form.content.trim() && form.date;
+  const isFormValid = form.title.trim() && form.date;
 
   // ── Preview View ───────────────────────────────────────────────────────────
   if (view === 'preview') {
@@ -350,11 +331,15 @@ const Posts = () => {
             </p>
           )}
 
-          {form.content ? (
-            <div
-              className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary"
-              dangerouslySetInnerHTML={{ __html: form.content }}
-            />
+          {previewContent ? (
+            isCraftJSON(previewContent) ? (
+              <CraftRenderer content={previewContent} />
+            ) : (
+              <div
+                className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary"
+                dangerouslySetInnerHTML={{ __html: previewContent }}
+              />
+            )
           ) : (
             <p className="text-muted-foreground italic">No content yet.</p>
           )}
@@ -382,7 +367,10 @@ const Posts = () => {
           <Button
             variant="outline"
             className="tracking-widest uppercase text-xs rounded-none gap-1.5"
-            onClick={() => setView('preview')}
+            onClick={() => {
+              setPreviewContent(builderRef.current?.getContent() ?? form.content);
+              setView('preview');
+            }}
             disabled={!isFormValid}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -462,109 +450,18 @@ const Posts = () => {
           )}
         </div>
 
-        {/* Editor */}
-        <div className="border border-border">
-          <Editor
-            value={form.content}
-            onEditorChange={content => handleFormField('content', content)}
-            init={{
-              licenseKey: 'gpl',
-              model: 'dom',
-              skin: false,
-              content_css: false,
-              height: 520,
-              menubar: true,
-              statusbar: true,
-              resize: false,
-              plugins: [
-                'link', 'lists', 'image', 'wordcount',
-                'table', 'media', 'fullscreen', 'preview',
-                'searchreplace', 'charmap', 'anchor', 'codesample',
-                'insertdatetime', 'visualblocks', 'quickbars',
-              ],
-              toolbar: [
-                'undo redo | blocks fontsize | bold italic underline strikethrough | forecolor backcolor | removeformat',
-                'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link anchor | image media table | charmap | insertbutton | fullscreen preview',
-              ],
-              toolbar_mode: 'wrap',
-              quickbars_selection_toolbar: 'bold italic | link h2 h3 blockquote',
-              quickbars_insert_toolbar: 'image media table',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              setup: (editor: any) => {
-                editor.ui.registry.addButton('insertbutton', {
-                  text: 'Button',
-                  tooltip: 'Insert a styled CTA button',
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onAction: () => {
-                    editor.windowManager.open({
-                      title: 'Insert Button',
-                      body: {
-                        type: 'panel',
-                        items: [
-                          { type: 'input', name: 'label', label: 'Button Label', placeholder: 'Shop Now' },
-                          { type: 'input', name: 'url',   label: 'URL',          placeholder: 'https://' },
-                        ],
-                      },
-                      buttons: [
-                        { type: 'cancel', text: 'Cancel' },
-                        { type: 'submit', text: 'Insert', buttonType: 'primary' },
-                      ],
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      onSubmit: (api: any) => {
-                        const { label, url } = api.getData();
-                        if (label && url) {
-                          editor.insertContent(
-                            `<a href="${url}" style="display:inline-block;padding:10px 24px;background-color:#173731;color:#f5f5ea;text-decoration:none;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;font-family:inherit;" target="_blank">${label}</a>`
-                          );
-                        }
-                        api.close();
-                      },
-                    });
-                  },
-                });
-              },
-              image_title: true,
-              automatic_uploads: true,
-              file_picker_types: 'image',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              file_picker_callback: (callback: any) => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = async () => {
-                  const file = input.files?.[0];
-                  if (!file) return;
-                  const fd = new FormData();
-                  fd.append('src', file);
-                  if (editPost) fd.append('postId', editPost._id);
-                  try {
-                    const res = await adminApi.uploadPostImage(fd);
-                    callback(res.data.url, { title: file.name });
-                  } catch (err: any) {
-                    const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
-                    toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
-                  }
-                };
-                input.click();
-              },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              images_upload_handler: async (blobInfo: any) => {
-                const fd = new FormData();
-                fd.append('src', blobInfo.blob(), blobInfo.filename());
-                if (editPost) fd.append('postId', editPost._id);
-                try {
-                  const res = await adminApi.uploadPostImage(fd);
-                  return res.data.url;
-                } catch (err: any) {
-                  const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
-                  toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
-                  throw err;
-                }
-              },
-              content_style: 'body { font-family: inherit; font-size: 12pt; margin: 8px; line-height: 1.6; color: #173731; }',
-            }}
-          />
-        </div>
+        {/* Block Builder */}
+        <BlogBuilder
+          ref={builderRef}
+          value={form.content}
+          onUploadImage={async (file) => {
+            const fd = new FormData();
+            fd.append('src', file);
+            if (editPost) fd.append('postId', editPost._id);
+            const res = await adminApi.uploadPostImage(fd);
+            return res.data.url;
+          }}
+        />
 
         {/* Options */}
         <div>

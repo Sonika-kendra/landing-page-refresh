@@ -230,6 +230,87 @@
     );
   }
 
+  /* ── Tiptap rich-text content ─────────────────────────────────────────── */
+
+  /* Paragraphs */
+  .tiptap-content p,
+  .tiptap-editor .ProseMirror p {
+    margin-bottom: 0.75rem;
+  }
+  .tiptap-content p:last-child,
+  .tiptap-editor .ProseMirror p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Lists */
+  .tiptap-content ul,
+  .tiptap-editor .ProseMirror ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .tiptap-content ol,
+  .tiptap-editor .ProseMirror ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .tiptap-content li,
+  .tiptap-editor .ProseMirror li {
+    margin-bottom: 0.25rem;
+  }
+  .tiptap-content li > p,
+  .tiptap-editor .ProseMirror li > p {
+    margin-bottom: 0;
+  }
+
+  /* Links */
+  .tiptap-content a,
+  .tiptap-editor .ProseMirror a {
+    text-decoration: underline;
+    opacity: 0.8;
+  }
+  .tiptap-content a:hover,
+  .tiptap-editor .ProseMirror a:hover {
+    opacity: 1;
+  }
+
+  /* Inline code */
+  .tiptap-content code,
+  .tiptap-editor .ProseMirror code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.875em;
+    background: hsl(var(--muted));
+    padding: 0.125em 0.3em;
+    border-radius: 2px;
+  }
+
+  /* Editor chrome */
+  .tiptap-editor .ProseMirror,
+  .tiptap-heading-editor .ProseMirror {
+    outline: none;
+    cursor: text;
+    min-height: 1.5em;
+  }
+
+  /* Placeholders */
+  .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: hsl(var(--muted-foreground) / 0.4);
+    pointer-events: none;
+    height: 0;
+  }
+  .tiptap-heading-editor .ProseMirror h1.is-empty::before,
+  .tiptap-heading-editor .ProseMirror h2.is-empty::before,
+  .tiptap-heading-editor .ProseMirror h3.is-empty::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: hsl(var(--muted-foreground) / 0.4);
+    pointer-events: none;
+    height: 0;
+  }
+
   /* Button variants */
   .btn-henig-primary {
     @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300;

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronUp, Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
@@ -8,16 +8,8 @@ import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { getMetalType } from '@/data/shop/metalTypes';
-import {
-  categories,
-  metals,
-  shapes,
-  shopProducts,
-  stockTypes,
-  subCategories,
-  youMayAlsoLike,
-} from '@/data/shop/products';
+import { useProducts } from '@/hooks/useProducts';
+import { youMayAlsoLike } from '@/data/shop/products';
 import ringImage from '@/assets/jewellery/category/ring.png';
 import braceletImage from '@/assets/jewellery/category/Bracelet.png';
 import earringsImage from '@/assets/jewellery/category/earrings.png';
@@ -33,19 +25,18 @@ import labDiamondImage from '@/assets/lab-grown-diamond.jpg';
 import diamondsImage from '@/assets/diamonds-category.jpg';
 
 const ITEMS_PER_PAGE = 16;
-const DEFAULT_PRICE_RANGE: [number, number] = [0, 5000];
+const DEFAULT_PRICE_RANGE: [number, number] = [0, 50000];
 
 const shopSort = {
   options: [
     { label: 'Price: Low to High', value: 'price-asc' },
     { label: 'Price: High to Low', value: 'price-desc' },
-    { label: 'Newest First', value: 'newest' },
     { label: 'Name: A-Z', value: 'name-asc' },
   ],
   defaultValue: 'price-asc',
 };
 
-type FilterTabKey = 'category' | 'subCategory' | 'metal' | 'shape' | 'stockType' | 'price' | 'inStock';
+type FilterTabKey = 'category' | 'subCategory' | 'shape' | 'stockType' | 'price' | 'inStock';
 type VisualFilterValue = string | [number, number];
 type FilterChangeHandler = (key: string, value: string | string[] | [number, number]) => void;
 
@@ -56,10 +47,14 @@ type VisualFilterItem = {
   display?: string;
 };
 
+const categories = ['Rings', 'Earrings', 'Bracelets', 'Necklaces', 'Bangles', 'Pendants'];
+const subCategories = ['Halo', 'Solitaire', 'Three Stone', 'Eternity', 'Cluster'];
+const shapes = ['Round', 'Pear', 'Oval', 'Emerald', 'Princess', 'Cushion'];
+const stockTypes = ['Natural', 'Lab'];
+
 const filterTabs: { key: FilterTabKey; label: string }[] = [
   { key: 'category', label: 'Categories' },
   { key: 'subCategory', label: 'Collections' },
-  { key: 'metal', label: 'Metals' },
   { key: 'shape', label: 'Shapes' },
   { key: 'stockType', label: 'Stock Type' },
   { key: 'price', label: 'Price' },
@@ -84,30 +79,15 @@ const collectionImages: Record<string, string> = {
 
 const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
   category: [
-    ...categories.map((category) => ({
-      label: category,
-      value: category,
-      image: categoryImages[category] ?? jewelleryImage,
-    })),
+    ...categories.map((c) => ({ label: c, value: c, image: categoryImages[c] ?? jewelleryImage })),
     { label: 'All Products', value: '', image: jewelleryImage },
   ],
   subCategory: [
-    ...subCategories.map((subCategory) => ({
-      label: subCategory,
-      value: subCategory,
-      image: collectionImages[subCategory] ?? jewelleryImage,
-    })),
+    ...subCategories.map((s) => ({ label: s, value: s, image: collectionImages[s] ?? jewelleryImage })),
     { label: 'All Collections', value: '', image: jewelleryImage },
   ],
-  metal: [
-    ...metals.map((metal) => {
-      const m = getMetalType(metal);
-      return { label: m.name, value: metal, display: m.label, image: m.image };
-    }),
-    { label: 'All Metals', value: '', display: 'All' },
-  ],
   shape: [
-    ...shapes.map((shape) => ({ label: shape, value: shape, display: shape })),
+    ...shapes.map((s) => ({ label: s, value: s, display: s })),
     { label: 'All Shapes', value: '', display: 'All' },
   ],
   stockType: [
@@ -116,19 +96,19 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: stockTypes[1], value: stockTypes[1], image: labDiamondImage },
   ],
   price: [
-    { label: 'Under £750', value: [0, 750] },
-    { label: '£750 – £1,000', value: [750, 1000] },
-    { label: '£1,000 – £1,500', value: [1000, 1500] },
-    { label: '£1,500+', value: [1500, 5000] },
+    { label: 'Under £1,000', value: [0, 1000] },
+    { label: '£1,000 – £5,000', value: [1000, 5000] },
+    { label: '£5,000 – £15,000', value: [5000, 15000] },
+    { label: '£15,000+', value: [15000, 50000] },
     { label: 'All Prices', value: DEFAULT_PRICE_RANGE },
   ],
+  inStock: [],
 };
 
 const defaultValues: FilterValues = {
   search: '',
   category: '',
   subCategory: '',
-  metal: '',
   shape: '',
   stockType: '',
   price: DEFAULT_PRICE_RANGE,
@@ -151,49 +131,6 @@ const renderFilterItems = (
   onChange: FilterChangeHandler
 ) => {
   const items = visualFilters[tab.key];
-
-  if (tab.key === 'metal') {
-    return (
-      <div className="space-y-0.5">
-        {items
-          .filter((item) => item.value !== '')
-          .map((item) => {
-            const isActive = isFilterItemActive(currentValue, item.value);
-            const itemKey = item.value as string;
-            const metalConfig = getMetalType(itemKey);
-            return (
-              <label
-                key={`metal-${itemKey}`}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/40"
-              >
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={() => onChange(tab.key, isActive ? '' : item.value)}
-                  className="h-4 w-4 flex-shrink-0 cursor-pointer accent-[hsl(var(--accent))]"
-                />
-                <span
-                  className="h-4 w-4 flex-shrink-0 overflow-hidden rounded-full border border-border/50"
-                  style={{
-                    backgroundImage: metalConfig.image ? `url(${metalConfig.image})` : undefined,
-                    backgroundColor: metalConfig.image ? undefined : metalConfig.bg,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
-                <span
-                  className={`text-sm transition-colors ${
-                    isActive ? 'font-semibold text-foreground' : 'text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </label>
-            );
-          })}
-      </div>
-    );
-  }
 
   if (tab.key === 'shape') {
     return (
@@ -248,7 +185,7 @@ const renderFilterItems = (
     );
   }
 
-  // Default: checkbox list (category, subCategory, stockType)
+  // Default: checkbox list
   return (
     <div className="space-y-0.5">
       {items
@@ -267,11 +204,7 @@ const renderFilterItems = (
                 onChange={() => onChange(tab.key, isActive ? '' : item.value)}
                 className="h-4 w-4 flex-shrink-0 cursor-pointer accent-[hsl(var(--accent))]"
               />
-              <span
-                className={`text-sm transition-colors ${
-                  isActive ? 'font-semibold text-foreground' : 'text-foreground'
-                }`}
-              >
+              <span className={`text-sm transition-colors ${isActive ? 'font-semibold text-foreground' : 'text-foreground'}`}>
                 {item.label}
               </span>
             </label>
@@ -367,16 +300,13 @@ const FilterSidebarContent = ({
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
                     {tab.label}
                   </span>
-                  {isFilterActive && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                  )}
+                  {isFilterActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
                 </div>
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground">
                   {openAccordionItems.includes(tab.key) ? '−' : '+'}
                 </span>
               </div>
             </AccordionTrigger>
-
             <AccordionContent className="pb-4 pt-0">
               {isFilterActive && (
                 <div className="mb-3 flex justify-end">
@@ -407,6 +337,9 @@ const ShopPage = () => {
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
 
+  // Server-side: pass search text to API; all other filters are client-side
+  const { items: allProducts, loading, error } = useProducts({ per_page: 200 });
+
   const handleFilterChange = useCallback(
     (key: string, value: string | string[] | [number, number]) => {
       setFilterValues((prev) => ({ ...prev, [key]: value }));
@@ -421,26 +354,57 @@ const ShopPage = () => {
   }, []);
 
   const filtered = useMemo(() => {
-    let result = [...shopProducts];
-    const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
+    let result = [...allProducts];
+    const { search, category, subCategory, shape, stockType, price, inStock } = filterValues;
 
     if (search && typeof search === 'string' && search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.sku ?? '').toLowerCase().includes(q) ||
+          (p.stockCode ?? '').toLowerCase().includes(q)
       );
     }
-    if (category) result = result.filter((p) => p.category === category);
-    if (subCategory) result = result.filter((p) => p.subCategory === subCategory);
-    if (metal) result = result.filter((p) => p.metal === metal);
-    if (typeof shape === 'string' && shape) result = result.filter((p) => p.shape === shape);
-    else if (Array.isArray(shape) && shape.length > 0)
-      result = result.filter((p) => (shape as string[]).includes(p.shape));
-    if (stockType) result = result.filter((p) => p.stockType === stockType);
-    if (inStock === 'true') result = result.filter((p) => (p.stock ?? 0) > 0);
+
+    if (category) {
+      const cat = category.toLowerCase();
+      result = result.filter(
+        (p) =>
+          (p.parentCategory ?? '').toLowerCase() === cat ||
+          (p.categoryName ?? '').toLowerCase().includes(cat)
+      );
+    }
+
+    if (subCategory) {
+      const sub = subCategory.toLowerCase();
+      result = result.filter((p) => (p.subCategory ?? '').toLowerCase() === sub);
+    }
+
+    if (typeof shape === 'string' && shape) {
+      result = result.filter(
+        (p) => (p.shape ?? '').toLowerCase() === shape.toLowerCase()
+      );
+    }
+
+    if (stockType) {
+      result = result.filter((p) => {
+        const gm = (p.growthMethod ?? '').toLowerCase();
+        if (stockType === 'Natural') return !gm || gm === 'natural';
+        if (stockType === 'Lab') return gm === 'cvd' || gm === 'hpht' || gm.includes('lab');
+        return true;
+      });
+    }
+
+    if (inStock === 'true') {
+      result = result.filter((p) => (p.stock_on_hand ?? 0) > 0);
+    }
+
     if (Array.isArray(price) && typeof price[0] === 'number') {
       const [lo, hi] = price as [number, number];
-      result = result.filter((p) => p.price >= lo && p.price <= hi);
+      if (!isSameRange([lo, hi], DEFAULT_PRICE_RANGE)) {
+        result = result.filter((p) => p.price >= lo && p.price <= hi);
+      }
     }
 
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
@@ -448,20 +412,16 @@ const ShopPage = () => {
     else if (sortBy === 'name-asc') result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [filterValues, sortBy]);
+  }, [allProducts, filterValues, sortBy]);
 
   const hasActiveFilters = useMemo(() => {
-    const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
+    const { search, category, subCategory, shape, stockType, price, inStock } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
     return Boolean(
       (typeof search === 'string' && search.trim()) ||
-        category ||
-        subCategory ||
-        metal ||
+        category || subCategory ||
         (typeof shape === 'string' && shape) ||
-        (Array.isArray(shape) && shape.length > 0) ||
-        stockType ||
-        inStock === 'true' ||
+        stockType || inStock === 'true' ||
         !isSameRange([lo, hi], DEFAULT_PRICE_RANGE)
     );
   }, [filterValues]);
@@ -472,8 +432,6 @@ const ShopPage = () => {
       chips.push({ key: 'category', label: filterValues.category });
     if (typeof filterValues.subCategory === 'string' && filterValues.subCategory)
       chips.push({ key: 'subCategory', label: filterValues.subCategory });
-    if (typeof filterValues.metal === 'string' && filterValues.metal)
-      chips.push({ key: 'metal', label: getMetalType(filterValues.metal).name });
     if (typeof filterValues.shape === 'string' && filterValues.shape)
       chips.push({ key: 'shape', label: filterValues.shape });
     if (typeof filterValues.stockType === 'string' && filterValues.stockType)
@@ -504,7 +462,6 @@ const ShopPage = () => {
       <div className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20">
         <div className="henig-container">
           <div className="flex flex-wrap items-center gap-3 py-4">
-            {/* Filter button */}
             <Sheet open={isFilterSidebarOpen} onOpenChange={setIsFilterSidebarOpen}>
               <SheetTrigger asChild>
                 <Button className="justify-start gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
@@ -555,7 +512,7 @@ const ShopPage = () => {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
               <input
                 value={(filterValues.search as string) || ''}
-                onChange={(event) => handleFilterChange('search', event.target.value)}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
                 placeholder="Search products"
                 className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
               />
@@ -575,19 +532,17 @@ const ShopPage = () => {
               <span className="whitespace-nowrap">Sort by</span>
               <select
                 value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
+                onChange={(e) => setSortBy(e.target.value)}
                 className="h-10 w-[180px] rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
               >
-                {shopSort.options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+                {shopSort.options.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </label>
 
             <span className="ml-auto text-sm text-foreground/55">
-              {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
+              {loading ? '…' : `${filtered.length.toLocaleString()} ${filtered.length === 1 ? 'result' : 'results'}`}
             </span>
             {hasActiveFilters && (
               <button
@@ -612,9 +567,7 @@ const ShopPage = () => {
                 <button
                   key={chip.key}
                   type="button"
-                  onClick={() =>
-                    handleFilterChange(chip.key, chip.key === 'price' ? DEFAULT_PRICE_RANGE : '')
-                  }
+                  onClick={() => handleFilterChange(chip.key, chip.key === 'price' ? DEFAULT_PRICE_RANGE : '')}
                   className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >
                   {chip.label}
@@ -638,71 +591,83 @@ const ShopPage = () => {
       {/* Main content */}
       <section className="bg-white py-8 md:py-12">
         <div className="henig-container">
-          <div>
-            {paged.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-lg text-foreground/60">No products match your filters.</p>
-                <button
-                  onClick={handleReset}
-                  className="mt-3 text-sm text-primary underline hover:text-primary/80"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-                {paged.map((product) => (
-                  <ShopProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-accent" />
+              <p className="text-sm text-foreground/50">Loading products…</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
+              <p className="text-base text-foreground/60">Could not load products.</p>
+              <p className="text-xs text-destructive">{error}</p>
+            </div>
+          ) : (
+            <div>
+              {paged.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <p className="text-lg text-foreground/60">No products match your filters.</p>
+                  <button
+                    onClick={handleReset}
+                    className="mt-3 text-sm text-primary underline hover:text-primary/80"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                  {paged.map((product) => (
+                    <ShopProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
 
-            {totalPages > 1 && (
-              <div className="mt-10 flex items-center justify-center gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
-                >
-                  &lsaquo;
-                </button>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = i + 1;
-                  return (
+              {totalPages > 1 && (
+                <div className="mt-10 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
+                  >
+                    &lsaquo;
+                  </button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${
+                          page === pageNum
+                            ? 'bg-accent text-accent-foreground'
+                            : 'text-foreground/60 hover:bg-border/40'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  {totalPages > 5 && <span className="text-foreground/40">…</span>}
+                  {totalPages > 5 && (
                     <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${
-                        page === pageNum
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-foreground/60 hover:bg-border/40'
+                      onClick={() => setPage(totalPages)}
+                      className={`h-8 w-8 rounded-full text-sm font-medium ${
+                        page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
                       }`}
                     >
-                      {pageNum}
+                      {totalPages}
                     </button>
-                  );
-                })}
-                {totalPages > 5 && <span className="text-foreground/40">...</span>}
-                {totalPages > 5 && (
+                  )}
                   <button
-                    onClick={() => setPage(totalPages)}
-                    className={`h-8 w-8 rounded-full text-sm font-medium ${
-                      page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
-                    }`}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
                   >
-                    {totalPages}
+                    &rsaquo;
                   </button>
-                )}
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
-                >
-                  &rsaquo;
-                </button>
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,19 +1,22 @@
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
   Heart, Share2, Copy, Mail,
-  Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck,
+  Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck, Loader2,
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
-import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
-import { getMetalType } from '@/data/shop/metalTypes';
+import { youMayAlsoLike } from '@/data/shop/products';
+import { useProduct } from '@/hooks/useProducts';
 import { useFavourites } from '@/context/FavouritesContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { newApiURL } from '@/config/site';
 import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
 const Diamond3DViewer = lazy(() => import('@/components/shared/product/Diamond3DViewer'));
+
+type ImgStage = 'picture' | 'proxy' | 'placeholder';
 
 const trustBadges = [
   { icon: Truck, label: 'Free UK Delivery' },
@@ -26,12 +29,10 @@ const trustBadges = [
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const product = useMemo(() => shopProducts.find((p) => p.id === id), [id]);
+  const { product, loading, error } = useProduct(id);
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [show3D, setShow3D] = useState(false);
-  const [selectedMetal, setSelectedMetal] = useState(0);
-  const [selectedCarat, setSelectedCarat] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(0);
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
@@ -39,6 +40,7 @@ const ProductDetail = () => {
   const [copied, setCopied] = useState(false);
   const [skuCopied, setSkuCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [imgStage, setImgStage] = useState<ImgStage>('picture');
 
   const { isFavourite, toggleFavourite } = useFavourites();
   const liked = product ? isFavourite(product.id) : false;
@@ -69,20 +71,72 @@ const ProductDetail = () => {
     setTimeout(() => setBagJustAdded(false), 600);
   };
 
-  if (!product) {
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="henig-container flex min-h-[60vh] flex-col items-center justify-center gap-3 py-24">
+          <Loader2 className="h-8 w-8 animate-spin text-accent" />
+          <p className="text-sm text-foreground/50">Loading product…</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error || !product) {
     return (
       <PageLayout>
         <div className="henig-container py-24 text-center">
           <h1 className="font-serif text-3xl text-foreground">Product not found</h1>
+          {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
           <Link to="/shop" className="mt-4 inline-block text-primary underline">Back to shop</Link>
         </div>
       </PageLayout>
     );
   }
 
-  const images = product.images || [product.image];
+  // Build image list: prefer CF Picture link; fall back to Zoho image proxy
+  const proxyUrl = `${newApiURL}/products/${product.id}/image`;
+  const images = [product.pictureLink || proxyUrl];
+
+  const handleDetailImgError = () => {
+    if (imgStage === 'picture') setImgStage('proxy');
+    else setImgStage('placeholder');
+  };
+
+  const detailImgSrc = imgStage === 'picture'
+    ? (product.pictureLink || proxyUrl)
+    : imgStage === 'proxy'
+    ? proxyUrl
+    : null;
+
   const prevImage = () => setSelectedImage((i) => (i === 0 ? images.length - 1 : i - 1));
   const nextImage = () => setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1));
+
+  // Derived display values
+  const category = product.parentCategory || product.categoryName || 'Shop';
+  const subCat = product.subCategory;
+  const stoneType = product.productType || (product.growthMethod ? `${product.growthMethod} Diamond` : null);
+  const itemRef = product.stockCodeNumber || product.stockCode;
+  const stockLeft = product.stock_on_hand;
+
+  const specs: [string, string | null | undefined][] = [
+    ['Stone type:', stoneType],
+    ['Shape:', product.shape],
+    ['Colour:', product.colour],
+    ['Clarity:', product.clarity],
+    ['Carats:', product.caratsTotal],
+    ['Centre diamond:', product.centreDiamondWeight],
+    ['Total diamond wt:', product.totalDiamondWeight],
+    ['Diamond shape(s):', product.diamondShapes],
+    ['Metal colour:', product.metalColour],
+    ['Metal purity:', product.metalPurity],
+    ['Metal weight:', product.metalWeight],
+    ['Side stones:', product.sideStonesWeight],
+    ['Gemstone wt:', product.gemstoneWeight],
+    ['Size:', product.size],
+    ['Style ID:', product.styleId],
+    ['Stock code:', product.stockCode],
+  ].filter(([, v]) => v) as [string, string][];
 
   return (
     <PageLayout>
@@ -96,12 +150,16 @@ const ProductDetail = () => {
             </Link>
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
             <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
-              {product.category}
+              {category}
             </Link>
-            <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-            <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
-              {product.subCategory}
-            </Link>
+            {subCat && (
+              <>
+                <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
+                <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+                  {subCat}
+                </Link>
+              </>
+            )}
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
             <span className="max-w-[240px] truncate font-semibold text-accent-foreground">{product.name}</span>
           </nav>
@@ -111,6 +169,7 @@ const ProductDetail = () => {
       <section className="bg-white py-8 md:py-12">
         <div className="henig-container">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            {/* ── Left: images ── */}
             <div>
               <div className="relative mb-3 aspect-square overflow-hidden border border-border/20 bg-white">
                 {show3D ? (
@@ -119,17 +178,35 @@ const ProductDetail = () => {
                   </Suspense>
                 ) : (
                   <>
-                    <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
-                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                      <ChevronLeft className="h-9 w-9" />
-                    </button>
-                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                      <ChevronRight className="h-9 w-9" />
-                    </button>
+                    {detailImgSrc ? (
+                      <img
+                        src={detailImgSrc}
+                        alt={product.name}
+                        onError={handleDetailImgError}
+                        className="h-full w-full object-contain p-8"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-foreground/20">
+                        <Gem className="h-16 w-16" />
+                        <span className="text-xs font-medium uppercase tracking-widest">No image available</span>
+                      </div>
+                    )}
+                    {images.length > 1 && (
+                      <>
+                        <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
+                          <ChevronLeft className="h-9 w-9" />
+                        </button>
+                        <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
+                          <ChevronRight className="h-9 w-9" />
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
-              <div className="flex gap-2">
+
+              {/* Thumbnails + media buttons */}
+              <div className="flex gap-2 flex-wrap">
                 {images.map((img, i) => (
                   <button key={i} onClick={() => { setSelectedImage(i); setShow3D(false); }} className={`h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${!show3D && i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
                     <img src={img} alt="" className="h-full w-full object-contain p-1" />
@@ -142,7 +219,29 @@ const ProductDetail = () => {
                   <Gem className="h-6 w-6 text-foreground/40" />
                   <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">3D View</span>
                 </button>
+                {product.mp4Url && (
+                  <a
+                    href={product.mp4Url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border border-border/30 bg-white transition-all hover:border-border/60"
+                  >
+                    <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">▶ Video</span>
+                  </a>
+                )}
+                {product.video360Url && (
+                  <a
+                    href={product.video360Url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border border-border/30 bg-white transition-all hover:border-border/60"
+                  >
+                    <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">360°</span>
+                  </a>
+                )}
               </div>
+
+              {/* Description accordion */}
               <div className="mt-8 border-t border-border/30">
                 <button onClick={() => setDescOpen(!descOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-sm font-medium text-foreground">Product Description</span>
@@ -150,15 +249,31 @@ const ProductDetail = () => {
                 </button>
                 {descOpen && (
                   <div className="pb-5 text-sm leading-relaxed text-foreground/60">
-                    <p className="mb-1 text-xs">Item Ref: {product.itemRef}</p>
-                    <p>{product.description}</p>
+                    {itemRef && <p className="mb-1 text-xs">Item Ref: {itemRef}</p>}
+                    <p>{product.description || 'No description available.'}</p>
+                    {product.certComments && (
+                      <p className="mt-2 text-xs text-foreground/50">{product.certComments}</p>
+                    )}
+                    {product.certLink && (
+                      <a
+                        href={product.certLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block text-xs text-primary underline"
+                      >
+                        View Certificate
+                      </a>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
+            {/* ── Right: details ── */}
             <div>
-              <h1 className="mb-1.5 font-serif text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
+              <h1 className="mb-1.5 font-serif text-2xl leading-snug text-foreground md:text-[1.7rem]">
+                {product.name}
+              </h1>
               <div className="mb-5 flex items-center gap-1.5 text-xs">
                 <span className="font-medium text-foreground/60">SKU #: {product.sku}</span>
                 <button
@@ -171,105 +286,70 @@ const ProductDetail = () => {
                 {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </div>
 
+              {/* Key attributes */}
               <div className="mb-5 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal type:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {product.metalOptions.map((m, i) => {
-                      const metal = getMetalType(m);
-                      const isSelected = i === selectedMetal;
-                      return (
-                        <button
-                          key={i}
-                          onClick={() => setSelectedMetal(i)}
-                          title={metal.name}
-                          style={{
-                            backgroundImage: metal.image ? `url(${metal.image})` : undefined,
-                            backgroundColor: metal.image ? undefined : metal.bg,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            color: '#000',
-                          }}
-                          className={`rounded px-2 py-1 text-[10px] font-bold uppercase leading-none tracking-wide transition-all ${isSelected ? 'ring-2 ring-foreground/70 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
-                        >
-                          {metal.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                {product.caratOptions && (
+                {product.metalColour && (
                   <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Carat Wt.:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {product.caratOptions.map((c, i) => (
-                        <button key={i} onClick={() => setSelectedCarat(i)} className={`h-8 w-8 border text-xs font-medium transition-colors ${i === selectedCarat ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{c}</button>
-                      ))}
-                    </div>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal:</span>
+                    <span className="rounded bg-secondary px-2.5 py-1 text-xs font-semibold text-foreground/80">
+                      {product.metalColour}{product.metalPurity ? ` · ${product.metalPurity}` : ''}
+                    </span>
                   </div>
                 )}
-                {product.sizeOptions && (
+                {product.size && (
                   <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Ring size:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {product.sizeOptions.map((s, i) => (
-                        <button key={i} onClick={() => setSelectedSize(i)} className={`h-8 w-8 border text-xs font-medium transition-colors ${i === selectedSize ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{s}</button>
-                      ))}
-                    </div>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Size:</span>
+                    <span className="text-sm text-foreground/70">{product.size}</span>
                   </div>
                 )}
-                {product.certificate && (
+                {product.lab && (
                   <div className="flex items-center gap-3">
                     <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
-                    <img src={igiLogo} alt={product.certificate} className="h-5 w-auto object-contain" />
+                    <div className="flex items-center gap-2">
+                      <img src={igiLogo} alt={product.lab} className="h-5 w-auto object-contain" />
+                      {product.certNo && (
+                        <span className="text-xs text-foreground/50">#{product.certNo}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {product.growthMethod && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Origin:</span>
+                    <span className="text-sm text-foreground/70">{product.growthMethod}</span>
                   </div>
                 )}
               </div>
 
+              {/* Specifications */}
               <div className="border-t border-border/30">
                 <button onClick={() => setSpecsOpen(!specsOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground">Product Specifications</span>
                   <span className="text-xl leading-none text-foreground/50">{specsOpen ? '−' : '+'}</span>
                 </button>
-                {specsOpen && (
+                {specsOpen && specs.length > 0 && (
                   <div className="pb-5">
-                    <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stone</p>
                     <table className="w-full">
                       <tbody>
-                        {([
-                          ['Stone type:', product.stoneType],
-                          ['Shape:', product.shape],
-                          ['Colour:', product.colour],
-                          ['Clarity:', product.clarity],
-                          ['Setting:', product.setting],
-                          ['Gold weight:', product.goldWeight],
-                          ['Total weight:', product.totalWeight],
-                        ] as [string, string | undefined][]).map(([label, value]) => (
+                        {specs.map(([label, value]) => (
                           <tr key={label}>
-                            <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">{label}</td>
+                            <td className="w-[140px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">{label}</td>
                             <td className="py-[3px] text-xs font-semibold text-foreground">{value}</td>
                           </tr>
                         ))}
-                        {product.certificate && (
-                          <tr>
-                            <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">Certificate:</td>
-                            <td className="py-[3px]">
-                              <img src={igiLogo} alt={product.certificate} className="h-4 w-auto object-contain" />
-                            </td>
-                          </tr>
-                        )}
                       </tbody>
                     </table>
                   </div>
                 )}
               </div>
 
+              {/* Price + actions */}
               <div className="mt-4 flex items-center gap-3">
                 <span className="border border-border/30 bg-gray-100 px-5 py-2.5 text-[1.6rem] font-bold leading-none tracking-tight text-foreground">
                   £{product.price.toLocaleString()}
                 </span>
-                {product.stock && product.stock <= 5 && (
-                  <span className="text-sm text-foreground/55">Only {product.stock} left</span>
+                {stockLeft !== undefined && stockLeft > 0 && stockLeft <= 5 && (
+                  <span className="text-sm text-foreground/55">Only {stockLeft} left</span>
                 )}
 
                 {/* Share popover */}
@@ -330,15 +410,9 @@ const ProductDetail = () => {
                   aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
                   className={`flex w-[54px] items-center justify-center bg-accent text-accent-foreground transition-all duration-200 hover:bg-accent/90 ${justLiked ? 'scale-95' : ''}`}
                 >
-                  <Heart
-                    className={`h-5 w-5 transition-all duration-200 ${
-                      liked ? 'fill-white scale-110' : 'scale-100'
-                    }`}
-                  />
+                  <Heart className={`h-5 w-5 transition-all duration-200 ${liked ? 'fill-white scale-110' : 'scale-100'}`} />
                 </button>
               </div>
-
-              <p className="mt-3 text-center text-xs text-primary">Order within 02 hours to receive by Thu, 26 Mar</p>
 
               <div className="mt-7 border-t border-border/30 pt-6">
                 <div className="grid grid-cols-3 gap-3 rounded border border-border/20 bg-secondary/60 p-4">
