@@ -1,13 +1,55 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Star, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, Trash2, Star, Loader2, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { addressesApi, AddressPayload } from '@/api/addresses';
+
+const PHONE_CODES = [
+  { code: '+44', cc: 'gb', name: 'United Kingdom' },
+  { code: '+1', cc: 'us', name: 'United States' },
+  { code: '+971', cc: 'ae', name: 'UAE' },
+  { code: '+91', cc: 'in', name: 'India' },
+  { code: '+353', cc: 'ie', name: 'Ireland' },
+  { code: '+33', cc: 'fr', name: 'France' },
+  { code: '+49', cc: 'de', name: 'Germany' },
+  { code: '+39', cc: 'it', name: 'Italy' },
+  { code: '+34', cc: 'es', name: 'Spain' },
+  { code: '+31', cc: 'nl', name: 'Netherlands' },
+  { code: '+41', cc: 'ch', name: 'Switzerland' },
+  { code: '+32', cc: 'be', name: 'Belgium' },
+  { code: '+43', cc: 'at', name: 'Austria' },
+  { code: '+351', cc: 'pt', name: 'Portugal' },
+  { code: '+46', cc: 'se', name: 'Sweden' },
+  { code: '+47', cc: 'no', name: 'Norway' },
+  { code: '+45', cc: 'dk', name: 'Denmark' },
+  { code: '+358', cc: 'fi', name: 'Finland' },
+  { code: '+30', cc: 'gr', name: 'Greece' },
+  { code: '+48', cc: 'pl', name: 'Poland' },
+  { code: '+61', cc: 'au', name: 'Australia' },
+  { code: '+64', cc: 'nz', name: 'New Zealand' },
+  { code: '+65', cc: 'sg', name: 'Singapore' },
+  { code: '+852', cc: 'hk', name: 'Hong Kong' },
+  { code: '+81', cc: 'jp', name: 'Japan' },
+  { code: '+82', cc: 'kr', name: 'South Korea' },
+  { code: '+86', cc: 'cn', name: 'China' },
+  { code: '+966', cc: 'sa', name: 'Saudi Arabia' },
+  { code: '+974', cc: 'qa', name: 'Qatar' },
+  { code: '+965', cc: 'kw', name: 'Kuwait' },
+  { code: '+973', cc: 'bh', name: 'Bahrain' },
+  { code: '+968', cc: 'om', name: 'Oman' },
+  { code: '+20', cc: 'eg', name: 'Egypt' },
+  { code: '+27', cc: 'za', name: 'South Africa' },
+  { code: '+55', cc: 'br', name: 'Brazil' },
+  { code: '+52', cc: 'mx', name: 'Mexico' },
+  { code: '+7', cc: 'ru', name: 'Russia' },
+];
 
 interface Address {
   _id: string;
@@ -32,6 +74,43 @@ const AddressBook = () => {
   const [editing, setEditing] = useState<(AddressPayload & { _id?: string }) | null>(null);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [dialCode, setDialCode] = useState('+44');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneDropOpen, setPhoneDropOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [highlightedIdx, setHighlightedIdx] = useState(0);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const selectedCountry = PHONE_CODES.find(c => c.code === dialCode) ?? PHONE_CODES[0];
+  const filteredCountries = countrySearch.trim()
+    ? PHONE_CODES.filter(c =>
+        c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+        c.code.includes(countrySearch)
+      )
+    : PHONE_CODES;
+
+  useEffect(() => { setHighlightedIdx(0); }, [countrySearch]);
+
+  useEffect(() => {
+    itemRefs.current[highlightedIdx]?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIdx]);
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIdx(i => Math.min(i + 1, filteredCountries.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIdx(i => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const country = filteredCountries[highlightedIdx];
+      if (country) { setDialCode(country.code); setPhoneDropOpen(false); setCountrySearch(''); }
+    } else if (e.key === 'Escape') {
+      setPhoneDropOpen(false);
+      setCountrySearch('');
+    }
+  };
 
   const loadAddresses = () => {
     addressesApi.list()
@@ -41,6 +120,20 @@ const AddressBook = () => {
   };
 
   useEffect(() => { loadAddresses(); }, []);
+
+  useEffect(() => {
+    if (open && editing) {
+      const phone = editing.phone ?? '';
+      const matched = PHONE_CODES.find(c => phone.startsWith(c.code));
+      if (matched) {
+        setDialCode(matched.code);
+        setPhoneNumber(phone.slice(matched.code.length).trim());
+      } else {
+        setDialCode('+44');
+        setPhoneNumber(phone);
+      }
+    }
+  }, [open]);
 
   const setDefault = async (id: string) => {
     try {
@@ -64,12 +157,14 @@ const AddressBook = () => {
     if (!editing) return;
     setSaving(true);
     try {
+      const phone = phoneNumber.trim() ? `${dialCode}${phoneNumber.trim()}` : undefined;
+      const editingWithPhone = { ...editing, phone };
       if (editing._id) {
-        const { _id, ...payload } = editing;
+        const { _id, ...payload } = editingWithPhone;
         await addressesApi.update(_id, payload);
         setItems(prev => prev.map(a => a._id === _id ? { ...a, ...payload } : a));
       } else {
-        const res = await addressesApi.create(editing as AddressPayload);
+        const res = await addressesApi.create(editingWithPhone as AddressPayload);
         setItems(prev => [...prev, res.data.address]);
       }
       setOpen(false);
@@ -168,7 +263,64 @@ const AddressBook = () => {
               </div>
               <div>
                 <Label>Phone</Label>
-                <Input value={editing.phone ?? ''} onChange={e => setEditing({ ...editing, phone: e.target.value })} />
+                <div className="flex">
+                  <Popover open={phoneDropOpen} onOpenChange={v => { setPhoneDropOpen(v); if (!v) setCountrySearch(''); }}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="h-10 flex shrink-0 items-center gap-1.5 rounded-l-md rounded-r-none border border-r-0 border-input bg-background px-2.5 text-sm hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      >
+                        <img
+                          src={`https://flagcdn.com/w20/${selectedCountry.cc}.png`}
+                          alt={selectedCountry.name}
+                          className="w-5 h-3.5 object-cover rounded-sm"
+                        />
+                        <span className="text-xs font-medium">{selectedCountry.code}</span>
+                        <ChevronDown className="h-3 w-3 opacity-50" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-2" align="start">
+                      <Input
+                        placeholder="Search country..."
+                        value={countrySearch}
+                        onChange={e => setCountrySearch(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        className="h-8 mb-2 text-sm"
+                        autoFocus
+                      />
+                      <ScrollArea className="h-56">
+                        {filteredCountries.length === 0 && (
+                          <p className="text-xs text-muted-foreground text-center py-4">No results</p>
+                        )}
+                        {filteredCountries.map((c, idx) => (
+                          <button
+                            key={c.code}
+                            ref={el => { itemRefs.current[idx] = el; }}
+                            type="button"
+                            className={`w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded text-left ${idx === highlightedIdx ? 'bg-accent' : 'hover:bg-accent/60'}`}
+                            onMouseEnter={() => setHighlightedIdx(idx)}
+                            onClick={() => { setDialCode(c.code); setPhoneDropOpen(false); setCountrySearch(''); }}
+                          >
+                            <img
+                              src={`https://flagcdn.com/w20/${c.cc}.png`}
+                              alt={c.name}
+                              className="w-5 h-3.5 object-cover rounded-sm shrink-0"
+                            />
+                            <span className="font-medium w-10 shrink-0">{c.code}</span>
+                            <span className="text-muted-foreground truncate">{c.name}</span>
+                          </button>
+                        ))}
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
+                  <Input
+                    className="rounded-l-none"
+                    type="tel"
+                    placeholder="Phone number"
+                    value={phoneNumber}
+                    onChange={e => setPhoneNumber(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           )}

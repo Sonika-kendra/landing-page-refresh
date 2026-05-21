@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, CheckCircle, XCircle, AlertCircle, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,10 @@ const ZohoSync = () => {
   const [directionFilter, setDirectionFilter] = useState('');
   const [statusFilter, setStatusFilter]       = useState('');
 
+  // Tracks when a background full-sync was triggered so we can poll for completion
+  const [fullSyncStartedAt, setFullSyncStartedAt] = useState<Date | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const { data: statusData, isLoading: statusLoading } = useQuery({
     queryKey: ['admin', 'zoho', 'status'],
     queryFn: () => adminApi.getZohoStatus().then(r => r.data),
@@ -52,11 +56,54 @@ const ZohoSync = () => {
       }).then(r => r.data),
   });
 
+  // Poll every 3 s while a full sync is running. Stop once a new batch log appears.
+  useEffect(() => {
+    if (!fullSyncStartedAt) {
+      if (pollRef.current) clearInterval(pollRef.current);
+      return;
+    }
+
+    const startMs = fullSyncStartedAt.getTime();
+    const modules = statusData?.modules ?? [];
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const result = await adminApi.getZohoLogs({}).then(r => r.data);
+        const newLogs = (result.logs as ZohoSyncLog[]).filter(
+          l => new Date(l.createdAt).getTime() >= startMs
+        );
+        // Wait until we have a batch log for every module (or 120 s timeout)
+        const modulesLogged = new Set(newLogs.map(l => l.module));
+        const allDone = modules.length > 0 && modules.every(m => modulesLogged.has(m));
+        const timedOut = Date.now() - startMs > 120_000;
+
+        if (allDone || timedOut) {
+          setFullSyncStartedAt(null);
+          queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] });
+          toast({
+            title: allDone ? 'Full sync completed' : 'Sync timed out',
+            description: allDone
+              ? 'All modules have been synced.'
+              : 'Sync may still be running — check logs.',
+          });
+        }
+      } catch {
+        // non-critical polling error — keep trying
+      }
+    }, 3000);
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [fullSyncStartedAt, statusData?.modules, queryClient, toast]);
+
+  const isFullSyncRunning = fullSyncStartedAt !== null;
+
   const syncAllMutation = useMutation({
     mutationFn: () => adminApi.zohoSyncAll().then(r => r.data),
     onSuccess: () => {
-      toast({ title: 'Full sync started', description: 'Running in background — logs will update shortly.' });
-      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] }), 3000);
+      setFullSyncStartedAt(new Date());
+      toast({ title: 'Full sync started', description: 'Syncing all modules in background…' });
     },
     onError: () => toast({ title: 'Sync failed', variant: 'destructive' }),
   });
@@ -66,13 +113,18 @@ const ZohoSync = () => {
     onSuccess: (data, module) => {
       toast({
         title: `${module} synced`,
-        description: `${data.synced ?? 0} records synced, ${data.errors ?? 0} errors.`,
+        description: `${data.synced ?? 0} synced, ${data.errors ?? 0} errors.`,
       });
       queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] });
     },
-    onError: (_err, module) =>
-      toast({ title: `Failed to sync ${module}`, variant: 'destructive' }),
+    onError: (err: unknown, module) => {
+      const msg = (err as { response?: { data?: { error?: string } }; message?: string })
+        ?.response?.data?.error ?? (err as { message?: string })?.message ?? 'Unknown error';
+      toast({ title: `Failed to sync ${module}`, description: msg, variant: 'destructive' });
+    },
   });
+
+  const anySyncRunning = isFullSyncRunning || syncModuleMutation.isPending;
 
   const modules = statusData?.modules ?? [];
   const logs    = logsData?.logs ?? [];
@@ -90,11 +142,11 @@ const ZohoSync = () => {
         </div>
         <Button
           onClick={() => syncAllMutation.mutate()}
-          disabled={syncAllMutation.isPending || !statusData?.configured}
+          disabled={anySyncRunning || !statusData?.configured}
           className="gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${syncAllMutation.isPending ? 'animate-spin' : ''}`} />
-          {syncAllMutation.isPending ? 'Starting…' : 'Full Sync'}
+          <RefreshCw className={`h-4 w-4 ${isFullSyncRunning ? 'animate-spin' : ''}`} />
+          {isFullSyncRunning ? 'Syncing…' : 'Full Sync'}
         </Button>
       </div>
 
@@ -128,19 +180,33 @@ const ZohoSync = () => {
         {/* Per-module sync buttons */}
         {statusData?.configured && modules.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-1">
-            {modules.map(mod => (
-              <Button
-                key={mod}
-                variant="outline"
-                size="sm"
-                className="gap-1.5 capitalize"
-                disabled={syncModuleMutation.isPending}
-                onClick={() => syncModuleMutation.mutate(mod)}
-              >
-                <RefreshCw className="h-3 w-3" />
-                Sync {mod}
-              </Button>
-            ))}
+            {modules.map(mod => {
+              const isThisModuleSyncing =
+                syncModuleMutation.isPending && syncModuleMutation.variables === mod;
+              return (
+                <Button
+                  key={mod}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 capitalize min-w-[110px]"
+                  disabled={anySyncRunning}
+                  onClick={() => syncModuleMutation.mutate(mod)}
+                >
+                  <RefreshCw className={`h-3 w-3 ${isThisModuleSyncing ? 'animate-spin' : ''}`} />
+                  {isThisModuleSyncing ? `Syncing…` : `Sync ${mod}`}
+                </Button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Ongoing sync banner */}
+        {anySyncRunning && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+            <RefreshCw className="h-3.5 w-3.5 animate-spin shrink-0" />
+            {isFullSyncRunning
+              ? 'Full sync in progress — please wait until it completes.'
+              : `Syncing ${syncModuleMutation.variables} — please wait…`}
           </div>
         )}
       </div>
@@ -182,7 +248,7 @@ const ZohoSync = () => {
 
         {logsLoading ? (
           <div className="space-y-2">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
@@ -193,40 +259,39 @@ const ZohoSync = () => {
           </div>
         ) : (
           <div className="bg-background rounded-sm border border-border overflow-hidden">
-            {/* Table header */}
-            <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2.5 border-b border-border bg-muted/50 text-xs font-medium tracking-wider uppercase text-muted-foreground">
+            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-3 px-4 py-2.5 border-b border-border bg-muted/50 text-xs font-medium tracking-wider uppercase text-muted-foreground">
               <span>Status</span>
-              <span>Module / ID</span>
-              <span className="hidden sm:block">Direction</span>
-              <span className="hidden md:block">Action</span>
+              <span>Module</span>
+              <span className="hidden sm:block">Records</span>
               <span className="hidden lg:block">Time</span>
             </div>
 
             {logs.map(log => (
               <div
                 key={log._id}
-                className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 items-start px-4 py-3 border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
+                className="grid grid-cols-[auto_1fr_auto_auto] gap-3 items-start px-4 py-3 border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
               >
                 <div className="pt-0.5">
                   <StatusIcon status={log.status} />
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-sm font-medium capitalize">{log.module}</p>
-                  {log.zohoId && (
-                    <p className="text-xs text-muted-foreground font-mono truncate">{log.zohoId}</p>
-                  )}
+                  <p className="text-sm font-medium capitalize">
+                    {log.module}
+                    <span className="ml-2 text-xs font-normal text-muted-foreground normal-case">
+                      {log.direction === 'zoho_to_mongo' ? 'Zoho → DB' : 'DB → Zoho'}
+                    </span>
+                  </p>
                   {log.error && (
                     <p className="text-xs text-destructive mt-0.5 truncate">{log.error}</p>
                   )}
                 </div>
 
                 <span className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap pt-0.5">
-                  {log.direction === 'zoho_to_mongo' ? 'Zoho → DB' : 'DB → Zoho'}
-                </span>
-
-                <span className="hidden md:block text-xs text-muted-foreground capitalize pt-0.5">
-                  {log.action}
+                  {log.meta
+                    ? `${log.meta.synced} synced${log.meta.errors > 0 ? `, ${log.meta.errors} errors` : ''} / ${log.meta.total} total`
+                    : <span className="capitalize">{log.action}</span>
+                  }
                 </span>
 
                 <span className="hidden lg:block text-xs text-muted-foreground whitespace-nowrap pt-0.5">

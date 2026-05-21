@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, ChevronDown, User, LogOut, Heart, ShoppingBag,
-  LayoutDashboard, Users, UserCheck, UserMinus, FileText,
-  Tag, Package, ClipboardList, Archive, Monitor, RefreshCw, Settings, ArrowRight,
+  LayoutDashboard, Users, UserCheck, FileEdit, FileText,
+  ShoppingCart, RefreshCw, Settings, ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/theme';
@@ -15,18 +15,14 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/assets/icons/logoLight.png';
 
 const adminNavLinks = [
-  { label: 'Dashboard',      href: '/admin',            icon: LayoutDashboard },
-  { label: 'Users',          href: '/admin/users',      icon: Users },
-  { label: 'User Approvals', href: '/admin/approvals',  icon: UserCheck },
-  { label: 'Draft Users',    href: '/admin/draft',      icon: UserMinus },
-  { label: 'Posts',          href: '/admin/posts',      icon: FileText },
-  { label: 'Categories',     href: '/admin/categories', icon: Tag },
-  { label: 'Products',       href: '/admin/products',   icon: Package },
-  { label: 'Orders',         href: '/admin/orders',     icon: ClipboardList },
-  { label: 'Stock',          href: '/admin/stock',      icon: Archive },
-  { label: 'Cart Monitor',   href: '/admin/carts',      icon: Monitor },
-  { label: 'Zoho Sync',      href: '/admin/zoho',       icon: RefreshCw },
-  { label: 'Settings',       href: '/admin/settings',   icon: Settings },
+  { label: 'Dashboard',        href: '/admin',            icon: LayoutDashboard },
+  { label: 'Draft Users',      href: '/admin/draft',      icon: FileEdit },
+  { label: 'Pending Approvals', href: '/admin/approvals', icon: UserCheck },
+  { label: 'All Users',        href: '/admin/users',      icon: Users },
+  { label: 'Active Carts',     href: '/admin/carts',      icon: ShoppingCart },
+  { label: 'Blog Posts',       href: '/admin/posts',      icon: FileText },
+  { label: 'Zoho Sync',        href: '/admin/zoho',       icon: RefreshCw },
+  { label: 'Settings',         href: '/admin/settings',   icon: Settings },
 ] as const;
 
 
@@ -405,12 +401,13 @@ const Header = () => {
                   onMouseEnter={handleAdminEnter}
                   onMouseLeave={handleAdminLeave}
                 >
-                  <Link
-                    to={user.role === 'admin' ? '/admin' : '/account'}
+                  <button
+                    type="button"
+                    onClick={() => setAdminDropdownOpen((v) => !v)}
                     className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-accent-foreground text-sm font-bold hover:opacity-85 transition-opacity"
                   >
                     {user.firstName?.[0]?.toUpperCase() ?? 'U'}
-                  </Link>
+                  </button>
 
                   <AnimatePresence>
                     {adminDropdownOpen && (
@@ -423,6 +420,11 @@ const Header = () => {
                       >
                         {user.role === 'admin' ? (
                           <>
+                            <div className="px-4 py-2.5 border-b border-border">
+                              <p className="text-sm font-semibold text-foreground truncate">
+                                Hi, {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName ?? 'there'}
+                              </p>
+                            </div>
                             <Link
                               to="/account/profile"
                               className="group flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary hover:text-primary transition-colors border-b border-border"
@@ -574,8 +576,8 @@ const Header = () => {
                       {category.links.map((subLink) => (
                         <li key={subLink.label}>
                           {'image' in subLink && subLink.image ? (
-                            <a
-                              href={subLink.href}
+                            <Link
+                              to={subLink.href}
                               className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
                             >
                               <img
@@ -588,26 +590,26 @@ const Header = () => {
                               <span className="text-sm font-medium hover:text-primary transition-colors">
                                 {subLink.label}
                               </span>
-                            </a>
+                            </Link>
                           ) : (
-                            <a
-                              href={subLink.href}
+                            <Link
+                              to={subLink.href}
                               className="block py-1.5 text-sm text-muted-foreground font-medium hover:text-primary transition-colors"
                             >
                               {subLink.label}
-                            </a>
+                            </Link>
                           )}
                         </li>
                       ))}
 
                       {category.showAll && (
                         <li className="pt-2">
-                          <a
-                            href={category.showAll.href}
+                          <Link
+                            to={category.showAll.href}
                             className="text-sm font-semibold text-primary hover:underline"
                           >
                             {category.showAll.label} →
-                          </a>
+                          </Link>
                         </li>
                       )}
                     </ul>

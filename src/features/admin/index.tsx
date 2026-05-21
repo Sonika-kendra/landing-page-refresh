@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Navigate, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, FolderTree, Package, ShoppingBag, Boxes, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, Boxes, ShoppingCart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { adminApi } from '@/api/admin';
@@ -12,11 +12,7 @@ const NAV_ITEMS = [
   { to: '/admin/draft',     label: 'Draft Users',      icon: FileEdit,        countKey: 'draftUsers' as const },
   { to: '/admin/approvals', label: 'Pending Approvals', icon: UserCheck,      countKey: 'pendingApprovals' as const },
   { to: '/admin/users',     label: 'All Users',        icon: Users,           countKey: undefined },
-  { to: '/admin/categories',label: 'Categories',       icon: FolderTree,      countKey: undefined },
-  { to: '/admin/products',  label: 'Products',         icon: Package,         countKey: undefined },
-  { to: '/admin/orders',    label: 'Orders',           icon: ShoppingBag,     countKey: undefined },
   { to: '/admin/carts',     label: 'Active Carts',     icon: ShoppingCart,    countKey: undefined },
-  { to: '/admin/stock',     label: 'Stock',            icon: Boxes,           countKey: undefined },
   { to: '/admin/posts',     label: 'Blog Posts',       icon: FileText,        countKey: undefined },
   { to: '/admin/zoho',      label: 'Zoho Sync',        icon: RefreshCw,       countKey: undefined },
   { to: '/admin/settings',  label: 'Settings',         icon: SettingsIcon,    countKey: undefined },

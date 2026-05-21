@@ -74,7 +74,7 @@ const ProductDetail = () => {
       <PageLayout>
         <div className="henig-container py-24 text-center">
           <h1 className="font-serif text-3xl text-foreground">Product not found</h1>
-          <Link to="/shop" className="mt-4 inline-block text-primary underline">Back to shop</Link>
+          <Link to="/jewellery/all" className="mt-4 inline-block text-primary underline">Back to shop</Link>
         </div>
       </PageLayout>
     );
@@ -95,11 +95,11 @@ const ProductDetail = () => {
               <span>Home</span>
             </Link>
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-            <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+            <Link to="/jewellery/all" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
               {product.category}
             </Link>
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-            <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+            <Link to="/jewellery/all" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
               {product.subCategory}
             </Link>
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />

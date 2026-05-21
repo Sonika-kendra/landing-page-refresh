@@ -10,6 +10,28 @@ type OrderStatus = 'web_order' | 'placed' | 'processing' | 'shipped' | 'delivere
 
 const ORDER_STATUS_FLOW: OrderStatus[] = ['web_order', 'placed', 'processing', 'shipped', 'delivered'];
 
+const DUMMY_DATA = {
+  salesorder: {
+    salesorder_number: 'SO-TEST-001',
+    date: '2026-05-15',
+    sub_total: 4250,
+    tax_total: 0,
+    total: 4250,
+    shipping_address: {
+      attention: 'Test User',
+      address: '63-66 Hatton Garden',
+      city: 'London',
+      zip: 'EC1N 8LE',
+      country: 'United Kingdom',
+    },
+    line_items: [
+      { line_item_id: 'li-1', name: 'Round Brilliant Diamond 1.5ct', quantity: 1, rate: 3500 },
+      { line_item_id: 'li-2', name: 'Platinum Solitaire Setting', quantity: 1, rate: 750 },
+    ],
+  },
+  orderStatus: { status: 'processing' as OrderStatus },
+};
+
 const MyOrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<any>(null);
@@ -17,6 +39,11 @@ const MyOrderDetail = () => {
 
   useEffect(() => {
     if (!id) return;
+    if (id === 'dummy-001') {
+      setData(DUMMY_DATA);
+      setLoading(false);
+      return;
+    }
     ordersApi.getOne(id)
       .then(res => setData(res.data))
       .catch(() => {})

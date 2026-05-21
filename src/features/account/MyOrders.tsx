@@ -23,14 +23,24 @@ interface Order {
   orderStatus?: { status: OrderStatus };
 }
 
+const DUMMY_ORDER: Order = {
+  salesorder_id: 'dummy-001',
+  salesorder_number: 'SO-TEST-001',
+  customer_name: 'Test User',
+  date: '2026-05-15',
+  line_items: [{ id: 'item-1' }, { id: 'item-2' }],
+  total: 4250,
+  orderStatus: { status: 'processing' },
+};
+
 const MyOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     ordersApi.list({ status: 'open', per_page: 50 })
-      .then(res => setOrders(res.data?.salesorders ?? []))
-      .catch(() => {})
+      .then(res => setOrders([DUMMY_ORDER, ...(res.data?.salesorders ?? [])]))
+      .catch(() => setOrders([DUMMY_ORDER]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -47,7 +57,7 @@ const MyOrders = () => {
       <Card className="p-16 text-center">
         <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
         <p className="text-muted-foreground">No orders yet</p>
-        <Link to="/shop" className="mt-3 inline-block">
+        <Link to="/jewellery/all" className="mt-3 inline-block">
           <Button size="sm" variant="outline">Start Shopping</Button>
         </Link>
       </Card>

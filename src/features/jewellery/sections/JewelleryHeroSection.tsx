@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import jewelleryHero from '@/assets/jewellery/hero/banner.png';
 import { websiteUrlConfig } from '@/config/site';
@@ -38,17 +39,17 @@ const JewelleryHeroSection = () => (
         </p>
 
         <div className="flex flex-wrap gap-3">
-          <a href={websiteUrlConfig.Jewellery.All}>
+          <Link to={websiteUrlConfig.Jewellery.All}>
             <Button className="btn-henig-outline py-4 px-6 text-md w-auto">
               Lab Diamonds
             </Button>
-          </a>
+          </Link>
 
-          <a href={websiteUrlConfig.Jewellery.All}>
+          <Link to={websiteUrlConfig.Jewellery.All}>
             <Button className="btn-henig-outline py-4 px-6 text-md w-auto">
               Natural Diamonds
             </Button>
-          </a>
+          </Link>
         </div>
       </motion.div>
     </div>

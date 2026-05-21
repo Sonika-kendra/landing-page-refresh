@@ -98,9 +98,10 @@ export interface ZohoSyncLog {
   zohoId?: string;
   mongoId?: string;
   direction: 'zoho_to_mongo' | 'mongo_to_zoho';
-  action: 'create' | 'update';
+  action: 'create' | 'update' | 'delete' | 'skip' | 'sync';
   status: 'success' | 'error';
   error?: string;
+  meta?: { synced: number; errors: number; total: number };
   createdAt: string;
 }
 

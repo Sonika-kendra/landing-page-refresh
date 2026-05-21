@@ -31,7 +31,7 @@ const Cart = () => {
           <Card className="p-16 text-center">
             <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
             <p className="text-muted-foreground mb-4">Your bag is empty</p>
-            <Link to="/shop"><Button>Continue Shopping</Button></Link>
+            <Link to="/jewellery/all"><Button>Continue Shopping</Button></Link>
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -110,7 +110,7 @@ const Cart = () => {
               <Button className="w-full mt-6 gap-2" onClick={() => navigate('/checkout')}>
                 Checkout <ArrowRight className="h-4 w-4" />
               </Button>
-              <Link to="/shop" className="block text-center text-xs text-muted-foreground mt-3 hover:text-foreground">
+              <Link to="/jewellery/all" className="block text-center text-xs text-muted-foreground mt-3 hover:text-foreground">
                 Continue shopping
               </Link>
             </Card>

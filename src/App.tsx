@@ -59,8 +59,9 @@ const AccountLayout   = lazy(() => import('@/features/account/AccountLayout'));
 const MyOrders        = lazy(() => import('@/features/account/MyOrders'));
 const MyOrderDetail   = lazy(() => import('@/features/account/MyOrderDetail'));
 const AddressBook     = lazy(() => import('@/features/account/AddressBook'));
-const AccountProfile  = lazy(() => import('@/features/account/Profile'));
-const AccountWishlist = lazy(() => import('@/features/account/MyWishlist'));
+const AccountProfile        = lazy(() => import('@/features/account/Profile'));
+const AccountChangePassword = lazy(() => import('@/features/account/ChangePassword'));
+const AccountWishlist       = lazy(() => import('@/features/account/MyWishlist'));
 const PrivacyPolicy = lazy(() => import('@/features/privacy'));
 const TermsAndConditions = lazy(() => import('@/features/terms'));
 const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
@@ -81,8 +82,8 @@ const AppRoutes = () => (
         <Route path={websiteUrlConfig.Blogs} element={<Blogs />} />
         <Route path={`${websiteUrlConfig.Blogs}/:slug`} element={<BlogPost />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/:id" element={<ProductDetail />} />
+        <Route path="/jewellery/all" element={<Shop />} />
+        <Route path="/jewellery/all/:id" element={<ProductDetail />} />
         <Route path="/verify/:id" element={<VerifyEmail />} />
         <Route path="/reset/:id" element={<ResetPassword />} />
         <Route path={websiteUrlConfig.PrivacyPolicy} element={<PrivacyPolicy />} />
@@ -116,6 +117,7 @@ const AppRoutes = () => (
           <Route path="wishlist" element={<AccountWishlist />} />
           <Route path="addresses" element={<AddressBook />} />
           <Route path="profile" element={<AccountProfile />} />
+          <Route path="change-password" element={<AccountChangePassword />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

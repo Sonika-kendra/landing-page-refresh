@@ -8,9 +8,10 @@ import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
 interface ShopProductCardProps {
   product: ShopProduct;
+  listView?: boolean;
 }
 
-const ShopProductCard = ({ product }: ShopProductCardProps) => {
+const ShopProductCard = ({ product, listView = false }: ShopProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
@@ -27,7 +28,7 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
 
   return (
     <div
-      className="group relative border border-border/40 bg-card transition-shadow hover:shadow-md"
+      className={`group relative border border-border/40 bg-card transition-shadow hover:shadow-md ${listView ? 'flex flex-row' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -54,8 +55,8 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
       </button>
 
       {/* Image */}
-      <Link to={`/shop/${product.id}`}>
-        <div className="aspect-square overflow-hidden bg-white p-4">
+      <Link to={`/jewellery/all/${product.id}`} className={listView ? 'shrink-0' : ''}>
+        <div className={`overflow-hidden bg-white p-4 ${listView ? 'h-32 w-32' : 'aspect-square'}`}>
           <img
             src={isHovered && product.hoverImage ? product.hoverImage : product.image}
             alt={product.name}
@@ -65,10 +66,10 @@ const ShopProductCard = ({ product }: ShopProductCardProps) => {
       </Link>
 
       {/* Info */}
-      <div className="px-3 pb-3 pt-2">
+      <div className={`px-3 pb-3 pt-2 ${listView ? 'flex flex-1 flex-col justify-center' : ''}`}>
         {/* Title + certificate */}
         <div className="flex items-start justify-between gap-1.5">
-          <Link to={`/shop/${product.id}`} className="min-w-0 flex-1">
+          <Link to={`/jewellery/all/${product.id}`} className="min-w-0 flex-1">
             <h3 className="line-clamp-2 text-xs font-medium uppercase leading-snug tracking-wide text-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {product.name}
             </h3>

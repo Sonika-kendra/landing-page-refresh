@@ -28,7 +28,7 @@ const Wishlist = () => {
               Save pieces you love by tapping the heart on any product.
             </p>
             <Button asChild>
-              <Link to="/shop">
+              <Link to="/jewellery/all">
                 <ShoppingBag className="mr-2 h-4 w-4" />
                 Browse the collection
               </Link>
