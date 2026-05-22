@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, Clock, ChevronDown } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, ChevronDown, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -276,8 +276,9 @@ const Contact = () => {
                   <FormField control={form.control} name="message" render={({ field }) => (
                     <FormItem><FormLabel>Message *</FormLabel><FormControl><Textarea placeholder="Tell us how we can help..." className="min-h-[140px]" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <Button type="submit" className="btn-henig-primary w-full sm:w-auto" disabled={submitting}>
+                  <Button type="submit" variant="outline" className="bg-primary border-primary text-white w-full sm:w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2" disabled={submitting}>
                     {submitting ? 'Sending...' : 'Send Message'}
+                    {!submitting && <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />}
                   </Button>
                 </form>
               </Form>

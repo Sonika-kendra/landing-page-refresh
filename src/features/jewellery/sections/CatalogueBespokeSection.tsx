@@ -62,10 +62,10 @@ const CatalogueBespokeSection = () => {
                   size="sm"
                   variant="outline"
                   onClick={() => openModal('register')}
-                  className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
+                  className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
                 >
                   Enquire
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
                 </Button>
               </div>
             </MotionLink>

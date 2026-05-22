@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { toast } from '@/hooks/use-toast';
 
@@ -104,9 +104,10 @@ const ChangePassword = () => {
         </div>
       </div>
       <div className="flex justify-end mt-6">
-        <Button onClick={handlePasswordSave} disabled={passwordLoading}>
+        <Button variant="outline" onClick={handlePasswordSave} disabled={passwordLoading} className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
           {passwordLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Update Password
+          {!passwordLoading && <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />}
         </Button>
       </div>
     </Card>

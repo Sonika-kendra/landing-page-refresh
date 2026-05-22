@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 import jewelleryHero from '@/assets/jewellery/hero/banner.png';
 import { websiteUrlConfig } from '@/config/site';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
@@ -40,14 +41,16 @@ const JewelleryHeroSection = () => (
 
         <div className="flex flex-wrap gap-3">
           <Link to={websiteUrlConfig.Jewellery.All}>
-            <Button className="btn-henig-outline py-4 px-6 text-md w-auto">
+            <Button variant="outline" className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
               Lab Diamonds
+              <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
             </Button>
           </Link>
 
           <Link to={websiteUrlConfig.Jewellery.All}>
-            <Button className="btn-henig-outline py-4 px-6 text-md w-auto">
+            <Button variant="outline" className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
               Natural Diamonds
+              <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
             </Button>
           </Link>
         </div>

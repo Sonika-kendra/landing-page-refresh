@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, ChevronDown } from 'lucide-react';
+import { Loader2, ChevronDown, ArrowRight } from 'lucide-react';
 import { authApi, ProfileUpdatePayload } from '@/api/auth';
 import { toast } from '@/hooks/use-toast';
 
@@ -284,9 +284,10 @@ const Profile = () => {
         </div>
       </div>
       <div className="flex justify-end mt-6">
-        <Button onClick={handleProfileSave} disabled={profileLoading}>
+        <Button variant="outline" onClick={handleProfileSave} disabled={profileLoading} className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
           {profileLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Save Changes
+          {!profileLoading && <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />}
         </Button>
       </div>
     </Card>

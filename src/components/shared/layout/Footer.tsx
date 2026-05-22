@@ -209,7 +209,7 @@ const Footer = () => {
 
               {/* Emails */}
               <li className="pl-7">
-                <p className="text-xs font-semibold uppercase tracking-widest text-accent-foreground/50 mb-2">General Enquiries</p>
+                {/* <p className="text-xs font-semibold uppercase tracking-widest text-accent-foreground/50 mb-2">General Enquiries</p> */}
                 <div className="space-y-1.5">
                   <div>
                     <a
@@ -234,15 +234,16 @@ const Footer = () => {
               <li className="pl-7 pt-1">
                 <Button
                   size="sm"
-                  className="btn-henig-outline !hover:bg-secondary !hover:text-accent group"
+                  variant="outline"
+                  className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
                   asChild
                 >
                   <a
                     href={websiteUrlConfig.Contact}
                     rel="noopener noreferrer"
                   >
-                    SEND AN ENQUIRY
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    Send an enquiry
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
                   </a>
                 </Button>
               </li>

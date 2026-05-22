@@ -76,7 +76,7 @@ const CertificationsAndPartnersSection = () => {
           <div className="px-4">
             <Button
               size="sm"
-              className="group p-5 whitespace-nowrap bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300"
+              className="group p-5 whitespace-nowrap bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
               asChild
             >
               <Link to={websiteUrlConfig.Contact}>

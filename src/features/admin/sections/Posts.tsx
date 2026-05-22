@@ -106,10 +106,11 @@ const EMPTY_FORM: PostForm = {
 
 const resolveImageUrl = (src: string) => {
   if (src.startsWith('http')) return src;
-  // WorkDrive images are served via the proxy; use relative path
-  if (src.startsWith('/posts/image/')) return src;
   return `${newApiURL}${src}`;
 };
+
+const fixContentImageUrls = (html: string) =>
+  html.replace(/(["'])\/posts\/image\//g, `$1${newApiURL}/posts/image/`);
 
 const postToImages = (post: Post): ImageEntry[] => {
   if (post.images?.length) {
@@ -353,7 +354,7 @@ const Posts = () => {
           {form.content ? (
             <div
               className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary"
-              dangerouslySetInnerHTML={{ __html: form.content }}
+              dangerouslySetInnerHTML={{ __html: fixContentImageUrls(form.content) }}
             />
           ) : (
             <p className="text-muted-foreground italic">No content yet.</p>
@@ -539,7 +540,7 @@ const Posts = () => {
                   if (editPost) fd.append('postId', editPost._id);
                   try {
                     const res = await adminApi.uploadPostImage(fd);
-                    callback(res.data.url, { title: file.name });
+                    callback(resolveImageUrl(res.data.url), { title: file.name });
                   } catch (err: any) {
                     const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
                     toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
@@ -554,7 +555,7 @@ const Posts = () => {
                 if (editPost) fd.append('postId', editPost._id);
                 try {
                   const res = await adminApi.uploadPostImage(fd);
-                  return res.data.url;
+                  return resolveImageUrl(res.data.url);
                 } catch (err: any) {
                   const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
                   toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
