@@ -144,6 +144,15 @@ const AddressBook = () => {
     }
   };
 
+  const unsetDefault = async (id: string) => {
+    try {
+      await addressesApi.unsetDefault(id);
+      setItems(prev => prev.map(a => a._id === id ? { ...a, isDefault: false } : a));
+    } catch {
+      toast({ title: 'Failed to remove default address', variant: 'destructive' });
+    }
+  };
+
   const remove = async (id: string) => {
     try {
       await addressesApi.remove(id);
@@ -221,7 +230,11 @@ const AddressBook = () => {
               {a.country}<br />
               {a.phone}
             </p>
-            {!a.isDefault && (
+            {a.isDefault ? (
+              <Button size="sm" variant="outline" className="mt-3 gap-1.5 h-8 text-muted-foreground" onClick={() => unsetDefault(a._id)}>
+                <Star className="h-3 w-3" /> Remove as default
+              </Button>
+            ) : (
               <Button size="sm" variant="outline" className="mt-3 gap-1.5 h-8" onClick={() => setDefault(a._id)}>
                 <Star className="h-3 w-3" /> Set as default
               </Button>
@@ -277,7 +290,7 @@ const AddressBook = () => {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        className="h-10 flex shrink-0 items-center gap-1.5 rounded-l-md rounded-r-none border border-r-0 border-input bg-background px-2.5 text-sm hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                        className="h-10 flex shrink-0 items-center gap-1.5 rounded-l-md rounded-r-none border border-r-0 border-input bg-background px-2.5 text-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                       >
                         <img
                           src={`https://flagcdn.com/w20/${selectedCountry.cc}.png`}
@@ -306,7 +319,7 @@ const AddressBook = () => {
                             key={c.code}
                             ref={el => { itemRefs.current[idx] = el; }}
                             type="button"
-                            className={`w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded text-left ${idx === highlightedIdx ? 'bg-accent' : 'hover:bg-accent/60'}`}
+                            className={`w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded text-left ${idx === highlightedIdx ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'}`}
                             onMouseEnter={() => setHighlightedIdx(idx)}
                             onClick={() => { setDialCode(c.code); setPhoneDropOpen(false); setCountrySearch(''); }}
                           >
@@ -316,7 +329,7 @@ const AddressBook = () => {
                               className="w-5 h-3.5 object-cover rounded-sm shrink-0"
                             />
                             <span className="font-medium w-10 shrink-0">{c.code}</span>
-                            <span className="text-muted-foreground truncate">{c.name}</span>
+                            <span className={`truncate ${idx === highlightedIdx ? 'text-accent-foreground/80' : 'text-muted-foreground'}`}>{c.name}</span>
                           </button>
                         ))}
                       </ScrollArea>

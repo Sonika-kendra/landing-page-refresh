@@ -34,4 +34,7 @@ export const addressesApi = {
 
   setDefault: (id: string) =>
     client.post(ep.setDefault(id), {}, undefined, base),
+
+  unsetDefault: (id: string) =>
+    client.patch(ep.update(id), { isDefault: false }, undefined, base),
 };
