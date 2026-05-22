@@ -10,6 +10,7 @@ import YouMayAlsoLike from './components/YouMayAlsoLike';
 import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
 import { useFavourites } from '@/context/FavouritesContext';
+import { useCart } from '@/context/CartContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 
@@ -41,6 +42,7 @@ const ProductDetail = () => {
   const [shareOpen, setShareOpen] = useState(false);
 
   const { isFavourite, toggleFavourite } = useFavourites();
+  const { addItem } = useCart();
   const liked = product ? isFavourite(product.id) : false;
 
   const copySku = () => {
@@ -64,7 +66,9 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAddToBag = () => {
+  const handleAddToBag = async () => {
+    if (!product) return;
+    await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku });
     setBagJustAdded(true);
     setTimeout(() => setBagJustAdded(false), 600);
   };

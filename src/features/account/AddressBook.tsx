@@ -231,23 +231,20 @@ const AddressBook = () => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing && '_id' in editing && editing._id ? 'Edit Address' : 'New Address'}</DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <Label>Label</Label>
-                <Input value={editing.label ?? ''} onChange={e => setEditing({ ...editing, label: e.target.value })} />
-              </div>
-              <div className="col-span-2">
-                <Label>Full Name</Label>
-                <Input value={editing.fullName} onChange={e => setEditing({ ...editing, fullName: e.target.value })} />
-              </div>
-              <div className="col-span-2">
                 <Label>Address Line</Label>
-                <Input value={editing.line1} onChange={e => setEditing({ ...editing, line1: e.target.value })} />
+                <textarea
+                  rows={3}
+                  value={editing.line1}
+                  onChange={e => setEditing({ ...editing, line1: e.target.value })}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                />
               </div>
               <div>
                 <Label>City</Label>
@@ -259,7 +256,19 @@ const AddressBook = () => {
               </div>
               <div>
                 <Label>Country</Label>
-                <Input value={editing.country} onChange={e => setEditing({ ...editing, country: e.target.value })} />
+                <select
+                  value={editing.country}
+                  onChange={e => {
+                    const selected = PHONE_CODES.find(c => c.name === e.target.value);
+                    if (selected) setDialCode(selected.code);
+                    setEditing({ ...editing, country: e.target.value });
+                  }}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {PHONE_CODES.map(c => (
+                    <option key={c.cc} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <Label>Phone</Label>
@@ -321,6 +330,14 @@ const AddressBook = () => {
                     onChange={e => setPhoneNumber(e.target.value)}
                   />
                 </div>
+              </div>
+              <div>
+                <Label>Label</Label>
+                <Input value={editing.label ?? ''} onChange={e => setEditing({ ...editing, label: e.target.value })} />
+              </div>
+              <div>
+                <Label>Full Name</Label>
+                <Input value={editing.fullName} onChange={e => setEditing({ ...editing, fullName: e.target.value })} />
               </div>
             </div>
           )}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, ShoppingBag } from 'lucide-react';
 import { ShopProduct } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
 import { useFavourites } from '@/context/FavouritesContext';
@@ -9,11 +9,13 @@ import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
 interface ShopProductCardProps {
   product: ShopProduct;
   listView?: boolean;
+  onAddToBag?: (product: ShopProduct) => Promise<void>;
 }
 
-const ShopProductCard = ({ product, listView = false }: ShopProductCardProps) => {
+const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
+  const [bagJustAdded, setBagJustAdded] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const liked = isFavourite(product.id);
 
@@ -23,6 +25,18 @@ const ShopProductCard = ({ product, listView = false }: ShopProductCardProps) =>
     if (!liked) {
       setJustLiked(true);
       setTimeout(() => setJustLiked(false), 400);
+    }
+  };
+
+  const handleAddToBag = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!onAddToBag) return;
+    try {
+      await onAddToBag(product);
+      setBagJustAdded(true);
+      setTimeout(() => setBagJustAdded(false), 600);
+    } catch {
+      // no-op: keep button in default state on failure
     }
   };
 
@@ -116,6 +130,20 @@ const ShopProductCard = ({ product, listView = false }: ShopProductCardProps) =>
             <span className="text-xl font-bold leading-none text-foreground">£{product.price.toLocaleString()}</span>
           </div>
         </div>
+
+        {onAddToBag && (
+          <button
+            onClick={handleAddToBag}
+            className={`mt-2 flex w-full items-center justify-center gap-1.5 py-2 text-[10px] font-semibold uppercase tracking-widest transition-all duration-200 ${
+              bagJustAdded
+                ? 'bg-accent/80 text-accent-foreground scale-[0.98]'
+                : 'bg-accent text-accent-foreground hover:bg-accent/90'
+            }`}
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            {bagJustAdded ? 'Added!' : 'Add to Bag'}
+          </button>
+        )}
       </div>
     </div>
   );

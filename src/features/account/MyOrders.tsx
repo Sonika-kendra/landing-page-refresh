@@ -23,15 +23,44 @@ interface Order {
   orderStatus?: { status: OrderStatus };
 }
 
-const DUMMY_ORDER: Order = {
-  salesorder_id: 'dummy-001',
-  salesorder_number: 'SO-TEST-001',
-  customer_name: 'Test User',
-  date: '2026-05-15',
-  line_items: [{ id: 'item-1' }, { id: 'item-2' }],
-  total: 4250,
-  orderStatus: { status: 'processing' },
-};
+const DUMMY_ORDERS: Order[] = [
+  {
+    salesorder_id: 'dummy-001',
+    salesorder_number: 'SO-00101',
+    customer_name: 'Test User',
+    date: '2026-05-10',
+    line_items: [{ item: 'Diamond Solitaire Ring' }, { item: 'Gift Box' }],
+    total: 4250,
+    orderStatus: { status: 'delivered' },
+  },
+  {
+    salesorder_id: 'dummy-002',
+    salesorder_number: 'SO-00098',
+    customer_name: 'Test User',
+    date: '2026-04-22',
+    line_items: [{ item: 'Pearl Necklace' }],
+    total: 1875,
+    orderStatus: { status: 'shipped' },
+  },
+  {
+    salesorder_id: 'dummy-003',
+    salesorder_number: 'SO-00085',
+    customer_name: 'Test User',
+    date: '2026-03-15',
+    line_items: [{ item: 'Emerald Earrings' }, { item: 'Bracelet' }, { item: 'Pendant' }],
+    total: 6990,
+    orderStatus: { status: 'processing' },
+  },
+  {
+    salesorder_id: 'dummy-004',
+    salesorder_number: 'SO-00072',
+    customer_name: 'Test User',
+    date: '2026-02-08',
+    line_items: [{ item: 'Sapphire Ring' }],
+    total: 3100,
+    orderStatus: { status: 'cancelled' },
+  },
+];
 
 const MyOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -39,8 +68,11 @@ const MyOrders = () => {
 
   useEffect(() => {
     ordersApi.list({ status: 'open', per_page: 50 })
-      .then(res => setOrders([DUMMY_ORDER, ...(res.data?.salesorders ?? [])]))
-      .catch(() => setOrders([DUMMY_ORDER]))
+      .then(res => {
+        const fetched = res.data?.salesorders ?? [];
+        setOrders(fetched.length > 0 ? fetched : DUMMY_ORDERS);
+      })
+      .catch(() => setOrders(DUMMY_ORDERS))
       .finally(() => setLoading(false));
   }, []);
 
