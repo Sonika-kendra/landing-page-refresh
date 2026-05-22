@@ -15,7 +15,7 @@
 | `#f5f5ea` | `60 23% 95%`  | - Ivory
 | `#173731` | `165 41% 15%` | - Dark forest green  
 | `#627672` | `183 10% 43%` | - Sage green
-| `#c3b89e` | `41 28% 69%`  | - Champagne gold  
+| `#c3ac88` | `38 37% 65%`  | - Champagne gold
 | `#716659` | `28 10% 42%`  | - Warm taupe */
 
 @layer base {
@@ -31,7 +31,7 @@
     --popover-foreground: 165 41% 15%;
 
     /* Champagne gold */
-    --primary: 41 28% 69%;            /* #c3b89e */
+    --primary: 38 37% 65%;            /* #c3ac88 */
     --primary-foreground: 165 41% 15%;
 
     /* Cream / ivory */
