@@ -139,6 +139,7 @@ const Posts = () => {
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const draftIdRef = useRef<string>(uid());
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['admin', 'posts'],
@@ -156,6 +157,7 @@ const Posts = () => {
 
   const openCreate = () => {
     setEditPost(null);
+    draftIdRef.current = uid(); // fresh draft folder ID for each new post
     setForm(EMPTY_FORM);
     setImages([]);
     setButtons([]);
@@ -537,7 +539,7 @@ const Posts = () => {
                   if (!file) return;
                   const fd = new FormData();
                   fd.append('src', file);
-                  if (editPost) fd.append('postId', editPost._id);
+                  fd.append('postId', editPost ? editPost._id : draftIdRef.current);
                   try {
                     const res = await adminApi.uploadPostImage(fd);
                     callback(resolveImageUrl(res.data.url), { title: file.name });
@@ -552,7 +554,7 @@ const Posts = () => {
               images_upload_handler: async (blobInfo: any) => {
                 const fd = new FormData();
                 fd.append('src', blobInfo.blob(), blobInfo.filename());
-                if (editPost) fd.append('postId', editPost._id);
+                fd.append('postId', editPost ? editPost._id : draftIdRef.current);
                 try {
                   const res = await adminApi.uploadPostImage(fd);
                   return resolveImageUrl(res.data.url);
