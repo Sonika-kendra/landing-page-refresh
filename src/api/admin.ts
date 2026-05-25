@@ -213,10 +213,52 @@ export const adminApi = {
       API_CONFIG.adminConfigs.base
     ),
 
-  updateConfig: (id: string, data: { fields: Record<string, unknown> }) =>
+  updateConfig: (id: string, data: { type?: string; fields: Record<string, unknown> }) =>
     apiClient.patch<SiteConfig>(
       API_CONFIG.adminConfigs.endpoints.update(id),
       data,
+      undefined,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  getAllEmailTemplates: () =>
+    apiClient.get<SiteConfig[]>(
+      API_CONFIG.adminConfigs.endpoints.emailTemplates,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  getEmailTemplateById: (id: string) =>
+    apiClient.get<SiteConfig>(
+      API_CONFIG.adminConfigs.endpoints.config(id),
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  createEmailTemplate: (name = 'New Template') =>
+    apiClient.post<SiteConfig>(
+      API_CONFIG.adminConfigs.endpoints.create,
+      { type: 'email_template', fields: { name } },
+      undefined,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  saveEmailTemplate: (id: string, design: object, html: string, name?: string) =>
+    apiClient.patch<SiteConfig>(
+      API_CONFIG.adminConfigs.endpoints.update(id),
+      { type: 'email_template', fields: { ...(name !== undefined && { name }), design, html } },
+      undefined,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  deleteConfig: (id: string) =>
+    apiClient.delete<{ message: string }>(
+      API_CONFIG.adminConfigs.endpoints.delete(id),
+      undefined,
       undefined,
       API_CONFIG.adminConfigs.base
     ),

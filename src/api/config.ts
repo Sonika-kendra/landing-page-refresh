@@ -82,6 +82,10 @@ export const API_CONFIG = {
       all: '/configs/all',
       config: (id: string) => `/configs/${id}`,
       update: (id: string) => `/configs/${id}`,
+      delete: (id: string) => `/configs/${id}`,
+      create: '/configs',
+      emailTemplate: '/configs/email-template',
+      emailTemplates: '/configs/email-templates',
     },
   },
 
