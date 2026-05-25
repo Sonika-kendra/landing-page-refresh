@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { contactApi } from '@/api/contact';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, ChevronDown, ArrowRight } from 'lucide-react';
@@ -206,7 +207,7 @@ const Contact = () => {
   const onSubmit = async (data: ContactFormValues) => {
     setSubmitting(true);
     try {
-      console.log('Contact form submitted:', data);
+      await contactApi.sendMessage({ ...data, pageTitle: 'Contact Us' });
       toast.success("Thank you! Your message has been sent. We'll get back to you shortly.");
       form.reset();
     } catch {

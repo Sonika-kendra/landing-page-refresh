@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { ShoppingCart, Clock, Loader2, RefreshCw } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { useState } from 'react';
+import { ShoppingCart, Clock, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import DataTable from '@/components/shared/common/DataTable';
+import type { ColumnDef } from '@/components/shared/common/DataTable';
 import { ordersApi } from '@/api/orders';
 
 interface DraftOrder {
@@ -18,19 +19,64 @@ interface DraftOrder {
   created_time?: string;
 }
 
+const COLUMNS: ColumnDef<DraftOrder>[] = [
+  {
+    key: 'customer_name',
+    label: 'Customer',
+    width: '200px',
+    render: (_, o) => (
+      <div>
+        <p className="text-sm font-medium">{o.customer_name}</p>
+        {o.customer_email && (
+          <p className="text-xs text-muted-foreground">{o.customer_email}</p>
+        )}
+        <Badge variant="secondary" className="text-[10px] mt-1">Draft</Badge>
+      </div>
+    ),
+  },
+  {
+    key: 'line_items',
+    label: 'Items',
+    render: (_, o) => (
+      <span className="text-sm text-muted-foreground">
+        {(o.line_items ?? []).map((i: any) => i.name).join(', ') || '—'}
+      </span>
+    ),
+  },
+  {
+    key: 'sub_total',
+    label: 'Subtotal',
+    width: '110px',
+    sortable: true,
+    render: (val) => (
+      <span className="text-sm">£{((val as number) ?? 0).toLocaleString()}</span>
+    ),
+  },
+  {
+    key: 'total',
+    label: 'Total',
+    width: '110px',
+    sortable: true,
+    render: (val) => (
+      <span className="text-sm font-medium">£{((val as number) ?? 0).toLocaleString()}</span>
+    ),
+  },
+  {
+    key: 'last_modified_time',
+    label: 'Last Update',
+    width: '130px',
+    sortable: true,
+    render: (val) => (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Clock className="h-3 w-3 shrink-0" />
+        {val ? new Date(val as string).toLocaleDateString('en-GB') : '—'}
+      </span>
+    ),
+  },
+];
+
 const CartMonitor = () => {
-  const [carts, setCarts] = useState<DraftOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = () => {
-    setLoading(true);
-    ordersApi.list({ status: 'draft', per_page: 100 })
-      .then(res => setCarts(res.data?.salesorders ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { load(); }, []);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div>
@@ -38,55 +84,35 @@ const CartMonitor = () => {
         title="Active Carts"
         description="Live draft orders (carts) awaiting checkout"
         actions={
-          <Button size="sm" variant="outline" onClick={load} className="gap-2">
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setRefreshKey((k) => k + 1)}
+            className="gap-2"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh
           </Button>
         }
       />
 
-      <Card className="overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/30 text-xs font-medium uppercase tracking-wider text-muted-foreground border-b border-border">
-          <div className="col-span-3">Customer</div>
-          <div className="col-span-4">Items</div>
-          <div className="col-span-2">Subtotal</div>
-          <div className="col-span-2">Total</div>
-          <div className="col-span-1">Last Update</div>
-        </div>
-
-        {loading ? (
-          <div className="p-10 flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <>
-            {carts.map(o => (
-              <div key={o.salesorder_id} className="grid grid-cols-12 gap-4 px-4 py-3 items-start border-b border-border hover:bg-muted/20">
-                <div className="col-span-3">
-                  <p className="text-sm font-medium">{o.customer_name}</p>
-                  {o.customer_email && <p className="text-xs text-muted-foreground">{o.customer_email}</p>}
-                  <Badge variant="secondary" className="text-[10px] mt-1">Draft</Badge>
-                </div>
-                <div className="col-span-4 text-sm text-muted-foreground">
-                  {(o.line_items ?? []).map((i: any) => i.name).join(', ') || '—'}
-                </div>
-                <div className="col-span-2 text-sm">£{(o.sub_total ?? 0).toLocaleString()}</div>
-                <div className="col-span-2 text-sm font-medium">£{(o.total ?? 0).toLocaleString()}</div>
-                <div className="col-span-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {o.last_modified_time
-                    ? new Date(o.last_modified_time).toLocaleDateString('en-GB')
-                    : '—'}
-                </div>
-              </div>
-            ))}
-            {carts.length === 0 && (
-              <div className="p-12 text-center text-sm text-muted-foreground">
-                <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-40" /> No active carts
-              </div>
-            )}
-          </>
-        )}
-      </Card>
+      <DataTable<DraftOrder>
+        queryKey={['admin', 'carts']}
+        fetchFn={() => ordersApi.list({ status: 'draft', per_page: 200 } as any)}
+        dataKey="salesorders"
+        columns={COLUMNS}
+        clientSidePagination
+        clientSideSearchFn={(o, q) =>
+          (o.customer_name ?? '').toLowerCase().includes(q) ||
+          (o.customer_email ?? '').toLowerCase().includes(q) ||
+          (o.salesorder_number ?? '').toLowerCase().includes(q)
+        }
+        searchable
+        searchPlaceholder="Search by customer…"
+        refreshKey={refreshKey}
+        emptyIcon={<ShoppingCart className="h-10 w-10 opacity-25" />}
+        emptyMessage="No active carts."
+      />
     </div>
   );
 };

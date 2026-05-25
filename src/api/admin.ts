@@ -92,6 +92,18 @@ export interface ZohoStatus {
   modules: string[];
 }
 
+export interface ZohoScheduleEntry {
+  cron: string;
+  description: string;
+  nextRun: string;
+}
+
+export interface ZohoSchedule {
+  ok: boolean;
+  dailySync: ZohoScheduleEntry;
+  weeklyBackup: ZohoScheduleEntry;
+}
+
 export interface ZohoSyncLog {
   _id: string;
   module: string;
@@ -252,6 +264,15 @@ export const adminApi = {
   getZohoStatus: () =>
     apiClient.get<ZohoStatus>(
       API_CONFIG.adminZoho.endpoints.status,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminZoho.base
+    ),
+
+  getZohoSchedule: () =>
+    apiClient.get<ZohoSchedule>(
+      API_CONFIG.adminZoho.endpoints.schedule,
       undefined,
       undefined,
       false,

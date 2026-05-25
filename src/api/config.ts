@@ -89,6 +89,7 @@ export const API_CONFIG = {
     base: 'new' as ApiBase,
     endpoints: {
       status:     '/admin/zoho/status',
+      schedule:   '/admin/zoho/schedule',
       logs:       '/admin/zoho/logs',
       syncAll:    '/admin/zoho/sync',
       syncModule: (module: string) => `/admin/zoho/sync/${module}`,
@@ -171,6 +172,14 @@ export const API_CONFIG = {
       get: '/profile',
       update: '/profile',
       changePassword: '/profile/changePassword',
+    },
+  },
+
+  contact: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      message: '/message',
+      newsletter: '/newsletter',
     },
   },
 } as const;
