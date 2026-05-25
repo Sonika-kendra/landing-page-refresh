@@ -4,6 +4,16 @@
       "source": "/",
       "destination": "/new",
       "permanent": false
+    },
+    {
+      "source": "/verify/:token",
+      "destination": "/new/verify/:token",
+      "permanent": false
+    },
+    {
+      "source": "/reset/:token",
+      "destination": "/new/reset/:token",
+      "permanent": false
     }
   ],
   "rewrites": [
