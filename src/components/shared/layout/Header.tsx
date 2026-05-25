@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, ChevronDown, User, LogOut, Heart, ShoppingBag,
   LayoutDashboard, Users, UserCheck, FileEdit, FileText,
-  ShoppingCart, RefreshCw, Settings, ArrowRight,
+  ShoppingCart, RefreshCw, Settings, ArrowRight, Mail,
+  Package, MapPin,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/theme';
@@ -22,6 +23,7 @@ const adminNavLinks = [
   { label: 'Active Carts',     href: '/admin/carts',      icon: ShoppingCart },
   { label: 'Blog Posts',       href: '/admin/posts',      icon: FileText },
   { label: 'Zoho Sync',        href: '/admin/zoho',       icon: RefreshCw },
+  { label: 'Email Template',   href: '/admin/email',      icon: Mail },
   { label: 'Settings',         href: '/admin/settings',   icon: Settings },
 ] as const;
 
@@ -474,31 +476,30 @@ const Header = () => {
                           </>
                         ) : (
                           <>
-                            <div className="px-3 py-2 border-b border-border">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                My Account
+                            <div className="px-4 py-2.5 border-b border-border">
+                              <p className="text-sm font-semibold text-foreground truncate">
+                                Hi, {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName ?? 'there'}
                               </p>
                             </div>
+                            <ul className="py-1">
+                              {[
+                                { label: 'My Orders',    href: '/account/orders',    icon: Package },
+                                { label: 'Profile',      href: '/account/profile',   icon: User    },
+                                { label: 'Address Book', href: '/account/addresses', icon: MapPin  },
+                              ].map(({ label, href, icon: Icon }) => (
+                                <li key={href}>
+                                  <Link
+                                    to={href}
+                                    className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                                  >
+                                    <Icon className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <span className="flex-1">{label}</span>
+                                    <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           </>
-                        )}
-
-                        {user.role !== 'admin' && (
-                          <ul className="py-1">
-                            {[
-                              { label: 'My Orders',    href: '/account/orders' },
-                              { label: 'Profile',      href: '/account/profile' },
-                              { label: 'Address Book', href: '/account/addresses' },
-                            ].map((item) => (
-                              <li key={item.href}>
-                                <Link
-                                  to={item.href}
-                                  className="block px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
-                                >
-                                  {item.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
                         )}
 
                         <div className="border-t border-border mt-1">
