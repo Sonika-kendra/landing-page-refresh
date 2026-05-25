@@ -420,35 +420,73 @@ const Header = () => {
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 top-full mt-2 w-56 bg-background border border-border rounded-lg shadow-xl z-[1200] py-1 max-h-[80vh] overflow-y-auto"
                       >
-                        {user.role === 'admin' ? (
-                          <>
-                            <div className="px-4 py-2.5 border-b border-border">
-                              <p className="text-sm font-semibold text-foreground truncate">
-                                Hi, {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName ?? 'there'}
-                              </p>
-                            </div>
+                        {/* ── Greeting — always shown ── */}
+                        <div className="px-4 py-2.5 border-b border-border">
+                          <p className="text-sm font-semibold text-foreground truncate">
+                            Hi, {user.firstName && user.lastName
+                              ? `${user.firstName} ${user.lastName}`
+                              : user.firstName ?? 'there'}
+                          </p>
+                        </div>
+
+                        {/* ── Account links ── */}
+                        <ul className="py-1">
+                          {/* My Orders — non-admin only */}
+                          {user.role !== 'admin' && (
+                            <li>
+                              <Link
+                                to="/account/orders"
+                                className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                              >
+                                <Package className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <span className="flex-1">My Orders</span>
+                                <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
+                              </Link>
+                            </li>
+                          )}
+
+                          {/* Profile — always shown */}
+                          <li>
                             <Link
                               to="/account/profile"
-                              className="group flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary hover:text-primary transition-colors border-b border-border"
+                              className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
                             >
+                              <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                               <span className="flex-1">Profile</span>
                               <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
                             </Link>
+                          </li>
+
+                          {/* Address Book — non-admin only */}
+                          {user.role !== 'admin' && (
+                            <li>
+                              <Link
+                                to="/account/addresses"
+                                className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                              >
+                                <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <span className="flex-1">Address Book</span>
+                                <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
+                              </Link>
+                            </li>
+                          )}
+                        </ul>
+
+                        {/* ── Admin Panel — admin only ── */}
+                        {user.role === 'admin' && (
+                          <div className="border-t border-border">
                             <button
                               type="button"
                               onClick={() => setAdminPanelExpanded((v) => !v)}
                               className="flex w-full items-center justify-between px-4 py-2"
                             >
-                              <span className="text-sm font-semibold text-foreground">
-                                Admin Panel
-                              </span>
+                              <span className="text-sm font-semibold text-foreground">Admin Panel</span>
                               <ChevronDown
                                 className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 ${
                                   adminPanelExpanded ? 'rotate-180' : ''
                                 }`}
                               />
                             </button>
-
                             <AnimatePresence initial={false}>
                               {adminPanelExpanded && (
                                 <motion.ul
@@ -473,35 +511,10 @@ const Header = () => {
                                 </motion.ul>
                               )}
                             </AnimatePresence>
-                          </>
-                        ) : (
-                          <>
-                            <div className="px-4 py-2.5 border-b border-border">
-                              <p className="text-sm font-semibold text-foreground truncate">
-                                Hi, {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName ?? 'there'}
-                              </p>
-                            </div>
-                            <ul className="py-1">
-                              {[
-                                { label: 'My Orders',    href: '/account/orders',    icon: Package },
-                                { label: 'Profile',      href: '/account/profile',   icon: User    },
-                                { label: 'Address Book', href: '/account/addresses', icon: MapPin  },
-                              ].map(({ label, href, icon: Icon }) => (
-                                <li key={href}>
-                                  <Link
-                                    to={href}
-                                    className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
-                                  >
-                                    <Icon className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
-                                    <span className="flex-1">{label}</span>
-                                    <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </>
+                          </div>
                         )}
 
+                        {/* ── Sign out — always shown ── */}
                         <div className="border-t border-border mt-1">
                           <button
                             type="button"
