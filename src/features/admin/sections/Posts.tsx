@@ -256,6 +256,8 @@ const Posts = () => {
     });
     fd.append('existingImages', JSON.stringify(existingUrls));
     fd.append('buttons', JSON.stringify(buttons.map(({ label, url }) => ({ label, url }))));
+    // Tell the API which draft folder to clean up after the post is saved
+    if (!editPost) fd.append('draftId', draftIdRef.current);
     return fd;
   };
 
