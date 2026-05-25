@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authApi } from '@/api/auth';
@@ -11,6 +11,7 @@ type Status = 'loading' | 'success' | 'error';
 const VerifyEmail = () => {
   const { id } = useParams<{ id: string }>();
   const { openModal } = useAuth();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<Status>('loading');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -66,9 +67,7 @@ const VerifyEmail = () => {
             </div>
             <Button
               className="btn-henig-gold"
-              onClick={() => {
-                openModal('login');
-              }}
+              onClick={() => { navigate('/'); openModal('login'); }}
             >
               Sign In
             </Button>

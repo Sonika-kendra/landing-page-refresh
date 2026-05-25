@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -33,6 +33,7 @@ type ResetData = z.infer<typeof resetSchema>;
 const ResetPassword = () => {
   const { id } = useParams<{ id: string }>();
   const { openModal } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -170,7 +171,7 @@ const ResetPassword = () => {
             </div>
             <Button
               className="btn-henig-gold"
-              onClick={() => openModal('login')}
+              onClick={() => { navigate('/'); openModal('login'); }}
             >
               Sign In
             </Button>
