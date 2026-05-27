@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/api/blog';
-import { baseURL, oldWebsiteURL, websiteUrlConfig } from '@/config/site';
+import { newApiURL, oldWebsiteURL, websiteUrlConfig } from '@/config/site';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
 
 const AUTO_DURATION = 4000;
@@ -90,7 +90,7 @@ const VerticalBlogListWithImage = ({ posts, visibleCount = 4 }: Props) => {
   };
 
   const activePost = posts[activeIndex];
-  const featuredImage = activePost?.src ? `${baseURL}${activePost.src}` : '';
+  const featuredImage = activePost?.src ? `${newApiURL}${activePost.src}` : '';
 
   return (
     <>
