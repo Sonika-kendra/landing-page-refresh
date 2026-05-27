@@ -17,13 +17,9 @@ const authInterceptor = (instance: AxiosInstance) => {
   });
 };
 
-const sharedHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-};
-
-const legacyAxios: AxiosInstance = axs.create({ baseURL: API_BASES.legacy, headers: sharedHeaders });
-const newAxios: AxiosInstance = axs.create({ baseURL: API_BASES.new, headers: sharedHeaders });
+// Access-Control-* are server response headers — do not set them on the client request.
+const legacyAxios: AxiosInstance = axs.create({ baseURL: API_BASES.legacy });
+const newAxios: AxiosInstance = axs.create({ baseURL: API_BASES.new });
 
 authInterceptor(legacyAxios);
 authInterceptor(newAxios);

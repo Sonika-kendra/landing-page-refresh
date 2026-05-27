@@ -12,7 +12,13 @@ import { getMetalType } from '@/data/shop/metalTypes';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCart } from '@/context/CartContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
+import igiLogo from '@/assets/jewellery/certification/IGI.svg';
+import giaLogo from '@/assets/jewellery/certification/GIA.svg';
+import hrdLogo from '@/assets/jewellery/certification/HRDAntwerplogo_notagline-Transperant-Background.png';
+import sglLogo from '@/assets/jewellery/certification/SGL.png';
+
+const CERT_LOGOS: Record<string, string> = { igi: igiLogo, gia: giaLogo, hrd: hrdLogo, sgl: sglLogo };
+const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
 
 const Diamond3DViewer = lazy(() => import('@/components/shared/product/Diamond3DViewer'));
 
@@ -222,12 +228,18 @@ const ProductDetail = () => {
                     </div>
                   </div>
                 )}
-                {product.certificate && (
-                  <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
-                    <img src={igiLogo} alt={product.certificate} className="h-5 w-auto object-contain" />
-                  </div>
-                )}
+                {product.certificate && (() => {
+                  const logo = getCertLogo(product.certificate);
+                  return (
+                    <div className="flex items-center gap-3">
+                      <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
+                      {logo
+                        ? <img src={logo} alt={product.certificate} className="h-5 w-auto object-contain" />
+                        : <span className="rounded border border-foreground/20 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground/60">{product.certificate}</span>
+                      }
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="border-t border-border/30">
@@ -254,14 +266,20 @@ const ProductDetail = () => {
                             <td className="py-[3px] text-xs font-semibold text-foreground">{value}</td>
                           </tr>
                         ))}
-                        {product.certificate && (
-                          <tr>
-                            <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">Certificate:</td>
-                            <td className="py-[3px]">
-                              <img src={igiLogo} alt={product.certificate} className="h-4 w-auto object-contain" />
-                            </td>
-                          </tr>
-                        )}
+                        {product.certificate && (() => {
+                          const logo = getCertLogo(product.certificate);
+                          return (
+                            <tr>
+                              <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">Certificate:</td>
+                              <td className="py-[3px]">
+                                {logo
+                                  ? <img src={logo} alt={product.certificate} className="h-4 w-auto object-contain" />
+                                  : <span className="rounded border border-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground/60">{product.certificate}</span>
+                                }
+                              </td>
+                            </tr>
+                          );
+                        })()}
                       </tbody>
                     </table>
                   </div>

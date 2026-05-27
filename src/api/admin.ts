@@ -125,6 +125,24 @@ export interface ZohoSyncResult {
   message?: string;
 }
 
+export interface ZohoInventoryItem {
+  item_id: string;
+  name: string;
+  sku?: string;
+  description?: string;
+  rate?: number;
+  purchase_rate?: number;
+  status?: string;
+  item_type?: string;
+  unit?: string;
+  category_id?: string;
+  category_name?: string;
+  image_name?: string;
+  image_document_id?: string;
+  last_modified_time?: string;
+  [key: string]: unknown;
+}
+
 const { base, endpoints } = API_CONFIG.admin;
 
 export const adminApi = {
@@ -343,6 +361,15 @@ export const adminApi = {
       API_CONFIG.adminZoho.endpoints.syncModule(module),
       undefined,
       undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
+  getZohoInventoryItems: (params?: { search?: string; category_id?: string; status?: string }) =>
+    apiClient.get<{ ok: boolean; total: number; items: ZohoInventoryItem[] }>(
+      API_CONFIG.adminZoho.endpoints.inventoryItems,
+      params,
+      undefined,
+      false,
       API_CONFIG.adminZoho.base
     ),
 };

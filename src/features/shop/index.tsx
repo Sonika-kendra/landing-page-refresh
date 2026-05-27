@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { productsApi } from '@/api/products';
+import { newApiURL } from '@/config/site';
 import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
@@ -13,11 +15,11 @@ import {
   categories,
   metals,
   shapes,
-  shopProducts,
   stockTypes,
   subCategories,
   youMayAlsoLike,
 } from '@/data/shop/products';
+import type { ShopProduct } from '@/data/shop/products';
 import ringImage from '@/assets/jewellery/category/ring.png';
 import braceletImage from '@/assets/jewellery/category/Bracelet.png';
 import earringsImage from '@/assets/jewellery/category/earrings.png';
@@ -32,7 +34,127 @@ import naturalDiamondImage from '@/assets/diamond-pairs.jpg';
 import labDiamondImage from '@/assets/lab-grown-diamond.jpg';
 import diamondsImage from '@/assets/diamonds-category.jpg';
 
-const ITEMS_PER_PAGE = 16;
+// ─── Zoho → ShopProduct mapper ────────────────────────────────────────────────
+
+/** Try several custom-field name variants from a raw Zoho item. */
+function getCf(item: Record<string, unknown>, ...names: string[]): string | undefined {
+  for (const name of names) {
+    if (item[`cf_${name}`] != null) return String(item[`cf_${name}`]);
+    if (item[name] != null && typeof item[name] !== 'object') return String(item[name]);
+    if (Array.isArray(item.custom_fields)) {
+      const f = (item.custom_fields as Array<{ api_name?: string; label?: string; value?: unknown }>)
+        .find((cf) => cf.api_name === `cf_${name}` || cf.label?.toLowerCase().replace(/ /g, '_') === name);
+      if (f?.value != null) return String(f.value);
+    }
+  }
+  return undefined;
+}
+
+/** Normalise free-text metal strings to the codes expected by getMetalType(). */
+const METAL_ALIASES: Record<string, string> = {
+  '18k yellow gold': '18K_YG', '18kyg': '18K_YG', '18k_yg': '18K_YG',
+  '18k white gold': '18K_WG', '18kwg': '18K_WG', '18k_wg': '18K_WG',
+  '18k rose gold': '18K_RG', '18k_rg': '18K_RG',
+  '9k yellow gold': '9K_YG', '9kyg': '9K_YG', '9k_yg': '9K_YG',
+  '9k white gold': '9K_WG', '9kwg': '9K_WG', '9k_wg': '9K_WG',
+  'platinum': 'Pt950', 'pt': 'Pt950', 'pt950': 'Pt950',
+};
+function normaliseMetalCode(raw: string): string {
+  return METAL_ALIASES[raw.toLowerCase().trim()] ?? raw.trim();
+}
+
+function mapZohoToShopProduct(item: Record<string, unknown>): ShopProduct {
+  // ── Metal ─────────────────────────────────────────────────────────────────
+  const metalRaw = getCf(item, 'metal_options', 'available_metals', 'metal_type', 'metal') ?? '';
+  const metalOptions = metalRaw
+    ? metalRaw.split(/[,;]/).map(normaliseMetalCode).filter(Boolean)
+    : [];
+
+  // ── Stock ─────────────────────────────────────────────────────────────────
+  const stock =
+    typeof item.available_stock === 'number' ? item.available_stock :
+      typeof item.actual_available_stock === 'number' ? item.actual_available_stock :
+        undefined;
+
+  // ── Badge — priority: low-stock > new arrival ────────────────────────────
+  const isFewLeft = stock !== undefined && stock > 0 && stock <= 3;
+  const isNewArrival =
+    // MongoDB-cached items (bestseller/new-arrival queries) carry this flag directly
+    item.isNewArrival === true ||
+    // Zoho custom field, if set on the item
+    getCf(item, 'is_new_arrival', 'new_arrival') === 'true' ||
+    // Derive from Zoho created_time — items created within the last 45 days
+    (() => {
+      const t = typeof item.created_time === 'string' ? item.created_time : '';
+      if (!t) return false;
+      const created = new Date(t).getTime();
+      return !isNaN(created) && (Date.now() - created < 45 * 24 * 60 * 60 * 1000);
+    })();
+
+  const badge: ShopProduct['badge'] =
+    isFewLeft ? 'ONLY FEW LEFT' : isNewArrival ? 'NEW STOCK' : undefined;
+
+  // ── Stock type (Natural | Lab) ────────────────────────────────────────────
+  const rawStockType = getCf(item, 'diamond_type', 'stock_type', 'stone_type') ?? 'Natural';
+
+  // ── Carat options (comma/semicolon-separated string → array) ────────────
+  const caratRaw = getCf(item, 'carat_options', 'carat_weight_options', 'carat') ?? '';
+  const caratOptions = caratRaw
+    ? caratRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
+    : undefined;
+
+  // ── Size options (ring sizes, comma/semicolon-separated) ─────────────────
+  const sizeRaw = getCf(item, 'size_options', 'ring_size_options', 'ring_size', 'size') ?? '';
+  const sizeOptions = sizeRaw
+    ? sizeRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
+    : undefined;
+
+  // ── Stone type — human-readable description for the spec table ───────────
+  // Try a dedicated description field first; fall back to deriving from stockType.
+  const stoneType =
+    getCf(item, 'stone_type_description', 'stone_description') ??
+    (rawStockType === 'Lab' ? 'Lab Created Diamond' :
+      rawStockType === 'Natural' ? 'Natural Diamond' : undefined);
+
+  // ── Image URL (Zoho exposes a single image per item) ─────────────────────
+  const imageUrl = `${newApiURL}/products/${item.item_id}/image`;
+
+  return {
+    id: String(item.item_id ?? ''),
+    sku: String(item.sku ?? ''),
+    name: String(item.name ?? ''),
+    category: String(getCf(item, 'stock_category') ?? item.category_name ?? ''),
+    subCategory: getCf(item, 'sub_category_type', 'collection', 'subcategory') ?? '',
+    metal: metalOptions[0] ?? '',
+    metalOptions,
+    shape: getCf(item, 'diamond_shape', 'shape', 'stone_shape') ?? '',
+    stockType: (['Natural', 'Lab'].includes(rawStockType) ? rawStockType : 'Natural') as 'Natural' | 'Lab',
+    price: typeof item.rate === 'number' ? item.rate : 0,
+    image: imageUrl,
+    badge,
+    description: String(item.description ?? ''),
+    certificate: getCf(item, 'certificate_lab', 'certification', 'certificate', 'cert'),
+    stock,
+    // ── Spec / detail-page fields ─────────────────────────────────────────
+    caratOptions: caratOptions?.length ? caratOptions : undefined,
+    sizeOptions:  sizeOptions?.length  ? sizeOptions  : undefined,
+    stoneType:    stoneType  || undefined,
+    colour:       getCf(item, 'colour', 'color', 'diamond_colour', 'stone_colour') || undefined,
+    clarity:      getCf(item, 'clarity', 'diamond_clarity', 'stone_clarity')       || undefined,
+    setting:      getCf(item, 'setting', 'setting_type', 'mount_type')             || undefined,
+    goldWeight:   getCf(item, 'gold_weight', 'metal_weight')                       || undefined,
+    totalWeight:  getCf(item, 'total_weight', 'total_carat_weight', 'carat_weight')|| undefined,
+    itemRef:      getCf(item, 'item_ref', 'reference', 'stock_ref', 'ref')         || String(item.sku ?? '') || undefined,
+    // Gallery: Zoho provides one image per item — wrap in array for the detail
+    // page carousel. Add more URLs here if a multi-image endpoint is added later.
+    images: [imageUrl],
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PAGE_SIZE_OPTIONS = [16, 32, 48, 96];
+const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
 const DEFAULT_PRICE_RANGE: [number, number] = [0, 5000];
 
 const shopSort = {
@@ -182,9 +304,8 @@ const renderFilterItems = (
                   }}
                 />
                 <span
-                  className={`text-sm transition-colors ${
-                    isActive ? 'font-semibold text-foreground' : 'text-foreground'
-                  }`}
+                  className={`text-sm transition-colors ${isActive ? 'font-semibold text-foreground' : 'text-foreground'
+                    }`}
                 >
                   {item.label}
                 </span>
@@ -207,11 +328,10 @@ const renderFilterItems = (
               type="button"
               onClick={() => onChange(tab.key, item.value as string)}
               aria-pressed={isActive}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
-                isActive
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
                   ? 'border-accent bg-accent text-accent-foreground shadow-sm'
                   : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
-              }`}
+                }`}
             >
               {item.label}
             </button>
@@ -233,11 +353,10 @@ const renderFilterItems = (
               type="button"
               onClick={() => onChange(tab.key, item.value)}
               aria-pressed={isActive}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 ${
-                isActive
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 ${isActive
                   ? 'bg-accent/10 text-accent'
                   : 'text-foreground/60 hover:bg-secondary/40 hover:text-foreground'
-              }`}
+                }`}
             >
               <span className={isActive ? 'font-semibold' : ''}>{item.label}</span>
               {isActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
@@ -268,9 +387,8 @@ const renderFilterItems = (
                 className="h-4 w-4 flex-shrink-0 cursor-pointer accent-[hsl(var(--accent))]"
               />
               <span
-                className={`text-sm transition-colors ${
-                  isActive ? 'font-semibold text-foreground' : 'text-foreground'
-                }`}
+                className={`text-sm transition-colors ${isActive ? 'font-semibold text-foreground' : 'text-foreground'
+                  }`}
               >
                 {item.label}
               </span>
@@ -327,14 +445,12 @@ const FilterSidebarContent = ({
           role="switch"
           aria-checked={filterValues.inStock === 'true'}
           onClick={() => handleFilterChange('inStock', filterValues.inStock === 'true' ? '' : 'true')}
-          className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-            filterValues.inStock === 'true' ? 'bg-accent' : 'bg-foreground/20'
-          }`}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${filterValues.inStock === 'true' ? 'bg-accent' : 'bg-foreground/20'
+            }`}
         >
           <span
-            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              filterValues.inStock === 'true' ? 'translate-x-5' : 'translate-x-0'
-            }`}
+            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${filterValues.inStock === 'true' ? 'translate-x-5' : 'translate-x-0'
+              }`}
           />
         </button>
       </label>
@@ -401,11 +517,56 @@ const FilterSidebarContent = ({
 );
 
 const ShopPage = () => {
+  const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['category']);
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [hasMorePage, setHasMorePage] = useState(false);
+
+  const selectedCategory = typeof filterValues.category === 'string' ? filterValues.category : '';
+
+  useEffect(() => {
+    setIsLoading(true);
+    setFetchError(null);
+    productsApi.list({
+      per_page: pageSize,
+      page,
+      status: 'active',
+      // Always restrict to Jewellery — falls back to the user-selected sub-category
+      // (Rings / Earrings / etc.) when one is chosen in the filter sidebar.
+      category: selectedCategory || 'Jewellery',
+    })
+      .then((res) => {
+        const raw = (res.data?.items ?? []) as Record<string, unknown>[];
+        setHasMorePage(res.data?.page_context?.has_more_page ?? false);
+        if (import.meta.env.DEV && raw.length > 0) {
+          const cats = [...new Set(raw.map((i) => i.cf_stock_category))];
+          console.log('[Shop] cf_stock_category values returned:', cats);
+          console.log('[Shop] Zoho item field reference (first item):', raw[0]);
+          console.log('[Shop] page_context:', res.data?.page_context);
+        }
+        // Category filtering is handled server-side (cf_stock_category param).
+        // No client-side category exclusion needed here.
+        setProducts(raw.map(mapZohoToShopProduct));
+      })
+      .catch((err) => {
+        console.error('[Shop] Failed to load products:', err);
+        setFetchError('Unable to load products right now. Please try again later.');
+      })
+      .finally(() => setIsLoading(false));
+  // Re-fetch from Zoho when category, page, or page size changes (server-side pagination)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, page, pageSize]);
+
+  // Scroll to top whenever the page changes so the user sees new results from the top
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   const handleFilterChange = useCallback(
     (key: string, value: string | string[] | [number, number]) => {
@@ -421,7 +582,7 @@ const ShopPage = () => {
   }, []);
 
   const filtered = useMemo(() => {
-    let result = [...shopProducts];
+    let result = [...products];
     const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
 
     if (search && typeof search === 'string' && search.trim()) {
@@ -448,21 +609,21 @@ const ShopPage = () => {
     else if (sortBy === 'name-asc') result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [filterValues, sortBy]);
+  }, [filterValues, sortBy, products]);
 
   const hasActiveFilters = useMemo(() => {
     const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
     return Boolean(
       (typeof search === 'string' && search.trim()) ||
-        category ||
-        subCategory ||
-        metal ||
-        (typeof shape === 'string' && shape) ||
-        (Array.isArray(shape) && shape.length > 0) ||
-        stockType ||
-        inStock === 'true' ||
-        !isSameRange([lo, hi], DEFAULT_PRICE_RANGE)
+      category ||
+      subCategory ||
+      metal ||
+      (typeof shape === 'string' && shape) ||
+      (Array.isArray(shape) && shape.length > 0) ||
+      stockType ||
+      inStock === 'true' ||
+      !isSameRange([lo, hi], DEFAULT_PRICE_RANGE)
     );
   }, [filterValues]);
 
@@ -493,8 +654,10 @@ const ShopPage = () => {
     return chips;
   }, [filterValues]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  // With server-side pagination the API returns exactly one page of results.
+  // Use has_more_page to know whether a next page exists; extend totalPages
+  // dynamically as the user navigates so the numbered buttons stay correct.
+  const totalPages = hasMorePage ? page + 1 : page;
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -544,7 +707,7 @@ const ShopPage = () => {
                       type="button"
                       className="w-full rounded bg-accent py-3 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90"
                     >
-                      View {filtered.length.toLocaleString()} {filtered.length === 1 ? 'Product' : 'Products'}
+                      View {filtered.length.toLocaleString()}{hasMorePage ? '+' : ''} {filtered.length === 1 ? 'Product' : 'Products'}
                     </button>
                   </SheetClose>
                 </div>
@@ -586,8 +749,24 @@ const ShopPage = () => {
               </select>
             </label>
 
+            <label className="flex items-center gap-2 text-sm text-foreground/55">
+              <span className="whitespace-nowrap">Show</span>
+              <select
+                value={pageSize}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value));
+                  setPage(1);
+                }}
+                className="h-10 w-[80px] rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
+              >
+                {PAGE_SIZE_OPTIONS.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+
             <span className="ml-auto text-sm text-foreground/55">
-              {filtered.length.toLocaleString()} {filtered.length === 1 ? 'result' : 'results'}
+              {filtered.length.toLocaleString()}{hasMorePage ? '+' : ''} {filtered.length === 1 ? 'result' : 'results'}
             </span>
             {hasActiveFilters && (
               <button
@@ -639,7 +818,29 @@ const ShopPage = () => {
       <section className="bg-white py-8 md:py-12">
         <div className="henig-container">
           <div>
-            {paged.length === 0 ? (
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: pageSize }).map((_, i) => (
+                  <div key={i} className="animate-pulse border border-border/40 bg-card">
+                    <div className="aspect-square bg-foreground/5" />
+                    <div className="px-3 pb-3 pt-2 space-y-2">
+                      <div className="h-3 w-3/4 rounded bg-foreground/10" />
+                      <div className="h-3 w-1/2 rounded bg-foreground/10" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : fetchError ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-lg text-foreground/60">{fetchError}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-3 text-sm text-primary underline hover:text-primary/80"
+                >
+                  Reload page
+                </button>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <p className="text-lg text-foreground/60">No products match your filters.</p>
                 <button
@@ -651,7 +852,7 @@ const ShopPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-                {paged.map((product) => (
+                {filtered.map((product) => (
                   <ShopProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -672,11 +873,10 @@ const ShopPage = () => {
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${
-                        page === pageNum
+                      className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${page === pageNum
                           ? 'bg-accent text-accent-foreground'
                           : 'text-foreground/60 hover:bg-border/40'
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -686,9 +886,8 @@ const ShopPage = () => {
                 {totalPages > 5 && (
                   <button
                     onClick={() => setPage(totalPages)}
-                    className={`h-8 w-8 rounded-full text-sm font-medium ${
-                      page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
-                    }`}
+                    className={`h-8 w-8 rounded-full text-sm font-medium ${page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
+                      }`}
                   >
                     {totalPages}
                   </button>

@@ -4,7 +4,23 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import { ShopProduct } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
 import { useFavourites } from '@/context/FavouritesContext';
-import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
+import igiLogo from '@/assets/jewellery/certification/IGI.svg';
+import giaLogo from '@/assets/jewellery/certification/GIA.svg';
+import hrdLogo from '@/assets/jewellery/certification/HRDAntwerplogo_notagline-Transperant-Background.png';
+import sglLogo from '@/assets/jewellery/certification/SGL.png';
+import defaultProductImage from '@/assets/product-placeholder.svg';
+
+/** Map cert lab name (case-insensitive) → logo asset URL. Returns null if no image available. */
+const CERT_LOGOS: Record<string, string> = {
+  igi: igiLogo,
+  gia: giaLogo,
+  hrd: hrdLogo,
+  sgl: sglLogo,
+};
+
+function getCertLogo(cert: string): string | null {
+  return CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
+}
 
 interface ShopProductCardProps {
   product: ShopProduct;
@@ -75,6 +91,10 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
             src={isHovered && product.hoverImage ? product.hoverImage : product.image}
             alt={product.name}
             className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.onerror = null; // prevent infinite loop
+              e.currentTarget.src = defaultProductImage;
+            }}
           />
         </div>
       </Link>
@@ -88,15 +108,22 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
               {product.name}
             </h3>
           </Link>
-          {product.certificate && (
-            <div className="mt-0.5 shrink-0">
-              <img
-                src={igiLogo}
-                alt={product.certificate}
-                className="h-4 w-auto object-contain"
-              />
-            </div>
-          )}
+          {product.certificate && (() => {
+            const logo = getCertLogo(product.certificate);
+            return logo ? (
+              <div className="mt-0.5 shrink-0">
+                <img
+                  src={logo}
+                  alt={product.certificate}
+                  className="h-4 w-auto object-contain"
+                />
+              </div>
+            ) : (
+              <span className="mt-0.5 shrink-0 rounded border border-foreground/20 px-1 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-foreground/60">
+                {product.certificate}
+              </span>
+            );
+          })()}
         </div>
 
         {/* Metal badges + price */}

@@ -92,11 +92,12 @@ export const API_CONFIG = {
   adminZoho: {
     base: 'new' as ApiBase,
     endpoints: {
-      status:     '/admin/zoho/status',
-      schedule:   '/admin/zoho/schedule',
-      logs:       '/admin/zoho/logs',
-      syncAll:    '/admin/zoho/sync',
-      syncModule: (module: string) => `/admin/zoho/sync/${module}`,
+      status:         '/admin/zoho/status',
+      schedule:       '/admin/zoho/schedule',
+      logs:           '/admin/zoho/logs',
+      syncAll:        '/admin/zoho/sync',
+      syncModule:     (module: string) => `/admin/zoho/sync/${module}`,
+      inventoryItems: '/admin/zoho/items',
     },
   },
 
