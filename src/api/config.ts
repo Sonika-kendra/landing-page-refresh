@@ -117,6 +117,7 @@ export const API_CONFIG = {
     base: 'new' as ApiBase,
     endpoints: {
       all: '/products',
+      currency: '/products/currency',
       one: (id: string) => `/products/${id}`,
       create: '/products',
       update: (id: string) => `/products/${id}`,

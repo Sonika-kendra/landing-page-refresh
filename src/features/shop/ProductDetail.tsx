@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
@@ -7,8 +7,11 @@ import {
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
-import { shopProducts, youMayAlsoLike } from '@/data/shop/products';
+import { youMayAlsoLike } from '@/data/shop/products';
+import type { ShopProduct } from '@/data/shop/products';
+import { mapZohoToShopProduct } from '@/data/shop/mappers';
 import { getMetalType } from '@/data/shop/metalTypes';
+import { productsApi } from '@/api/products';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCart } from '@/context/CartContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -33,7 +36,9 @@ const trustBadges = [
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const product = useMemo(() => shopProducts.find((p) => p.id === id), [id]);
+  const [product, setProduct] = useState<ShopProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [show3D, setShow3D] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState(0);
@@ -50,6 +55,24 @@ const ProductDetail = () => {
   const { isFavourite, toggleFavourite } = useFavourites();
   const { addItem } = useCart();
   const liked = product ? isFavourite(product.id) : false;
+
+  useEffect(() => {
+    if (!id) return;
+    setIsLoading(true);
+    setFetchError(null);
+    setSelectedImage(0);
+    productsApi.getOne(id)
+      .then((res) => {
+        const item = res.data?.item as Record<string, unknown> | undefined;
+        if (!item) {
+          setFetchError('not_found');
+          return;
+        }
+        setProduct(mapZohoToShopProduct(item));
+      })
+      .catch(() => setFetchError('error'))
+      .finally(() => setIsLoading(false));
+  }, [id]);
 
   const copySku = () => {
     navigator.clipboard.writeText(product?.sku ?? '');
@@ -79,7 +102,30 @@ const ProductDetail = () => {
     setTimeout(() => setBagJustAdded(false), 600);
   };
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="henig-container py-12">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="animate-pulse">
+              <div className="aspect-square bg-foreground/5" />
+              <div className="mt-3 flex gap-2">
+                {[...Array(3)].map((_, i) => <div key={i} className="h-[90px] w-[90px] bg-foreground/5" />)}
+              </div>
+            </div>
+            <div className="animate-pulse space-y-4 pt-2">
+              <div className="h-7 w-2/3 rounded bg-foreground/10" />
+              <div className="h-4 w-1/4 rounded bg-foreground/10" />
+              <div className="h-4 w-1/2 rounded bg-foreground/10" />
+              <div className="mt-8 h-12 w-full rounded bg-foreground/10" />
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (fetchError || !product) {
     return (
       <PageLayout>
         <div className="henig-container py-24 text-center">

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { productsApi } from '@/api/products';
-import { newApiURL } from '@/config/site';
 import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
@@ -20,6 +19,7 @@ import {
   youMayAlsoLike,
 } from '@/data/shop/products';
 import type { ShopProduct } from '@/data/shop/products';
+import { mapZohoToShopProduct } from '@/data/shop/mappers';
 import ringImage from '@/assets/jewellery/category/ring.png';
 import braceletImage from '@/assets/jewellery/category/Bracelet.png';
 import earringsImage from '@/assets/jewellery/category/earrings.png';
@@ -34,124 +34,6 @@ import naturalDiamondImage from '@/assets/diamond-pairs.jpg';
 import labDiamondImage from '@/assets/lab-grown-diamond.jpg';
 import diamondsImage from '@/assets/diamonds-category.jpg';
 
-// ─── Zoho → ShopProduct mapper ────────────────────────────────────────────────
-
-/** Try several custom-field name variants from a raw Zoho item. */
-function getCf(item: Record<string, unknown>, ...names: string[]): string | undefined {
-  for (const name of names) {
-    if (item[`cf_${name}`] != null) return String(item[`cf_${name}`]);
-    if (item[name] != null && typeof item[name] !== 'object') return String(item[name]);
-    if (Array.isArray(item.custom_fields)) {
-      const f = (item.custom_fields as Array<{ api_name?: string; label?: string; value?: unknown }>)
-        .find((cf) => cf.api_name === `cf_${name}` || cf.label?.toLowerCase().replace(/ /g, '_') === name);
-      if (f?.value != null) return String(f.value);
-    }
-  }
-  return undefined;
-}
-
-/** Normalise free-text metal strings to the codes expected by getMetalType(). */
-const METAL_ALIASES: Record<string, string> = {
-  '18k yellow gold': '18K_YG', '18kyg': '18K_YG', '18k_yg': '18K_YG',
-  '18k white gold': '18K_WG', '18kwg': '18K_WG', '18k_wg': '18K_WG',
-  '18k rose gold': '18K_RG', '18k_rg': '18K_RG',
-  '9k yellow gold': '9K_YG', '9kyg': '9K_YG', '9k_yg': '9K_YG',
-  '9k white gold': '9K_WG', '9kwg': '9K_WG', '9k_wg': '9K_WG',
-  'platinum': 'Pt950', 'pt': 'Pt950', 'pt950': 'Pt950',
-};
-function normaliseMetalCode(raw: string): string {
-  return METAL_ALIASES[raw.toLowerCase().trim()] ?? raw.trim();
-}
-
-function mapZohoToShopProduct(item: Record<string, unknown>): ShopProduct {
-  // ── Metal ─────────────────────────────────────────────────────────────────
-  const metalRaw = getCf(item, 'metal_options', 'available_metals', 'metal_type', 'metal') ?? '';
-  const metalOptions = metalRaw
-    ? metalRaw.split(/[,;]/).map(normaliseMetalCode).filter(Boolean)
-    : [];
-
-  // ── Stock ─────────────────────────────────────────────────────────────────
-  const stock =
-    typeof item.available_stock === 'number' ? item.available_stock :
-      typeof item.actual_available_stock === 'number' ? item.actual_available_stock :
-        undefined;
-
-  // ── Badge — priority: low-stock > new arrival ────────────────────────────
-  const isFewLeft = stock !== undefined && stock > 0 && stock <= 3;
-  const isNewArrival =
-    // MongoDB-cached items (bestseller/new-arrival queries) carry this flag directly
-    item.isNewArrival === true ||
-    // Zoho custom field, if set on the item
-    getCf(item, 'is_new_arrival', 'new_arrival') === 'true' ||
-    // Derive from Zoho created_time — items created within the last 45 days
-    (() => {
-      const t = typeof item.created_time === 'string' ? item.created_time : '';
-      if (!t) return false;
-      const created = new Date(t).getTime();
-      return !isNaN(created) && (Date.now() - created < 45 * 24 * 60 * 60 * 1000);
-    })();
-
-  const badge: ShopProduct['badge'] =
-    isFewLeft ? 'ONLY FEW LEFT' : isNewArrival ? 'NEW STOCK' : undefined;
-
-  // ── Stock type (Natural | Lab) ────────────────────────────────────────────
-  const rawStockType = getCf(item, 'diamond_type', 'stock_type', 'stone_type') ?? 'Natural';
-
-  // ── Carat options (comma/semicolon-separated string → array) ────────────
-  const caratRaw = getCf(item, 'carat_options', 'carat_weight_options', 'carat') ?? '';
-  const caratOptions = caratRaw
-    ? caratRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
-    : undefined;
-
-  // ── Size options (ring sizes, comma/semicolon-separated) ─────────────────
-  const sizeRaw = getCf(item, 'size_options', 'ring_size_options', 'ring_size', 'size') ?? '';
-  const sizeOptions = sizeRaw
-    ? sizeRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
-    : undefined;
-
-  // ── Stone type — human-readable description for the spec table ───────────
-  // Try a dedicated description field first; fall back to deriving from stockType.
-  const stoneType =
-    getCf(item, 'stone_type_description', 'stone_description') ??
-    (rawStockType === 'Lab' ? 'Lab Created Diamond' :
-      rawStockType === 'Natural' ? 'Natural Diamond' : undefined);
-
-  // ── Image URL (Zoho exposes a single image per item) ─────────────────────
-  const imageUrl = `${newApiURL}/products/${item.item_id}/image`;
-
-  return {
-    id: String(item.item_id ?? ''),
-    sku: String(item.sku ?? ''),
-    name: String(item.name ?? ''),
-    category: String(getCf(item, 'stock_category') ?? item.category_name ?? ''),
-    subCategory: getCf(item, 'sub_category_type', 'collection', 'subcategory') ?? '',
-    metal: metalOptions[0] ?? '',
-    metalOptions,
-    shape: getCf(item, 'diamond_shape', 'shape', 'stone_shape') ?? '',
-    stockType: (['Natural', 'Lab'].includes(rawStockType) ? rawStockType : 'Natural') as 'Natural' | 'Lab',
-    price: typeof item.rate === 'number' ? item.rate : 0,
-    image: imageUrl,
-    badge,
-    description: String(item.description ?? ''),
-    certificate: getCf(item, 'certificate_lab', 'certification', 'certificate', 'cert'),
-    stock,
-    // ── Spec / detail-page fields ─────────────────────────────────────────
-    caratOptions: caratOptions?.length ? caratOptions : undefined,
-    sizeOptions:  sizeOptions?.length  ? sizeOptions  : undefined,
-    stoneType:    stoneType  || undefined,
-    colour:       getCf(item, 'colour', 'color', 'diamond_colour', 'stone_colour') || undefined,
-    clarity:      getCf(item, 'clarity', 'diamond_clarity', 'stone_clarity')       || undefined,
-    setting:      getCf(item, 'setting', 'setting_type', 'mount_type')             || undefined,
-    goldWeight:   getCf(item, 'gold_weight', 'metal_weight')                       || undefined,
-    totalWeight:  getCf(item, 'total_weight', 'total_carat_weight', 'carat_weight')|| undefined,
-    itemRef:      getCf(item, 'item_ref', 'reference', 'stock_ref', 'ref')         || String(item.sku ?? '') || undefined,
-    // Gallery: Zoho provides one image per item — wrap in array for the detail
-    // page carousel. Add more URLs here if a multi-image endpoint is added later.
-    images: [imageUrl],
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 const PAGE_SIZE_OPTIONS = [16, 32, 48, 96];
 const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
@@ -244,6 +126,7 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: '£1,500+', value: [1500, 5000] },
     { label: 'All Prices', value: DEFAULT_PRICE_RANGE },
   ],
+  inStock: [],
 };
 
 const defaultValues: FilterValues = {
@@ -518,6 +401,7 @@ const FilterSidebarContent = ({
 
 const ShopPage = () => {
   const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [currencySymbol, setCurrencySymbol] = useState('£');
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
@@ -529,6 +413,12 @@ const ShopPage = () => {
   const [hasMorePage, setHasMorePage] = useState(false);
 
   const selectedCategory = typeof filterValues.category === 'string' ? filterValues.category : '';
+
+  useEffect(() => {
+    productsApi.getCurrency()
+      .then((res) => { if (res.data?.currency_symbol) setCurrencySymbol(res.data.currency_symbol) })
+      .catch(() => { /* keep default £ */ });
+  }, []);
 
   useEffect(() => {
     setIsLoading(true);
@@ -549,19 +439,23 @@ const ShopPage = () => {
           console.log('[Shop] cf_stock_category values returned:', cats);
           console.log('[Shop] Zoho item field reference (first item):', raw[0]);
           console.log('[Shop] page_context:', res.data?.page_context);
+          // Debug: log all metal-related fields from first item
+          const first = raw[0];
+          const metalKeys = Object.keys(first).filter(k => /metal|colour|color/i.test(k));
+          console.log('[Shop] Metal-related fields on item:', Object.fromEntries(metalKeys.map(k => [k, first[k]])));
         }
         // Category filtering is handled server-side (cf_stock_category param).
         // No client-side category exclusion needed here.
-        setProducts(raw.map(mapZohoToShopProduct));
+        setProducts(raw.map((item) => mapZohoToShopProduct(item, currencySymbol)));
       })
       .catch((err) => {
         console.error('[Shop] Failed to load products:', err);
         setFetchError('Unable to load products right now. Please try again later.');
       })
       .finally(() => setIsLoading(false));
-  // Re-fetch from Zoho when category, page, or page size changes (server-side pagination)
+  // Re-fetch from Zoho when category, page, page size, or currency changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, page, pageSize]);
+  }, [selectedCategory, page, pageSize, currencySymbol]);
 
   // Scroll to top whenever the page changes so the user sees new results from the top
   useEffect(() => {

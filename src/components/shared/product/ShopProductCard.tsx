@@ -154,7 +154,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
           </div>
           <div className="flex shrink-0 items-baseline gap-0.5">
             <span className="mb-0.5 text-[10px] leading-none text-foreground/50">From</span>
-            <span className="text-xl font-bold leading-none text-foreground">£{product.price.toLocaleString()}</span>
+            <span className="text-xl font-bold leading-none text-foreground">{product.currency}{product.price.toLocaleString()}</span>
           </div>
         </div>
 

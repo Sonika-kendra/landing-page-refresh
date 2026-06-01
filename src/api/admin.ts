@@ -47,6 +47,7 @@ export interface Post {
   images?: string[];
   snippet: string;
   content: string;
+  design?: object;
   status: 'draft' | 'published';
   related?: string[];
   buttons?: { label: string; url: string }[];

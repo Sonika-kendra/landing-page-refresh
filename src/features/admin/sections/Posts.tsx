@@ -1,34 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus, MoreVertical, Eye, ArrowLeft, Calendar } from 'lucide-react';
-import { Editor } from '@tinymce/tinymce-react';
-
-// Bundled TinyMCE — no CDN, no API key required
-import 'tinymce/tinymce';
-import 'tinymce/models/dom';
-import 'tinymce/themes/silver';
-import 'tinymce/icons/default';
-import 'tinymce/skins/ui/oxide/skin.min.css';
-import 'tinymce/plugins/link';
-import 'tinymce/plugins/lists';
-import 'tinymce/plugins/image';
-import 'tinymce/plugins/wordcount';
-import 'tinymce/plugins/table';
-import 'tinymce/plugins/media';
-import 'tinymce/plugins/fullscreen';
-import 'tinymce/plugins/preview';
-import 'tinymce/plugins/searchreplace';
-import 'tinymce/plugins/charmap';
-import 'tinymce/plugins/anchor';
-import 'tinymce/plugins/codesample';
-import 'tinymce/plugins/insertdatetime';
-import 'tinymce/plugins/visualblocks';
-import 'tinymce/plugins/quickbars';
+import EmailEditor, { EditorRef } from 'react-email-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,6 +117,8 @@ const Posts = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const draftIdRef = useRef<string>(uid());
+  const emailEditorRef = useRef<EditorRef>(null);
+  const designRef = useRef<object | null>(null);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['admin', 'posts'],
@@ -157,7 +136,8 @@ const Posts = () => {
 
   const openCreate = () => {
     setEditPost(null);
-    draftIdRef.current = uid(); // fresh draft folder ID for each new post
+    draftIdRef.current = uid();
+    designRef.current = null;
     setForm(EMPTY_FORM);
     setImages([]);
     setButtons([]);
@@ -166,6 +146,7 @@ const Posts = () => {
 
   const openEdit = (post: Post) => {
     setEditPost(post);
+    designRef.current = (post.design as object) || null;
     setForm({
       title:   post.title,
       date:    toDateTimeLocal(post.date),
@@ -197,10 +178,17 @@ const Posts = () => {
       });
       setImages(postToImages(editPost));
       setButtons(postToButtons(editPost));
+      designRef.current = (editPost.design as object) || null;
+      if (emailEditorRef.current?.editor) {
+        if (editPost.design) {
+          emailEditorRef.current.editor.loadDesign(editPost.design as object);
+        }
+      }
     } else {
       setForm(EMPTY_FORM);
       setImages([]);
       setButtons([]);
+      designRef.current = null;
     }
   };
 
@@ -235,14 +223,23 @@ const Posts = () => {
   const addButton = () =>
     setButtons(prev => [...prev, { id: uid(), label: '', url: '' }]);
 
-  const buildFormData = (statusOverride?: PostStatus) => {
+  // Called by Unlayer once the editor iframe is ready; loads the existing design if editing
+  const onEditorLoad = useCallback(() => {
+    if (designRef.current && emailEditorRef.current?.editor) {
+      emailEditorRef.current.editor.loadDesign(designRef.current);
+    }
+  }, []);
+
+  // Build FormData from current form state + exported HTML/design
+  const buildFd = (html: string, design: object, statusOverride?: PostStatus) => {
     const fd = new FormData();
     fd.append('title',   form.title);
     fd.append('date',    new Date(form.date).toISOString());
     fd.append('snippet', form.snippet);
-    fd.append('content', form.content);
+    fd.append('content', html || ' ');
     fd.append('status',  statusOverride ?? form.status);
     if (form.related) fd.append('related', form.related);
+    fd.append('design', JSON.stringify(design));
 
     const existingUrls: string[] = [];
     images.forEach((img, i) => {
@@ -256,19 +253,14 @@ const Posts = () => {
     });
     fd.append('existingImages', JSON.stringify(existingUrls));
     fd.append('buttons', JSON.stringify(buttons.map(({ label, url }) => ({ label, url }))));
-    // Tell the API which draft folder to clean up after the post is saved
     if (!editPost) fd.append('draftId', draftIdRef.current);
     return fd;
   };
 
   const saveMutation = useMutation({
-    mutationFn: (statusOverride?: PostStatus) => {
-      const fd = buildFormData(statusOverride);
-      return editPost
-        ? adminApi.updatePost(editPost._id, fd)
-        : adminApi.createPost(fd);
-    },
-    onSuccess: (_, statusOverride) => {
+    mutationFn: ({ fd }: { fd: FormData; statusOverride?: PostStatus }) =>
+      editPost ? adminApi.updatePost(editPost._id, fd) : adminApi.createPost(fd),
+    onSuccess: (_, { statusOverride }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'posts'] });
       if (statusOverride) setForm(prev => ({ ...prev, status: statusOverride }));
       setView('list');
@@ -289,17 +281,40 @@ const Posts = () => {
       toast({ title: 'Error', description: 'Failed to delete post.', variant: 'destructive' }),
   });
 
-  const isFormValid = form.title.trim() && form.content.trim() && form.date;
+  // Save from the form view — exports HTML+design from the live Unlayer editor
+  const handleSaveFromEditor = (statusOverride?: PostStatus) => {
+    if (!emailEditorRef.current?.editor) return;
+    emailEditorRef.current.editor.exportHtml((data) => {
+      designRef.current = data.design;
+      const fd = buildFd(data.html, data.design, statusOverride);
+      saveMutation.mutate({ fd, statusOverride });
+    });
+  };
+
+  // Save from the preview view — editor is unmounted; use captured content in form.content
+  const handleSaveFromPreview = (statusOverride?: PostStatus) => {
+    const fd = buildFd(form.content, designRef.current ?? {}, statusOverride);
+    saveMutation.mutate({ fd, statusOverride });
+  };
+
+  // Switch to preview: export HTML+design first so preview renders correctly
+  const handlePreview = () => {
+    if (!emailEditorRef.current?.editor) return;
+    emailEditorRef.current.editor.exportHtml((data) => {
+      designRef.current = data.design;
+      setForm(prev => ({ ...prev, content: data.html }));
+      setView('preview');
+    });
+  };
+
+  const isFormValid = form.title.trim() && form.date;
 
   // ── Preview View ───────────────────────────────────────────────────────────
   if (view === 'preview') {
-    const previewImage = images[0]
-      ? images[0].preview
-      : null;
+    const previewImage = images[0] ? images[0].preview : null;
 
     return (
       <div className="w-full">
-        {/* Admin toolbar */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
           <button
             onClick={() => setView('form')}
@@ -315,7 +330,7 @@ const Posts = () => {
             {form.status !== 'published' && (
               <Button
                 className="tracking-widest uppercase text-xs rounded-none"
-                onClick={() => saveMutation.mutate('published')}
+                onClick={() => handleSaveFromPreview('published')}
                 disabled={!isFormValid || saveMutation.isPending}
               >
                 {saveMutation.isPending ? 'Publishing…' : 'Publish'}
@@ -324,7 +339,6 @@ const Posts = () => {
           </div>
         </div>
 
-        {/* Blog post preview — mirrors PostDetail layout */}
         <article className="section-ivory py-10 px-8">
           <h1 className="henig-heading-display text-3xl md:text-4xl mb-4 text-foreground">
             {form.title || <span className="text-muted-foreground italic">Untitled Post</span>}
@@ -387,7 +401,7 @@ const Posts = () => {
           <Button
             variant="outline"
             className="tracking-widest uppercase text-xs rounded-none gap-1.5"
-            onClick={() => setView('preview')}
+            onClick={handlePreview}
             disabled={!isFormValid}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -468,106 +482,12 @@ const Posts = () => {
         </div>
 
         {/* Editor */}
-        <div className="border border-border">
-          <Editor
-            value={form.content}
-            onEditorChange={content => handleFormField('content', content)}
-            init={{
-              licenseKey: 'gpl',
-              model: 'dom',
-              skin: false,
-              content_css: false,
-              height: 520,
-              menubar: true,
-              statusbar: true,
-              resize: false,
-              plugins: [
-                'link', 'lists', 'image', 'wordcount',
-                'table', 'media', 'fullscreen', 'preview',
-                'searchreplace', 'charmap', 'anchor', 'codesample',
-                'insertdatetime', 'visualblocks', 'quickbars',
-              ],
-              toolbar: [
-                'undo redo | blocks fontsize | bold italic underline strikethrough | forecolor backcolor | removeformat',
-                'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link anchor | image media table | charmap | insertbutton | fullscreen preview',
-              ],
-              toolbar_mode: 'wrap',
-              quickbars_selection_toolbar: 'bold italic | link h2 h3 blockquote',
-              quickbars_insert_toolbar: 'image media table',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              setup: (editor: any) => {
-                editor.ui.registry.addButton('insertbutton', {
-                  text: 'Button',
-                  tooltip: 'Insert a styled CTA button',
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onAction: () => {
-                    editor.windowManager.open({
-                      title: 'Insert Button',
-                      body: {
-                        type: 'panel',
-                        items: [
-                          { type: 'input', name: 'label', label: 'Button Label', placeholder: 'Shop Now' },
-                          { type: 'input', name: 'url',   label: 'URL',          placeholder: 'https://' },
-                        ],
-                      },
-                      buttons: [
-                        { type: 'cancel', text: 'Cancel' },
-                        { type: 'submit', text: 'Insert', buttonType: 'primary' },
-                      ],
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      onSubmit: (api: any) => {
-                        const { label, url } = api.getData();
-                        if (label && url) {
-                          editor.insertContent(
-                            `<a href="${url}" style="display:inline-block;padding:10px 24px;background-color:#173731;color:#f5f5ea;text-decoration:none;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;font-family:inherit;" target="_blank">${label}</a>`
-                          );
-                        }
-                        api.close();
-                      },
-                    });
-                  },
-                });
-              },
-              image_title: true,
-              automatic_uploads: true,
-              file_picker_types: 'image',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              file_picker_callback: (callback: any) => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = async () => {
-                  const file = input.files?.[0];
-                  if (!file) return;
-                  const fd = new FormData();
-                  fd.append('src', file);
-                  fd.append('postId', editPost ? editPost._id : draftIdRef.current);
-                  try {
-                    const res = await adminApi.uploadPostImage(fd);
-                    callback(resolveImageUrl(res.data.url), { title: file.name });
-                  } catch (err: any) {
-                    const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
-                    toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
-                  }
-                };
-                input.click();
-              },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              images_upload_handler: async (blobInfo: any) => {
-                const fd = new FormData();
-                fd.append('src', blobInfo.blob(), blobInfo.filename());
-                fd.append('postId', editPost ? editPost._id : draftIdRef.current);
-                try {
-                  const res = await adminApi.uploadPostImage(fd);
-                  return resolveImageUrl(res.data.url);
-                } catch (err: any) {
-                  const msg = err?.response?.data?.errors?.msg || err?.message || 'Upload failed';
-                  toast({ title: 'Image upload failed', description: msg, variant: 'destructive' });
-                  throw err;
-                }
-              },
-              content_style: 'body { font-family: inherit; font-size: 12pt; margin: 8px; line-height: 1.6; color: #173731; }',
-            }}
+        <div className="border border-border overflow-hidden">
+          <EmailEditor
+            ref={emailEditorRef}
+            onLoad={onEditorLoad}
+            options={{ displayMode: 'email' }}
+            style={{ height: '70vh' }}
           />
         </div>
 
@@ -585,7 +505,6 @@ const Posts = () => {
                 className="border border-border px-3 py-1.5 text-sm bg-background focus:outline-none focus:border-foreground"
               />
             </div>
-
           </div>
         </div>
 
@@ -602,10 +521,10 @@ const Posts = () => {
             <Button
               variant="outline"
               className="tracking-widest uppercase text-xs rounded-none"
-              onClick={() => saveMutation.mutate('draft')}
+              onClick={() => handleSaveFromEditor('draft')}
               disabled={!isFormValid || saveMutation.isPending}
             >
-              {saveMutation.isPending && saveMutation.variables === 'draft' ? 'Saving…' : 'Save Draft'}
+              {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
             </Button>
           </div>
         </div>
