@@ -4,8 +4,11 @@ import { API_CONFIG } from './config';
 const { base, endpoints: ep } = API_CONFIG.products;
 
 export const productsApi = {
-  list: (params?: { page?: number; per_page?: number; search?: string; category_id?: string; status?: string; bestseller?: boolean; new_arrival?: boolean }) =>
+  list: (params?: { page?: number; per_page?: number; search?: string; category_id?: string; category?: string; status?: string; bestseller?: boolean; new_arrival?: boolean }) =>
     client.get(ep.all, params, undefined, false, base),
+
+  getCurrency: () =>
+    client.get<{ ok: boolean; currency_symbol: string; currency_code: string }>(ep.currency, undefined, undefined, false, base),
 
   getOne: (id: string) =>
     client.get(ep.one(id), undefined, undefined, false, base),

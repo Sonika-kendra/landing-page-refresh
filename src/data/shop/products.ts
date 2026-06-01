@@ -13,6 +13,7 @@ export interface ShopProduct {
   id: string;
   sku: string;
   name: string;
+  currency: string;
   category: string;
   subCategory: string;
   metal: string;
@@ -86,6 +87,7 @@ export const shopProducts: ShopProduct[] = Array.from({ length: 24 }, (_, i) => 
     id: `prod-${i + 1}`,
     sku: `LSE${2110 + i}D`,
     name: `${shapes[i % shapes.length]} Diamond ${categoryProductNames[category]}`,
+    currency: '£',
     category,
     subCategory: subCategories[i % subCategories.length],
     metal: metals[i % metals.length],
