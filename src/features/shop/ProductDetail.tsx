@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
   Heart, Share2, Copy, Mail,
@@ -48,10 +48,12 @@ const ProductDetail = () => {
   const [descOpen, setDescOpen] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
   const [bagJustAdded, setBagJustAdded] = useState(false);
+  const [addedToBag, setAddedToBag] = useState(false);
   const [copied, setCopied] = useState(false);
   const [skuCopied, setSkuCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
+  const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
   const { addItem } = useCart();
   const liked = product ? isFavourite(product.id) : false;
@@ -97,9 +99,10 @@ const ProductDetail = () => {
 
   const handleAddToBag = async () => {
     if (!product) return;
+    if (addedToBag) { navigate('/cart'); return; }
     await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku });
     setBagJustAdded(true);
-    setTimeout(() => setBagJustAdded(false), 600);
+    setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
   };
 
   if (isLoading) {
@@ -388,10 +391,12 @@ const ProductDetail = () => {
                   className={`flex-1 py-4 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 ${
                     bagJustAdded
                       ? 'bg-accent/80 scale-[0.98] text-accent-foreground'
+                      : addedToBag
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'bg-accent text-accent-foreground hover:bg-accent/90'
                   }`}
                 >
-                  {bagJustAdded ? 'Added!' : 'Add to Bag'}
+                  {bagJustAdded ? 'Added!' : addedToBag ? 'Go to Bag' : 'Add to Bag'}
                 </button>
                 <button
                   onClick={handleToggleLiked}

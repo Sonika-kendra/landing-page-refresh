@@ -486,7 +486,7 @@ const Posts = () => {
           <EmailEditor
             ref={emailEditorRef}
             onLoad={onEditorLoad}
-            options={{ displayMode: 'email' }}
+            options={{ displayMode: 'web' }}
             style={{ height: '70vh' }}
           />
         </div>

@@ -1,23 +1,54 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, LayoutGrid, List } from 'lucide-react';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
 import { Button } from '@/components/ui/button';
 import { useFavourites } from '@/context/FavouritesContext';
-import { shopProducts } from '@/data/shop/products';
+import { productsApi } from '@/api/products';
+import { mapZohoToShopProduct } from '@/data/shop/mappers';
+import type { ShopProduct } from '@/data/shop/products';
 
 const MyWishlist = () => {
-  const { favourites, loading } = useFavourites();
-  const wishlisted = shopProducts.filter(p => favourites.includes(p.id));
+  const { favourites, loading: favLoading } = useFavourites();
+  const [wishlisted, setWishlisted] = useState<ShopProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const navigate = useNavigate();
+
+  const handleAddToBag = (product: ShopProduct) => {
+    navigate(`/jewellery/all/${product.id}`);
+    return Promise.resolve();
+  };
+
+  useEffect(() => {
+    if (favLoading || favourites.length === 0) {
+      setWishlisted([]);
+      return;
+    }
+    setLoadingProducts(true);
+    Promise.all(
+      favourites.map((id) =>
+        productsApi.getOne(id)
+          .then((res) => {
+            const item = res.data?.item as Record<string, unknown> | undefined;
+            return item ? mapZohoToShopProduct(item) : null;
+          })
+          .catch(() => null)
+      )
+    )
+      .then((results) => setWishlisted(results.filter(Boolean) as ShopProduct[]))
+      .finally(() => setLoadingProducts(false));
+  }, [favourites, favLoading]);
+
+  const isLoading = favLoading || loadingProducts;
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {loading ? 'Loading…' : `${wishlisted.length} ${wishlisted.length === 1 ? 'item' : 'items'} saved`}
+          {isLoading ? 'Loading…' : `${wishlisted.length} ${wishlisted.length === 1 ? 'item' : 'items'} saved`}
         </p>
-        {!loading && wishlisted.length > 0 && (
+        {!isLoading && wishlisted.length > 0 && (
           <div className="flex items-center gap-1">
             <button
               onClick={() => setViewMode('grid')}
@@ -37,7 +68,19 @@ const MyWishlist = () => {
         )}
       </div>
 
-      {!loading && wishlisted.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: favourites.length || 4 }).map((_, i) => (
+            <div key={i} className="animate-pulse border border-border/40 bg-card">
+              <div className="aspect-square bg-foreground/5" />
+              <div className="px-3 pb-3 pt-2 space-y-2">
+                <div className="h-3 w-3/4 rounded bg-foreground/10" />
+                <div className="h-3 w-1/2 rounded bg-foreground/10" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : wishlisted.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Heart className="h-12 w-12 text-muted-foreground/30 mb-4" />
           <p className="text-lg font-medium text-foreground mb-1">Your wishlist is empty</p>
@@ -57,7 +100,7 @@ const MyWishlist = () => {
           : 'flex flex-col gap-3'
         }>
           {wishlisted.map(product => (
-            <ShopProductCard key={product.id} product={product} listView={viewMode === 'list'} />
+            <ShopProductCard key={product.id} product={product} listView={viewMode === 'list'} onAddToBag={handleAddToBag} />
           ))}
         </div>
       )}

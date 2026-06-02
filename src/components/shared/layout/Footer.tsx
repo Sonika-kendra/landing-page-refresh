@@ -174,14 +174,14 @@ const Footer = () => {
                   Blogs
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   to={websiteUrlConfig.Careers}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Careers
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
                   to={websiteUrlConfig.Careers}
