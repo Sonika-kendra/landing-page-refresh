@@ -15,15 +15,13 @@ const AdminEmailEditor = () => {
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState('');
 
-  const onLoad = useCallback(async () => {
+  const onReady = useCallback(async () => {
     if (!id) return;
     try {
       const res = await adminApi.getEmailTemplateById(id);
-      const fields = res.data.fields as Record<string, unknown>;
-      setName((fields?.name as string) || 'New Template');
-      const design = fields?.design;
-      if (design && emailEditorRef.current?.editor) {
-        emailEditorRef.current.editor.loadDesign(design as object);
+      setName(res.data.name || 'New Template');
+      if (res.data.design && emailEditorRef.current?.editor) {
+        emailEditorRef.current.editor.loadDesign(res.data.design as object);
       }
     } catch {
       toast.error('Failed to load template');
@@ -72,7 +70,7 @@ const AdminEmailEditor = () => {
       />
       <EmailEditor
         ref={emailEditorRef}
-        onLoad={onLoad}
+        onReady={onReady}
         options={{ displayMode: 'email' }}
         style={{ height: '80vh', borderRadius: '4px', overflow: 'hidden' }}
       />

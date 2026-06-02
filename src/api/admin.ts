@@ -63,6 +63,16 @@ export interface SiteConfig {
   updatedAt: string;
 }
 
+export interface EmailTemplateDoc {
+  _id: string;
+  name: string;
+  subject: string;
+  html: string;
+  design: object | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type UserStatus = 'draft' | 'pending' | 'approved' | 'inactive' | 'blocked' | 'rejected';
 
 export interface UserStatusLogEntry {
@@ -241,37 +251,45 @@ export const adminApi = {
     ),
 
   getAllEmailTemplates: () =>
-    apiClient.get<SiteConfig[]>(
-      API_CONFIG.adminConfigs.endpoints.emailTemplates,
+    apiClient.get<EmailTemplateDoc[]>(
+      API_CONFIG.adminEmailTemplates.endpoints.all,
       undefined,
       undefined,
       false,
-      API_CONFIG.adminConfigs.base
+      API_CONFIG.adminEmailTemplates.base
     ),
 
   getEmailTemplateById: (id: string) =>
-    apiClient.get<SiteConfig>(
-      API_CONFIG.adminConfigs.endpoints.config(id),
+    apiClient.get<EmailTemplateDoc>(
+      API_CONFIG.adminEmailTemplates.endpoints.byId(id),
       undefined,
       undefined,
       false,
-      API_CONFIG.adminConfigs.base
+      API_CONFIG.adminEmailTemplates.base
     ),
 
   createEmailTemplate: (name = 'New Template') =>
-    apiClient.post<SiteConfig>(
-      API_CONFIG.adminConfigs.endpoints.create,
-      { type: 'email_template', fields: { name } },
+    apiClient.post<EmailTemplateDoc>(
+      API_CONFIG.adminEmailTemplates.endpoints.create,
+      { name },
       undefined,
-      API_CONFIG.adminConfigs.base
+      API_CONFIG.adminEmailTemplates.base
     ),
 
-  saveEmailTemplate: (id: string, design: object, html: string, name?: string) =>
-    apiClient.patch<SiteConfig>(
-      API_CONFIG.adminConfigs.endpoints.update(id),
-      { type: 'email_template', fields: { ...(name !== undefined && { name }), design, html } },
+  saveEmailTemplate: (id: string, design: object, html: string, name?: string, subject?: string) =>
+    apiClient.patch<EmailTemplateDoc>(
+      API_CONFIG.adminEmailTemplates.endpoints.byId(id),
+      { ...(name !== undefined && { name }), ...(subject !== undefined && { subject }), design, html },
       undefined,
-      API_CONFIG.adminConfigs.base
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  deleteEmailTemplate: (id: string) =>
+    apiClient.delete<{ message: string }>(
+      API_CONFIG.adminEmailTemplates.endpoints.byId(id),
+      undefined,
+      undefined,
+      API_CONFIG.adminEmailTemplates.base
     ),
 
   deleteConfig: (id: string) =>

@@ -70,6 +70,7 @@ const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-ret
 const QualityPolicy = lazy(() => import('@/features/quality-policy'));
 const CookiesPolicy = lazy(() => import('@/features/cookies-policy'));
 const Wishlist = lazy(() => import('@/features/wishlist'));
+const SitemapPage = lazy(() => import('@/features/sitemap'));
 const NotFound = lazy(() => import('@/features/not-found'));
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ const AppRoutes = () => (
         <Route path={websiteUrlConfig.CancellationReturnsPolicy} element={<CancellationReturnsPolicy />} />
         <Route path={websiteUrlConfig.QualityPolicy} element={<QualityPolicy />} />
         <Route path={websiteUrlConfig.CookiesPolicy} element={<CookiesPolicy />} />
+        <Route path={websiteUrlConfig.Sitemap} element={<SitemapPage />} />
         <Route path="/admin" element={<AdminErrorBoundary><AdminLayout /></AdminErrorBoundary>}>
           <Route index element={<AdminDashboard />} />
           <Route path="draft"     element={<AdminDraftUsers />} />

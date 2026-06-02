@@ -190,6 +190,14 @@ const Footer = () => {
                   Warranty Policy
                 </Link>
               </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.Sitemap}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Sitemap
+                </Link>
+              </li>
             </ul>
           </div>
 

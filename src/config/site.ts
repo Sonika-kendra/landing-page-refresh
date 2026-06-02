@@ -8,6 +8,7 @@ export const websiteUrlConfig = {
     Blogs: `/blogs`,
     Careers: `/careers`,
     Contact: `/contact`,
+    Sitemap: `/sitemap`,
     TermsAndConditions: `/terms-and-conditions`,
     PrivacyPolicy: `/privacy-policy`,
     CancellationReturnsPolicy: `/cancellation-returns-policy`,

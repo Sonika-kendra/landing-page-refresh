@@ -84,8 +84,16 @@ export const API_CONFIG = {
       update: (id: string) => `/configs/${id}`,
       delete: (id: string) => `/configs/${id}`,
       create: '/configs',
-      emailTemplate: '/configs/email-template',
-      emailTemplates: '/configs/email-templates',
+    },
+  },
+
+  adminEmailTemplates: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      all: '/email-templates/all',
+      list: '/email-templates',
+      byId: (id: string) => `/email-templates/${id}`,
+      create: '/email-templates',
     },
   },
 
