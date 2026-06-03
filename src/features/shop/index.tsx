@@ -399,8 +399,12 @@ const FilterSidebarContent = ({
   </div>
 );
 
+type CurrencyOption = { currency_code: string; currency_symbol: string; currency_name: string; is_base_currency: boolean };
+
 const ShopPage = () => {
   const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
+  const [currencyCode, setCurrencyCode] = useState('GBP');
   const [currencySymbol, setCurrencySymbol] = useState('£');
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -416,8 +420,15 @@ const ShopPage = () => {
 
   useEffect(() => {
     productsApi.getCurrency()
-      .then((res) => { if (res.data?.currency_symbol) setCurrencySymbol(res.data.currency_symbol) })
-      .catch(() => { /* keep default £ */ });
+      .then((res) => {
+        if (res.data?.currency_symbol) setCurrencySymbol(res.data.currency_symbol);
+        if (res.data?.currency_code) setCurrencyCode(res.data.currency_code);
+      })
+      .catch(() => { /* keep default £ / GBP */ });
+
+    productsApi.getCurrencies()
+      .then((res) => { if (res.data?.currencies?.length) setCurrencies(res.data.currencies) })
+      .catch(() => { /* keep empty, dropdown won't show */ });
   }, []);
 
   useEffect(() => {
@@ -662,6 +673,25 @@ const ShopPage = () => {
             <span className="ml-auto text-sm text-foreground/55">
               {filtered.length.toLocaleString()}{hasMorePage ? '+' : ''} {filtered.length === 1 ? 'result' : 'results'}
             </span>
+            {currencies.length > 0 && (
+              <select
+                value={currencyCode}
+                onChange={(e) => {
+                  const selected = currencies.find(c => c.currency_code === e.target.value);
+                  if (selected) {
+                    setCurrencyCode(selected.currency_code);
+                    setCurrencySymbol(selected.currency_symbol);
+                  }
+                }}
+                className="h-10 rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
+              >
+                {currencies.map(c => (
+                  <option key={c.currency_code} value={c.currency_code}>
+                    {c.currency_code} {c.currency_symbol}
+                  </option>
+                ))}
+              </select>
+            )}
             {hasActiveFilters && (
               <button
                 type="button"

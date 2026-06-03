@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings2 } from 'lucide-react';
+import { Settings2, Plus, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -14,9 +16,266 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { adminApi, SiteConfig } from '@/api/admin';
+import { announcementBar as staticConfig } from '@/config/theme';
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type AnnStyle = 'normal' | 'bold' | 'italic' | 'bold-italic';
+interface AnnMsg { text: string; link?: string; style?: AnnStyle }
+
+// Normalise whatever is stored in the DB (plain string or object) to AnnMsg
+const toAnnMsg = (raw: unknown): AnnMsg =>
+  typeof raw === 'string' ? { text: raw } : (raw as AnnMsg);
+
+// Strip outer <p> wrapper TinyMCE adds so we store clean inline HTML
+const cleanHtml = (html: string) =>
+  html.replace(/^<p[^>]*>([\s\S]*?)<\/p>$/i, '$1').trim();
+
+// Strip all tags for list preview
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').trim();
+
+// Convert legacy { text, link, style } to HTML for the editor initial value
+const legacyToHtml = (msg: AnnMsg): string => {
+  let content = msg.text;
+  if (msg.style === 'bold') content = `<strong>${content}</strong>`;
+  else if (msg.style === 'italic') content = `<em>${content}</em>`;
+  else if (msg.style === 'bold-italic') content = `<strong><em>${content}</em></strong>`;
+  if (msg.link) content = `<a href="${msg.link}" target="_blank" rel="noopener noreferrer">${content}</a>`;
+  return content;
+};
+
+// ── Announcement Bar Manager ──────────────────────────────────────────────────
+
+interface AnnouncementManagerProps {
+  config: SiteConfig | null;
+  isLoading: boolean;
+}
+
+const AnnouncementManager = ({ config, isLoading }: AnnouncementManagerProps) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Track the DB _id in a ref so subsequent saves use update without waiting
+  // for the parent query to refetch after the initial create.
+  const configIdRef = useRef<string | null>(config?._id ?? null);
+
+  const initEnabled = config?.fields?.enabled !== undefined
+    ? (config.fields.enabled as boolean)
+    : staticConfig.enabled;
+
+  const initMessages: AnnMsg[] = Array.isArray(config?.fields?.messages)
+    ? (config!.fields.messages as unknown[]).map(toAnnMsg)
+    : staticConfig.messages.map(t => ({ text: t }));
+
+  const [enabled, setEnabled] = useState(initEnabled);
+  const [messages, setMessages] = useState<AnnMsg[]>(initMessages);
+
+  // New-message form
+  const [newHtml, setNewHtml] = useState('');
+  const [addKey, setAddKey] = useState(0);
+
+  // Inline edit state
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editHtml, setEditHtml] = useState('');
+
+  useEffect(() => {
+    if (!config?._id || config._id === configIdRef.current) return;
+    // First time a real DB config is loaded — sync local state so subsequent
+    // saves don't clobber the DB with stale staticConfig fallback values.
+    configIdRef.current = config._id;
+    setEnabled(
+      config.fields.enabled !== undefined
+        ? (config.fields.enabled as boolean)
+        : staticConfig.enabled
+    );
+    setMessages(
+      Array.isArray(config.fields.messages)
+        ? (config.fields.messages as unknown[]).map(toAnnMsg)
+        : staticConfig.messages.map(t => ({ text: t }))
+    );
+  }, [config?._id]);
+
+  const saveMutation = useMutation({
+    mutationFn: (data: { enabled: boolean; messages: AnnMsg[] }) => {
+      const id = configIdRef.current;
+      if (id) {
+        return adminApi.updateConfig(id, { type: 'announcement_bar', fields: data });
+      }
+      return adminApi.createConfig({ type: 'announcement_bar', fields: data });
+    },
+    onSuccess: (res) => {
+      configIdRef.current = res.data._id;
+      queryClient.invalidateQueries({ queryKey: ['admin', 'configs'] });
+      toast({ title: 'Saved' });
+    },
+    onError: (err: any) => {
+      const detail = err?.response?.data?.errors?.msg || err?.message || 'Unknown error';
+      toast({ title: 'Save failed', description: String(detail), variant: 'destructive' });
+    },
+  });
+
+  const persist = (nextEnabled: boolean, nextMessages: AnnMsg[]) => {
+    saveMutation.mutate({ enabled: nextEnabled, messages: nextMessages });
+  };
+
+  const handleToggle = (val: boolean) => {
+    setEnabled(val);
+    persist(val, messages);
+  };
+
+  const handleAddMessage = () => {
+    const html = cleanHtml(newHtml);
+    if (!html) return;
+    const updated = [...messages, { text: html }];
+    setMessages(updated);
+    setNewHtml('');
+    setAddKey(k => k + 1);
+    persist(enabled, updated);
+  };
+
+  const handleRemoveMessage = (index: number) => {
+    const updated = messages.filter((_, i) => i !== index);
+    setMessages(updated);
+    persist(enabled, updated);
+  };
+
+  const handleStartEdit = (index: number) => {
+    const msg = messages[index];
+    // Convert legacy format to HTML for the editor
+    const html = (msg.link || msg.style) ? legacyToHtml(msg) : msg.text;
+    setEditHtml(html);
+    setEditingIndex(index);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingIndex === null) return;
+    const html = cleanHtml(editHtml);
+    const updated = [...messages];
+    updated[editingIndex] = { text: html || updated[editingIndex].text };
+    setMessages(updated);
+    setEditingIndex(null);
+    persist(enabled, updated);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bg-background rounded-sm border border-border p-5 space-y-3">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background rounded-sm border border-border p-5 space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-medium tracking-widest uppercase">Announcement Bar</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Changes are saved automatically.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {saveMutation.isPending && (
+            <span className="text-[10px] text-muted-foreground tracking-wider">Saving…</span>
+          )}
+          <Label htmlFor="ann-enabled" className="text-xs text-muted-foreground">
+            {enabled ? 'Enabled' : 'Disabled'}
+          </Label>
+          <Switch
+            id="ann-enabled"
+            checked={enabled}
+            onCheckedChange={handleToggle}
+            disabled={saveMutation.isPending}
+          />
+        </div>
+      </div>
+
+      {/* Messages list */}
+      <div className="space-y-2">
+        <Label className="text-xs tracking-wider uppercase text-muted-foreground">Messages</Label>
+
+        {messages.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-sm">
+            No messages yet. Add one below.
+          </p>
+        ) : (
+          <div className="space-y-1.5">
+            {messages.map((msg, i) => (
+              <div key={i} className="bg-muted/30 rounded-sm px-3 py-2 group">
+                {editingIndex === i ? (
+                  <div className="space-y-1.5">
+                    <TiptapEditor
+                      key={`edit-${i}`}
+                      initialValue={editHtml}
+                      onChange={setEditHtml}
+                    />
+                    <div className="flex gap-1.5 justify-end">
+                      <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setEditingIndex(null)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={handleSaveEdit}>
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                    <div
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => handleStartEdit(i)}
+                      title="Click to edit"
+                    >
+                      <p className="text-xs truncate hover:text-primary transition-colors">
+                        {stripHtml(msg.text) || msg.text}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                      onClick={() => handleRemoveMessage(i)}
+                      disabled={saveMutation.isPending}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add message */}
+      <div className="pt-1 border-t border-border space-y-1.5">
+        <Label className="text-xs tracking-wider uppercase text-muted-foreground">Add Message</Label>
+        <TiptapEditor
+          key={addKey}
+          initialValue=""
+          onChange={setNewHtml}
+        />
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8"
+            onClick={handleAddMessage}
+            disabled={!cleanHtml(newHtml) || saveMutation.isPending}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            Add
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Settings Page ────────────────────────────────────────────────────────
 
 const Settings = () => {
   const queryClient = useQueryClient();
@@ -30,6 +289,10 @@ const Settings = () => {
     queryKey: ['admin', 'configs'],
     queryFn: () => adminApi.getConfigs().then(r => r.data),
   });
+
+  // Separate announcement_bar from the generic list
+  const annConfig = configs.find(c => c.type === 'announcement_bar') ?? null;
+  const otherConfigs = configs.filter(c => c.type !== 'announcement_bar');
 
   const openEdit = (config: SiteConfig) => {
     setEditConfig(config);
@@ -50,7 +313,8 @@ const Settings = () => {
   const saveMutation = useMutation({
     mutationFn: () => {
       const fields = JSON.parse(jsonText);
-      return adminApi.updateConfig(editConfig!._id, { fields });
+      // Pass type — backend validator requires it in the PATCH body
+      return adminApi.updateConfig(editConfig!._id, { type: editConfig!.type, fields });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'configs'] });
@@ -70,16 +334,20 @@ const Settings = () => {
         </p>
       </div>
 
+      {/* Announcement Bar — dedicated UI */}
+      <AnnouncementManager config={annConfig} isLoading={isLoading} />
+
+      {/* Generic configs */}
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
-      ) : configs.length === 0 ? (
+      ) : otherConfigs.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <Settings2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">No configurations found.</p>
+          <p className="text-sm">No other configurations found.</p>
         </div>
       ) : (
         <div className="bg-background rounded-sm border border-border overflow-hidden">
@@ -89,7 +357,7 @@ const Settings = () => {
             <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Edit</span>
           </div>
 
-          {configs.map(config => (
+          {otherConfigs.map(config => (
             <div
               key={config._id}
               className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-4 py-3.5 border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
@@ -102,7 +370,7 @@ const Settings = () => {
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs text-muted-foreground whitespace-nowrap">
-                  {formatDate(config.updatedAt)}
+                  {config.updatedAt ? formatDate(config.updatedAt) : '—'}
                 </p>
               </div>
               <Button

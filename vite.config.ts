@@ -4,7 +4,7 @@ import path from "path";
 import sitemap from "vite-plugin-sitemap";
 
 // https://vitejs.dev/config/
-export default defineConfig(async ({ mode }) => {
+export default defineConfig(() => {
   const sitemapRoutes = [
     "/new",
     "/new/diamonds",
@@ -31,15 +31,6 @@ export default defineConfig(async ({ mode }) => {
       generateRobotsTxt: false,
     }),
   ];
-
-  if (mode === "development") {
-    try {
-      const { componentTagger } = await import("lovable-tagger");
-      plugins.push(componentTagger());
-    } catch {
-      // Lovable's component tagger is a local editor helper and is optional.
-    }
-  }
 
   return {
     base: "/new",

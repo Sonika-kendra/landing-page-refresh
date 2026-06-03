@@ -7,6 +7,9 @@ export const productsApi = {
   list: (params?: { page?: number; per_page?: number; search?: string; category_id?: string; category?: string; status?: string; bestseller?: boolean; new_arrival?: boolean }) =>
     client.get(ep.all, params, undefined, false, base),
 
+  getCurrencies: () =>
+    client.get<{ ok: boolean; currencies: { currency_code: string; currency_symbol: string; currency_name: string; is_base_currency: boolean }[] }>(ep.currencies, undefined, undefined, false, base),
+
   getCurrency: () =>
     client.get<{ ok: boolean; currency_symbol: string; currency_code: string }>(ep.currency, undefined, undefined, false, base),
 

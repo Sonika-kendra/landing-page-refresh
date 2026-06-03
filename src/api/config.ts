@@ -84,6 +84,7 @@ export const API_CONFIG = {
       update: (id: string) => `/configs/${id}`,
       delete: (id: string) => `/configs/${id}`,
       create: '/configs',
+      announcementBar: '/configs/announcement-bar',
     },
   },
 
@@ -125,6 +126,7 @@ export const API_CONFIG = {
     base: 'new' as ApiBase,
     endpoints: {
       all: '/products',
+      currencies: '/products/currencies',
       currency: '/products/currency',
       one: (id: string) => `/products/${id}`,
       create: '/products',

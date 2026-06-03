@@ -250,6 +250,23 @@ export const adminApi = {
       API_CONFIG.adminConfigs.base
     ),
 
+  createConfig: (data: { type: string; fields: Record<string, unknown> }) =>
+    apiClient.post<SiteConfig>(
+      API_CONFIG.adminConfigs.endpoints.create,
+      data,
+      undefined,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  getAnnouncementBar: () =>
+    apiClient.get<SiteConfig | null>(
+      API_CONFIG.adminConfigs.endpoints.announcementBar,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminConfigs.base
+    ),
+
   getAllEmailTemplates: () =>
     apiClient.get<EmailTemplateDoc[]>(
       API_CONFIG.adminEmailTemplates.endpoints.all,
