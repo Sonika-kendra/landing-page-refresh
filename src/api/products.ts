@@ -7,7 +7,8 @@ export const productsApi = {
   list: (params?: {
     page?: number; per_page?: number; status?: string;
     category_id?: string; category?: string;
-    sub_category?: string; metal?: string; shape?: string;
+    sub_category?: string; cf_sub_category?: string; cf_sub_category_type?: string;
+    metal?: string; shape?: string;
     stock_type?: string; in_stock?: string;
     price_min?: number; price_max?: number;
     search?: string; sort?: string; currency?: string;
@@ -20,6 +21,9 @@ export const productsApi = {
 
   getCurrency: () =>
     client.get<{ ok: boolean; currency_symbol: string; currency_code: string }>(ep.currency, undefined, undefined, false, base),
+
+  getSubcategories: (params?: { category?: string }) =>
+    client.get<{ ok: boolean; subcategories: Record<string, string[]> }>(ep.subcategories, params, undefined, false, base),
 
   getOne: (id: string) =>
     client.get(ep.one(id), undefined, undefined, false, base),

@@ -128,6 +128,7 @@ export const API_CONFIG = {
       all: '/products',
       currencies: '/products/currencies',
       currency: '/products/currency',
+      subcategories: '/products/subcategories',
       one: (id: string) => `/products/${id}`,
       create: '/products',
       update: (id: string) => `/products/${id}`,

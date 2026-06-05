@@ -13,9 +13,10 @@ interface Suggestion {
 
 interface YouMayAlsoLikeProps {
   items: Suggestion[];
+  hasActiveFilters?: boolean;
 }
 
-const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
+const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
   return (
     <section className="border-t border-border/30 bg-gray-50 py-12 md:py-16">
       <div className="henig-container">
@@ -26,6 +27,11 @@ const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
           </h2>
           <div className="h-px flex-1 bg-foreground/20" />
         </div>
+        {hasActiveFilters && (
+          <p className="-mt-4 mb-6 text-center text-xs tracking-wider text-foreground/45 uppercase">
+            Not affected by your active filters
+          </p>
+        )}
 
         <div className="relative px-12">
           <Carousel opts={{ align: "start" }}>

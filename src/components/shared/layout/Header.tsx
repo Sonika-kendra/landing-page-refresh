@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, ChevronDown, User, LogOut, Heart, ShoppingBag,
@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/theme';
 import { websiteUrlConfig } from '@/config/site';
+import { productsApi } from '@/api/products';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useFavourites } from '@/context/FavouritesContext';
@@ -131,6 +132,13 @@ const Header = () => {
   const [adminPanelExpanded, setAdminPanelExpanded] = useState(false);
   const adminHoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [jewellerySubcats, setJewellerySubcats] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    productsApi.getSubcategories({ category: 'Jewellery' })
+      .then((res) => { if (res.data?.subcategories) setJewellerySubcats(res.data.subcategories); })
+      .catch(() => { /* fall back to static nav */ });
+  }, []);
 
   const handleAdminEnter = () => {
     if (adminHoverTimeout.current) clearTimeout(adminHoverTimeout.current);
@@ -168,6 +176,28 @@ const Header = () => {
   const activeLink = navigationLinks.find(
     (link) => link.label === activeMegaMenu
   );
+
+  const megaMenuCategories = useMemo(() => {
+    if (!activeLink || !('categories' in activeLink)) return [];
+    if (activeLink.label !== 'Jewellery' || !Object.keys(jewellerySubcats).length) {
+      return activeLink.categories;
+    }
+    const byCategory = {
+      ...activeLink.categories[0],
+      links: activeLink.categories[0].links.map((link) => ({
+        ...link,
+        href: `${websiteUrlConfig.Jewellery.All}?cf_sub_category=${encodeURIComponent(link.label)}`,
+      })),
+    };
+    const dynamicCols = Object.entries(jewellerySubcats).map(([subcat, types]) => ({
+      title: subcat,
+      links: types.map((type) => ({
+        label: type,
+        href: `${websiteUrlConfig.Jewellery.All}?cf_sub_category=${encodeURIComponent(subcat)}&cf_sub_category_type=${encodeURIComponent(type)}`,
+      })),
+    }));
+    return [byCategory, ...dynamicCols];
+  }, [activeLink, jewellerySubcats]);
 
   const toggleMobileSubmenu = (menuId: string) => {
     setOpenMobileMenus((prev) => ({
@@ -580,7 +610,7 @@ const Header = () => {
           >
             <div className="henig-container py-10">
               <div className="grid grid-cols-4 lg:grid-cols-5 gap-10">
-                {activeLink.categories.map((category) => (
+                {megaMenuCategories.map((category) => (
                   <div key={category.title}>
                     <h3 className="text-sm font-bold uppercase tracking-wider mb-4">
                       {category.title}

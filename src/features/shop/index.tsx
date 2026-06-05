@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { productsApi } from '@/api/products';
 import { ArrowRight, ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
@@ -47,7 +48,7 @@ const shopSort = {
   defaultValue: 'price-asc',
 };
 
-type FilterTabKey = 'category' | 'subCategory' | 'metal' | 'shape' | 'stockType' | 'price' | 'inStock';
+type FilterTabKey = 'category' | 'subCategory' | 'cfSubCategory' | 'cfSubCategoryType' | 'metal' | 'shape' | 'stockType' | 'price' | 'inStock';
 type VisualFilterValue = string | [number, number];
 type FilterChangeHandler = (key: string, value: string | string[] | [number, number]) => void;
 
@@ -131,6 +132,8 @@ const defaultValues: FilterValues = {
   search: '',
   category: '',
   subCategory: '',
+  cfSubCategory: '',
+  cfSubCategoryType: '',
   metal: '',
   shape: '',
   stockType: '',
@@ -400,6 +403,7 @@ const FilterSidebarContent = ({
 type CurrencyOption = { currency_code: string; currency_symbol: string; currency_name: string; is_base_currency: boolean };
 
 const ShopPage = () => {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
@@ -413,6 +417,20 @@ const ShopPage = () => {
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['category']);
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
+
+  // Sync filter state from URL params (set by mega menu links)
+  useEffect(() => {
+    const cfSubCategory = searchParams.get('cf_sub_category');
+    const cfSubCategoryType = searchParams.get('cf_sub_category_type');
+    if (cfSubCategory || cfSubCategoryType) {
+      setFilterValues({
+        ...defaultValues,
+        ...(cfSubCategory ? { cfSubCategory } : {}),
+        ...(cfSubCategoryType ? { cfSubCategoryType } : {}),
+      });
+      setPage(1);
+    }
+  }, [searchParams]);
 
   // Debounce search so we don't fire a request on every keystroke
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -452,6 +470,10 @@ const ShopPage = () => {
 
     if (typeof filterValues.subCategory === 'string' && filterValues.subCategory)
       params.sub_category = filterValues.subCategory;
+    if (typeof filterValues.cfSubCategory === 'string' && filterValues.cfSubCategory)
+      params.cf_sub_category = filterValues.cfSubCategory;
+    if (typeof filterValues.cfSubCategoryType === 'string' && filterValues.cfSubCategoryType)
+      params.cf_sub_category_type = filterValues.cfSubCategoryType;
     if (typeof filterValues.metal === 'string' && filterValues.metal)
       params.metal = filterValues.metal;
     if (typeof filterValues.shape === 'string' && filterValues.shape)
@@ -483,7 +505,8 @@ const ShopPage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedCategory, page, currencySymbol, sortBy, debouncedSearch,
-    filterValues.subCategory, filterValues.metal, filterValues.shape,
+    filterValues.subCategory, filterValues.cfSubCategory, filterValues.cfSubCategoryType,
+    filterValues.metal, filterValues.shape,
     filterValues.stockType, filterValues.inStock, filterValues.price,
   ]);
 
@@ -502,12 +525,14 @@ const ShopPage = () => {
 
 
   const hasActiveFilters = useMemo(() => {
-    const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
+    const { search, category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, stockType, price, inStock } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
     return Boolean(
       (typeof search === 'string' && search.trim()) ||
       category ||
       subCategory ||
+      cfSubCategory ||
+      cfSubCategoryType ||
       metal ||
       (typeof shape === 'string' && shape) ||
       (Array.isArray(shape) && shape.length > 0) ||
@@ -523,6 +548,10 @@ const ShopPage = () => {
       chips.push({ key: 'category', label: filterValues.category });
     if (typeof filterValues.subCategory === 'string' && filterValues.subCategory)
       chips.push({ key: 'subCategory', label: filterValues.subCategory });
+    if (typeof filterValues.cfSubCategory === 'string' && filterValues.cfSubCategory)
+      chips.push({ key: 'cfSubCategory', label: filterValues.cfSubCategory as string });
+    if (typeof filterValues.cfSubCategoryType === 'string' && filterValues.cfSubCategoryType)
+      chips.push({ key: 'cfSubCategoryType', label: filterValues.cfSubCategoryType as string });
     if (typeof filterValues.metal === 'string' && filterValues.metal)
       chips.push({ key: 'metal', label: getMetalType(filterValues.metal).name });
     if (typeof filterValues.shape === 'string' && filterValues.shape)
@@ -765,7 +794,7 @@ const ShopPage = () => {
         </div>
       </section>
 
-      <YouMayAlsoLike items={youMayAlsoLike} />
+      <YouMayAlsoLike items={youMayAlsoLike} hasActiveFilters={hasActiveFilters} />
       <CommitmentSection />
 
       <button
