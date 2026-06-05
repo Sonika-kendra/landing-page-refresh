@@ -4,7 +4,15 @@ import { API_CONFIG } from './config';
 const { base, endpoints: ep } = API_CONFIG.products;
 
 export const productsApi = {
-  list: (params?: { page?: number; per_page?: number; search?: string; category_id?: string; category?: string; status?: string; bestseller?: boolean; new_arrival?: boolean }) =>
+  list: (params?: {
+    page?: number; per_page?: number; status?: string;
+    category_id?: string; category?: string;
+    sub_category?: string; metal?: string; shape?: string;
+    stock_type?: string; in_stock?: string;
+    price_min?: number; price_max?: number;
+    search?: string; sort?: string; currency?: string;
+    bestseller?: boolean; new_arrival?: boolean;
+  }) =>
     client.get(ep.all, params, undefined, false, base),
 
   getCurrencies: () =>

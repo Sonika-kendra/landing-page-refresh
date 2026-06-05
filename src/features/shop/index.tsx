@@ -19,7 +19,6 @@ import {
   youMayAlsoLike,
 } from '@/data/shop/products';
 import type { ShopProduct } from '@/data/shop/products';
-import { mapZohoToShopProduct } from '@/data/shop/mappers';
 import ringImage from '@/assets/jewellery/category/ring.png';
 import braceletImage from '@/assets/jewellery/category/Bracelet.png';
 import earringsImage from '@/assets/jewellery/category/earrings.png';
@@ -403,6 +402,7 @@ type CurrencyOption = { currency_code: string; currency_symbol: string; currency
 
 const ShopPage = () => {
   const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [total, setTotal] = useState(0);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
   const [currencyCode, setCurrencyCode] = useState('GBP');
   const [currencySymbol, setCurrencySymbol] = useState('£');
@@ -414,7 +414,13 @@ const ShopPage = () => {
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [hasMorePage, setHasMorePage] = useState(false);
+
+  // Debounce search so we don't fire a request on every keystroke
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(typeof filterValues.search === 'string' ? filterValues.search : ''), 400);
+    return () => clearTimeout(t);
+  }, [filterValues.search]);
 
   const selectedCategory = typeof filterValues.category === 'string' ? filterValues.category : '';
 
@@ -434,42 +440,52 @@ const ShopPage = () => {
   useEffect(() => {
     setIsLoading(true);
     setFetchError(null);
-    productsApi.list({
+
+    const params: Record<string, unknown> = {
       per_page: pageSize,
       page,
       status: 'active',
-      // Always restrict to Jewellery — falls back to the user-selected sub-category
-      // (Rings / Earrings / etc.) when one is chosen in the filter sidebar.
       category: selectedCategory || 'Jewellery',
-    })
+      sort: sortBy,
+      currency: currencySymbol,
+    };
+
+    if (typeof filterValues.subCategory === 'string' && filterValues.subCategory)
+      params.sub_category = filterValues.subCategory;
+    if (typeof filterValues.metal === 'string' && filterValues.metal)
+      params.metal = filterValues.metal;
+    if (typeof filterValues.shape === 'string' && filterValues.shape)
+      params.shape = filterValues.shape;
+    if (typeof filterValues.stockType === 'string' && filterValues.stockType)
+      params.stock_type = filterValues.stockType;
+    if (filterValues.inStock === 'true')
+      params.in_stock = 'true';
+    if (debouncedSearch)
+      params.search = debouncedSearch;
+    if (Array.isArray(filterValues.price)) {
+      const [lo, hi] = filterValues.price as [number, number];
+      if (lo > DEFAULT_PRICE_RANGE[0]) params.price_min = lo;
+      if (hi < DEFAULT_PRICE_RANGE[1]) params.price_max = hi;
+    }
+
+    productsApi.list(params as Parameters<typeof productsApi.list>[0])
       .then((res) => {
-        const raw = (res.data?.items ?? []) as Record<string, unknown>[];
-        setHasMorePage(res.data?.page_context?.has_more_page ?? false);
-        if (import.meta.env.DEV && raw.length > 0) {
-          const cats = [...new Set(raw.map((i) => i.cf_stock_category))];
-          console.log('[Shop] cf_stock_category values returned:', cats);
-          console.log('[Shop] Zoho item field reference (first item):', raw[0]);
-          console.log('[Shop] page_context:', res.data?.page_context);
-          // Debug: log all metal-related fields from first item
-          const first = raw[0];
-          const metalKeys = Object.keys(first).filter(k => /metal|colour|color/i.test(k));
-          console.log('[Shop] Metal-related fields on item:', Object.fromEntries(metalKeys.map(k => [k, first[k]])));
-        }
-        // Category filtering is handled server-side (cf_stock_category param).
-        // No client-side category exclusion needed here.
-        const mapped = raw.map((item) => mapZohoToShopProduct(item, currencySymbol));
-        setProducts(mapped);
+        const items = (res.data?.items ?? []) as ShopProduct[];
+        setTotal(res.data?.page_context?.total ?? items.length);
+        setProducts(items);
       })
       .catch((err) => {
         console.error('[Shop] Failed to load products:', err);
         setFetchError('Unable to load products right now. Please try again later.');
       })
       .finally(() => setIsLoading(false));
-  // Re-fetch from Zoho when category, page, page size, or currency changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, page, pageSize, currencySymbol]);
+  }, [
+    selectedCategory, page, pageSize, currencySymbol, sortBy, debouncedSearch,
+    filterValues.subCategory, filterValues.metal, filterValues.shape,
+    filterValues.stockType, filterValues.inStock, filterValues.price,
+  ]);
 
-  // Scroll to top whenever the page changes so the user sees new results from the top
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [page]);
@@ -487,35 +503,6 @@ const ShopPage = () => {
     setPage(1);
   }, []);
 
-  const filtered = useMemo(() => {
-    let result = [...products];
-    const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
-
-    if (search && typeof search === 'string' && search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
-      );
-    }
-    if (category) result = result.filter((p) => p.category === category);
-    if (subCategory) result = result.filter((p) => p.subCategory === subCategory);
-    if (metal) result = result.filter((p) => p.metalOptions.includes(metal));
-    if (typeof shape === 'string' && shape) result = result.filter((p) => p.shape === shape);
-    else if (Array.isArray(shape) && shape.length > 0)
-      result = result.filter((p) => (shape as string[]).includes(p.shape));
-    if (stockType) result = result.filter((p) => p.stockType === stockType);
-    if (inStock === 'true') result = result.filter((p) => (p.stock ?? 0) > 0);
-    if (Array.isArray(price) && typeof price[0] === 'number') {
-      const [lo, hi] = price as [number, number];
-      result = result.filter((p) => p.price >= lo && p.price <= hi);
-    }
-
-    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
-    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
-    else if (sortBy === 'name-asc') result.sort((a, b) => a.name.localeCompare(b.name));
-
-    return result;
-  }, [filterValues, sortBy, products]);
 
   const hasActiveFilters = useMemo(() => {
     const { search, category, subCategory, metal, shape, stockType, price, inStock } = filterValues;
@@ -560,10 +547,7 @@ const ShopPage = () => {
     return chips;
   }, [filterValues]);
 
-  // With server-side pagination the API returns exactly one page of results.
-  // Use has_more_page to know whether a next page exists; extend totalPages
-  // dynamically as the user navigates so the numbered buttons stay correct.
-  const totalPages = hasMorePage ? page + 1 : page;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -613,7 +597,7 @@ const ShopPage = () => {
                       type="button"
                       className="w-full rounded bg-accent py-3 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90"
                     >
-                      View {filtered.length.toLocaleString()}{hasMorePage ? '+' : ''} {filtered.length === 1 ? 'Product' : 'Products'}
+                      View {total.toLocaleString()}{total === 1 ? 'Product' : 'Products'}
                     </button>
                   </SheetClose>
                 </div>
@@ -672,7 +656,7 @@ const ShopPage = () => {
             </label>
 
             <span className="ml-auto text-sm text-foreground/55">
-              {filtered.length.toLocaleString()}{hasMorePage ? '+' : ''} {filtered.length === 1 ? 'result' : 'results'}
+              {total.toLocaleString()}{total === 1 ? 'result' : 'results'}
             </span>
             {currencies.length > 0 && (
               <select
@@ -765,7 +749,7 @@ const ShopPage = () => {
                   Reload page
                 </button>
               </div>
-            ) : filtered.length === 0 ? (
+            ) : total === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <p className="text-lg text-foreground/60">No products match your filters.</p>
                 <button
@@ -777,7 +761,7 @@ const ShopPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-                {filtered.map((product) => (
+                {products.map((product) => (
                   <ShopProductCard key={product.id} product={product} />
                 ))}
               </div>
