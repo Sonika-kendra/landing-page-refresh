@@ -457,7 +457,8 @@ const ShopPage = () => {
         }
         // Category filtering is handled server-side (cf_stock_category param).
         // No client-side category exclusion needed here.
-        setProducts(raw.map((item) => mapZohoToShopProduct(item, currencySymbol)));
+        const mapped = raw.map((item) => mapZohoToShopProduct(item, currencySymbol));
+        setProducts(mapped);
       })
       .catch((err) => {
         console.error('[Shop] Failed to load products:', err);
@@ -498,7 +499,7 @@ const ShopPage = () => {
     }
     if (category) result = result.filter((p) => p.category === category);
     if (subCategory) result = result.filter((p) => p.subCategory === subCategory);
-    if (metal) result = result.filter((p) => p.metal === metal);
+    if (metal) result = result.filter((p) => p.metalOptions.includes(metal));
     if (typeof shape === 'string' && shape) result = result.filter((p) => p.shape === shape);
     else if (Array.isArray(shape) && shape.length > 0)
       result = result.filter((p) => (shape as string[]).includes(p.shape));

@@ -1,11 +1,20 @@
 import { newApiURL } from '@/config/site';
 import type { ShopProduct } from './products';
 
-/** Try several custom-field name variants from a raw Zoho item. */
+/** Try several custom-field name variants from a raw Zoho item, including nested item_attributes. */
 export function getCf(item: Record<string, unknown>, ...names: string[]): string | undefined {
+  const attrs =
+    item.item_attributes != null && typeof item.item_attributes === 'object'
+      ? (item.item_attributes as Record<string, unknown>)
+      : null;
+
   for (const name of names) {
     if (item[`cf_${name}`] != null) return String(item[`cf_${name}`]);
     if (item[name] != null && typeof item[name] !== 'object') return String(item[name]);
+    if (attrs) {
+      if (attrs[`cf_${name}`] != null) return String(attrs[`cf_${name}`]);
+      if (attrs[name] != null && typeof attrs[name] !== 'object') return String(attrs[name]);
+    }
     if (Array.isArray(item.custom_fields)) {
       const f = (item.custom_fields as Array<{ api_name?: string; label?: string; value?: unknown }>)
         .find((cf) => cf.api_name === `cf_${name}` || cf.label?.toLowerCase().replace(/ /g, '_') === name);
@@ -28,10 +37,33 @@ function normaliseMetalCode(raw: string): string {
   return METAL_ALIASES[raw.toLowerCase().trim()] ?? raw.trim();
 }
 
+/** Combines a colour ("White Gold") and purity ("9 Kts") into a metal ID ("9K_WG"). */
+function buildMetalCode(colour: string, purity: string): string | null {
+  const c = colour.toLowerCase().trim();
+  const p = purity.toLowerCase().trim();
+
+  let karat = '';
+  if (p.includes('22')) karat = '22K';
+  else if (p.includes('18')) karat = '18K';
+  else if (p.includes('9')) karat = '9K';
+  else if (p.includes('pt') || p.includes('platinum')) return 'Pt950';
+
+  if (!karat) return null;
+
+  if (c.includes('yellow') || c === 'yg') return `${karat}_YG`;
+  if (c.includes('white') || c === 'wg') return `${karat}_WG`;
+  if (c.includes('rose') || c.includes('pink') || c === 'rg') return `${karat}_RG`;
+  return null;
+}
+
 export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '£'): ShopProduct {
-  const metalRaw = getCf(item, 'metal_colour', 'metal_color', 'metal_options', 'available_metals', 'metal_type', 'metal') ?? '';
-  const metalOptions = metalRaw
-    ? metalRaw.split(/[,;]/).map(normaliseMetalCode).filter(Boolean)
+  const metalColour = getCf(item, 'metal_colour', 'metal_color', 'metal_options', 'available_metals', 'metal_type', 'metal') ?? '';
+  const metalPurity = getCf(item, 'metal_purity') ?? '';
+  const metalOptions = metalColour
+    ? metalColour.split(/[,;]/).map((raw) => {
+        const combined = metalPurity ? buildMetalCode(raw, metalPurity) : null;
+        return combined ?? normaliseMetalCode(raw);
+      }).filter(Boolean)
     : [];
 
   const stock =
