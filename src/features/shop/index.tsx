@@ -37,6 +37,7 @@ import diamondsImage from '@/assets/diamonds-category.jpg';
 
 const PAGE_SIZE = 16;
 const DEFAULT_PRICE_RANGE: [number, number] = [0, 5000];
+const DEFAULT_CARAT_RANGE: [number, number] = [0, 99];
 
 const shopSort = {
   options: [
@@ -48,7 +49,7 @@ const shopSort = {
   defaultValue: 'price-asc',
 };
 
-type FilterTabKey = 'category' | 'subCategory' | 'cfSubCategory' | 'cfSubCategoryType' | 'metal' | 'shape' | 'stockType' | 'price' | 'inStock';
+type FilterTabKey = 'category' | 'subCategory' | 'cfSubCategory' | 'cfSubCategoryType' | 'metal' | 'shape' | 'stockType' | 'price' | 'inStock' | 'caratWeight' | 'ringSize' | 'certificate';
 type VisualFilterValue = string | [number, number];
 type FilterChangeHandler = (key: string, value: string | string[] | [number, number]) => void;
 
@@ -65,6 +66,9 @@ const filterTabs: { key: FilterTabKey; label: string }[] = [
   { key: 'metal', label: 'Metals' },
   { key: 'shape', label: 'Shapes' },
   { key: 'stockType', label: 'Stock Type' },
+  { key: 'caratWeight', label: 'Carat Weight' },
+  { key: 'ringSize', label: 'Ring Size' },
+  { key: 'certificate', label: 'Certificates' },
   { key: 'price', label: 'Price' },
 ];
 
@@ -125,6 +129,21 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: '£1,500+', value: [1500, 5000] },
     { label: 'All Prices', value: DEFAULT_PRICE_RANGE },
   ],
+  caratWeight: [
+    { label: 'Under 0.50ct', value: [0, 0.5] },
+    { label: '0.50 – 1.00ct', value: [0.5, 1.0] },
+    { label: '1.00 – 2.00ct', value: [1.0, 2.0] },
+    { label: '2.00ct+', value: [2.0, 99] },
+    { label: 'All Weights', value: DEFAULT_CARAT_RANGE },
+  ],
+  ringSize: [
+    ...['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'].map((s) => ({ label: s, value: s })),
+  ],
+  certificate: [
+    { label: 'IGI', value: 'IGI' },
+    { label: 'GIA', value: 'GIA' },
+    { label: 'HRD', value: 'HRD' },
+  ],
   inStock: [],
 };
 
@@ -139,6 +158,9 @@ const defaultValues: FilterValues = {
   stockType: '',
   price: DEFAULT_PRICE_RANGE,
   inStock: '',
+  caratWeight: DEFAULT_CARAT_RANGE,
+  ringSize: '',
+  certificate: '',
 };
 
 const isSameRange = (left: [number, number], right: [number, number]) =>
@@ -225,7 +247,7 @@ const renderFilterItems = (
     );
   }
 
-  if (tab.key === 'price') {
+  if (tab.key === 'price' || tab.key === 'caratWeight') {
     return (
       <div className="space-y-0.5">
         {items.map((item) => {
@@ -233,7 +255,7 @@ const renderFilterItems = (
           const itemKey = Array.isArray(item.value) ? item.value.join('-') : 'all';
           return (
             <button
-              key={`price-${itemKey}`}
+              key={`${tab.key}-${itemKey}`}
               type="button"
               onClick={() => onChange(tab.key, item.value)}
               aria-pressed={isActive}
@@ -251,7 +273,31 @@ const renderFilterItems = (
     );
   }
 
-  // Default: checkbox list (category, subCategory, stockType)
+  if (tab.key === 'ringSize') {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) => {
+          const isActive = isFilterItemActive(currentValue, item.value);
+          return (
+            <button
+              key={`ringSize-${item.value}`}
+              type="button"
+              onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
+              aria-pressed={isActive}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+                  ? 'border-accent bg-accent text-accent-foreground shadow-sm'
+                  : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
+                }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Default: checkbox list (category, subCategory, stockType, certificate)
   return (
     <div className="space-y-0.5">
       {items
@@ -353,6 +399,11 @@ const FilterSidebarContent = ({
             tab.key === 'price' &&
             Array.isArray(filterValues.price) &&
             isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
+          ) &&
+          !(
+            tab.key === 'caratWeight' &&
+            Array.isArray(filterValues.caratWeight) &&
+            isSameRange(filterValues.caratWeight as [number, number], DEFAULT_CARAT_RANGE)
           );
 
         return (
@@ -383,7 +434,7 @@ const FilterSidebarContent = ({
                   <button
                     type="button"
                     onClick={() =>
-                      handleFilterChange(tab.key, tab.key === 'price' ? DEFAULT_PRICE_RANGE : '')
+                      handleFilterChange(tab.key, tab.key === 'price' ? DEFAULT_PRICE_RANGE : tab.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
                     }
                     className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground"
                   >
@@ -463,11 +514,13 @@ const ShopPage = () => {
       per_page: PAGE_SIZE,
       page,
       status: 'active',
-      category: selectedCategory || 'Jewellery',
+      category: 'Jewellery',
       sort: sortBy,
       currency: currencySymbol,
     };
 
+    if (selectedCategory)
+      params.cf_sub_category = selectedCategory;
     if (typeof filterValues.subCategory === 'string' && filterValues.subCategory)
       params.sub_category = filterValues.subCategory;
     if (typeof filterValues.cfSubCategory === 'string' && filterValues.cfSubCategory)
@@ -489,6 +542,15 @@ const ShopPage = () => {
       if (lo > DEFAULT_PRICE_RANGE[0]) params.price_min = lo;
       if (hi < DEFAULT_PRICE_RANGE[1]) params.price_max = hi;
     }
+    if (Array.isArray(filterValues.caratWeight)) {
+      const [lo, hi] = filterValues.caratWeight as [number, number];
+      if (lo > DEFAULT_CARAT_RANGE[0]) params.carat_min = lo;
+      if (hi < DEFAULT_CARAT_RANGE[1]) params.carat_max = hi;
+    }
+    if (typeof filterValues.ringSize === 'string' && filterValues.ringSize)
+      params.ring_size = filterValues.ringSize;
+    if (typeof filterValues.certificate === 'string' && filterValues.certificate)
+      params.certificate = filterValues.certificate;
 
     productsApi.list(params as Parameters<typeof productsApi.list>[0])
       .then((res) => {
@@ -508,6 +570,7 @@ const ShopPage = () => {
     filterValues.subCategory, filterValues.cfSubCategory, filterValues.cfSubCategoryType,
     filterValues.metal, filterValues.shape,
     filterValues.stockType, filterValues.inStock, filterValues.price,
+    filterValues.caratWeight, filterValues.ringSize, filterValues.certificate,
   ]);
 
   const handleFilterChange = useCallback(
@@ -525,8 +588,9 @@ const ShopPage = () => {
 
 
   const hasActiveFilters = useMemo(() => {
-    const { search, category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, stockType, price, inStock } = filterValues;
+    const { search, category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, stockType, price, inStock, caratWeight, ringSize, certificate } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
+    const [clo, chi] = Array.isArray(caratWeight) ? (caratWeight as [number, number]) : DEFAULT_CARAT_RANGE;
     return Boolean(
       (typeof search === 'string' && search.trim()) ||
       category ||
@@ -538,7 +602,10 @@ const ShopPage = () => {
       (Array.isArray(shape) && shape.length > 0) ||
       stockType ||
       inStock === 'true' ||
-      !isSameRange([lo, hi], DEFAULT_PRICE_RANGE)
+      !isSameRange([lo, hi], DEFAULT_PRICE_RANGE) ||
+      !isSameRange([clo, chi], DEFAULT_CARAT_RANGE) ||
+      (typeof ringSize === 'string' && ringSize) ||
+      (typeof certificate === 'string' && certificate)
     );
   }, [filterValues]);
 
@@ -570,6 +637,20 @@ const ShopPage = () => {
       );
       chips.push({ key: 'price', label: priceItem?.label ?? `£${lo}–£${hi}` });
     }
+    if (
+      Array.isArray(filterValues.caratWeight) &&
+      !isSameRange(filterValues.caratWeight as [number, number], DEFAULT_CARAT_RANGE)
+    ) {
+      const [lo, hi] = filterValues.caratWeight as [number, number];
+      const caratItem = visualFilters.caratWeight.find(
+        (p) => Array.isArray(p.value) && isSameRange(p.value as [number, number], [lo, hi])
+      );
+      chips.push({ key: 'caratWeight', label: caratItem?.label ?? `${lo}–${hi}ct` });
+    }
+    if (typeof filterValues.ringSize === 'string' && filterValues.ringSize)
+      chips.push({ key: 'ringSize', label: `Size ${filterValues.ringSize}` });
+    if (typeof filterValues.certificate === 'string' && filterValues.certificate)
+      chips.push({ key: 'certificate', label: filterValues.certificate });
     return chips;
   }, [filterValues]);
 
@@ -709,7 +790,7 @@ const ShopPage = () => {
                   key={chip.key}
                   type="button"
                   onClick={() =>
-                    handleFilterChange(chip.key, chip.key === 'price' ? DEFAULT_PRICE_RANGE : '')
+                    handleFilterChange(chip.key, chip.key === 'price' ? DEFAULT_PRICE_RANGE : chip.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
                   }
                   className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >

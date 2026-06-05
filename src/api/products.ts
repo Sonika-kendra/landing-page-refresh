@@ -13,6 +13,8 @@ export const productsApi = {
     price_min?: number; price_max?: number;
     search?: string; sort?: string; currency?: string;
     bestseller?: boolean; new_arrival?: boolean;
+    certificate?: string; ring_size?: string;
+    carat_min?: number; carat_max?: number;
   }) =>
     client.get(ep.all, params, undefined, false, base),
 

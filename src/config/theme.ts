@@ -90,7 +90,7 @@ export const navigationLinks = [
         title: 'By Category',
         showAll: {
           label: 'Show all',
-          href: websiteUrlConfig.Jewellery.Home,
+          href: websiteUrlConfig.Jewellery.All,
         },
         links: [
           { label: 'Rings', href: websiteUrlConfig.Jewellery.Rings, image: ring },
