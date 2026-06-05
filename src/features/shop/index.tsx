@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { productsApi } from '@/api/products';
-import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowRight, ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
@@ -34,8 +34,7 @@ import labDiamondImage from '@/assets/lab-grown-diamond.jpg';
 import diamondsImage from '@/assets/diamonds-category.jpg';
 
 
-const PAGE_SIZE_OPTIONS = [16, 32, 48, 96];
-const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
+const PAGE_SIZE = 16;
 const DEFAULT_PRICE_RANGE: [number, number] = [0, 5000];
 
 const shopSort = {
@@ -407,13 +406,13 @@ const ShopPage = () => {
   const [currencyCode, setCurrencyCode] = useState('GBP');
   const [currencySymbol, setCurrencySymbol] = useState('£');
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['category']);
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Debounce search so we don't fire a request on every keystroke
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -438,11 +437,12 @@ const ShopPage = () => {
   }, []);
 
   useEffect(() => {
-    setIsLoading(true);
+    if (page === 1) setIsLoading(true);
+    else setIsLoadingMore(true);
     setFetchError(null);
 
     const params: Record<string, unknown> = {
-      per_page: pageSize,
+      per_page: PAGE_SIZE,
       page,
       status: 'active',
       category: selectedCategory || 'Jewellery',
@@ -472,23 +472,20 @@ const ShopPage = () => {
       .then((res) => {
         const items = (res.data?.items ?? []) as ShopProduct[];
         setTotal(res.data?.page_context?.total ?? items.length);
-        setProducts(items);
+        if (page === 1) setProducts(items);
+        else setProducts((prev) => [...prev, ...items]);
       })
       .catch((err) => {
         console.error('[Shop] Failed to load products:', err);
         setFetchError('Unable to load products right now. Please try again later.');
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => { setIsLoading(false); setIsLoadingMore(false); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    selectedCategory, page, pageSize, currencySymbol, sortBy, debouncedSearch,
+    selectedCategory, page, currencySymbol, sortBy, debouncedSearch,
     filterValues.subCategory, filterValues.metal, filterValues.shape,
     filterValues.stockType, filterValues.inStock, filterValues.price,
   ]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [page]);
 
   const handleFilterChange = useCallback(
     (key: string, value: string | string[] | [number, number]) => {
@@ -546,8 +543,6 @@ const ShopPage = () => {
     }
     return chips;
   }, [filterValues]);
-
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -639,22 +634,6 @@ const ShopPage = () => {
               </select>
             </label>
 
-            <label className="flex items-center gap-2 text-sm text-foreground/55">
-              <span className="whitespace-nowrap">Show</span>
-              <select
-                value={pageSize}
-                onChange={(event) => {
-                  setPageSize(Number(event.target.value));
-                  setPage(1);
-                }}
-                className="h-10 w-[80px] rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
-              >
-                {PAGE_SIZE_OPTIONS.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </label>
-
             <span className="ml-auto text-sm text-foreground/55">
               {total.toLocaleString()}{total === 1 ? 'result' : 'results'}
             </span>
@@ -729,7 +708,7 @@ const ShopPage = () => {
           <div>
             {isLoading ? (
               <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-                {Array.from({ length: pageSize }).map((_, i) => (
+                {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <div key={i} className="animate-pulse border border-border/40 bg-card">
                     <div className="aspect-square bg-foreground/5" />
                     <div className="px-3 pb-3 pt-2 space-y-2">
@@ -767,47 +746,19 @@ const ShopPage = () => {
               </div>
             )}
 
-            {totalPages > 1 && (
-              <div className="mt-10 flex items-center justify-center gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
+            {products.length < total && !isLoading && (
+              <div className="mt-10 flex justify-center">
+                <Button
+                  size="sm"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={isLoadingMore}
+                  className="group bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300 px-8 py-3 text-sm font-normal tracking-widest uppercase disabled:opacity-50"
                 >
-                  &lsaquo;
-                </button>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = i + 1;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`h-8 w-8 rounded-full text-sm font-medium transition-colors ${page === pageNum
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-foreground/60 hover:bg-border/40'
-                        }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-                {totalPages > 5 && <span className="text-foreground/40">...</span>}
-                {totalPages > 5 && (
-                  <button
-                    onClick={() => setPage(totalPages)}
-                    className={`h-8 w-8 rounded-full text-sm font-medium ${page === totalPages ? 'bg-accent text-accent-foreground' : 'text-foreground/60'
-                      }`}
-                  >
-                    {totalPages}
-                  </button>
-                )}
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-2 py-1 text-sm text-foreground/50 hover:text-foreground disabled:opacity-30"
-                >
-                  &rsaquo;
-                </button>
+                  {isLoadingMore ? 'Loading…' : 'Load More'}
+                  {!isLoadingMore && (
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  )}
+                </Button>
               </div>
             )}
           </div>
