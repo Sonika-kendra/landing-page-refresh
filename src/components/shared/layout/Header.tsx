@@ -186,14 +186,14 @@ const Header = () => {
       ...activeLink.categories[0],
       links: activeLink.categories[0].links.map((link) => ({
         ...link,
-        href: `${websiteUrlConfig.Jewellery.All}?cf_sub_category=${encodeURIComponent(link.label)}`,
+        href: `/jewellery/all?cf_sub_category=${encodeURIComponent(link.label)}`,
       })),
     };
     const dynamicCols = Object.entries(jewellerySubcats).map(([subcat, types]) => ({
       title: subcat,
       links: types.map((type) => ({
         label: type,
-        href: `${websiteUrlConfig.Jewellery.All}?cf_sub_category=${encodeURIComponent(subcat)}&cf_sub_category_type=${encodeURIComponent(type)}`,
+        href: `/jewellery/all?cf_sub_category=${encodeURIComponent(subcat)}&cf_sub_category_type=${encodeURIComponent(type)}`,
       })),
     }));
     return [byCategory, ...dynamicCols];

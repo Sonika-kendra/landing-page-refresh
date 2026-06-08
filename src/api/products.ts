@@ -24,8 +24,33 @@ export const productsApi = {
   getCurrency: () =>
     client.get<{ ok: boolean; currency_symbol: string; currency_code: string }>(ep.currency, undefined, undefined, false, base),
 
+  getAllFilterData: (params?: { category?: string }) =>
+    client.get<{
+      ok: boolean;
+      subcategories: Record<string, string[]>;
+      metals: string[];
+      shapes: string[];
+      stockTypes: string[];
+      caratValues: number[];
+      ringSizes: string[];
+      certificates: string[];
+    }>(ep.allFilterData, params, undefined, false, base),
+
   getSubcategories: (params?: { category?: string }) =>
     client.get<{ ok: boolean; subcategories: Record<string, string[]> }>(ep.subcategories, params, undefined, false, base),
+
+  getMetals: (params?: { category?: string }) =>
+    client.get<{ ok: boolean; metals: string[] }>(ep.metals, params, undefined, false, base),
+
+  getFilterOptions: (params?: { category?: string }) =>
+    client.get<{
+      ok: boolean;
+      shapes: string[];
+      stockTypes: string[];
+      caratValues: number[];
+      ringSizes: string[];
+      certificates: string[];
+    }>(ep.filterOptions, params, undefined, false, base),
 
   getOne: (id: string) =>
     client.get(ep.one(id), undefined, undefined, false, base),

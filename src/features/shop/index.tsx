@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+
+const fromSlug = (slug: string) =>
+  slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 import { productsApi } from '@/api/products';
 import { ArrowRight, ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
@@ -62,7 +65,7 @@ type VisualFilterItem = {
 
 const filterTabs: { key: FilterTabKey; label: string }[] = [
   { key: 'category', label: 'Categories' },
-  { key: 'subCategory', label: 'Collections' },
+  { key: 'cfSubCategoryType', label: 'Collections' },
   { key: 'metal', label: 'Metals' },
   { key: 'shape', label: 'Shapes' },
   { key: 'stockType', label: 'Stock Type' },
@@ -144,6 +147,8 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: 'GIA', value: 'GIA' },
     { label: 'HRD', value: 'HRD' },
   ],
+  cfSubCategory: [],
+  cfSubCategoryType: [],
   inStock: [],
 };
 
@@ -176,9 +181,26 @@ const isFilterItemActive = (currentValue: FilterValues[string], itemValue: Visua
 const renderFilterItems = (
   tab: { key: FilterTabKey; label: string },
   currentValue: FilterValues[string],
-  onChange: FilterChangeHandler
+  onChange: FilterChangeHandler,
+  dynamicCategoryItems?: VisualFilterItem[],
+  dynamicCollectionItems?: VisualFilterItem[],
+  dynamicMetalItems?: VisualFilterItem[],
+  dynamicShapeItems?: VisualFilterItem[],
+  dynamicStockTypeItems?: VisualFilterItem[],
+  dynamicCaratItems?: VisualFilterItem[],
+  dynamicRingSizeItems?: VisualFilterItem[],
+  dynamicCertificateItems?: VisualFilterItem[]
 ) => {
-  const items = visualFilters[tab.key];
+  const items =
+    (tab.key === 'category'          && dynamicCategoryItems)    ? dynamicCategoryItems    :
+    (tab.key === 'cfSubCategoryType' && dynamicCollectionItems)  ? dynamicCollectionItems  :
+    (tab.key === 'metal'             && dynamicMetalItems)       ? dynamicMetalItems       :
+    (tab.key === 'shape'             && dynamicShapeItems)       ? dynamicShapeItems       :
+    (tab.key === 'stockType'         && dynamicStockTypeItems)   ? dynamicStockTypeItems   :
+    (tab.key === 'caratWeight'       && dynamicCaratItems)       ? dynamicCaratItems       :
+    (tab.key === 'ringSize'          && dynamicRingSizeItems)    ? dynamicRingSizeItems    :
+    (tab.key === 'certificate'       && dynamicCertificateItems) ? dynamicCertificateItems :
+    visualFilters[tab.key];
 
   if (tab.key === 'metal') {
     return (
@@ -336,6 +358,14 @@ type FilterSidebarContentProps = {
   handleFilterChange: FilterChangeHandler;
   handleReset: () => void;
   hasActiveFilters: boolean;
+  dynamicCategoryItems?: VisualFilterItem[];
+  dynamicCollectionItems?: VisualFilterItem[];
+  dynamicMetalItems?: VisualFilterItem[];
+  dynamicShapeItems?: VisualFilterItem[];
+  dynamicStockTypeItems?: VisualFilterItem[];
+  dynamicCaratItems?: VisualFilterItem[];
+  dynamicRingSizeItems?: VisualFilterItem[];
+  dynamicCertificateItems?: VisualFilterItem[];
 };
 
 const FilterSidebarContent = ({
@@ -345,6 +375,14 @@ const FilterSidebarContent = ({
   handleFilterChange,
   handleReset,
   hasActiveFilters,
+  dynamicCategoryItems,
+  dynamicCollectionItems,
+  dynamicMetalItems,
+  dynamicShapeItems,
+  dynamicStockTypeItems,
+  dynamicCaratItems,
+  dynamicRingSizeItems,
+  dynamicCertificateItems,
 }: FilterSidebarContentProps) => (
   <div>
     <div className="mb-5 flex items-center justify-between">
@@ -442,7 +480,7 @@ const FilterSidebarContent = ({
                   </button>
                 </div>
               )}
-              {renderFilterItems(tab, filterValues[tab.key], handleFilterChange)}
+              {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems)}
             </AccordionContent>
           </AccordionItem>
         );
@@ -454,7 +492,8 @@ const FilterSidebarContent = ({
 type CurrencyOption = { currency_code: string; currency_symbol: string; currency_name: string; is_base_currency: boolean };
 
 const ShopPage = () => {
-  const [searchParams] = useSearchParams();
+  const { category: categorySlug } = useParams<{ category?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
@@ -463,32 +502,67 @@ const ShopPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [filterValues, setFilterValues] = useState<FilterValues>(defaultValues);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
-  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['category']);
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
-
-  // Sync filter state from URL params (set by mega menu links)
-  useEffect(() => {
-    const cfSubCategory = searchParams.get('cf_sub_category');
-    const cfSubCategoryType = searchParams.get('cf_sub_category_type');
-    if (cfSubCategory || cfSubCategoryType) {
-      setFilterValues({
-        ...defaultValues,
-        ...(cfSubCategory ? { cfSubCategory } : {}),
-        ...(cfSubCategoryType ? { cfSubCategoryType } : {}),
-      });
-      setPage(1);
-    }
-  }, [searchParams]);
-
-  // Debounce search so we don't fire a request on every keystroke
+  const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [dynamicCategoryItems, setDynamicCategoryItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicCollectionItems, setDynamicCollectionItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicMetalItems, setDynamicMetalItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicShapeItems, setDynamicShapeItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicStockTypeItems, setDynamicStockTypeItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicCaratItems, setDynamicCaratItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicRingSizeItems, setDynamicRingSizeItems] = useState<VisualFilterItem[]>([]);
+  const [dynamicCertificateItems, setDynamicCertificateItems] = useState<VisualFilterItem[]>([]);
+  const navigate = useNavigate();
+
+  // Filter values are derived from the URL — single source of truth
+  const filterValues = useMemo<FilterValues>(() => {
+    if (categorySlug) {
+      return {
+        ...defaultValues,
+        cfSubCategory: fromSlug(categorySlug),
+        cfSubCategoryType: searchParams.get('type') ?? '',
+      };
+    }
+    const priceMin = searchParams.get('price_min');
+    const priceMax = searchParams.get('price_max');
+    const caratMin = searchParams.get('carat_min');
+    const caratMax = searchParams.get('carat_max');
+    return {
+      search: '',
+      category: searchParams.get('category') ?? '',
+      subCategory: searchParams.get('sub_category') ?? '',
+      cfSubCategory: searchParams.get('cf_sub_category') ?? '',
+      cfSubCategoryType: searchParams.get('cf_sub_category_type') ?? '',
+      metal: searchParams.get('metal') ?? '',
+      shape: searchParams.get('shape') ?? '',
+      stockType: searchParams.get('stock_type') ?? '',
+      inStock: searchParams.get('in_stock') ?? '',
+      price: (priceMin !== null || priceMax !== null)
+        ? [Number(priceMin) || DEFAULT_PRICE_RANGE[0], Number(priceMax) || DEFAULT_PRICE_RANGE[1]] as [number, number]
+        : DEFAULT_PRICE_RANGE,
+      caratWeight: (caratMin !== null || caratMax !== null)
+        ? [Number(caratMin) || DEFAULT_CARAT_RANGE[0], Number(caratMax) || DEFAULT_CARAT_RANGE[1]] as [number, number]
+        : DEFAULT_CARAT_RANGE,
+      ringSize: searchParams.get('ring_size') ?? '',
+      certificate: searchParams.get('certificate') ?? '',
+    };
+  }, [categorySlug, searchParams]);
+
+  // Reset page and search when navigating via header (category slug changes)
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(typeof filterValues.search === 'string' ? filterValues.search : ''), 400);
+    setPage(1);
+    setSearchInput('');
+  }, [categorySlug]);
+
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchInput), 400);
     return () => clearTimeout(t);
-  }, [filterValues.search]);
+  }, [searchInput]);
 
   const selectedCategory = typeof filterValues.category === 'string' ? filterValues.category : '';
 
@@ -503,6 +577,60 @@ const ShopPage = () => {
     productsApi.getCurrencies()
       .then((res) => { if (res.data?.currencies?.length) setCurrencies(res.data.currencies) })
       .catch(() => { /* keep empty, dropdown won't show */ });
+
+    productsApi.getAllFilterData({ category: 'Jewellery' })
+      .then((res) => {
+        const d = res.data;
+        if (!d) return;
+
+        if (d.subcategories) {
+          const catItems = Object.keys(d.subcategories).map((name) => ({
+            label: name,
+            value: name,
+            image: categoryImages[name] ?? jewelleryImage,
+          }));
+          if (catItems.length) setDynamicCategoryItems(catItems);
+
+          const uniqueTypes = [...new Set(Object.values(d.subcategories).flat())];
+          const colItems = uniqueTypes.map((type) => ({
+            label: type,
+            value: type,
+            image: collectionImages[type] ?? jewelleryImage,
+          }));
+          if (colItems.length) setDynamicCollectionItems(colItems);
+        }
+
+        if (d.metals?.length) {
+          setDynamicMetalItems(d.metals.map((id) => {
+            const m = getMetalType(id);
+            return { label: m.name, value: id, display: m.label, image: m.image };
+          }));
+        }
+
+        if (d.shapes?.length)
+          setDynamicShapeItems(d.shapes.map((s) => ({ label: s, value: s })));
+
+        if (d.stockTypes?.length) {
+          setDynamicStockTypeItems(d.stockTypes.map((t) => ({
+            label: t,
+            value: t,
+            image: t === 'Lab' ? labDiamondImage : naturalDiamondImage,
+          })));
+        }
+
+        if (d.caratValues?.length) {
+          setDynamicCaratItems(
+            d.caratValues.map((v) => ({ label: `${v}ct`, value: [v, v] as [number, number] }))
+          );
+        }
+
+        if (d.ringSizes?.length)
+          setDynamicRingSizeItems(d.ringSizes.map((s) => ({ label: s, value: s })));
+
+        if (d.certificates?.length)
+          setDynamicCertificateItems(d.certificates.map((c) => ({ label: c, value: c })));
+      })
+      .catch(() => { /* fall back to static filter options */ });
   }, []);
 
   useEffect(() => {
@@ -575,24 +703,51 @@ const ShopPage = () => {
 
   const handleFilterChange = useCallback(
     (key: string, value: string | string[] | [number, number]) => {
-      setFilterValues((prev) => ({ ...prev, [key]: value }));
+      const newFilters = { ...filterValues, [key]: value };
+      const newParams = new URLSearchParams();
+      if (newFilters.category && typeof newFilters.category === 'string') newParams.set('category', newFilters.category);
+      if (newFilters.subCategory && typeof newFilters.subCategory === 'string') newParams.set('sub_category', newFilters.subCategory);
+      if (newFilters.cfSubCategory && typeof newFilters.cfSubCategory === 'string') newParams.set('cf_sub_category', newFilters.cfSubCategory);
+      if (newFilters.cfSubCategoryType && typeof newFilters.cfSubCategoryType === 'string') newParams.set('cf_sub_category_type', newFilters.cfSubCategoryType);
+      if (newFilters.metal && typeof newFilters.metal === 'string') newParams.set('metal', newFilters.metal);
+      if (newFilters.shape && typeof newFilters.shape === 'string') newParams.set('shape', newFilters.shape);
+      if (newFilters.stockType && typeof newFilters.stockType === 'string') newParams.set('stock_type', newFilters.stockType);
+      if (newFilters.inStock === 'true') newParams.set('in_stock', 'true');
+      if (Array.isArray(newFilters.price)) {
+        const [lo, hi] = newFilters.price as [number, number];
+        if (lo > DEFAULT_PRICE_RANGE[0]) newParams.set('price_min', String(lo));
+        if (hi < DEFAULT_PRICE_RANGE[1]) newParams.set('price_max', String(hi));
+      }
+      if (Array.isArray(newFilters.caratWeight)) {
+        const [lo, hi] = newFilters.caratWeight as [number, number];
+        if (lo > DEFAULT_CARAT_RANGE[0]) newParams.set('carat_min', String(lo));
+        if (hi < DEFAULT_CARAT_RANGE[1]) newParams.set('carat_max', String(hi));
+      }
+      if (newFilters.ringSize && typeof newFilters.ringSize === 'string') newParams.set('ring_size', newFilters.ringSize);
+      if (newFilters.certificate && typeof newFilters.certificate === 'string') newParams.set('certificate', newFilters.certificate);
       setPage(1);
+      if (categorySlug) {
+        navigate(`/jewellery/all?${newParams.toString()}`);
+      } else {
+        setSearchParams(newParams, { replace: true });
+      }
     },
-    []
+    [filterValues, categorySlug, navigate, setSearchParams]
   );
 
   const handleReset = useCallback(() => {
-    setFilterValues(defaultValues);
+    setSearchInput('');
     setPage(1);
-  }, []);
+    navigate('/jewellery/all');
+  }, [navigate]);
 
 
   const hasActiveFilters = useMemo(() => {
-    const { search, category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, stockType, price, inStock, caratWeight, ringSize, certificate } = filterValues;
+    const { category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, stockType, price, inStock, caratWeight, ringSize, certificate } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
     const [clo, chi] = Array.isArray(caratWeight) ? (caratWeight as [number, number]) : DEFAULT_CARAT_RANGE;
     return Boolean(
-      (typeof search === 'string' && search.trim()) ||
+      debouncedSearch.trim() ||
       category ||
       subCategory ||
       cfSubCategory ||
@@ -607,7 +762,7 @@ const ShopPage = () => {
       (typeof ringSize === 'string' && ringSize) ||
       (typeof certificate === 'string' && certificate)
     );
-  }, [filterValues]);
+  }, [filterValues, debouncedSearch]);
 
   const activeFilterChips = useMemo(() => {
     const chips: { key: FilterTabKey; label: string }[] = [];
@@ -694,6 +849,14 @@ const ShopPage = () => {
                     handleFilterChange={handleFilterChange}
                     handleReset={handleReset}
                     hasActiveFilters={hasActiveFilters}
+                    dynamicCategoryItems={dynamicCategoryItems.length ? dynamicCategoryItems : undefined}
+                    dynamicCollectionItems={dynamicCollectionItems.length ? dynamicCollectionItems : undefined}
+                    dynamicMetalItems={dynamicMetalItems.length ? dynamicMetalItems : undefined}
+                    dynamicShapeItems={dynamicShapeItems.length ? dynamicShapeItems : undefined}
+                    dynamicStockTypeItems={dynamicStockTypeItems.length ? dynamicStockTypeItems : undefined}
+                    dynamicCaratItems={dynamicCaratItems.length ? dynamicCaratItems : undefined}
+                    dynamicRingSizeItems={dynamicRingSizeItems.length ? dynamicRingSizeItems : undefined}
+                    dynamicCertificateItems={dynamicCertificateItems.length ? dynamicCertificateItems : undefined}
                   />
                 </div>
                 <div className="shrink-0 border-t border-border/40 px-6 py-4">
@@ -712,15 +875,15 @@ const ShopPage = () => {
             <label className="relative block min-w-[200px] flex-1 sm:max-w-[320px]">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
               <input
-                value={(filterValues.search as string) || ''}
-                onChange={(event) => handleFilterChange('search', event.target.value)}
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="Search products"
                 className="h-10 w-full rounded border border-border bg-background pl-10 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/45 focus:border-primary"
               />
-              {filterValues.search && (
+              {searchInput && (
                 <button
                   type="button"
-                  onClick={() => handleFilterChange('search', '')}
+                  onClick={() => setSearchInput('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 transition-colors hover:text-foreground"
                   aria-label="Clear search"
                 >
