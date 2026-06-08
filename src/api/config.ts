@@ -110,6 +110,14 @@ export const API_CONFIG = {
     },
   },
 
+  adminFilterConfig: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      status:  '/admin/filter-config/status',
+      rebuild: '/admin/filter-config/rebuild',
+    },
+  },
+
   categories: {
     base: 'new' as ApiBase,
     endpoints: {

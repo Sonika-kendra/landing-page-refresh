@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings2, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Settings2, Plus, Trash2, GripVertical, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,16 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { adminApi, SiteConfig } from '@/api/admin';
 import { announcementBar as staticConfig } from '@/config/theme';
+
+const FILTER_KEY_LABELS: Record<string, string> = {
+  metals: 'Metals',
+  shapes: 'Shapes',
+  stockTypes: 'Stock Types',
+  ringSizes: 'Ring Sizes',
+  certificates: 'Certificates',
+  caratValues: 'Carat Values',
+  subcategories: 'Subcategories',
+};
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -275,6 +285,249 @@ const AnnouncementManager = ({ config, isLoading }: AnnouncementManagerProps) =>
   );
 };
 
+// ── Jewellery Filter Config Panel ─────────────────────────────────────────────
+
+interface FilterConfigPanelProps {
+  config: SiteConfig | null;
+}
+
+const ARRAY_FILTER_KEYS = ['metals', 'shapes', 'stockTypes', 'ringSizes', 'certificates', 'caratValues'] as const;
+
+const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [showJson, setShowJson] = useState(false);
+  const [jsonText, setJsonText] = useState('');
+  const [jsonError, setJsonError] = useState('');
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['admin', 'filter-config-status'],
+    queryFn: () => adminApi.getFilterConfigStatus().then(r => r.data),
+  });
+
+  const rebuildMutation = useMutation({
+    mutationFn: () => adminApi.rebuildFilterConfig().then(r => r.data),
+    onSuccess: (result) => {
+      refetch();
+      toast({ title: 'Filter config rebuilt', description: result.message });
+    },
+    onError: (err: any) => {
+      const detail = err?.response?.data?.message || err?.message || 'Unknown error';
+      toast({ title: 'Rebuild failed', description: String(detail), variant: 'destructive' });
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      const fields = JSON.parse(jsonText);
+      return adminApi.updateConfig(config!._id, { type: config!.type, fields });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'configs'] });
+      setEditOpen(false);
+      toast({ title: 'Config saved' });
+    },
+    onError: () =>
+      toast({ title: 'Error', description: 'Failed to save config.', variant: 'destructive' }),
+  });
+
+  const openEdit = () => {
+    setJsonText(JSON.stringify(config?.fields ?? {}, null, 2));
+    setJsonError('');
+    setShowJson(false);
+    setEditOpen(true);
+  };
+
+  const handleJsonChange = (value: string) => {
+    setJsonText(value);
+    try {
+      JSON.parse(value);
+      setJsonError('');
+    } catch {
+      setJsonError('Invalid JSON — fix before saving.');
+    }
+  };
+
+  const formatDateTime = (iso: string) =>
+    new Date(iso).toLocaleString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+
+  const fields = config?.fields ?? {};
+  const subcategories = fields.subcategories as Record<string, string[]> | undefined;
+
+  if (isLoading) {
+    return (
+      <div className="bg-background rounded-sm border border-border p-5 space-y-3">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="bg-background rounded-sm border border-border p-5 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-medium tracking-widest uppercase">Jewellery Filter Config</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Rebuilt automatically every hour from Zoho product data.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {config && (
+              <Button size="sm" variant="ghost" className="h-8" onClick={openEdit}>
+                Edit
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8"
+              onClick={() => rebuildMutation.mutate()}
+              disabled={rebuildMutation.isPending}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${rebuildMutation.isPending ? 'animate-spin' : ''}`} />
+              {rebuildMutation.isPending ? 'Rebuilding…' : 'Rebuild Now'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Status */}
+        {!data?.exists ? (
+          <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-sm">
+            No config document found. Click Rebuild Now to create it.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(data.summary ?? {}).map(([key, count]) => (
+                <div key={key} className="flex items-center gap-1.5 bg-muted/40 rounded-sm px-2.5 py-1">
+                  <span className="text-xs text-muted-foreground">
+                    {FILTER_KEY_LABELS[key] ?? key}
+                  </span>
+                  <span className="text-xs font-medium tabular-nums">{count}</span>
+                </div>
+              ))}
+            </div>
+            {data.updatedAt && (
+              <p className="text-xs text-muted-foreground">
+                Last updated: {formatDateTime(data.updatedAt)}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* View / Edit Dialog */}
+      <Dialog open={editOpen} onOpenChange={open => !open && setEditOpen(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-light tracking-widest uppercase">
+              Jewellery Filter Config
+            </DialogTitle>
+          </DialogHeader>
+
+          {showJson ? (
+            <div className="space-y-3">
+              <Textarea
+                value={jsonText}
+                onChange={e => handleJsonChange(e.target.value)}
+                rows={18}
+                className="font-mono text-xs"
+                spellCheck={false}
+              />
+              {jsonError && (
+                <p className="text-xs text-destructive">{jsonError}</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-5 max-h-[65vh] overflow-y-auto pr-1">
+              {/* Subcategories */}
+              {subcategories && Object.keys(subcategories).length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+                    Subcategories
+                  </p>
+                  <div className="divide-y divide-border rounded-sm border border-border overflow-hidden">
+                    {Object.entries(subcategories).map(([category, subs]) => (
+                      <div key={category} className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2.5 bg-background">
+                        <span className="text-xs font-medium self-start pt-0.5">{category}</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(subs as string[]).map(sub => (
+                            <span
+                              key={sub}
+                              className="inline-flex items-center rounded-sm bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground"
+                            >
+                              {sub}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Simple array fields */}
+              {ARRAY_FILTER_KEYS.map(key => {
+                const values = fields[key] as string[] | undefined;
+                if (!values?.length) return null;
+                return (
+                  <div key={key} className="space-y-2">
+                    <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+                      {FILTER_KEY_LABELS[key] ?? key}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {values.map(v => (
+                        <span
+                          key={v}
+                          className="inline-flex items-center rounded-sm bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground"
+                        >
+                          {v}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <DialogFooter className="flex-row items-center justify-between sm:justify-between gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs text-muted-foreground"
+              onClick={() => setShowJson(v => !v)}
+            >
+              {showJson ? 'Structured View' : 'Edit as JSON'}
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setEditOpen(false)}>
+                {showJson ? 'Cancel' : 'Close'}
+              </Button>
+              {showJson && (
+                <Button
+                  onClick={() => saveMutation.mutate()}
+                  disabled={!!jsonError || saveMutation.isPending}
+                >
+                  {saveMutation.isPending ? 'Saving…' : 'Save Config'}
+                </Button>
+              )}
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
 // ── Main Settings Page ────────────────────────────────────────────────────────
 
 const Settings = () => {
@@ -290,9 +543,12 @@ const Settings = () => {
     queryFn: () => adminApi.getConfigs().then(r => r.data),
   });
 
-  // Separate announcement_bar from the generic list
+  // Separate announcement_bar and jewellery_filter_config from the generic list
   const annConfig = configs.find(c => c.type === 'announcement_bar') ?? null;
-  const otherConfigs = configs.filter(c => c.type !== 'announcement_bar');
+  const filterConfig = configs.find(c => c.type === 'jewellery_filter_config') ?? null;
+  const otherConfigs = configs.filter(
+    c => c.type !== 'announcement_bar' && c.type !== 'jewellery_filter_config'
+  );
 
   const openEdit = (config: SiteConfig) => {
     setEditConfig(config);
@@ -336,6 +592,9 @@ const Settings = () => {
 
       {/* Announcement Bar — dedicated UI */}
       <AnnouncementManager config={annConfig} isLoading={isLoading} />
+
+      {/* Jewellery Filter Config */}
+      <FilterConfigPanel config={filterConfig} />
 
       {/* Generic configs */}
       {isLoading ? (

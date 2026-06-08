@@ -12,6 +12,7 @@ import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { getMetalType } from '@/data/shop/metalTypes';
 import {
@@ -178,6 +179,69 @@ const isFilterItemActive = (currentValue: FilterValues[string], itemValue: Visua
   return currentValue === itemValue || (!currentValue && itemValue === '');
 };
 
+const CaratRangeSlider = ({
+  currentValue,
+  onChange,
+  caratItems,
+}: {
+  currentValue: [number, number];
+  onChange: (val: [number, number]) => void;
+  caratItems: VisualFilterItem[];
+}) => {
+  const { sliderMin, sliderMax } = useMemo(() => {
+    const vals = caratItems
+      .map((item) => (Array.isArray(item.value) ? item.value[0] : null))
+      .filter((v): v is number => v !== null && v < 90);
+    if (!vals.length) return { sliderMin: 0, sliderMax: 5 };
+    return {
+      sliderMin: Math.floor(Math.min(...vals) * 100) / 100,
+      sliderMax: Math.ceil(Math.max(...vals) * 100) / 100,
+    };
+  }, [caratItems]);
+
+  const normalize = (val: [number, number]): [number, number] => {
+    if (isSameRange(val, DEFAULT_CARAT_RANGE)) return [sliderMin, sliderMax];
+    return [
+      Math.max(sliderMin, Math.min(val[0], sliderMax)),
+      Math.max(sliderMin, Math.min(val[1], sliderMax)),
+    ];
+  };
+
+  const [localValue, setLocalValue] = useState<[number, number]>(() => normalize(currentValue));
+
+  useEffect(() => {
+    setLocalValue(normalize(currentValue));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentValue[0], currentValue[1], sliderMin, sliderMax]);
+
+  const handleCommit = (v: number[]) => {
+    const [lo, hi] = v as [number, number];
+    onChange(lo <= sliderMin && hi >= sliderMax ? DEFAULT_CARAT_RANGE : [lo, hi]);
+  };
+
+  return (
+    <div className="px-1 pb-3 pt-4">
+      <Slider
+        min={sliderMin}
+        max={sliderMax}
+        step={0.01}
+        value={localValue}
+        onValueChange={(v) => setLocalValue(v as [number, number])}
+        onValueCommit={handleCommit}
+      />
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
+          {localValue[0].toFixed(2)}ct
+        </span>
+        <span className="text-[10px] text-foreground/35">–</span>
+        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
+          {localValue[1].toFixed(2)}ct
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const renderFilterItems = (
   tab: { key: FilterTabKey; label: string },
   currentValue: FilterValues[string],
@@ -204,7 +268,7 @@ const renderFilterItems = (
 
   if (tab.key === 'metal') {
     return (
-      <div className="space-y-0.5">
+      <div className="flex flex-wrap gap-2 p-1">
         {items
           .filter((item) => item.value !== '')
           .map((item) => {
@@ -212,64 +276,56 @@ const renderFilterItems = (
             const itemKey = item.value as string;
             const metalConfig = getMetalType(itemKey);
             return (
-              <label
+              <button
                 key={`metal-${itemKey}`}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/40"
+                onClick={() => onChange(tab.key, isActive ? '' : item.value)}
+                title={metalConfig.name}
+                className={`rounded border-2 px-2.5 py-1.5 text-[11px] font-bold uppercase leading-none tracking-wide transition-all ${
+                  isActive ? 'border-accent' : 'border-transparent opacity-80 hover:opacity-100'
+                }`}
+                style={{
+                  backgroundImage: metalConfig.image ? `url(${metalConfig.image})` : undefined,
+                  backgroundColor: metalConfig.image ? undefined : metalConfig.bg,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  color: metalConfig.color,
+                }}
               >
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={() => onChange(tab.key, isActive ? '' : item.value)}
-                  className="h-4 w-4 flex-shrink-0 cursor-pointer accent-[hsl(var(--accent))]"
-                />
-                <span
-                  className="h-4 w-4 flex-shrink-0 overflow-hidden rounded-full border border-border/50"
-                  style={{
-                    backgroundImage: metalConfig.image ? `url(${metalConfig.image})` : undefined,
-                    backgroundColor: metalConfig.image ? undefined : metalConfig.bg,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
-                <span
-                  className={`text-sm transition-colors ${isActive ? 'font-semibold text-foreground' : 'text-foreground'
-                    }`}
-                >
-                  {item.label}
-                </span>
-              </label>
+                {metalConfig.label}
+              </button>
             );
           })}
       </div>
     );
   }
 
-  if (tab.key === 'shape') {
+  if (tab.key === 'shape' || tab.key === 'cfSubCategoryType' || tab.key === 'stockType' || tab.key === 'certificate') {
     return (
       <div className="flex flex-wrap gap-2">
-        {items.map((item) => {
-          const isActive = isFilterItemActive(currentValue, item.value);
-          const itemKey = (item.value as string) || 'all';
-          return (
-            <button
-              key={`shape-${itemKey}`}
-              type="button"
-              onClick={() => onChange(tab.key, item.value as string)}
-              aria-pressed={isActive}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
-                  ? 'border-accent bg-accent text-accent-foreground shadow-sm'
-                  : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
-                }`}
-            >
-              {item.label}
-            </button>
-          );
-        })}
+        {items
+          .filter((item) => item.value !== '')
+          .map((item) => {
+            const isActive = isFilterItemActive(currentValue, item.value);
+            return (
+              <button
+                key={`${tab.key}-${item.value}`}
+                type="button"
+                onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
+                aria-pressed={isActive}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+                    ? 'border-accent bg-accent text-accent-foreground shadow-sm'
+                    : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
+                  }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
       </div>
     );
   }
 
-  if (tab.key === 'price' || tab.key === 'caratWeight') {
+  if (tab.key === 'price') {
     return (
       <div className="space-y-0.5">
         {items.map((item) => {
@@ -277,7 +333,7 @@ const renderFilterItems = (
           const itemKey = Array.isArray(item.value) ? item.value.join('-') : 'all';
           return (
             <button
-              key={`${tab.key}-${itemKey}`}
+              key={`price-${itemKey}`}
               type="button"
               onClick={() => onChange(tab.key, item.value)}
               aria-pressed={isActive}
@@ -291,6 +347,42 @@ const renderFilterItems = (
             </button>
           );
         })}
+      </div>
+    );
+  }
+
+  if (tab.key === 'caratWeight') {
+    return (
+      <CaratRangeSlider
+        currentValue={currentValue as [number, number]}
+        onChange={(val) => onChange(tab.key, val)}
+        caratItems={items}
+      />
+    );
+  }
+
+  if (tab.key === 'category') {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {items
+          .filter((item) => item.value !== '')
+          .map((item) => {
+            const isActive = isFilterItemActive(currentValue, item.value);
+            return (
+              <button
+                key={`category-${item.value}`}
+                type="button"
+                onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
+                aria-pressed={isActive}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+                    ? 'border-accent bg-accent text-accent-foreground shadow-sm'
+                    : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
+                  }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
       </div>
     );
   }
@@ -448,7 +540,7 @@ const FilterSidebarContent = ({
           <AccordionItem
             key={tab.key}
             value={tab.key}
-            className="overflow-hidden rounded-2xl border border-border/60 bg-background px-3.5"
+            className="rounded-2xl border border-border/60 bg-background px-3.5"
           >
             <AccordionTrigger className="py-3.5 hover:no-underline [&>svg]:hidden">
               <div className="flex w-full items-center justify-between">
@@ -800,7 +892,7 @@ const ShopPage = () => {
       const caratItem = visualFilters.caratWeight.find(
         (p) => Array.isArray(p.value) && isSameRange(p.value as [number, number], [lo, hi])
       );
-      chips.push({ key: 'caratWeight', label: caratItem?.label ?? `${lo}–${hi}ct` });
+      chips.push({ key: 'caratWeight', label: caratItem?.label ?? `${lo.toFixed(2)}–${hi.toFixed(2)}ct` });
     }
     if (typeof filterValues.ringSize === 'string' && filterValues.ringSize)
       chips.push({ key: 'ringSize', label: `Size ${filterValues.ringSize}` });

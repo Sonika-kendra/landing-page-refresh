@@ -115,6 +115,19 @@ export interface ZohoSchedule {
   weeklyBackup: ZohoScheduleEntry;
 }
 
+export interface FilterConfigStatus {
+  ok: boolean;
+  exists: boolean;
+  summary: Record<string, number> | null;
+  updatedAt: string | null;
+}
+
+export interface FilterConfigRebuildResult {
+  ok: boolean;
+  message: string;
+  summary: Record<string, number>;
+}
+
 export interface ZohoSyncLog {
   _id: string;
   module: string;
@@ -407,5 +420,23 @@ export const adminApi = {
       undefined,
       false,
       API_CONFIG.adminZoho.base
+    ),
+
+  // ── Filter Config ──────────────────────────────────────────────────────────
+  getFilterConfigStatus: () =>
+    apiClient.get<FilterConfigStatus>(
+      API_CONFIG.adminFilterConfig.endpoints.status,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminFilterConfig.base
+    ),
+
+  rebuildFilterConfig: () =>
+    apiClient.post<FilterConfigRebuildResult>(
+      API_CONFIG.adminFilterConfig.endpoints.rebuild,
+      undefined,
+      undefined,
+      API_CONFIG.adminFilterConfig.base
     ),
 };
