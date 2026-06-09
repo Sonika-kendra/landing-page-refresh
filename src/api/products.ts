@@ -55,6 +55,9 @@ export const productsApi = {
   getOne: (id: string) =>
     client.get(ep.one(id), undefined, undefined, false, base),
 
+  getByName: (name: string) =>
+    client.get(ep.byName, { name }, undefined, false, base),
+
   create: (data: Record<string, any>) =>
     client.post(ep.create, data, undefined, base),
 

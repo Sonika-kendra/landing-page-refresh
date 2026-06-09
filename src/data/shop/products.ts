@@ -32,6 +32,7 @@ export interface ShopProduct {
   clarity?: string;
   setting?: string;
   goldWeight?: string;
+  metalWeightOptions?: string[];
   totalWeight?: string;
   description?: string;
   itemRef?: string;

@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { productPath, toSlug } from '@/lib/utils';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
   Heart, Share2, Copy, Mail,
@@ -35,15 +36,20 @@ const trustBadges = [
 ];
 
 const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { category: categoryParam, subCategory: subCategoryParam, id } = useParams<{ category?: string; subCategory?: string; id: string }>();
   const [product, setProduct] = useState<ShopProduct | null>(null);
+  const [variants, setVariants] = useState<ShopProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [show3D, setShow3D] = useState(false);
-  const [selectedMetal, setSelectedMetal] = useState(0);
-  const [selectedCarat, setSelectedCarat] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(0);
+  const [selectedMetalCode, setSelectedMetalCode] = useState('');
+  const [selectedCaratValue, setSelectedCaratValue] = useState('');
+  const [selectedSizeValue, setSelectedSizeValue] = useState('');
+  const [selectedMetalWeight, setSelectedMetalWeight] = useState('');
+  const [selectedShape, setSelectedShape] = useState('');
+  const [selectedColour, setSelectedColour] = useState('');
+  const [selectedClarity, setSelectedClarity] = useState('');
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
@@ -63,6 +69,7 @@ const ProductDetail = () => {
     setIsLoading(true);
     setFetchError(null);
     setSelectedImage(0);
+    setVariants([]);
     productsApi.getOne(id)
       .then((res) => {
         const item = res.data?.item as Record<string, unknown> | undefined;
@@ -70,11 +77,27 @@ const ProductDetail = () => {
           setFetchError('not_found');
           return;
         }
-        setProduct(mapZohoToShopProduct(item));
+        const p = mapZohoToShopProduct(item);
+        setProduct(p);
+        setSelectedMetalCode(p.metalOptions[0] ?? '');
+        setSelectedCaratValue(p.caratOptions?.[0] ?? '');
+        setSelectedSizeValue(p.sizeOptions?.[0] ?? '');
+        setSelectedMetalWeight(p.metalWeightOptions?.[0] ?? '');
+        setSelectedShape(p.shape ?? '');
+        setSelectedColour(p.colour ?? '');
+        setSelectedClarity(p.clarity ?? '');
+        const raw = (res.data?.variants ?? []) as Record<string, unknown>[];
+        if (raw.length > 0) setVariants(raw.map((i) => mapZohoToShopProduct(i)));
       })
       .catch(() => setFetchError('error'))
       .finally(() => setIsLoading(false));
   }, [id]);
+
+  // Redirect old /jewellery/all/:id URLs to the new /jewellery/:category/:subCategory/:id format
+  useEffect(() => {
+    if (!product || !id || categoryParam) return;
+    navigate(productPath(product.category, product.subCategory, id), { replace: true });
+  }, [product, id, categoryParam, navigate]);
 
   const copySku = () => {
     navigator.clipboard.writeText(product?.sku ?? '');
@@ -143,6 +166,11 @@ const ProductDetail = () => {
   const prevImage = () => setSelectedImage((i) => (i === 0 ? images.length - 1 : i - 1));
   const nextImage = () => setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1));
 
+  const _allVariantsOuter = variants.length ? variants : [product];
+  const allShapes = [...new Set(_allVariantsOuter.map((v) => v.shape).filter(Boolean) as string[])];
+  const allColours = [...new Set(_allVariantsOuter.map((v) => v.colour).filter(Boolean) as string[])];
+  const allClarities = [...new Set(_allVariantsOuter.map((v) => v.clarity).filter(Boolean) as string[])];
+
   return (
     <PageLayout>
       {/* Breadcrumb */}
@@ -154,13 +182,17 @@ const ProductDetail = () => {
               <span>Home</span>
             </Link>
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-            <Link to="/jewellery/all" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+            <Link to={`/jewellery/${toSlug(product.category)}`} className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
               {product.category}
             </Link>
-            <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-            <Link to="/jewellery/all" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
-              {product.subCategory}
-            </Link>
+            {product.subCategory && (
+              <>
+                <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
+                <Link to={`/jewellery/${toSlug(product.category)}?type=${product.subCategory}`} className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+                  {product.subCategory}
+                </Link>
+              </>
+            )}
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
             <span className="max-w-[240px] truncate font-semibold text-accent-foreground">{product.name}</span>
           </nav>
@@ -230,17 +262,99 @@ const ProductDetail = () => {
                 {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </div>
 
+              {(() => {
+                const allVariants = variants.length ? variants : [product];
+
+                const seenMetal = new Set<string>();
+                const metalList = allVariants.flatMap((v) =>
+                  v.metalOptions.map((m) => ({ metal: m, variant: v }))
+                ).filter((o) => {
+                  if (seenMetal.has(o.metal)) return false;
+                  seenMetal.add(o.metal);
+                  return true;
+                });
+
+                const allCarats = [...new Set(allVariants.flatMap((v) => v.caratOptions ?? []))];
+                const allMetalWeights = [...new Set(
+                  allVariants
+                    .filter((v) => v.metalOptions.includes(selectedMetalCode))
+                    .flatMap((v) => v.metalWeightOptions ?? [])
+                )];
+                const allSizes = [...new Set(allVariants.flatMap((v) => v.sizeOptions ?? []))];
+                const allCerts = [...new Set(allVariants.map((v) => v.certificate).filter(Boolean) as string[])];
+
+                // Score each variant: metal=8, shape=4, colour=2, clarity=2, carat=2, weight=1
+                const resolveVariant = (metal: string, carat: string, weight: string, shape: string, colour: string, clarity: string) => {
+                  if (allVariants.length === 1) return allVariants[0];
+                  return allVariants
+                    .map((v) => ({
+                      v,
+                      score:
+                        (v.metalOptions.includes(metal) ? 8 : 0) +
+                        (shape && v.shape === shape ? 4 : 0) +
+                        (colour && v.colour === colour ? 2 : 0) +
+                        (clarity && v.clarity === clarity ? 2 : 0) +
+                        (carat && v.caratOptions?.includes(carat) ? 2 : 0) +
+                        (weight && v.metalWeightOptions?.includes(weight) ? 1 : 0),
+                    }))
+                    .sort((a, b) => b.score - a.score)[0].v;
+                };
+
+                const switchVariant = (resolved: ShopProduct) => {
+                  if (resolved.id !== product.id) { setProduct(resolved); setSelectedImage(0); }
+                };
+
+                const handleMetalSelect = (metalCode: string) => {
+                  setSelectedMetalCode(metalCode);
+                  const weightsForMetal = [...new Set(
+                    allVariants
+                      .filter((v) => v.metalOptions.includes(metalCode))
+                      .flatMap((v) => v.metalWeightOptions ?? [])
+                  )];
+                  const newWeight = weightsForMetal.includes(selectedMetalWeight)
+                    ? selectedMetalWeight
+                    : (weightsForMetal[0] ?? '');
+                  setSelectedMetalWeight(newWeight);
+                  switchVariant(resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity));
+                };
+
+                const handleCaratSelect = (carat: string) => {
+                  setSelectedCaratValue(carat);
+                  switchVariant(resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity));
+                };
+
+                const handleMetalWeightSelect = (weight: string) => {
+                  setSelectedMetalWeight(weight);
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity));
+                };
+
+                const handleShapeSelect = (shape: string) => {
+                  setSelectedShape(shape);
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity));
+                };
+
+                const handleColourSelect = (colour: string) => {
+                  setSelectedColour(colour);
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity));
+                };
+
+                const handleClaritySelect = (clarity: string) => {
+                  setSelectedClarity(clarity);
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity));
+                };
+
+                return (
               <div className="mb-5 space-y-3">
                 <div className="flex items-center gap-3">
                   <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal type:</span>
                   <div className="flex flex-wrap gap-1.5">
-                    {product.metalOptions.map((m, i) => {
-                      const metal = getMetalType(m);
-                      const isSelected = i === selectedMetal;
+                    {metalList.map((opt, i) => {
+                      const metal = getMetalType(opt.metal);
+                      const isSelected = opt.metal === selectedMetalCode;
                       return (
                         <button
                           key={i}
-                          onClick={() => setSelectedMetal(i)}
+                          onClick={() => handleMetalSelect(opt.metal)}
                           title={metal.name}
                           style={{
                             backgroundImage: metal.image ? `url(${metal.image})` : undefined,
@@ -257,39 +371,118 @@ const ProductDetail = () => {
                     })}
                   </div>
                 </div>
-                {product.caratOptions && (
+                {allShapes.length > 1 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Shape:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allShapes.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => handleShapeSelect(s)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${s === selectedShape ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allColours.length > 1 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Colour:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allColours.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleColourSelect(c)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${c === selectedColour ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allClarities.length > 1 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Clarity:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allClarities.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleClaritySelect(c)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${c === selectedClarity ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allCarats.length > 0 && (
                   <div className="flex items-center gap-3">
                     <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Carat Wt.:</span>
                     <div className="flex flex-wrap gap-2">
-                      {product.caratOptions.map((c, i) => (
-                        <button key={i} onClick={() => setSelectedCarat(i)} className={`h-8 w-8 border text-xs font-medium transition-colors ${i === selectedCarat ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{c}</button>
+                      {allCarats.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleCaratSelect(c)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${c === selectedCaratValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {c}
+                        </button>
                       ))}
                     </div>
                   </div>
                 )}
-                {product.sizeOptions && (
+                {allMetalWeights.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal weight:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allMetalWeights.map((w) => (
+                        <button
+                          key={w}
+                          onClick={() => handleMetalWeightSelect(w)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${w === selectedMetalWeight ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {w}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allSizes.length > 0 && (
                   <div className="flex items-center gap-3">
                     <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Ring size:</span>
                     <div className="flex flex-wrap gap-2">
-                      {product.sizeOptions.map((s, i) => (
-                        <button key={i} onClick={() => setSelectedSize(i)} className={`h-8 w-8 border text-xs font-medium transition-colors ${i === selectedSize ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}>{s}</button>
+                      {allSizes.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setSelectedSizeValue(s)}
+                          className={`h-8 w-8 border text-xs font-medium transition-colors ${s === selectedSizeValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {s}
+                        </button>
                       ))}
                     </div>
                   </div>
                 )}
-                {product.certificate && (() => {
-                  const logo = getCertLogo(product.certificate);
-                  return (
-                    <div className="flex items-center gap-3">
-                      <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
-                      {logo
-                        ? <img src={logo} alt={product.certificate} className="h-5 w-auto object-contain" />
-                        : <span className="rounded border border-foreground/20 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground/60">{product.certificate}</span>
-                      }
+                {allCerts.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {allCerts.map((cert) => {
+                        const logo = getCertLogo(cert);
+                        return logo
+                          ? <img key={cert} src={logo} alt={cert} className="h-5 w-auto object-contain" />
+                          : <span key={cert} className="rounded border border-foreground/20 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground/60">{cert}</span>;
+                      })}
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
               </div>
+                );
+              })()}
 
               <div className="border-t border-border/30">
                 <button onClick={() => setSpecsOpen(!specsOpen)} className="flex w-full items-center justify-between py-4 text-left">
@@ -303,13 +496,13 @@ const ProductDetail = () => {
                       <tbody>
                         {([
                           ['Stone type:', product.stoneType],
-                          ['Shape:', product.shape],
-                          ['Colour:', product.colour],
-                          ['Clarity:', product.clarity],
+                          ['Shape:', allShapes.length <= 1 ? product.shape : undefined],
+                          ['Colour:', allColours.length <= 1 ? product.colour : undefined],
+                          ['Clarity:', allClarities.length <= 1 ? product.clarity : undefined],
                           ['Setting:', product.setting],
                           ['Gold weight:', product.goldWeight],
                           ['Total weight:', product.totalWeight],
-                        ] as [string, string | undefined][]).map(([label, value]) => (
+                        ] as [string, string | undefined][]).filter(([, value]) => Boolean(value)).map(([label, value]) => (
                           <tr key={label}>
                             <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">{label}</td>
                             <td className="py-[3px] text-xs font-semibold text-foreground">{value}</td>

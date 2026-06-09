@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { ShopProduct } from '@/data/shop/products';
 import { getMetalType } from '@/data/shop/metalTypes';
+import { productPath } from '@/lib/utils';
 import { useFavourites } from '@/context/FavouritesContext';
 import igiLogo from '@/assets/jewellery/certification/IGI.svg';
 import giaLogo from '@/assets/jewellery/certification/GIA.svg';
@@ -71,7 +72,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
         )}
 
         {/* Image */}
-        <Link to={`/jewellery/all/${product.id}`} className="shrink-0">
+        <Link to={`${productPath(product.category, product.subCategory, product.id)}`} className="shrink-0">
           <div className="h-36 w-36 overflow-hidden bg-white p-4 sm:h-44 sm:w-44">
             <img
               src={isHovered && product.hoverImage ? product.hoverImage : product.image}
@@ -87,7 +88,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
 
         {/* Middle: name + metal */}
         <div className="flex flex-1 flex-col justify-center px-4 py-3 min-w-0">
-          <Link to={`/jewellery/all/${product.id}`}>
+          <Link to={`${productPath(product.category, product.subCategory, product.id)}`}>
             <h3 className="line-clamp-2 text-sm font-medium uppercase leading-snug tracking-wide text-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {product.name}
             </h3>
@@ -197,7 +198,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
       </button>
 
       {/* Image */}
-      <Link to={`/jewellery/all/${product.id}`}>
+      <Link to={`${productPath(product.category, product.subCategory, product.id)}`}>
         <div className="aspect-square overflow-hidden bg-white p-4">
           <img
             src={isHovered && product.hoverImage ? product.hoverImage : product.image}
@@ -215,7 +216,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
       <div className="px-3 pb-3 pt-2">
         {/* Title + certificate */}
         <div className="flex items-start justify-between gap-1.5">
-          <Link to={`/jewellery/all/${product.id}`} className="min-w-0 flex-1">
+          <Link to={`${productPath(product.category, product.subCategory, product.id)}`} className="min-w-0 flex-1">
             <h3 className="line-clamp-2 text-xs font-medium uppercase leading-snug tracking-wide text-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {product.name}
             </h3>

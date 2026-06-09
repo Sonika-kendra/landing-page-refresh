@@ -98,6 +98,11 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     ? sizeRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
     : undefined;
 
+  const metalWeightRaw = getCf(item, 'metal_weight') ?? '';
+  const metalWeightOptions = metalWeightRaw
+    ? metalWeightRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
+    : undefined;
+
   const stoneType =
     getCf(item, 'stone_type_description', 'stone_description') ??
     (normalisedStockType === 'Lab' ? 'Lab Created Diamond' :
@@ -128,7 +133,8 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     colour:       getCf(item, 'colour', 'color', 'diamond_colour', 'stone_colour') || undefined,
     clarity:      getCf(item, 'clarity', 'diamond_clarity', 'stone_clarity')       || undefined,
     setting:      getCf(item, 'setting', 'setting_type', 'mount_type')             || undefined,
-    goldWeight:   getCf(item, 'gold_weight', 'metal_weight')                       || undefined,
+    goldWeight:   getCf(item, 'gold_weight')                                        || undefined,
+    metalWeightOptions: metalWeightOptions?.length ? metalWeightOptions : undefined,
     totalWeight:  getCf(item, 'total_weight', 'total_carat_weight', 'carat_weight')|| undefined,
     itemRef:      getCf(item, 'item_ref', 'reference', 'stock_ref', 'ref')         || String(item.sku ?? '') || undefined,
     images: [imageUrl],

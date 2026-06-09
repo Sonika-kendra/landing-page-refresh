@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { productPath } from '@/lib/utils';
 import { Heart, ShoppingBag, LayoutGrid, List } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
@@ -37,7 +38,7 @@ const Wishlist = () => {
   }, [favourites, favLoading]);
 
   const handleAddToBag = (product: ShopProduct) => {
-    navigate(`/jewellery/all/${product.id}`);
+    navigate(productPath(product.category, product.subCategory, product.id));
     return Promise.resolve();
   };
 

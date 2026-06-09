@@ -140,6 +140,7 @@ export const API_CONFIG = {
       subcategories: '/products/subcategories',
       metals: '/products/metals',
       filterOptions: '/products/filter-options',
+      byName: '/products/by-name',
       one: (id: string) => `/products/${id}`,
       create: '/products',
       update: (id: string) => `/products/${id}`,
