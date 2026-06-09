@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productPath, toSlug } from '@/lib/utils';
 import {
@@ -24,7 +24,6 @@ import sglLogo from '@/assets/jewellery/certification/SGL.png';
 const CERT_LOGOS: Record<string, string> = { igi: igiLogo, gia: giaLogo, hrd: hrdLogo, sgl: sglLogo };
 const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
 
-const Diamond3DViewer = lazy(() => import('@/components/shared/product/Diamond3DViewer'));
 
 const trustBadges = [
   { icon: Truck, label: 'Free UK Delivery' },
@@ -42,7 +41,6 @@ const ProductDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [show3D, setShow3D] = useState(false);
   const [selectedMetalCode, setSelectedMetalCode] = useState('');
   const [selectedCaratValue, setSelectedCaratValue] = useState('');
   const [selectedSizeValue, setSelectedSizeValue] = useState('');
@@ -177,7 +175,7 @@ const ProductDetail = () => {
       <div className="bg-accent">
         <div className="henig-container py-3">
           <nav className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
-            <Link to="/" className="flex items-center gap-1 font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+            <Link to="/jewellery/all" className="flex items-center gap-1 font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
               <HomeIcon className="h-3.5 w-3.5" />
               <span>Home</span>
             </Link>
@@ -204,35 +202,20 @@ const ProductDetail = () => {
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <div className="relative mb-3 aspect-square overflow-hidden border border-border/20 bg-white">
-                {show3D ? (
-                  <Suspense fallback={<div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-widest text-foreground/30">Loading 3D view…</div>}>
-                    <Diamond3DViewer />
-                  </Suspense>
-                ) : (
-                  <>
-                    <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
-                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                      <ChevronLeft className="h-9 w-9" />
-                    </button>
-                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                      <ChevronRight className="h-9 w-9" />
-                    </button>
-                  </>
-                )}
+                <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
+                <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
+                  <ChevronLeft className="h-9 w-9" />
+                </button>
+                <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
+                  <ChevronRight className="h-9 w-9" />
+                </button>
               </div>
               <div className="flex gap-2">
                 {images.map((img, i) => (
-                  <button key={i} onClick={() => { setSelectedImage(i); setShow3D(false); }} className={`h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${!show3D && i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
+                  <button key={i} onClick={() => setSelectedImage(i)} className={`h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
                     <img src={img} alt="" className="h-full w-full object-contain p-1" />
                   </button>
                 ))}
-                <button
-                  onClick={() => setShow3D((v) => !v)}
-                  className={`flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border bg-white transition-all ${show3D ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
-                >
-                  <Gem className="h-6 w-6 text-foreground/40" />
-                  <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">3D View</span>
-                </button>
               </div>
               <div className="mt-8 border-t border-border/30">
                 <button onClick={() => setDescOpen(!descOpen)} className="flex w-full items-center justify-between py-4 text-left">
