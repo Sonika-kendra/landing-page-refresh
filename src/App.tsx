@@ -84,7 +84,7 @@ const AppRoutes = () => (
         <Route path="/jewellery" element={<Jewellery />} />
         <Route path={websiteUrlConfig.Blogs} element={<Blogs />} />
         <Route path={`${websiteUrlConfig.Blogs}/:slug`} element={<BlogPost />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path={websiteUrlConfig.Contact} element={<Contact />} />
         <Route path="/jewellery/all" element={<Shop />} />
         <Route path="/jewellery/all/:id" element={<ProductDetail />} />
         <Route path="/jewellery/:category/:subCategory/:id" element={<ProductDetail />} />

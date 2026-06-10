@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Star, Package } from 'lucide-react';
+import { Sparkles, Star, Package, ImagePlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -35,6 +35,9 @@ const Products = () => {
   const navigate = useNavigate();
   const [typeFilter, setTypeFilter] = useState('all');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadTargetRef = useRef<string | null>(null);
 
   const toggleBestseller = async (item: Product, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,6 +46,30 @@ const Products = () => {
       setRefreshKey((k) => k + 1);
     } catch {
       toast({ title: 'Failed to update tag', variant: 'destructive' });
+    }
+  };
+
+  const handleUploadImage = (item: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    uploadTargetRef.current = item.item_id;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const id = uploadTargetRef.current;
+    e.target.value = '';
+    if (!file || !id) return;
+    setUploadingId(id);
+    try {
+      await productsApi.uploadImage(id, file);
+      toast({ title: 'Image uploaded to WorkDrive', description: 'Product image updated.' });
+      setRefreshKey((k) => k + 1);
+    } catch {
+      toast({ title: 'Upload failed', variant: 'destructive' });
+    } finally {
+      setUploadingId(null);
+      uploadTargetRef.current = null;
     }
   };
 
@@ -109,11 +136,24 @@ const Products = () => {
     {
       key: 'isBestseller',
       label: 'Tags',
-      width: '100px',
+      width: '140px',
       align: 'right',
       render: (_, p) => (
         <div className="flex items-center justify-end gap-1.5">
           {p.isNewArrival && <Badge className="text-[10px] px-1.5">New</Badge>}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            title="Upload custom image to WorkDrive"
+            onClick={(e) => handleUploadImage(p, e)}
+            disabled={uploadingId === p.item_id}
+          >
+            {uploadingId === p.item_id
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <ImagePlus className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+            }
+          </Button>
           <Button
             size="icon"
             variant="ghost"
@@ -134,6 +174,13 @@ const Products = () => {
 
   return (
     <div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
       <AdminPageHeader
         title="Products"
         description="Manage your diamond and jewellery catalogue"

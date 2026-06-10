@@ -424,12 +424,6 @@ const MyOrderDetail = () => {
                     <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity}</p>
                     <div className="flex gap-2 mt-2">
                       <button
-                        onClick={() => setDialog({ type: 'replace', itemName: item.name })}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 py-1 transition-colors hover:bg-muted/30"
-                      >
-                        <RefreshCw className="h-3 w-3" /> Replace
-                      </button>
-                      <button
                         onClick={() => setDialog({ type: 'exchange', itemName: item.name })}
                         className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 py-1 transition-colors hover:bg-muted/30"
                       >

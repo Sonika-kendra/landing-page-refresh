@@ -146,6 +146,8 @@ export const API_CONFIG = {
       update: (id: string) => `/products/${id}`,
       updateTags: (zohoId: string) => `/products/${zohoId}/tags`,
       delete: (id: string) => `/products/${id}`,
+      uploadImage: (id: string) => `/products/${id}/image`,
+      deleteImage: (id: string) => `/products/${id}/image`,
     },
   },
 

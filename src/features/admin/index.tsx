@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Navigate, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, Boxes, ShoppingCart, Mail } from 'lucide-react';
+import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, Boxes, ShoppingCart, Mail, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { adminApi } from '@/api/admin';
@@ -24,6 +24,7 @@ interface SidebarNavProps {
   userName: string;
   userEmail: string;
   userInitials: string;
+  collapsed: boolean;
   onNavClick: () => void;
   onLogout: () => void;
 }
@@ -35,20 +36,27 @@ const SidebarNav = ({
   userName,
   userEmail,
   userInitials,
+  collapsed,
   onNavClick,
   onLogout,
 }: SidebarNavProps) => (
-  <div className="flex flex-col h-full">
+  <div className="flex flex-col h-full overflow-hidden">
     {/* Logo */}
-    <div className="px-6 py-5 border-b border-accent-foreground/10">
-      <Link to="/"><img src={Logo} alt="Henig Admin" className="h-8 w-auto object-contain" /></Link>
-      <p className="text-[10px] text-accent-foreground/50 mt-1.5 tracking-widest uppercase">
-        Admin Panel
-      </p>
+    <div className={`py-5 border-b border-accent-foreground/10 ${collapsed ? 'px-3 flex justify-center' : 'px-6'}`}>
+      {collapsed ? (
+        <Link to="/"><img src={Logo} alt="Henig Admin" className="h-6 w-6 object-contain" /></Link>
+      ) : (
+        <>
+          <Link to="/"><img src={Logo} alt="Henig Admin" className="h-8 w-auto object-contain" /></Link>
+          <p className="text-[10px] text-accent-foreground/50 mt-1.5 tracking-widest uppercase">
+            Admin Panel
+          </p>
+        </>
+      )}
     </div>
 
     {/* Nav links */}
-    <nav className="flex-1 px-3 py-4 space-y-0.5">
+    <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
       {NAV_ITEMS.map(({ to, label, icon: Icon, exact, countKey }) => {
         const count = countKey ? (counts[countKey] ?? 0) : 0;
         return (
@@ -57,17 +65,25 @@ const SidebarNav = ({
             to={to}
             end={exact}
             onClick={onNavClick}
+            title={collapsed ? label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-colors ${
+              `flex items-center gap-3 rounded-sm text-sm transition-colors ${collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'} ${
                 isActive
                   ? 'bg-accent-foreground/15 text-accent-foreground font-medium'
                   : 'text-accent-foreground/60 hover:bg-accent-foreground/10 hover:text-accent-foreground'
               }`
             }
           >
-            <Icon className="h-4 w-4 shrink-0" />
-            <span className="flex-1">{label}</span>
-            {count > 0 && (
+            <div className="relative shrink-0">
+              <Icon className="h-4 w-4" />
+              {collapsed && count > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[1rem] h-4 px-1 text-[9px] bg-primary text-primary-foreground rounded-sm flex items-center justify-center font-medium">
+                  {count}
+                </span>
+              )}
+            </div>
+            {!collapsed && <span className="flex-1">{label}</span>}
+            {!collapsed && count > 0 && (
               <span className="min-w-[1.25rem] h-5 px-1.5 text-[11px] bg-primary text-primary-foreground rounded-sm flex items-center justify-center font-medium">
                 {count}
               </span>
@@ -78,24 +94,27 @@ const SidebarNav = ({
     </nav>
 
     {/* User + logout */}
-    <div className="px-4 py-4 border-t border-accent-foreground/10">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="h-8 w-8 rounded-full bg-accent-foreground/20 flex items-center justify-center text-xs font-medium text-accent-foreground shrink-0">
-          {userInitials}
+    <div className={`py-4 border-t border-accent-foreground/10 ${collapsed ? 'px-2' : 'px-4'}`}>
+      {!collapsed && (
+        <div className="flex items-center gap-3 mb-3">
+          <div className="h-8 w-8 rounded-full bg-accent-foreground/20 flex items-center justify-center text-xs font-medium text-accent-foreground shrink-0">
+            {userInitials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-accent-foreground truncate">{userName}</p>
+            <p className="text-xs text-accent-foreground/50 truncate">{userEmail}</p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-accent-foreground truncate">{userName}</p>
-          <p className="text-xs text-accent-foreground/50 truncate">{userEmail}</p>
-        </div>
-      </div>
+      )}
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start gap-2 px-2 text-accent-foreground/60 hover:text-accent-foreground hover:bg-accent-foreground/10"
+        title={collapsed ? 'Sign Out' : undefined}
+        className={`w-full gap-2 px-2 text-accent-foreground/60 hover:text-accent-foreground hover:bg-accent-foreground/10 ${collapsed ? 'justify-center' : 'justify-start'}`}
         onClick={onLogout}
       >
-        <LogOut className="h-4 w-4" />
-        Sign Out
+        <LogOut className="h-4 w-4 shrink-0" />
+        {!collapsed && 'Sign Out'}
       </Button>
     </div>
   </div>
@@ -104,6 +123,7 @@ const SidebarNav = ({
 const AdminLayout = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { data: stats } = useQuery({
     queryKey: ['admin', 'stats'],
@@ -127,14 +147,18 @@ const AdminLayout = () => {
     userName,
     userEmail:  user.email,
     userInitials,
+    collapsed:  sidebarCollapsed,
     onNavClick: () => setSidebarOpen(false),
     onLogout:   logout,
   };
 
+  const desktopSidebarWidth = sidebarCollapsed ? 'w-16' : 'w-64';
+  const mainPaddingLeft     = sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64';
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Desktop sidebar — dark forest green */}
-      <aside className="hidden lg:flex flex-col w-64 bg-accent fixed inset-y-0 left-0 z-50">
+      <aside className={`hidden lg:flex flex-col ${desktopSidebarWidth} bg-accent fixed inset-y-0 left-0 z-50 transition-[width] duration-200`}>
         <SidebarNav {...sidebarProps} />
       </aside>
 
@@ -146,21 +170,33 @@ const AdminLayout = () => {
             onClick={() => setSidebarOpen(false)}
           />
           <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-accent lg:hidden">
-            <SidebarNav {...sidebarProps} />
+            <SidebarNav {...{ ...sidebarProps, collapsed: false }} />
           </aside>
         </>
       )}
 
       {/* Main content */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+      <div className={`flex-1 ${mainPaddingLeft} flex flex-col min-h-screen transition-[padding] duration-200`}>
         {/* Top bar — card (ivory) so it stands out from the beige body */}
         <header className="h-14 bg-card border-b border-border flex items-center px-4 gap-3 sticky top-0 z-30">
+          {/* Mobile open */}
           <button
             className="lg:hidden p-1.5 rounded-sm text-foreground/50 hover:text-foreground"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
+          </button>
+          {/* Desktop collapse toggle */}
+          <button
+            className="hidden lg:flex p-1.5 rounded-sm text-foreground/50 hover:text-foreground transition-colors"
+            onClick={() => setSidebarCollapsed(v => !v)}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {sidebarCollapsed
+              ? <PanelLeftOpen className="h-5 w-5" />
+              : <PanelLeftClose className="h-5 w-5" />
+            }
           </button>
           <div className="flex-1" />
           <span className="text-xs text-foreground/40 tracking-widest uppercase">

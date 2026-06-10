@@ -990,7 +990,7 @@ const ShopPage = () => {
                 }}
                 className="h-10 rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
               >
-                {currencies.map(c => (
+                {currencies.filter(c => c.currency_code === 'USD' || c.currency_code === 'GBP').map(c => (
                   <option key={c.currency_code} value={c.currency_code}>
                     {c.currency_code} {c.currency_symbol}
                   </option>

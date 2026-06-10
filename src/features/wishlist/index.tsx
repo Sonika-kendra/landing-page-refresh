@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { productPath } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag, LayoutGrid, List } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
@@ -15,7 +14,6 @@ const Wishlist = () => {
   const [wishlisted, setWishlisted] = useState<ShopProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (favLoading || favourites.length === 0) {
@@ -36,11 +34,6 @@ const Wishlist = () => {
       .then((results) => setWishlisted(results.filter(Boolean) as ShopProduct[]))
       .finally(() => setLoadingProducts(false));
   }, [favourites, favLoading]);
-
-  const handleAddToBag = (product: ShopProduct) => {
-    navigate(productPath(product.category, product.subCategory, product.id));
-    return Promise.resolve();
-  };
 
   const isLoading = favLoading || loadingProducts;
 
@@ -75,7 +68,7 @@ const Wishlist = () => {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: favourites.length || 4 }).map((_, i) => (
               <div key={i} className="animate-pulse border border-border/40 bg-card">
                 <div className="aspect-square bg-foreground/5" />
@@ -102,11 +95,11 @@ const Wishlist = () => {
           </div>
         ) : (
           <div className={viewMode === 'grid'
-            ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5'
+            ? 'grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4'
             : 'flex flex-col gap-3'
           }>
             {wishlisted.map(product => (
-              <ShopProductCard key={product.id} product={product} listView={viewMode === 'list'} onAddToBag={handleAddToBag} />
+              <ShopProductCard key={product.id} product={product} listView={viewMode === 'list'} />
             ))}
           </div>
         )}

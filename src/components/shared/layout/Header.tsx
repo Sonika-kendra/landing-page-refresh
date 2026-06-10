@@ -461,20 +461,6 @@ const Header = () => {
 
                         {/* ── Account links ── */}
                         <ul className="py-1">
-                          {/* My Orders — non-admin only */}
-                          {user.role !== 'admin' && (
-                            <li>
-                              <Link
-                                to="/account/orders"
-                                className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
-                              >
-                                <Package className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="flex-1">My Orders</span>
-                                <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
-                              </Link>
-                            </li>
-                          )}
-
                           {/* Profile — always shown */}
                           <li>
                             <Link
@@ -483,6 +469,18 @@ const Header = () => {
                             >
                               <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                               <span className="flex-1">Profile</span>
+                              <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
+                            </Link>
+                          </li>
+
+                          {/* My Orders — always shown */}
+                          <li className="border-t border-border">
+                            <Link
+                              to="/account/orders"
+                              className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                            >
+                              <Package className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                              <span className="flex-1">My Orders</span>
                               <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
                             </Link>
                           </li>

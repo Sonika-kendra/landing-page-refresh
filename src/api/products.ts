@@ -69,4 +69,13 @@ export const productsApi = {
 
   remove: (id: string) =>
     client.delete(ep.delete(id), undefined, undefined, base),
+
+  uploadImage: (id: string, file: File) => {
+    const fd = new FormData();
+    fd.append('src', file);
+    return client.post<{ ok: boolean; src: string }>(ep.uploadImage(id), fd, undefined, base);
+  },
+
+  deleteImage: (id: string) =>
+    client.delete<{ ok: boolean }>(ep.deleteImage(id), undefined, undefined, base),
 };

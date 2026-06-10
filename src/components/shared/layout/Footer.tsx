@@ -282,13 +282,10 @@ const Footer = () => {
                   className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
                   asChild
                 >
-                  <a
-                    href={websiteUrlConfig.Contact}
-                    rel="noopener noreferrer"
-                  >
+                  <Link to={websiteUrlConfig.Contact}>
                     Send an enquiry
                     <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
-                  </a>
+                  </Link>
                 </Button>
               </li>
 

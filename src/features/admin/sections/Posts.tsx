@@ -115,10 +115,33 @@ const Posts = () => {
   const [buttons, setButtons] = useState<ButtonEntry[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [coverHeight, setCoverHeight] = useState(256);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const draftIdRef = useRef<string>(uid());
   const emailEditorRef = useRef<EditorRef>(null);
   const designRef = useRef<object | null>(null);
+  const resizingRef = useRef(false);
+  const resizeStartY = useRef(0);
+  const resizeStartH = useRef(0);
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    resizingRef.current = true;
+    resizeStartY.current = e.clientY;
+    resizeStartH.current = coverHeight;
+    const onMove = (me: MouseEvent) => {
+      if (!resizingRef.current) return;
+      const delta = me.clientY - resizeStartY.current;
+      setCoverHeight(Math.max(120, resizeStartH.current + delta));
+    };
+    const onUp = () => {
+      resizingRef.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['admin', 'posts'],
@@ -196,16 +219,9 @@ const Posts = () => {
     setForm(prev => ({ ...prev, [name]: value }));
 
   const addImageFiles = useCallback((files: FileList | File[]) => {
-    const valid = Array.from(files).filter(f => f.type.startsWith('image/'));
-    setImages(prev => [
-      ...prev,
-      ...valid.map(file => ({
-        id: uid(),
-        file,
-        preview: URL.createObjectURL(file),
-        serverUrl: '',
-      })),
-    ]);
+    const first = Array.from(files).find(f => f.type.startsWith('image/'));
+    if (!first) return;
+    setImages([{ id: uid(), file: first, preview: URL.createObjectURL(first), serverUrl: '' }]);
   }, []);
 
   const handleImageDrop = useCallback((e: React.DragEvent) => {
@@ -428,56 +444,77 @@ const Posts = () => {
         {/* Cover Image */}
         <div>
           <h3 className="text-sm font-medium tracking-wide mb-2">Cover Image</h3>
-          <div
-            className={`flex flex-wrap gap-3 border border-border p-3 min-h-[96px] transition-colors ${
-              isDragOver ? 'bg-muted/40' : ''
-            }`}
-            onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={handleImageDrop}
-          >
-            {images.map((img, index) => (
-              <div key={img.id} className="relative w-24 h-24 border border-border group shrink-0">
-                <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                {index === 0 && (
-                  <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-black/60 text-white tracking-wider py-0.5 uppercase">
-                    Cover
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-
-            {/* Add image slot */}
-            <div
-              className="w-24 h-24 border border-dashed border-border flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-muted/20 transition-colors shrink-0"
-              onClick={() => imageInputRef.current?.click()}
-            >
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={e => {
-                  if (e.target.files?.length) addImageFiles(e.target.files);
-                  e.target.value = '';
-                }}
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={e => {
+              if (e.target.files?.length) addImageFiles(e.target.files);
+              e.target.value = '';
+            }}
+          />
+          {images.length > 0 ? (
+            <div className="relative w-full border border-border group overflow-hidden" style={{ height: coverHeight }}>
+              <img
+                src={images[0].preview}
+                alt=""
+                className="w-full h-full object-cover"
+                onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleImageDrop}
               />
-              <ImagePlus className="w-5 h-5 text-muted-foreground" />
-              <span className="text-[9px] text-muted-foreground tracking-widest uppercase">Add</span>
+              {isDragOver && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                  <span className="text-white text-xs tracking-widest uppercase">Drop to replace</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
+              <button
+                type="button"
+                onClick={() => setImages([])}
+                className="absolute top-2 right-2 w-7 h-7 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                className="absolute bottom-6 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 text-white text-[10px] tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+              >
+                <ImagePlus className="w-3.5 h-3.5" />
+                Replace
+              </button>
+              {/* Resize handle */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-3 flex items-center justify-center cursor-ns-resize group/handle select-none"
+                onMouseDown={handleResizeMouseDown}
+              >
+                <div className="w-10 h-1 rounded-full bg-white/40 group-hover/handle:bg-white/80 transition-colors" />
+              </div>
             </div>
-          </div>
-          {images.length === 0 && (
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Drag images above or click Add. First image becomes the cover.
-            </p>
+          ) : (
+            <div
+              className={`relative w-full border border-dashed border-border flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+                isDragOver ? 'bg-muted/40' : 'hover:bg-muted/20'
+              }`}
+              style={{ height: coverHeight }}
+              onClick={() => imageInputRef.current?.click()}
+              onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={handleImageDrop}
+            >
+              <ImagePlus className="w-6 h-6 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground tracking-widest uppercase">Add Cover Image</span>
+              <span className="text-[11px] text-muted-foreground/60">Drag & drop or click to upload</span>
+              {/* Resize handle */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-3 flex items-center justify-center cursor-ns-resize group/handle select-none"
+                onMouseDown={e => { e.stopPropagation(); handleResizeMouseDown(e); }}
+              >
+                <div className="w-10 h-1 rounded-full bg-border group-hover/handle:bg-muted-foreground/60 transition-colors" />
+              </div>
+            </div>
           )}
         </div>
 
