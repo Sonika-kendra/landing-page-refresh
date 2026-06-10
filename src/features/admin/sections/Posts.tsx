@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus, MoreVertical, Eye, ArrowLeft, Calendar } from 'lucide-react';
+import { Plus, Search, FileText, Pencil, Trash2, X, ImagePlus, MoreVertical, Eye, ArrowLeft, Calendar, Loader2 } from 'lucide-react';
 import EmailEditor, { EditorRef } from 'react-email-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -116,6 +116,7 @@ const Posts = () => {
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [coverHeight, setCoverHeight] = useState(256);
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const draftIdRef = useRef<string>(uid());
   const emailEditorRef = useRef<EditorRef>(null);
@@ -218,11 +219,29 @@ const Posts = () => {
   const handleFormField = (name: keyof PostForm, value: string) =>
     setForm(prev => ({ ...prev, [name]: value }));
 
-  const addImageFiles = useCallback((files: FileList | File[]) => {
+  const addImageFiles = useCallback(async (files: FileList | File[]) => {
     const first = Array.from(files).find(f => f.type.startsWith('image/'));
     if (!first) return;
-    setImages([{ id: uid(), file: first, preview: URL.createObjectURL(first), serverUrl: '' }]);
-  }, []);
+    const tempId = uid();
+    const preview = URL.createObjectURL(first);
+    // Show local preview immediately while uploading
+    setImages([{ id: tempId, file: first, preview, serverUrl: '' }]);
+    setIsCoverUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('src', first);
+      // Edit mode: upload straight to the post's WorkDrive folder
+      // Create mode: upload to blog root (not draft folder, so it isn't trashed on post-create cleanup)
+      if (editPost?._id) fd.append('postId', editPost._id);
+      const result = await adminApi.uploadPostImage(fd);
+      setImages([{ id: tempId, file: null, preview, serverUrl: result.data.url }]);
+    } catch {
+      setImages([]);
+      toast({ title: 'Cover image failed', description: 'Could not upload to WorkDrive.', variant: 'destructive' });
+    } finally {
+      setIsCoverUploading(false);
+    }
+  }, [editPost, toast]);
 
   const handleImageDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -239,12 +258,67 @@ const Posts = () => {
   const addButton = () =>
     setButtons(prev => [...prev, { id: uid(), label: '', url: '' }]);
 
-  // Called by Unlayer once the editor iframe is ready; loads the existing design if editing
-  const onEditorLoad = useCallback(() => {
-    if (designRef.current && emailEditorRef.current?.editor) {
-      emailEditorRef.current.editor.loadDesign(designRef.current);
+  // Upload helper shared by both image callbacks
+  const uploadToWorkDrive = useCallback(async (file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append('src', file);
+    fd.append('postId', editPost?._id ?? draftIdRef.current);
+    const result = await adminApi.uploadPostImage(fd);
+    return resolveImageUrl(result.data.url);
+  }, [editPost]);
+
+  // Called by Unlayer once the editor is fully ready (onReady fires after editor:ready event)
+  const onEditorReady = useCallback((editor: NonNullable<EditorRef['editor']>) => {
+    // Handle file uploads — triggered by drag & drop or the Upload button in the Image block
+    editor.registerCallback('image', async (data, done) => {
+      const file = data.accepted?.[0] ?? data.attachments?.[0];
+      if (!file) { done({}); return; }
+      try {
+        const url = await uploadToWorkDrive(file);
+        done({ url });
+      } catch {
+        toast({ title: 'Image upload failed', description: 'Could not upload image to WorkDrive.', variant: 'destructive' });
+        done({});
+      }
+    });
+
+    // Handle image picker — triggered by the "Browse" / "Change Image" button
+    editor.registerCallback('selectImage', (_, done) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.style.cssText = 'position:fixed;top:-9999px;opacity:0';
+      document.body.appendChild(input);
+
+      const cleanup = () => {
+        if (document.body.contains(input)) document.body.removeChild(input);
+      };
+
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        cleanup();
+        if (!file) { done({}); return; }
+        try {
+          const url = await uploadToWorkDrive(file);
+          done({ url });
+        } catch {
+          toast({ title: 'Image upload failed', description: 'Could not upload image to WorkDrive.', variant: 'destructive' });
+          done({});
+        }
+      };
+
+      // Handle cancel — focus returns to window when picker closes without selecting
+      const onFocus = () => setTimeout(() => { cleanup(); }, 500);
+      window.addEventListener('focus', onFocus, { once: true });
+      input.addEventListener('change', () => window.removeEventListener('focus', onFocus));
+
+      input.click();
+    });
+
+    if (designRef.current) {
+      editor.loadDesign(designRef.current);
     }
-  }, []);
+  }, [editPost, uploadToWorkDrive, toast]);
 
   // Build FormData from current form state + exported HTML/design
   const buildFd = (html: string, design: object, statusOverride?: PostStatus) => {
@@ -418,7 +492,7 @@ const Posts = () => {
             variant="outline"
             className="tracking-widest uppercase text-xs rounded-none gap-1.5"
             onClick={handlePreview}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isCoverUploading}
           >
             <Eye className="w-3.5 h-3.5" />
             Preview
@@ -464,27 +538,36 @@ const Posts = () => {
                 onDragLeave={() => setIsDragOver(false)}
                 onDrop={handleImageDrop}
               />
-              {isDragOver && (
+              {isCoverUploading && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+                  <Loader2 className="w-6 h-6 text-white animate-spin" />
+                </div>
+              )}
+              {!isCoverUploading && isDragOver && (
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
                   <span className="text-white text-xs tracking-widest uppercase">Drop to replace</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
-              <button
-                type="button"
-                onClick={() => setImages([])}
-                className="absolute top-2 right-2 w-7 h-7 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => imageInputRef.current?.click()}
-                className="absolute bottom-6 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 text-white text-[10px] tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
-              >
-                <ImagePlus className="w-3.5 h-3.5" />
-                Replace
-              </button>
+              {!isCoverUploading && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setImages([])}
+                    className="absolute top-2 right-2 w-7 h-7 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="absolute bottom-6 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 text-white text-[10px] tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                  >
+                    <ImagePlus className="w-3.5 h-3.5" />
+                    Replace
+                  </button>
+                </>
+              )}
               {/* Resize handle */}
               <div
                 className="absolute bottom-0 left-0 right-0 h-3 flex items-center justify-center cursor-ns-resize group/handle select-none"
@@ -522,8 +605,11 @@ const Posts = () => {
         <div className="border border-border overflow-hidden">
           <EmailEditor
             ref={emailEditorRef}
-            onLoad={onEditorLoad}
-            options={{ displayMode: 'web' }}
+            onReady={onEditorReady}
+            options={{
+              displayMode: 'web',
+              features: { stockImages: false, userUploads: false },
+            }}
             style={{ height: '70vh' }}
           />
         </div>
@@ -559,7 +645,7 @@ const Posts = () => {
               variant="outline"
               className="tracking-widest uppercase text-xs rounded-none"
               onClick={() => handleSaveFromEditor('draft')}
-              disabled={!isFormValid || saveMutation.isPending}
+              disabled={!isFormValid || saveMutation.isPending || isCoverUploading}
             >
               {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
             </Button>
