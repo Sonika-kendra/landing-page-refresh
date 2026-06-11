@@ -27,6 +27,7 @@ interface SidebarNavProps {
   collapsed: boolean;
   onNavClick: () => void;
   onLogout: () => void;
+  onToggleCollapse?: () => void;
 }
 
 // Sidebar is rendered on dark forest-green (bg-accent = #173731)
@@ -39,19 +40,42 @@ const SidebarNav = ({
   collapsed,
   onNavClick,
   onLogout,
+  onToggleCollapse,
 }: SidebarNavProps) => (
   <div className="flex flex-col h-full overflow-hidden">
     {/* Logo */}
-    <div className={`py-5 border-b border-accent-foreground/10 ${collapsed ? 'px-3 flex justify-center' : 'px-6'}`}>
+    <div className={`py-5 border-b border-accent-foreground/10 ${collapsed ? 'px-3' : 'px-6'}`}>
       {collapsed ? (
-        <Link to="/"><img src={Logo} alt="Henig Admin" className="h-6 w-6 object-contain" /></Link>
+        <div className="flex flex-col items-center gap-3">
+          <Link to="/"><img src={Logo} alt="Henig Admin" className="h-6 w-6 object-contain" /></Link>
+          {onToggleCollapse && (
+            <button
+              className="p-1.5 rounded-sm text-accent-foreground/50 hover:text-accent-foreground hover:bg-accent-foreground/10 transition-colors"
+              onClick={onToggleCollapse}
+              aria-label="Expand sidebar"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       ) : (
-        <>
-          <Link to="/"><img src={Logo} alt="Henig Admin" className="h-8 w-auto object-contain" /></Link>
-          <p className="text-[10px] text-accent-foreground/50 mt-1.5 tracking-widest uppercase">
-            Admin Panel
-          </p>
-        </>
+        <div className="flex items-start justify-between">
+          <div>
+            <Link to="/"><img src={Logo} alt="Henig Admin" className="h-8 w-auto object-contain" /></Link>
+            <p className="text-[10px] text-accent-foreground/50 mt-1.5 tracking-widest uppercase">
+              Admin Panel
+            </p>
+          </div>
+          {onToggleCollapse && (
+            <button
+              className="p-1.5 rounded-sm text-accent-foreground/50 hover:text-accent-foreground hover:bg-accent-foreground/10 transition-colors"
+              onClick={onToggleCollapse}
+              aria-label="Collapse sidebar"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       )}
     </div>
 
@@ -145,11 +169,12 @@ const AdminLayout = () => {
       pendingApprovals: stats?.pendingApprovals  ?? 0,
     },
     userName,
-    userEmail:  user.email,
+    userEmail:        user.email,
     userInitials,
-    collapsed:  sidebarCollapsed,
-    onNavClick: () => setSidebarOpen(false),
-    onLogout:   logout,
+    collapsed:        sidebarCollapsed,
+    onNavClick:       () => setSidebarOpen(false),
+    onLogout:         logout,
+    onToggleCollapse: () => setSidebarCollapsed(v => !v),
   };
 
   const desktopSidebarWidth = sidebarCollapsed ? 'w-16' : 'w-64';
@@ -170,7 +195,7 @@ const AdminLayout = () => {
             onClick={() => setSidebarOpen(false)}
           />
           <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-accent lg:hidden">
-            <SidebarNav {...{ ...sidebarProps, collapsed: false }} />
+            <SidebarNav {...{ ...sidebarProps, collapsed: false, onToggleCollapse: undefined }} />
           </aside>
         </>
       )}
@@ -187,18 +212,7 @@ const AdminLayout = () => {
           >
             <Menu className="h-5 w-5" />
           </button>
-          {/* Desktop collapse toggle */}
-          <button
-            className="hidden lg:flex p-1.5 rounded-sm text-foreground/50 hover:text-foreground transition-colors"
-            onClick={() => setSidebarCollapsed(v => !v)}
-            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {sidebarCollapsed
-              ? <PanelLeftOpen className="h-5 w-5" />
-              : <PanelLeftClose className="h-5 w-5" />
-            }
-          </button>
-          <div className="flex-1" />
+<div className="flex-1" />
           <span className="text-xs text-foreground/40 tracking-widest uppercase">
             <Link to="/" className="hover:text-foreground/70 transition-colors">Henig Diamonds</Link>
             {' · Admin'}

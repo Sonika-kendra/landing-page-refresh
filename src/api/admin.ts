@@ -67,6 +67,7 @@ export interface EmailTemplateDoc {
   _id: string;
   name: string;
   subject: string;
+  recipients: string[];
   html: string;
   design: object | null;
   createdAt: string;
@@ -306,10 +307,10 @@ export const adminApi = {
       API_CONFIG.adminEmailTemplates.base
     ),
 
-  saveEmailTemplate: (id: string, design: object, html: string, name?: string, subject?: string) =>
+  saveEmailTemplate: (id: string, design: object, html: string, name?: string, subject?: string, recipients?: string[]) =>
     apiClient.patch<EmailTemplateDoc>(
       API_CONFIG.adminEmailTemplates.endpoints.byId(id),
-      { ...(name !== undefined && { name }), ...(subject !== undefined && { subject }), design, html },
+      { ...(name !== undefined && { name }), ...(subject !== undefined && { subject }), ...(recipients !== undefined && { recipients }), design, html },
       undefined,
       API_CONFIG.adminEmailTemplates.base
     ),

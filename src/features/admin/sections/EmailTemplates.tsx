@@ -42,7 +42,7 @@ const AdminEmailTemplates = () => {
 
   const createMutation = useMutation({
     mutationFn: () => adminApi.createEmailTemplate(),
-    onSuccess: (res) => navigate(`/admin/email/${res.data._id}`),
+    onSuccess: (res) => navigate(`/admin/email/${res.data._id}`, { state: { fresh: true } }),
     onError: () => toast.error('Failed to create template'),
   });
 
@@ -71,7 +71,7 @@ const AdminEmailTemplates = () => {
 
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="aspect-[3/4] w-full" />)}
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="aspect-[4/3] w-full" />)}
         </div>
       ) : templates.length === 0 ? (
         <div className="border border-dashed border-border rounded-sm p-16 text-center">
@@ -95,7 +95,7 @@ const AdminEmailTemplates = () => {
             return (
               <div
                 key={t._id}
-                className="group relative aspect-[3/4] overflow-hidden bg-white border border-border cursor-pointer"
+                className="group relative aspect-[4/3] overflow-hidden bg-white border border-border cursor-pointer"
                 onClick={() => navigate(`/admin/email/${t._id}`)}
               >
                 {/* Email preview */}
@@ -104,7 +104,7 @@ const AdminEmailTemplates = () => {
                     <iframe
                       srcDoc={t.html}
                       className="pointer-events-none border-none"
-                      style={{ width: '600px', height: '1000px', transform: 'scale(0.45)', transformOrigin: 'top left' }}
+                      style={{ width: '600px', height: '600px', transform: 'scale(0.45)', transformOrigin: 'top left' }}
                       sandbox="allow-same-origin"
                       title={tName}
                     />
