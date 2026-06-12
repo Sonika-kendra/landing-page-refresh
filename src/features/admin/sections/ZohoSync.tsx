@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  RefreshCw, CheckCircle, XCircle, AlertCircle, Activity, Clock,
+  RefreshCw, CheckCircle, XCircle, AlertCircle, Activity, Clock, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,20 +37,32 @@ const STATUSES = [
   { value: 'error', label: 'Error' },
 ];
 
-const LOG_COLUMNS: ColumnDef<ZohoSyncLog>[] = [
+const makeLogColumns = (onErrorClick: (msg: string) => void): ColumnDef<ZohoSyncLog>[] => [
   {
     key: 'status',
     label: 'Status',
-    width: '60px',
+    width: '25%',
     align: 'center',
-    render: (val) =>
+    render: (val, log) =>
       val === 'success'
-        ? <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
-        : <XCircle className="h-4 w-4 text-destructive mx-auto" />,
+        ? (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded px-2 py-0.5">
+            <CheckCircle className="h-3 w-3" /> Success
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => log.error && onErrorClick(log.error)}
+            className="inline-flex items-center gap-1 text-xs font-medium text-destructive bg-red-50 border border-red-200 rounded px-2 py-0.5 hover:bg-red-100 transition-colors cursor-pointer"
+          >
+            <XCircle className="h-3 w-3" /> Error
+          </button>
+        ),
   },
   {
     key: 'module',
     label: 'Module',
+    width: '25%',
     sortable: true,
     render: (_, log) => (
       <div className="min-w-0">
@@ -60,33 +72,46 @@ const LOG_COLUMNS: ColumnDef<ZohoSyncLog>[] = [
             {log.direction === 'zoho_to_mongo' ? 'Zoho → DB' : 'DB → Zoho'}
           </span>
         </p>
-        {log.error && (
-          <p className="text-xs text-destructive mt-0.5 truncate">{log.error}</p>
-        )}
       </div>
-    ),
-  },
-  {
-    key: 'meta',
-    label: 'Records',
-    width: '220px',
-    render: (_, log) => (
-      <span className="text-xs text-muted-foreground">
-        {log.meta
-          ? `${log.meta.synced} synced${log.meta.errors > 0 ? `, ${log.meta.errors} errors` : ''} / ${log.meta.total} total`
-          : <span className="capitalize">{log.action}</span>
-        }
-      </span>
     ),
   },
   {
     key: 'createdAt',
     label: 'Time',
-    width: '180px',
+    width: '25%',
     sortable: true,
     render: (val) => (
       <span className="text-xs text-muted-foreground whitespace-nowrap">
         {formatDate(val as string)}
+      </span>
+    ),
+  },
+  {
+    key: 'meta',
+    label: 'Records',
+    width: '25%',
+    render: (_, log) => (
+      <span className="text-xs text-muted-foreground">
+        {log.meta ? (
+          <>
+            {log.meta.synced} synced
+            {log.meta.errors > 0 && (
+              <>
+                {', '}
+                <button
+                  type="button"
+                  onClick={() => log.error && onErrorClick(log.error)}
+                  className="text-destructive underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer"
+                >
+                  {log.meta.errors} errors
+                </button>
+              </>
+            )}
+            {' / '}{log.meta.total} total
+          </>
+        ) : (
+          <span className="capitalize">{log.action}</span>
+        )}
       </span>
     ),
   },
@@ -99,6 +124,9 @@ const ZohoSync = () => {
   const [moduleFilter, setModuleFilter]       = useState('all');
   const [directionFilter, setDirectionFilter] = useState('all');
   const [statusFilter, setStatusFilter]       = useState('all');
+  const [errorModal, setErrorModal]           = useState<string | null>(null);
+
+  const logColumns = makeLogColumns((msg) => setErrorModal(msg));
 
   const [fullSyncStartedAt, setFullSyncStartedAt] = useState<Date | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -181,13 +209,33 @@ const ZohoSync = () => {
     },
   });
 
-  const anySyncRunning = isFullSyncRunning || syncModuleMutation.isPending;
+  const syncProductsMutation = useMutation({
+    mutationFn: () => adminApi.zohoSyncProducts().then(r => r.data),
+    onSuccess: (data) => {
+      toast({
+        title: 'Products synced',
+        description: `${data.synced ?? 0} synced, ${data.errors ?? 0} errors of ${data.total ?? 0} total.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] });
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } }; message?: string })
+          ?.response?.data?.error ??
+        (err as { message?: string })?.message ??
+        'Unknown error';
+      toast({ title: 'Failed to sync products', description: msg, variant: 'destructive' });
+    },
+  });
+
+  const anySyncRunning = isFullSyncRunning || syncModuleMutation.isPending || syncProductsMutation.isPending;
   const modules = statusData?.modules ?? [];
 
   // Log filter key — forces DataTable remount (page reset) when filters change
   const logsFilterKey = `${moduleFilter}-${directionFilter}-${statusFilter}`;
 
   return (
+    <>
     <div className="space-y-8">
 
       {/* ── Header ── */}
@@ -258,6 +306,16 @@ const ZohoSync = () => {
                 </Button>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 min-w-[110px]"
+              disabled={anySyncRunning}
+              onClick={() => syncProductsMutation.mutate()}
+            >
+              <RefreshCw className={`h-3 w-3 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
+              {syncProductsMutation.isPending ? 'Syncing…' : 'Sync Products'}
+            </Button>
           </div>
         )}
 
@@ -266,6 +324,8 @@ const ZohoSync = () => {
             <RefreshCw className="h-3.5 w-3.5 animate-spin shrink-0" />
             {isFullSyncRunning
               ? 'Full sync in progress — please wait until it completes.'
+              : syncProductsMutation.isPending
+              ? 'Syncing products — please wait…'
               : `Syncing ${syncModuleMutation.variables} — please wait…`}
           </div>
         )}
@@ -321,6 +381,7 @@ const ZohoSync = () => {
                 {modules.map(m => (
                   <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>
                 ))}
+                <SelectItem value="products">Products</SelectItem>
               </SelectContent>
             </Select>
 
@@ -359,7 +420,7 @@ const ZohoSync = () => {
             })
           }
           dataKey="logs"
-          columns={LOG_COLUMNS}
+          columns={logColumns}
           clientSidePagination
           defaultPageSize={10}
           emptyIcon={<Activity className="h-10 w-10 opacity-25" />}
@@ -368,6 +429,42 @@ const ZohoSync = () => {
         />
       </div>
     </div>
+
+    {/* Error detail modal — fixed overlay, sibling to main content */}
+    {errorModal !== null && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        onClick={() => setErrorModal(null)}
+      >
+        <div
+          className="relative bg-background border rounded-lg shadow-xl w-full max-w-lg mx-4 p-6"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <XCircle className="h-5 w-5 shrink-0" />
+              <span className="font-semibold text-sm">Sync Error</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorModal(null)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <pre className="text-xs text-muted-foreground bg-muted rounded p-3 whitespace-pre-wrap break-all max-h-72 overflow-y-auto">
+            {errorModal}
+          </pre>
+          <div className="mt-4 flex justify-end">
+            <Button size="sm" variant="outline" onClick={() => setErrorModal(null)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

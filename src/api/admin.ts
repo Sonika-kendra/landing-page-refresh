@@ -414,6 +414,14 @@ export const adminApi = {
       API_CONFIG.adminZoho.base
     ),
 
+  zohoSyncProducts: () =>
+    apiClient.post<ZohoSyncResult>(
+      API_CONFIG.adminZoho.endpoints.syncProducts,
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
   getZohoInventoryItems: (params?: { search?: string; category_id?: string; status?: string }) =>
     apiClient.get<{ ok: boolean; total: number; items: ZohoInventoryItem[] }>(
       API_CONFIG.adminZoho.endpoints.inventoryItems,

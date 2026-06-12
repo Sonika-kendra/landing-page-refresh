@@ -4,7 +4,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 const fromSlug = (slug: string) =>
   slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 import { productsApi } from '@/api/products';
-import { ArrowRight, ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
@@ -39,7 +39,7 @@ import labDiamondImage from '@/assets/lab-grown-diamond.jpg';
 import diamondsImage from '@/assets/diamonds-category.jpg';
 
 
-const PAGE_SIZE = 16;
+const PAGE_SIZE = 12;
 const DEFAULT_PRICE_RANGE: [number, number] = [0, 5000];
 const DEFAULT_CARAT_RANGE: [number, number] = [0, 99];
 
@@ -568,7 +568,6 @@ const ShopPage = () => {
   const [currencyCode, setCurrencyCode] = useState('GBP');
   const [currencySymbol, setCurrencySymbol] = useState('£');
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
@@ -702,8 +701,7 @@ const ShopPage = () => {
   }, []);
 
   useEffect(() => {
-    if (page === 1) setIsLoading(true);
-    else setIsLoadingMore(true);
+    setIsLoading(true);
     setFetchError(null);
 
     const params: Record<string, unknown> = {
@@ -752,14 +750,13 @@ const ShopPage = () => {
       .then((res) => {
         const items = (res.data?.items ?? []) as ShopProduct[];
         setTotal(res.data?.page_context?.total ?? items.length);
-        if (page === 1) setProducts(items);
-        else setProducts((prev) => [...prev, ...items]);
+        setProducts(items);
       })
       .catch((err) => {
         console.error('[Shop] Failed to load products:', err);
         setFetchError('Unable to load products right now. Please try again later.');
       })
-      .finally(() => { setIsLoading(false); setIsLoadingMore(false); });
+      .finally(() => { setIsLoading(false); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedCategory, page, currencySymbol, sortBy, debouncedSearch,
@@ -1087,21 +1084,70 @@ const ShopPage = () => {
               </div>
             )}
 
-            {products.length < total && !isLoading && (
-              <div className="mt-10 flex justify-center">
-                <Button
-                  size="sm"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={isLoadingMore}
-                  className="group bg-accent text-accent-foreground border border-primary hover:bg-primary hover:text-accent hover:border-primary transition-all duration-300 px-8 py-3 text-sm font-normal tracking-widest uppercase disabled:opacity-50"
-                >
-                  {isLoadingMore ? 'Loading…' : 'Load More'}
-                  {!isLoadingMore && (
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            {(() => {
+              const totalPages = Math.ceil(total / PAGE_SIZE);
+              if (totalPages <= 1 || isLoading) return null;
+
+              const getPageNumbers = (current: number, last: number): (number | 'ellipsis')[] => {
+                if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1);
+                const pages: (number | 'ellipsis')[] = [1];
+                if (current > 3) pages.push('ellipsis');
+                for (let i = Math.max(2, current - 1); i <= Math.min(last - 1, current + 1); i++) pages.push(i);
+                if (current < last - 2) pages.push('ellipsis');
+                pages.push(last);
+                return pages;
+              };
+
+              const handlePageChange = (newPage: number) => {
+                setPage(newPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              };
+
+              const btnBase = 'flex h-9 min-w-[2.25rem] cursor-pointer items-center justify-center rounded border px-2 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+              const btnActive = 'border-accent bg-accent text-accent-foreground font-semibold';
+              const btnDefault = 'border-border/60 bg-background text-foreground/70 hover:border-accent/60 hover:text-foreground';
+
+              return (
+                <div className="mt-10 flex items-center justify-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page === 1}
+                    className={`${btnBase} ${btnDefault} gap-1 px-3`}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
+
+                  {getPageNumbers(page, totalPages).map((p, idx) =>
+                    p === 'ellipsis' ? (
+                      <span key={`ellipsis-${idx}`} className="flex h-9 w-9 items-center justify-center text-foreground/40 text-sm">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => handlePageChange(p)}
+                        className={`${btnBase} ${p === page ? btnActive : btnDefault}`}
+                      >
+                        {p}
+                      </button>
+                    )
                   )}
-                </Button>
-              </div>
-            )}
+
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page === totalPages}
+                    className={`${btnBase} ${btnDefault} gap-1 px-3`}
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </section>
