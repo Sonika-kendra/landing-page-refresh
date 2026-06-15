@@ -68,9 +68,6 @@ const makeLogColumns = (onErrorClick: (msg: string) => void): ColumnDef<ZohoSync
       <div className="min-w-0">
         <p className="text-sm font-medium capitalize">
           {log.module}
-          <span className="ml-2 text-xs font-normal text-muted-foreground normal-case">
-            {log.direction === 'zoho_to_mongo' ? 'Zoho → DB' : 'DB → Zoho'}
-          </span>
         </p>
       </div>
     ),
@@ -210,10 +207,29 @@ const ZohoSync = () => {
   });
 
   const syncProductsMutation = useMutation({
-    mutationFn: () => adminApi.zohoSyncProducts().then(r => r.data),
+    mutationFn: () => adminApi.zohoTriggerProductsSync().then(r => r.data),
     onSuccess: (data) => {
       toast({
-        title: 'Products synced',
+        title: 'Product sync triggered',
+        description: data.message ?? 'Zoho Deluge schedule triggered — items will sync to MongoDB shortly.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] });
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } }; message?: string })
+          ?.response?.data?.error ??
+        (err as { message?: string })?.message ??
+        'Unknown error';
+      toast({ title: 'Failed to trigger product sync', description: msg, variant: 'destructive' });
+    },
+  });
+
+  const syncDirectoryMutation = useMutation({
+    mutationFn: () => adminApi.zohoSyncDirectory().then(r => r.data),
+    onSuccess: (data) => {
+      toast({
+        title: 'Internal users synced',
         description: `${data.synced ?? 0} synced, ${data.errors ?? 0} errors of ${data.total ?? 0} total.`,
       });
       queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] });
@@ -224,11 +240,11 @@ const ZohoSync = () => {
           ?.response?.data?.error ??
         (err as { message?: string })?.message ??
         'Unknown error';
-      toast({ title: 'Failed to sync products', description: msg, variant: 'destructive' });
+      toast({ title: 'Failed to sync internal users', description: msg, variant: 'destructive' });
     },
   });
 
-  const anySyncRunning = isFullSyncRunning || syncModuleMutation.isPending || syncProductsMutation.isPending;
+  const anySyncRunning = isFullSyncRunning || syncModuleMutation.isPending || syncProductsMutation.isPending || syncDirectoryMutation.isPending;
   const modules = statusData?.modules ?? [];
 
   // Log filter key — forces DataTable remount (page reset) when filters change
@@ -288,34 +304,49 @@ const ZohoSync = () => {
         )}
 
         {statusData?.configured && modules.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {modules.map(mod => {
-              const isThisModuleSyncing =
-                syncModuleMutation.isPending && syncModuleMutation.variables === mod;
-              return (
+          <div className="space-y-3 pt-1">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1.5">Zoho → DB</p>
+              <div className="flex flex-wrap gap-2">
+                {modules.map(mod => {
+                  const isThisModuleSyncing =
+                    syncModuleMutation.isPending && syncModuleMutation.variables === mod;
+                  return (
+                    <Button
+                      key={mod}
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 capitalize min-w-[110px]"
+                      disabled={anySyncRunning}
+                      onClick={() => syncModuleMutation.mutate(mod)}
+                    >
+                      <RefreshCw className={`h-3 w-3 ${isThisModuleSyncing ? 'animate-spin' : ''}`} />
+                      {isThisModuleSyncing ? 'Syncing…' : `Sync ${mod}`}
+                    </Button>
+                  );
+                })}
                 <Button
-                  key={mod}
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 capitalize min-w-[110px]"
+                  className="gap-1.5 min-w-[110px]"
                   disabled={anySyncRunning}
-                  onClick={() => syncModuleMutation.mutate(mod)}
+                  onClick={() => syncProductsMutation.mutate()}
                 >
-                  <RefreshCw className={`h-3 w-3 ${isThisModuleSyncing ? 'animate-spin' : ''}`} />
-                  {isThisModuleSyncing ? 'Syncing…' : `Sync ${mod}`}
+                  <RefreshCw className={`h-3 w-3 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
+                  {syncProductsMutation.isPending ? 'Syncing…' : 'Sync Products'}
                 </Button>
-              );
-            })}
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 min-w-[110px]"
-              disabled={anySyncRunning}
-              onClick={() => syncProductsMutation.mutate()}
-            >
-              <RefreshCw className={`h-3 w-3 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
-              {syncProductsMutation.isPending ? 'Syncing…' : 'Sync Products'}
-            </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 min-w-[140px]"
+                  disabled={anySyncRunning}
+                  onClick={() => syncDirectoryMutation.mutate()}
+                >
+                  <RefreshCw className={`h-3 w-3 ${syncDirectoryMutation.isPending ? 'animate-spin' : ''}`} />
+                  {syncDirectoryMutation.isPending ? 'Syncing…' : 'Sync Internal Users'}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -326,6 +357,8 @@ const ZohoSync = () => {
               ? 'Full sync in progress — please wait until it completes.'
               : syncProductsMutation.isPending
               ? 'Syncing products — please wait…'
+              : syncDirectoryMutation.isPending
+              ? 'Syncing internal users — please wait…'
               : `Syncing ${syncModuleMutation.variables} — please wait…`}
           </div>
         )}

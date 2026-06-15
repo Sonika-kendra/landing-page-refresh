@@ -113,7 +113,6 @@ export interface ZohoScheduleEntry {
 export interface ZohoSchedule {
   ok: boolean;
   dailySync: ZohoScheduleEntry;
-  weeklyBackup: ZohoScheduleEntry;
 }
 
 export interface FilterConfigStatus {
@@ -417,6 +416,22 @@ export const adminApi = {
   zohoSyncProducts: () =>
     apiClient.post<ZohoSyncResult>(
       API_CONFIG.adminZoho.endpoints.syncProducts,
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
+  zohoTriggerProductsSync: () =>
+    apiClient.post<{ ok: boolean; message: string }>(
+      API_CONFIG.adminZoho.endpoints.triggerProductsSync,
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
+  zohoSyncDirectory: () =>
+    apiClient.post<ZohoSyncResult>(
+      API_CONFIG.adminZoho.endpoints.syncDirectory,
       undefined,
       undefined,
       API_CONFIG.adminZoho.base
