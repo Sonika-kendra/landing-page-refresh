@@ -106,7 +106,6 @@ export const API_CONFIG = {
       logs:           '/admin/zoho/logs',
       syncAll:        '/admin/zoho/sync',
       syncModule:     (module: string) => `/admin/zoho/sync/${module}`,
-      syncProducts:         '/admin/zoho/products/sync',
       triggerProductsSync:  '/admin/zoho/products/sync/trigger',
       syncDirectory:  '/admin/zoho/directory/sync',
       inventoryItems: '/admin/zoho/items',

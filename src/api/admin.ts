@@ -413,14 +413,6 @@ export const adminApi = {
       API_CONFIG.adminZoho.base
     ),
 
-  zohoSyncProducts: () =>
-    apiClient.post<ZohoSyncResult>(
-      API_CONFIG.adminZoho.endpoints.syncProducts,
-      undefined,
-      undefined,
-      API_CONFIG.adminZoho.base
-    ),
-
   zohoTriggerProductsSync: () =>
     apiClient.post<{ ok: boolean; message: string }>(
       API_CONFIG.adminZoho.endpoints.triggerProductsSync,
