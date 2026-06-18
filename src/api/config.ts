@@ -215,4 +215,12 @@ export const API_CONFIG = {
       newsletter: '/newsletter',
     },
   },
+
+  orderForms: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      create: '/order-forms',
+      one:    (id: string) => `/order-forms/${id}`,
+    },
+  },
 } as const;

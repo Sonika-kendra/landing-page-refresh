@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { productPath } from '@/lib/utils';
 import { Heart, ShoppingBag, LayoutGrid, List } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
@@ -14,6 +15,12 @@ const Wishlist = () => {
   const [wishlisted, setWishlisted] = useState<ShopProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const navigate = useNavigate();
+
+  const handleAddToBag = (product: ShopProduct) => {
+    navigate(productPath(product.category, product.subCategory, product.id));
+    return Promise.resolve();
+  };
 
   useEffect(() => {
     if (favLoading || favourites.length === 0) {
@@ -99,7 +106,7 @@ const Wishlist = () => {
             : 'flex flex-col gap-3'
           }>
             {wishlisted.map(product => (
-              <ShopProductCard key={product.id} product={product} listView={viewMode === 'list'} />
+              <ShopProductCard key={product.id} product={product} listView={viewMode === 'list'} onAddToBag={handleAddToBag} />
             ))}
           </div>
         )}

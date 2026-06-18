@@ -29,17 +29,20 @@ interface LineItem {
   amount: number;
   sku?: string;
   image?: string;
+  metal?: string;
 }
 
 interface Cart {
-  salesorder_id: string;
+  salesorder_id:    string;
   salesorder_number?: string;
-  line_items: LineItem[];
-  sub_total: number;
-  tax_total: number;
-  total: number;
-  currency_code?: string;
-  status?: string;
+  customer_id?:     string;
+  customer_name?:   string;
+  line_items:       LineItem[];
+  sub_total:        number;
+  tax_total:        number;
+  total:            number;
+  currency_code?:   string;
+  status?:          string;
 }
 
 interface CartContextValue {
@@ -47,7 +50,7 @@ interface CartContextValue {
   cartId: string | null;
   itemCount: number;
   loading: boolean;
-  addItem: (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string }) => Promise<void>;
+  addItem: (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string }) => Promise<void>;
   removeItem: (lineItemId: string) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -98,7 +101,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return { sub_total, tax_total, total: sub_total + tax_total };
   };
 
-  const addItem = async (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string }) => {
+  const addItem = async (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string }) => {
     if (USE_DUMMY_CART) {
       const qty = item.quantity ?? 1;
       setCart(prev => {
@@ -118,6 +121,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               amount: item.rate * qty,
               quantity: qty,
               sku: item.sku,
+              image: item.image,
+              metal: item.metal,
             }];
         return { ...prev, ...recalcTotals(newItems), line_items: newItems };
       });

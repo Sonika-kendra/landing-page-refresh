@@ -38,14 +38,16 @@ const Cart = () => {
             <div className="lg:col-span-2 space-y-3">
               {items.map(item => (
                 <Card key={item.line_item_id} className="p-4 flex gap-4">
-                  {item.image && (
-                    <img src={item.image} alt={item.name} className="h-24 w-24 object-cover rounded" />
-                  )}
+                  <div className="h-24 w-24 flex-shrink-0 rounded overflow-hidden bg-muted">
+                    {item.image
+                      ? <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                      : <div className="h-full w-full" />}
+                  </div>
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between gap-4">
                       <div>
                         <h3 className="font-medium text-foreground">{item.name}</h3>
-                        {item.sku && <p className="text-xs text-muted-foreground mt-0.5">SKU: {item.sku}</p>}
+                        {item.metal && <p className="text-xs text-muted-foreground mt-0.5">{item.metal}</p>}
                       </div>
                       <Button
                         size="icon"

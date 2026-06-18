@@ -121,7 +121,7 @@ const ProductDetail = () => {
   const handleAddToBag = async () => {
     if (!product) return;
     if (addedToBag) { navigate('/cart'); return; }
-    await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku });
+    await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal });
     setBagJustAdded(true);
     setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
   };
