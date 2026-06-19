@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productPath, toSlug } from '@/lib/utils';
+import { newApiURL } from '@/config/site';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
   Heart, Share2, Copy, Mail,
@@ -41,6 +42,7 @@ const ProductDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [thumbOffset, setThumbOffset] = useState(0);
   const [selectedMetalCode, setSelectedMetalCode] = useState('');
   const [selectedCaratValue, setSelectedCaratValue] = useState('');
   const [selectedSizeValue, setSelectedSizeValue] = useState('');
@@ -48,6 +50,8 @@ const ProductDetail = () => {
   const [selectedShape, setSelectedShape] = useState('');
   const [selectedColour, setSelectedColour] = useState('');
   const [selectedClarity, setSelectedClarity] = useState('');
+  const [mediaItems, setMediaItems] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
+  const [mediaFetchId, setMediaFetchId] = useState(id ?? '');
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
@@ -67,7 +71,9 @@ const ProductDetail = () => {
     setIsLoading(true);
     setFetchError(null);
     setSelectedImage(0);
+    setThumbOffset(0);
     setVariants([]);
+    setMediaFetchId(id);
     productsApi.getOne(id)
       .then((res) => {
         const item = res.data?.item as Record<string, unknown> | undefined;
@@ -90,6 +96,24 @@ const ProductDetail = () => {
       .catch(() => setFetchError('error'))
       .finally(() => setIsLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!mediaFetchId) return;
+    setMediaItems([]);
+    setSelectedImage(0);
+    setThumbOffset(0);
+    productsApi.getMedia(mediaFetchId)
+      .then((res) => {
+        const { thumbnail, images, video } = res.data ?? {};
+        const fileUrl = (fileId: string) => `${newApiURL}/products/file/${fileId}`;
+        const items: { url: string; type: 'image' | 'video' }[] = [];
+        if (thumbnail) items.push({ url: fileUrl(thumbnail), type: 'image' });
+        (images ?? []).forEach((fid: string) => items.push({ url: fileUrl(fid), type: 'image' }));
+        if (video) items.push({ url: fileUrl(video), type: 'video' });
+        if (items.length > 0) setMediaItems(items);
+      })
+      .catch(() => {});
+  }, [mediaFetchId]);
 
   // Redirect old /jewellery/all/:id URLs to the new /jewellery/:category/:subCategory/:id format
   useEffect(() => {
@@ -160,9 +184,20 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.images || [product.image];
-  const prevImage = () => setSelectedImage((i) => (i === 0 ? images.length - 1 : i - 1));
-  const nextImage = () => setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1));
+  const galleryItems = mediaItems.length > 0
+    ? mediaItems
+    : (product.images || [product.image]).map((url) => ({ url, type: 'image' as const }));
+  const THUMB_PAGE = 5;
+  const prevImage = () => setSelectedImage((i) => {
+    const next = i === 0 ? galleryItems.length - 1 : i - 1;
+    setThumbOffset((o) => next < o ? Math.max(0, next) : next >= o + THUMB_PAGE ? next - THUMB_PAGE + 1 : o);
+    return next;
+  });
+  const nextImage = () => setSelectedImage((i) => {
+    const next = i === galleryItems.length - 1 ? 0 : i + 1;
+    setThumbOffset((o) => next >= o + THUMB_PAGE ? next - THUMB_PAGE + 1 : next < o ? 0 : o);
+    return next;
+  });
 
   const _allVariantsOuter = variants.length ? variants : [product];
   const allShapes = [...new Set(_allVariantsOuter.map((v) => v.shape).filter(Boolean) as string[])];
@@ -201,22 +236,86 @@ const ProductDetail = () => {
         <div className="henig-container">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
-              <div className="relative mb-3 aspect-square overflow-hidden border border-border/20 bg-white">
-                <img src={images[selectedImage]} alt={product.name} className="h-full w-full object-contain p-8" />
-                <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                  <ChevronLeft className="h-9 w-9" />
-                </button>
-                <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                  <ChevronRight className="h-9 w-9" />
-                </button>
+              <div className={`relative mb-3 aspect-square overflow-hidden bg-white ${galleryItems[selectedImage]?.type === 'video' ? '' : 'border border-border/20'}`}>
+                {galleryItems[selectedImage]?.type === 'video' ? (
+                  <video
+                    key={galleryItems[selectedImage].url}
+                    src={galleryItems[selectedImage].url}
+                    className="h-full w-full object-contain outline-none"
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img src={galleryItems[selectedImage]?.url} alt={product.name} className="h-full w-full object-contain p-8" />
+                )}
+                {galleryItems.length > 1 && (
+                  <>
+                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-background/90 transition-colors hover:bg-background">
+                      <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+                    </button>
+                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-background/90 transition-colors hover:bg-background">
+                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+                    </button>
+                  </>
+                )}
               </div>
-              <div className="flex gap-2">
-                {images.map((img, i) => (
-                  <button key={i} onClick={() => setSelectedImage(i)} className={`h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
-                    <img src={img} alt="" className="h-full w-full object-contain p-1" />
-                  </button>
-                ))}
-              </div>
+              {(() => {
+                const THUMB_PAGE = 5;
+                const canPrev = thumbOffset > 0;
+                const canNext = thumbOffset + THUMB_PAGE < galleryItems.length;
+                const visibleThumbs = galleryItems.slice(thumbOffset, thumbOffset + THUMB_PAGE);
+                const handleThumbSelect = (absoluteIndex: number) => {
+                  setSelectedImage(absoluteIndex);
+                };
+                const goPrev = () => setThumbOffset((o) => Math.max(0, o - 1));
+                const goNext = () => setThumbOffset((o) => Math.min(galleryItems.length - THUMB_PAGE, o + 1));
+                return (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={goPrev}
+                      disabled={!canPrev}
+                      aria-label="Previous thumbnails"
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border/30 bg-background/90 text-foreground/60 transition-colors hover:bg-background disabled:pointer-events-none disabled:opacity-20"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <div className="flex flex-1 gap-1.5">
+                      {visibleThumbs.map((item, vi) => {
+                        const absoluteIndex = thumbOffset + vi;
+                        return (
+                          <button
+                            key={absoluteIndex}
+                            onClick={() => handleThumbSelect(absoluteIndex)}
+                            className={`relative h-[90px] flex-1 overflow-hidden border bg-white transition-all ${absoluteIndex === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
+                          >
+                            {item.type === 'video' ? (
+                              <>
+                                <video src={item.url} className="h-full w-full object-contain" muted playsInline preload="metadata" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                  <svg className="h-6 w-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                </div>
+                              </>
+                            ) : (
+                              <img src={item.url} alt="" className="h-full w-full object-contain p-1" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={goNext}
+                      disabled={!canNext}
+                      aria-label="Next thumbnails"
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border/30 bg-background/90 text-foreground/60 transition-colors hover:bg-background disabled:pointer-events-none disabled:opacity-20"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })()}
               <div className="mt-8 border-t border-border/30">
                 <button onClick={() => setDescOpen(!descOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-sm font-medium text-foreground">Product Description</span>
@@ -263,11 +362,14 @@ const ProductDetail = () => {
                     .filter((v) => v.metalOptions.includes(selectedMetalCode))
                     .flatMap((v) => v.metalWeightOptions ?? [])
                 )];
+                const DEFAULT_RING_SIZES = ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
                 const allSizes = [...new Set(allVariants.flatMap((v) => v.sizeOptions ?? []))];
+                const isRingProduct = product.category.toLowerCase().includes('ring');
+                const ringSizeOptions = allSizes.length > 0 ? allSizes : (isRingProduct ? DEFAULT_RING_SIZES : []);
                 const allCerts = [...new Set(allVariants.map((v) => v.certificate).filter(Boolean) as string[])];
 
-                // Score each variant: metal=8, shape=4, colour=2, clarity=2, carat=2, weight=1
-                const resolveVariant = (metal: string, carat: string, weight: string, shape: string, colour: string, clarity: string) => {
+                // Score each variant: metal=8, shape=4, colour=2, clarity=2, carat=2, size=2, weight=1
+                const resolveVariant = (metal: string, carat: string, weight: string, shape: string, colour: string, clarity: string, size: string) => {
                   if (allVariants.length === 1) return allVariants[0];
                   return allVariants
                     .map((v) => ({
@@ -278,13 +380,14 @@ const ProductDetail = () => {
                         (colour && v.colour === colour ? 2 : 0) +
                         (clarity && v.clarity === clarity ? 2 : 0) +
                         (carat && v.caratOptions?.includes(carat) ? 2 : 0) +
+                        (size && v.sizeOptions?.includes(size) ? 2 : 0) +
                         (weight && v.metalWeightOptions?.includes(weight) ? 1 : 0),
                     }))
                     .sort((a, b) => b.score - a.score)[0].v;
                 };
 
                 const switchVariant = (resolved: ShopProduct) => {
-                  if (resolved.id !== product.id) { setProduct(resolved); setSelectedImage(0); }
+                  if (resolved.id !== product.id) { setProduct(resolved); setMediaFetchId(resolved.id); }
                 };
 
                 const handleMetalSelect = (metalCode: string) => {
@@ -298,32 +401,37 @@ const ProductDetail = () => {
                     ? selectedMetalWeight
                     : (weightsForMetal[0] ?? '');
                   setSelectedMetalWeight(newWeight);
-                  switchVariant(resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity));
+                  switchVariant(resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleCaratSelect = (carat: string) => {
                   setSelectedCaratValue(carat);
-                  switchVariant(resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity));
+                  switchVariant(resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleMetalWeightSelect = (weight: string) => {
                   setSelectedMetalWeight(weight);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity));
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleShapeSelect = (shape: string) => {
                   setSelectedShape(shape);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity));
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleColourSelect = (colour: string) => {
                   setSelectedColour(colour);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity));
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleClaritySelect = (clarity: string) => {
                   setSelectedClarity(clarity);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity));
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity, selectedSizeValue));
+                };
+
+                const handleSizeSelect = (size: string) => {
+                  setSelectedSizeValue(size);
+                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, size));
                 };
 
                 return (
@@ -434,14 +542,14 @@ const ProductDetail = () => {
                     </div>
                   </div>
                 )}
-                {allSizes.length > 0 && (
+                {ringSizeOptions.length > 0 && (
                   <div className="flex items-center gap-3">
                     <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Ring size:</span>
                     <div className="flex flex-wrap gap-2">
-                      {allSizes.map((s) => (
+                      {ringSizeOptions.map((s) => (
                         <button
                           key={s}
-                          onClick={() => setSelectedSizeValue(s)}
+                          onClick={() => handleSizeSelect(s)}
                           className={`h-8 w-8 border text-xs font-medium transition-colors ${s === selectedSizeValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
                         >
                           {s}

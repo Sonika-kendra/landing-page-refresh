@@ -150,6 +150,8 @@ export const API_CONFIG = {
       delete: (id: string) => `/products/${id}`,
       uploadImage: (id: string) => `/products/${id}/image`,
       deleteImage: (id: string) => `/products/${id}/image`,
+      media: (id: string) => `/products/${id}/media`,
+      file: (fileId: string) => `/products/file/${fileId}`,
     },
   },
 

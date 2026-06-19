@@ -78,4 +78,9 @@ export const productsApi = {
 
   deleteImage: (id: string) =>
     client.delete<{ ok: boolean }>(ep.deleteImage(id), undefined, undefined, base),
+
+  getMedia: (id: string) =>
+    client.get<{ ok: boolean; thumbnail: string | null; images: string[]; video: string | null }>(
+      ep.media(id), undefined, undefined, false, base
+    ),
 };
