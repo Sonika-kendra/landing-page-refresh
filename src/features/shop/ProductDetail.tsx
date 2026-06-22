@@ -52,6 +52,7 @@ const ProductDetail = () => {
   const [selectedClarity, setSelectedClarity] = useState('');
   const [mediaItems, setMediaItems] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
   const [mediaFetchId, setMediaFetchId] = useState(id ?? '');
+  const [displayPrice, setDisplayPrice] = useState<number>(0);
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
@@ -83,6 +84,7 @@ const ProductDetail = () => {
         }
         const p = mapZohoToShopProduct(item);
         setProduct(p);
+        setDisplayPrice(p.price);
         setSelectedMetalCode(p.metalOptions[0] ?? '');
         setSelectedCaratValue(p.caratOptions?.[0] ?? '');
         setSelectedSizeValue(p.sizeOptions?.[0] ?? '');
@@ -401,37 +403,51 @@ const ProductDetail = () => {
                     ? selectedMetalWeight
                     : (weightsForMetal[0] ?? '');
                   setSelectedMetalWeight(newWeight);
-                  switchVariant(resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
+                  const resolved = resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 const handleCaratSelect = (carat: string) => {
                   setSelectedCaratValue(carat);
-                  switchVariant(resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
+                  const resolved = resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 const handleMetalWeightSelect = (weight: string) => {
                   setSelectedMetalWeight(weight);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 const handleShapeSelect = (shape: string) => {
                   setSelectedShape(shape);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity, selectedSizeValue));
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 const handleColourSelect = (colour: string) => {
                   setSelectedColour(colour);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity, selectedSizeValue));
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 const handleClaritySelect = (clarity: string) => {
                   setSelectedClarity(clarity);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity, selectedSizeValue));
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 const handleSizeSelect = (size: string) => {
                   setSelectedSizeValue(size);
-                  switchVariant(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, size));
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, size);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
                 };
 
                 return (
@@ -621,7 +637,7 @@ const ProductDetail = () => {
 
               <div className="mt-4 flex items-center gap-3">
                 <span className="border border-border/30 bg-gray-100 px-5 py-2.5 text-[1.6rem] font-bold leading-none tracking-tight text-foreground">
-                  £{product.price.toLocaleString()}
+                  £{displayPrice.toLocaleString()}
                 </span>
                 {product.stock && product.stock <= 5 && (
                   <span className="text-sm text-foreground/55">Only {product.stock} left</span>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
+import { getMetalType } from '@/data/shop/metalTypes';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -47,7 +48,24 @@ const Cart = () => {
                     <div className="flex justify-between gap-4">
                       <div>
                         <h3 className="font-medium text-foreground">{item.name}</h3>
-                        {item.metal && <p className="text-xs text-muted-foreground mt-0.5">{item.metal}</p>}
+                        {item.metal && (() => {
+                          const metal = getMetalType(item.metal);
+                          return (
+                            <span
+                              className="inline-block mt-1 rounded px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide ring-2 ring-foreground/70 ring-offset-1"
+                              style={{
+                                backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                                backgroundColor: metal.image ? undefined : metal.bg,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                color: '#000',
+                              }}
+                              title={metal.name}
+                            >
+                              {metal.label}
+                            </span>
+                          );
+                        })()}
                       </div>
                       <Button
                         size="icon"
