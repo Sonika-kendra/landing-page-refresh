@@ -67,9 +67,11 @@ const MyOrders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    ordersApi.list({ status: 'open', per_page: 50 })
+    ordersApi.list({ per_page: 50 })
       .then(res => {
-        const fetched = res.data?.salesorders ?? [];
+        const fetched = (res.data?.salesorders ?? []).filter(
+          (o: any) => !['draft', 'void'].includes(o.status)
+        );
         setOrders(fetched.length > 0 ? fetched : DUMMY_ORDERS);
       })
       .catch(() => setOrders(DUMMY_ORDERS))

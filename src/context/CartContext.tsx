@@ -154,8 +154,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         : currentItems.find(li => li.name === item.name);
 
       const newLineItem = hasZohoId
-        ? { item_id: item.item_id, name: item.name, rate: item.rate, quantity: item.quantity ?? 1 }
-        : { name: item.name, rate: item.rate, quantity: item.quantity ?? 1 };
+        ? { item_id: item.item_id, name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }) }
+        : { name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }) };
 
       const newItems = existing
         ? currentItems.map(li => {
