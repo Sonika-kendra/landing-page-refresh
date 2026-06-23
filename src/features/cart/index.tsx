@@ -6,10 +6,23 @@ import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
 import { getMetalType } from '@/data/shop/metalTypes';
+import { toast } from '@/hooks/use-toast';
+
+const fmt = (n: number) => n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, loading, removeItem, updateQuantity } = useCart();
+
+  const handleRemove = async (lineItemId: string) => {
+    try { await removeItem(lineItemId); }
+    catch { toast({ title: 'Could not remove item', variant: 'destructive' }); }
+  };
+
+  const handleUpdateQty = async (lineItemId: string, qty: number) => {
+    try { await updateQuantity(lineItemId, qty); }
+    catch { toast({ title: 'Could not update quantity', variant: 'destructive' }); }
+  };
 
   const items = cart?.line_items ?? [];
   const subtotal = cart?.sub_total ?? 0;
@@ -70,7 +83,7 @@ const Cart = () => {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => removeItem(item.line_item_id)}
+                        onClick={() => handleRemove(item.line_item_id)}
                         disabled={loading}
                         className="text-destructive"
                       >
@@ -84,7 +97,7 @@ const Cart = () => {
                           variant="ghost"
                           className="h-8 w-8"
                           disabled={loading}
-                          onClick={() => updateQuantity(item.line_item_id, item.quantity - 1)}
+                          onClick={() => handleUpdateQty(item.line_item_id, item.quantity - 1)}
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </Button>
@@ -94,12 +107,12 @@ const Cart = () => {
                           variant="ghost"
                           className="h-8 w-8"
                           disabled={loading}
-                          onClick={() => updateQuantity(item.line_item_id, item.quantity + 1)}
+                          onClick={() => handleUpdateQty(item.line_item_id, item.quantity + 1)}
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
                       </div>
-                      <p className="font-medium">£{(item.rate * item.quantity).toLocaleString()}</p>
+                      <p className="font-medium">£{fmt(item.rate * item.quantity)}</p>
                     </div>
                   </div>
                 </Card>
@@ -111,11 +124,11 @@ const Cart = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>£{subtotal.toLocaleString()}</span>
+                  <span>£{fmt(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">VAT</span>
-                  <span>£{tax.toLocaleString()}</span>
+                  <span>£{fmt(tax)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
@@ -124,7 +137,7 @@ const Cart = () => {
                 <Separator className="my-3" />
                 <div className="flex justify-between text-base font-medium">
                   <span>Total</span>
-                  <span>£{total.toLocaleString()}</span>
+                  <span>£{fmt(total)}</span>
                 </div>
               </div>
               <Button className="w-full mt-6 gap-2" onClick={() => navigate('/checkout')}>

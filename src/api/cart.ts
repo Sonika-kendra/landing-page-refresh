@@ -16,8 +16,8 @@ export const cartApi = {
   removeItem: (id: string, lineItemId: string) =>
     client.delete(ep.removeItem(id, lineItemId), undefined, undefined, base),
 
-  checkout: (id: string) =>
-    client.post(ep.checkout(id), {}, undefined, base),
+  checkout: (id: string, data?: Record<string, any>) =>
+    client.post(ep.checkout(id), data ?? {}, undefined, base),
 
   abandon: (id: string) =>
     client.delete(ep.delete(id), undefined, undefined, base),

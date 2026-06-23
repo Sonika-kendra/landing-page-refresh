@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 const CART_ID_KEY = 'henig-cart-id';
 
 // ─── TESTING: set to true to use dummy cart data without API calls ───────────
-const USE_DUMMY_CART = true;
+const USE_DUMMY_CART = false;
 
 const DUMMY_CART = {
   salesorder_id: 'dummy-cart-001',
@@ -88,8 +88,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const ensureCart = async (): Promise<string> => {
     if (USE_DUMMY_CART) return DUMMY_CART.salesorder_id;
     if (cartId) return cartId;
-    const res = await cartApi.create({ customer_id: user?._id });
-    const id: string = res.data.cart.salesorder_id;
+    const res = await cartApi.create({ customer_id: user?.zohoContactId });
+    const id: string = res.data?.cart?.salesorder_id;
+    if (!id) throw new Error('Failed to create cart');
     setCartId(id);
     localStorage.setItem(CART_ID_KEY, id);
     return id;
@@ -97,7 +98,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const recalcTotals = (items: LineItem[]) => {
     const sub_total = items.reduce((s, li) => s + li.rate * li.quantity, 0);
-    const tax_total = Math.round(sub_total * 0.2);
+    const tax_total = Math.round(sub_total * 0.2 * 100) / 100;
     return { sub_total, tax_total, total: sub_total + tax_total };
   };
 
@@ -131,7 +132,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const id = await ensureCart();
-      const currentItems = cart?.line_items ?? [];
+      // Fetch fresh cart to avoid stale-state race conditions when items are added quickly
+      const freshRes = await cartApi.get(id);
+      const freshCart = freshRes.data?.cart;
+
+      // If the cart is no longer editable (checked out / voided), discard it and start fresh
+      if (freshCart && freshCart.status && freshCart.status !== 'draft') {
+        setCart(null);
+        setCartId(null);
+        localStorage.removeItem(CART_ID_KEY);
+        throw new Error('Your cart has expired. Please try again.');
+      }
+
+      const currentItems = freshCart?.line_items ?? [];
 
       // Zoho Inventory requires all-numeric item IDs; static/placeholder IDs (e.g. "prod-1")
       // must be omitted so Zoho treats the line as a custom (non-inventory) item.
@@ -151,10 +164,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           })
         : [...currentItems, newLineItem];
 
-      const res = await cartApi.update(id, { line_items: newItems });
+      // Zoho's PUT salesorders/:id requires customer_id in the body
+      const updatePayload: Record<string, any> = { line_items: newItems };
+      if (freshCart?.customer_id) updatePayload.customer_id = freshCart.customer_id;
+
+      const res = await cartApi.update(id, updatePayload);
       setCart(res.data?.cart ?? null);
-    } catch (err) {
-      throw err;
+    } catch (err: any) {
+      console.error('addItem failed:', err);
+      // Clear stale cart IDs so the next attempt creates a fresh cart
+      if (err?.response?.status === 404 || err?.response?.data?.error === 'Cart not found') {
+        setCart(null);
+        setCartId(null);
+        localStorage.removeItem(CART_ID_KEY);
+      }
+      throw new Error(err?.response?.data?.error ?? err?.message ?? 'Failed to add item to cart');
     } finally {
       setLoading(false);
     }
@@ -198,7 +222,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const newItems = cart.line_items.map(li =>
         li.line_item_id === lineItemId ? { ...li, quantity: Math.max(1, quantity) } : li
       );
-      const res = await cartApi.update(cartId, { line_items: newItems });
+      const updatePayload: Record<string, any> = { line_items: newItems };
+      if (cart.customer_id) updatePayload.customer_id = cart.customer_id;
+      const res = await cartApi.update(cartId, updatePayload);
       setCart(res.data?.cart ?? null);
     } finally {
       setLoading(false);

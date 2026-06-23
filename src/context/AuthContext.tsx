@@ -23,6 +23,7 @@ export interface AuthUser {
   role: string;
   scopes?: string[];
   verified: boolean;
+  zohoContactId?: string;
 }
 
 export type ModalInitialView = 'login' | 'register';

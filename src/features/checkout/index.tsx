@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { addressesApi, AddressPayload } from '@/api/addresses';
-import { orderFormsApi, OrderFormAddress } from '@/api/orderForms';
+import { cartApi } from '@/api/cart';
 
 interface Address {
   _id:        string;
@@ -32,13 +32,12 @@ const blank: AddressPayload = {
   label: 'Home', fullName: '', line1: '', city: '', country: 'United Kingdom',
 };
 
-function toOrderFormAddress(a: Address): OrderFormAddress {
+function toCartAddress(a: Address) {
   return {
     address: [a.line1, a.line2].filter(Boolean).join(', '),
     city:    a.city,
     zip:     a.postalCode,
     country: a.country,
-    phone:   a.phone,
   };
 }
 
@@ -91,27 +90,15 @@ const Checkout = () => {
 
     setPlacing(true);
     try {
-      const billingAddress  = toOrderFormAddress(selectedAddr);
-      const customerName    = selectedAddr.fullName ||
+      const billingAddress = toCartAddress(selectedAddr);
+      const customerName   = selectedAddr.fullName ||
         (user ? `${user.firstName} ${user.lastName ?? ''}`.trim() : '');
 
-      const today = new Date().toISOString().split('T')[0];
-
-      await orderFormsApi.create({
-        subject:          `Web Order – ${customerName} – ${today}`,
-        customer_id:      cart.customer_id,
+      await cartApi.checkout(cartId, {
         customer_name:    customerName,
-        order_date:       today,
+        customer_id:      cart.customer_id ?? user?.zohoContactId,
         billing_address:  billingAddress,
         shipping_address: billingAddress,
-        line_items: (cart.line_items ?? []).map(li => ({
-          item_id:  li.item_id,
-          name:     li.name,
-          quantity: li.quantity,
-          rate:     li.rate,
-        })),
-        notes:         '',
-        currency_code: cart.currency_code,
       });
 
       await clearCart();

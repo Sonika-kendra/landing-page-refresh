@@ -16,6 +16,8 @@ import { getMetalType } from '@/data/shop/metalTypes';
 import { productsApi } from '@/api/products';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import igiLogo from '@/assets/jewellery/certification/IGI.svg';
 import giaLogo from '@/assets/jewellery/certification/GIA.svg';
@@ -65,6 +67,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
   const { addItem } = useCart();
+  const { isAuthenticated, openModal } = useAuth();
   const liked = product ? isFavourite(product.id) : false;
 
   useEffect(() => {
@@ -147,9 +150,14 @@ const ProductDetail = () => {
   const handleAddToBag = async () => {
     if (!product) return;
     if (addedToBag) { navigate('/cart'); return; }
-    await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal });
-    setBagJustAdded(true);
-    setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
+    if (!isAuthenticated) { openModal('login'); return; }
+    try {
+      await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal });
+      setBagJustAdded(true);
+      setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
+    } catch (err: any) {
+      toast({ title: 'Could not add to bag', description: err?.message ?? 'Please try again.', variant: 'destructive' });
+    }
   };
 
   if (isLoading) {
@@ -639,7 +647,7 @@ const ProductDetail = () => {
                 <span className="border border-border/30 bg-gray-100 px-5 py-2.5 text-[1.6rem] font-bold leading-none tracking-tight text-foreground">
                   £{displayPrice.toLocaleString()}
                 </span>
-                {product.stock && product.stock <= 5 && (
+                {product.stock !== undefined && product.stock > 0 && product.stock <= 5 && (
                   <span className="text-sm text-foreground/55">Only {product.stock} left</span>
                 )}
 
