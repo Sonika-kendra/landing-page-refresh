@@ -210,6 +210,13 @@ export const API_CONFIG = {
     },
   },
 
+  users: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      accountManagers: '/users/account-managers',
+    },
+  },
+
   contact: {
     base: 'new' as ApiBase,
     endpoints: {

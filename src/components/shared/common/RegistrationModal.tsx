@@ -11,6 +11,7 @@ import { authApi } from '@/api/auth';
 import Logo from '@/assets/icons/logoDark.png';
 
 type FormMode = 'register' | 'login' | 'forgot' | 'verify-pending' | 'forgot-sent';
+type AccountManager = { _id: string; firstName: string; lastName?: string; email: string };
 
 const ERROR_MAP: Record<string, string> = {
   EMAIL_NOT_VERIFIED: 'Please verify your email before logging in.',
@@ -49,6 +50,9 @@ const RegistrationModal = () => {
   const [pendingEmail, setPendingEmail] = useState('');
   const [resendSuccess, setResendSuccess] = useState(false);
 
+  const [accountManagers, setAccountManagers] = useState<AccountManager[]>([]);
+  const [selectedAccountManager, setSelectedAccountManager] = useState('');
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -59,6 +63,12 @@ const RegistrationModal = () => {
     forgotEmail: '',
     acceptTerms: false,
   });
+
+  useEffect(() => {
+    authApi.getAccountManagers()
+      .then((res) => { if (res.data?.accountManagers?.length) setAccountManagers(res.data.accountManagers); })
+      .catch(() => {});
+  }, []);
 
   // Sync mode when modal opens
   useEffect(() => {
@@ -121,6 +131,7 @@ const RegistrationModal = () => {
         email: formData.email,
         password: formData.password,
         acceptTermsAndConditions: true,
+        ...(selectedAccountManager && { accountManagerId: selectedAccountManager }),
       });
       setPendingEmail(formData.email);
       setMode('verify-pending');
@@ -369,6 +380,25 @@ const RegistrationModal = () => {
                         className="mt-0.5 h-9 text-sm bg-foreground/20 border-background/20 text-background placeholder:text-background/40 focus:border-primary"
                       />
                     </div>
+
+                    {accountManagers.length > 0 && (
+                      <div>
+                        <Label htmlFor="accountManager" className="text-background text-xs">Account Manager</Label>
+                        <select
+                          id="accountManager"
+                          value={selectedAccountManager}
+                          onChange={(e) => setSelectedAccountManager(e.target.value)}
+                          className="mt-0.5 h-9 w-full rounded-md border border-background/20 bg-foreground/20 px-3 text-sm text-background focus:border-primary focus:outline-none"
+                        >
+                          <option value="">Select account manager (optional)</option>
+                          {accountManagers.map((am) => (
+                            <option key={am._id} value={am._id}>
+                              {am.firstName}{am.lastName ? ` ${am.lastName}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <div>
                       <Label htmlFor="reg-password" className="text-background text-xs">Password *</Label>

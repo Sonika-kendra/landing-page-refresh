@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
-import { youMayAlsoLike } from '@/data/shop/products';
 import type { ShopProduct } from '@/data/shop/products';
 import { mapZohoToShopProduct } from '@/data/shop/mappers';
 import { getMetalType } from '@/data/shop/metalTypes';
@@ -63,12 +62,19 @@ const ProductDetail = () => {
   const [copied, setCopied] = useState(false);
   const [skuCopied, setSkuCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [similarProducts, setSimilarProducts] = useState<{ name: string; image: string; id: string }[]>([]);
 
   const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
   const { addItem } = useCart();
-  const { isAuthenticated, openModal } = useAuth();
+  const { isAuthenticated, isAuthLoading, openModal } = useAuth();
   const liked = product ? isFavourite(product.id) : false;
+
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      openModal('login');
+    }
+  }, [isAuthLoading, isAuthenticated, openModal]);
 
   useEffect(() => {
     if (!id) return;
@@ -126,6 +132,25 @@ const ProductDetail = () => {
     navigate(productPath(product.category, product.subCategory, id), { replace: true });
   }, [product, id, categoryParam, navigate]);
 
+  useEffect(() => {
+    if (!product) return;
+    productsApi.list({
+      per_page: 8,
+      page: 1,
+      status: 'active',
+      category: 'Jewellery',
+      ...(product.subCategory && { cf_sub_category_type: product.subCategory }),
+    }).then((res) => {
+      const items = (res.data?.items ?? []) as ShopProduct[];
+      setSimilarProducts(
+        items
+          .filter((p) => p.id !== product.id)
+          .slice(0, 6)
+          .map((p) => ({ name: p.name, image: p.image, id: p.id }))
+      );
+    }).catch(() => {});
+  }, [product?.id, product?.subCategory]);
+
   const copySku = () => {
     navigator.clipboard.writeText(product?.sku ?? '');
     setSkuCopied(true);
@@ -159,6 +184,25 @@ const ProductDetail = () => {
       toast({ title: 'Could not add to bag', description: err?.message ?? 'Please try again.', variant: 'destructive' });
     }
   };
+
+  if (!isAuthLoading && !isAuthenticated) {
+    return (
+      <PageLayout>
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
+          <h2 className="font-serif text-2xl text-foreground">Members Only</h2>
+          <p className="text-sm text-foreground/60">Please sign in or register to view product details.</p>
+          <div className="flex gap-3">
+            <button onClick={() => openModal('login')} className="rounded bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent-foreground hover:bg-accent/90">
+              Sign In
+            </button>
+            <button onClick={() => openModal('register')} className="rounded border border-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent hover:bg-accent/10">
+              Register
+            </button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -738,7 +782,7 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      <YouMayAlsoLike items={youMayAlsoLike} />
+      {similarProducts.length > 0 && <YouMayAlsoLike items={similarProducts} />}
     </PageLayout>
   );
 };

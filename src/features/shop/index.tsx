@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 const fromSlug = (slug: string) =>
   slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -21,7 +22,6 @@ import {
   shapes,
   stockTypes,
   subCategories,
-  youMayAlsoLike,
 } from '@/data/shop/products';
 import type { ShopProduct } from '@/data/shop/products';
 import ringImage from '@/assets/jewellery/category/ring.png';
@@ -492,6 +492,28 @@ const FilterSidebarContent = ({
       )}
     </div>
 
+    <div className="mb-4 rounded-2xl border border-border/60 bg-background px-3.5 py-3.5">
+      <div className="mb-3">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
+          Availability
+        </span>
+      </div>
+      <label className="flex cursor-pointer items-center justify-between gap-3 px-2 py-1">
+        <span className="text-sm text-foreground">In-Stock and Ready to Ship</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={filterValues.inStock === 'true'}
+          onClick={() => handleFilterChange('inStock', filterValues.inStock === 'true' ? '' : 'true')}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${filterValues.inStock === 'true' ? 'bg-accent' : 'bg-foreground/20'}`}
+        >
+          <span
+            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${filterValues.inStock === 'true' ? 'translate-x-5' : 'translate-x-0'}`}
+          />
+        </button>
+      </label>
+    </div>
+
     <Accordion
       type="multiple"
       value={openAccordionItems}
@@ -583,7 +605,9 @@ const ShopPage = () => {
   const [dynamicCaratItems, setDynamicCaratItems] = useState<VisualFilterItem[]>([]);
   const [dynamicRingSizeItems, setDynamicRingSizeItems] = useState<VisualFilterItem[]>([]);
   const [dynamicCertificateItems, setDynamicCertificateItems] = useState<VisualFilterItem[]>([]);
+  const [youMayAlsoLikeItems, setYouMayAlsoLikeItems] = useState<{ name: string; image: string; id: string }[]>([]);
   const navigate = useNavigate();
+  const { isAuthenticated, isAuthLoading, openModal } = useAuth();
 
   // Filter values are derived from the URL — single source of truth
   const filterValues = useMemo<FilterValues>(() => {
@@ -766,6 +790,29 @@ const ShopPage = () => {
     filterValues.caratWeight, filterValues.ringSize, filterValues.certificate,
   ]);
 
+  useEffect(() => {
+    const cfSubCategoryType = typeof filterValues.cfSubCategoryType === 'string' ? filterValues.cfSubCategoryType : '';
+    const cfSubCategory = typeof filterValues.cfSubCategory === 'string' ? filterValues.cfSubCategory : '';
+
+    const params: Record<string, unknown> = {
+      per_page: 8,
+      page: 1,
+      status: 'active',
+      category: 'Jewellery',
+    };
+    if (cfSubCategoryType) params.cf_sub_category_type = cfSubCategoryType;
+    else if (cfSubCategory) params.cf_sub_category = cfSubCategory;
+
+    productsApi.list(params as Parameters<typeof productsApi.list>[0])
+      .then((res) => {
+        const items = (res.data?.items ?? []) as ShopProduct[];
+        setYouMayAlsoLikeItems(
+          items.slice(0, 8).map((p) => ({ name: p.name, image: p.image, id: p.id }))
+        );
+      })
+      .catch(() => {});
+  }, [filterValues.cfSubCategoryType, filterValues.cfSubCategory]);
+
   const handleFilterChange = useCallback(
     (key: string, value: string | string[] | [number, number]) => {
       const newFilters = { ...filterValues, [key]: value };
@@ -875,6 +922,31 @@ const ShopPage = () => {
   }, [filterValues]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      openModal('login');
+    }
+  }, [isAuthLoading, isAuthenticated, openModal]);
+
+  if (!isAuthLoading && !isAuthenticated) {
+    return (
+      <PageLayout>
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
+          <h2 className="font-serif text-2xl text-foreground">Members Only</h2>
+          <p className="text-sm text-foreground/60">Please sign in or register to browse products.</p>
+          <div className="flex gap-3">
+            <button onClick={() => openModal('login')} className="rounded bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent-foreground hover:bg-accent/90">
+              Sign In
+            </button>
+            <button onClick={() => openModal('register')} className="rounded border border-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent hover:bg-accent/10">
+              Register
+            </button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -1152,7 +1224,7 @@ const ShopPage = () => {
         </div>
       </section>
 
-      <YouMayAlsoLike items={youMayAlsoLike} hasActiveFilters={hasActiveFilters} />
+      <YouMayAlsoLike items={youMayAlsoLikeItems} hasActiveFilters={hasActiveFilters} />
       <CommitmentSection />
 
       <button

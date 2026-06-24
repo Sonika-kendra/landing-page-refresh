@@ -33,6 +33,7 @@ export interface RegisterPayload {
   email: string;
   password: string;
   acceptTermsAndConditions: boolean;
+  accountManagerId?: string;
 }
 
 export interface AuthUser {
@@ -93,5 +94,14 @@ export const authApi = {
       { oldPassword, newPassword },
       undefined,
       API_CONFIG.profile.base,
+    ),
+
+  getAccountManagers: () =>
+    apiClient.get<{ ok: boolean; accountManagers: { _id: string; firstName: string; lastName?: string; email: string }[] }>(
+      API_CONFIG.users.endpoints.accountManagers,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.users.base,
     ),
 };

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -9,6 +10,7 @@ import {
 interface Suggestion {
   name: string;
   image: string;
+  id?: string;
 }
 
 interface YouMayAlsoLikeProps {
@@ -36,8 +38,8 @@ const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
         <div className="relative px-12">
           <Carousel opts={{ align: "start" }}>
             <CarouselContent>
-              {items.map((item, i) => (
-                <CarouselItem key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+              {items.map((item, i) => {
+                const inner = (
                   <div className="group cursor-pointer px-2 text-center">
                     <div className="mb-3 aspect-square overflow-hidden bg-white">
                       <img
@@ -48,8 +50,16 @@ const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
                     </div>
                     <p className="text-sm leading-tight text-foreground">{item.name}</p>
                   </div>
-                </CarouselItem>
-              ))}
+                );
+                return (
+                  <CarouselItem key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                    {item.id
+                      ? <Link to={`/jewellery/all/${item.id}`}>{inner}</Link>
+                      : inner
+                    }
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
