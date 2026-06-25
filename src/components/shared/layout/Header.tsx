@@ -438,7 +438,7 @@ const Header = () => {
                     onClick={() => setAdminDropdownOpen((v) => !v)}
                     className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-accent-foreground text-sm font-bold hover:opacity-85 transition-opacity"
                   >
-                    {user.firstName?.[0]?.toUpperCase() ?? 'U'}
+                    {user.firstName?.[0]?.toUpperCase() ?? user.full_name?.[0]?.toUpperCase() ?? 'U'}
                   </button>
 
                   <AnimatePresence>
@@ -453,9 +453,11 @@ const Header = () => {
                         {/* ── Greeting — always shown ── */}
                         <div className="px-4 py-2.5 border-b border-border">
                           <p className="text-sm font-semibold text-foreground truncate">
-                            Hi, {user.firstName && user.lastName
-                              ? `${user.firstName} ${user.lastName}`
-                              : user.firstName ?? 'there'}
+                            Hi, {user.full_name
+                              ? user.full_name
+                              : user.firstName && user.lastName
+                                ? `${user.firstName} ${user.lastName}`
+                                : user.firstName ?? 'there'}
                           </p>
                         </div>
 
@@ -486,7 +488,7 @@ const Header = () => {
                           </li>
 
                           {/* Address Book — non-admin only */}
-                          {user.role !== 'admin' && (
+                          {user.role !== 'admin' && user.profile?.name !== 'Administrator' && (
                             <li>
                               <Link
                                 to="/account/addresses"
@@ -501,7 +503,7 @@ const Header = () => {
                         </ul>
 
                         {/* ── Admin Panel — admin only ── */}
-                        {user.role === 'admin' && (
+                        {(user.role === 'admin' || user.profile?.name === 'Administrator') && (
                           <div className="border-t border-border">
                             <button
                               type="button"

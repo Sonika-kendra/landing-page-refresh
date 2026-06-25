@@ -141,6 +141,18 @@ export interface ZohoSyncLog {
   createdAt: string;
 }
 
+export interface StaffUser {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  full_name?: string;
+  email: string;
+  role: string;
+  status: 'active' | 'inactive';
+  profile?: { name?: string; id?: string };
+  createdAt?: string;
+}
+
 export interface ZohoSyncResult {
   ok: boolean;
   synced?: number;
@@ -186,6 +198,15 @@ export const adminApi = {
     apiClient.get<{ users: AdminUser[] }>(
       endpoints.pendingUsers,
       undefined,
+      undefined,
+      false,
+      base
+    ),
+
+  getStaff: (params?: { page?: number; limit?: number; status?: string }) =>
+    apiClient.get<{ staff: StaffUser[]; total: number; page: number; limit: number; totalPages: number }>(
+      endpoints.staff,
+      params,
       undefined,
       false,
       base

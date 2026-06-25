@@ -23,48 +23,10 @@ interface Order {
   orderStatus?: { status: OrderStatus };
 }
 
-const DUMMY_ORDERS: Order[] = [
-  {
-    salesorder_id: 'dummy-001',
-    salesorder_number: 'SO-00101',
-    customer_name: 'Test User',
-    date: '2026-05-10',
-    line_items: [{ item: 'Diamond Solitaire Ring' }, { item: 'Gift Box' }],
-    total: 4250,
-    orderStatus: { status: 'delivered' },
-  },
-  {
-    salesorder_id: 'dummy-002',
-    salesorder_number: 'SO-00098',
-    customer_name: 'Test User',
-    date: '2026-04-22',
-    line_items: [{ item: 'Pearl Necklace' }],
-    total: 1875,
-    orderStatus: { status: 'shipped' },
-  },
-  {
-    salesorder_id: 'dummy-003',
-    salesorder_number: 'SO-00085',
-    customer_name: 'Test User',
-    date: '2026-03-15',
-    line_items: [{ item: 'Emerald Earrings' }, { item: 'Bracelet' }, { item: 'Pendant' }],
-    total: 6990,
-    orderStatus: { status: 'processing' },
-  },
-  {
-    salesorder_id: 'dummy-004',
-    salesorder_number: 'SO-00072',
-    customer_name: 'Test User',
-    date: '2026-02-08',
-    line_items: [{ item: 'Sapphire Ring' }],
-    total: 3100,
-    orderStatus: { status: 'cancelled' },
-  },
-];
-
 const MyOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     ordersApi.list({ per_page: 50 })
@@ -72,9 +34,9 @@ const MyOrders = () => {
         const fetched = (res.data?.salesorders ?? []).filter(
           (o: any) => !['draft', 'void'].includes(o.status)
         );
-        setOrders(fetched.length > 0 ? fetched : DUMMY_ORDERS);
+        setOrders(fetched);
       })
-      .catch(() => setOrders(DUMMY_ORDERS))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -82,6 +44,15 @@ const MyOrders = () => {
     return (
       <Card className="p-16 flex justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-16 text-center">
+        <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+        <p className="text-muted-foreground">Unable to load orders. Please try again later.</p>
       </Card>
     );
   }

@@ -5,8 +5,10 @@ const TOKEN_KEY = 'henig-auth-token';
 const USER_KEY = 'henig-auth-user';
 
 const PERMISSIONS: Record<string, Record<string, string[]>> = {
-  admin:        { users: ['create','read','update','delete','manage'], products: ['create','read','update','delete'], orders: ['create','read','update','delete'], reports: ['read'], settings: ['read','update'], roles: ['assign'] },
-  internalUser: { products: ['read','update'], orders: ['read','update'], reports: ['read'], users: ['read'] },
+  admin:         { users: ['create','read','update','delete','manage'], products: ['create','read','update','delete'], orders: ['create','read','update','delete'], reports: ['read'], settings: ['read','update'], roles: ['assign'] },
+  Administrator: { users: ['create','read','update','delete','manage'], products: ['create','read','update','delete'], orders: ['create','read','update','delete'], reports: ['read'], settings: ['read','update'], roles: ['assign'] },
+  internalUser:  { products: ['read','update'], orders: ['read','update'], reports: ['read'], users: ['read'] },
+  Standard:      { products: ['read','update'], orders: ['read','update'], reports: ['read'], users: ['read'] },
   client:       { products: ['read'], orders: ['create','read'], profile: ['read','update'] },
   user:         { products: ['read'], orders: ['create','read'], profile: ['read','update'] },
   sales:        { products: ['read'], orders: ['create','read','update'], reports: ['read'], profile: ['read','update'] },
@@ -16,14 +18,16 @@ const PERMISSIONS: Record<string, Record<string, string[]>> = {
 export interface AuthUser {
   _id: string;
   title?: string;
-  firstName: string;
+  firstName?: string;
   lastName?: string;
+  full_name?: string;
   companyName?: string;
   email: string;
   role: string;
   scopes?: string[];
   verified: boolean;
   zohoContactId?: string;
+  profile?: { name?: string; id?: string };
 }
 
 export type ModalInitialView = 'login' | 'register';
@@ -97,9 +101,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const ZOHO_ROLE_MAP: Record<string, string> = { Administrator: 'admin', Standard: 'internalUser' };
   const hasRole = (role: string | string[]) => {
     if (!user) return false;
-    return Array.isArray(role) ? role.includes(user.role) : user.role === role;
+    const effectiveRole = ZOHO_ROLE_MAP[user.role] ?? user.role;
+    return Array.isArray(role) ? role.includes(effectiveRole) : effectiveRole === role;
   };
 
   const hasPermission = (module: string, action: string) => {

@@ -153,10 +153,11 @@ const AdminLayout = () => {
     queryKey: ['admin', 'stats'],
     queryFn: () => adminApi.getStats().then(r => r.data),
     refetchInterval: 30_000,
-    enabled: isAuthenticated && user?.role === 'admin',
+    enabled: isAuthenticated && (user?.role === 'admin' || user?.profile?.name === 'Administrator'),
   });
 
-  if (!isAuthenticated || user?.role !== 'admin') {
+  const isAdmin = user?.role === 'admin' || user?.profile?.name === 'Administrator';
+  if (!isAuthenticated || !isAdmin) {
     return <Navigate to="/" replace />;
   }
 

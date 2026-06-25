@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings2, Plus, Trash2, GripVertical, RefreshCw } from 'lucide-react';
+import { Settings2, Plus, Trash2, GripVertical, RefreshCw, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,7 +15,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { adminApi, SiteConfig } from '@/api/admin';
+import { adminApi, SiteConfig, StaffUser } from '@/api/admin';
 import { announcementBar as staticConfig } from '@/config/theme';
 
 const FILTER_KEY_LABELS: Record<string, string> = {
@@ -528,6 +528,83 @@ const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
   );
 };
 
+// ── Internal Users Panel ──────────────────────────────────────────────────────
+
+const statusDot = (status: StaffUser['status']) =>
+  status === 'active'
+    ? 'bg-green-500'
+    : 'bg-muted-foreground/40';
+
+const InternalUsersPanel = () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin', 'staff'],
+    queryFn: () => adminApi.getStaff({ limit: 100 }).then(r => r.data),
+  });
+
+  const staff = data?.staff ?? [];
+
+  const displayName = (u: StaffUser) =>
+    u.full_name || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email;
+
+  if (isLoading) {
+    return (
+      <div className="bg-background rounded-sm border border-border p-5 space-y-3">
+        <Skeleton className="h-6 w-40" />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background rounded-sm border border-border p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-medium tracking-widest uppercase">Internal Users</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {data?.total ?? staff.length} zoho_directory account{(data?.total ?? staff.length) !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <Users className="w-4 h-4 text-muted-foreground" />
+      </div>
+
+      {staff.length === 0 ? (
+        <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-sm">
+          No internal users found.
+        </p>
+      ) : (
+        <div className="divide-y divide-border rounded-sm border border-border overflow-hidden">
+          {/* Header */}
+          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-3 py-2 bg-muted/50">
+            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Name / Email</span>
+            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Profile</span>
+            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Status</span>
+          </div>
+          {staff.map(u => (
+            <div
+              key={u._id}
+              className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-3 py-2.5 bg-background hover:bg-muted/20 transition-colors"
+            >
+              <div className="min-w-0">
+                <p className="text-sm truncate">{displayName(u)}</p>
+                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+              </div>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {u.profile?.name ?? u.role ?? '—'}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(u.status)}`} />
+                <span className="text-xs text-muted-foreground capitalize">{u.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Main Settings Page ────────────────────────────────────────────────────────
 
 const Settings = () => {
@@ -595,6 +672,9 @@ const Settings = () => {
 
       {/* Jewellery Filter Config */}
       <FilterConfigPanel config={filterConfig} />
+
+      {/* Internal Users */}
+      <InternalUsersPanel />
 
       {/* Generic configs */}
       {isLoading ? (

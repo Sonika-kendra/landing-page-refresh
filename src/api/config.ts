@@ -61,6 +61,7 @@ export const API_CONFIG = {
       statusLog:      (id: string) => `/admin/users/${id}/status-log`,
       user:           (id: string) => `/users/${id}`,
       updateUser:     (id: string) => `/users/${id}`,
+      staff:          '/admin/staff',
     },
   },
 

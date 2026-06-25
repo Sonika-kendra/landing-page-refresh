@@ -33,6 +33,20 @@ const TEMPLATE_VARIABLES = [
     ],
   },
   {
+    group: 'Order',
+    vars: [
+      { key: 'orderNumber',   desc: 'Zoho CRM Quote / Order Form ID' },
+      { key: 'orderDate',     desc: 'Date the order was placed (DD/MM/YYYY)' },
+      { key: 'itemsList',     desc: 'Plain-text list of all line items' },
+      { key: 'subtotal',      desc: 'Subtotal (e.g. £398.00)' },
+      { key: 'vat',           desc: 'VAT amount (e.g. £79.60)' },
+      { key: 'shipping',      desc: 'Shipping cost or "Free"' },
+      { key: 'total',         desc: 'Order total (e.g. £477.60)' },
+      { key: 'trackUrl',      desc: 'Link to order tracking page' },
+      { key: 'adminOrderUrl', desc: 'Admin link to view the order (admin template)' },
+    ],
+  },
+  {
     group: 'Context',
     vars: [
       { key: 'reason',       desc: 'Reason text (e.g. rejection reason)' },
@@ -115,9 +129,27 @@ const AdminEmailEditor = () => {
       setName(res.data.name || 'New Template');
       setSubject(res.data.subject || '');
       setRecipients(res.data.recipients ?? []);
-      if (res.data.design && emailEditorRef.current?.editor) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        emailEditorRef.current.editor.loadDesign(res.data.design as any);
+      if (emailEditorRef.current?.editor) {
+        if (res.data.design) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          emailEditorRef.current.editor.loadDesign(res.data.design as any);
+        } else if (res.data.html) {
+          // No design saved yet — wrap the raw HTML in a single HTML block so it's visible
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (emailEditorRef.current.editor as any).loadDesign({
+            body: {
+              rows: [{
+                cells: [1],
+                columns: [{
+                  contents: [{ type: 'html', values: { html: res.data.html } }],
+                  values: {},
+                }],
+                values: {},
+              }],
+              values: { backgroundColor: '#f0f1f5' },
+            },
+          });
+        }
       }
     } catch {
       toast.error('Failed to load template');
