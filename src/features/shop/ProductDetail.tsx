@@ -6,6 +6,14 @@ import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
   Heart, Share2, Copy, Mail,
   Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck,
+  Leaf,
+  Tag,
+  BadgeDollarSign,
+  Sparkles,
+  RotateCcw,
+  RefreshCw,
+  Pencil,
+  PenLine,
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
@@ -28,12 +36,12 @@ const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase
 
 
 const trustBadges = [
-  { icon: Truck, label: 'Free UK Delivery' },
-  { icon: Shield, label: 'Lifetime Warranty' },
-  { icon: Maximize, label: 'Free Resizing' },
-  { icon: Gem, label: 'Ethical Sourcing' },
-  { icon: HomeIcon, label: 'Handcrafted in the UK' },
-  { icon: FileCheck, label: 'Insurance Valuation' },
+  { icon: Leaf, label: 'Ethical Sourcing' },
+  { icon: BadgeDollarSign, label: 'Competitive Pricing' },
+  { icon: Sparkles, label: 'Free After Care' },
+  { icon: RotateCcw, label: '90 Day Return Policy' },
+  { icon: PenLine, label: 'Bespoke Available' },
+  { icon: FileCheck, label: '100% Certified Jewellery' },
 ];
 
 const ProductDetail = () => {
