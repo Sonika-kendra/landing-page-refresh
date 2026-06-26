@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { authApi } from '@/api/auth';
 import Logo from '@/assets/icons/logoDark.png';
 
 type FormMode = 'register' | 'login' | 'forgot' | 'verify-pending' | 'forgot-sent';
-type AccountManager = { _id: string; firstName: string; lastName?: string; email: string };
+type AccountManager = { _id: string; full_name?: string; firstName?: string; lastName?: string; email: string };
 
 const ERROR_MAP: Record<string, string> = {
   EMAIL_NOT_VERIFIED: 'Please verify your email before logging in.',
@@ -384,19 +385,21 @@ const RegistrationModal = () => {
                     {accountManagers.length > 0 && (
                       <div>
                         <Label htmlFor="accountManager" className="text-background text-xs">Account Manager</Label>
-                        <select
-                          id="accountManager"
-                          value={selectedAccountManager}
-                          onChange={(e) => setSelectedAccountManager(e.target.value)}
-                          className="mt-0.5 h-9 w-full rounded-md border border-background/20 bg-foreground/20 px-3 text-sm text-background focus:border-primary focus:outline-none"
-                        >
-                          <option value="">Select account manager (optional)</option>
-                          {accountManagers.map((am) => (
-                            <option key={am._id} value={am._id}>
-                              {am.firstName}{am.lastName ? ` ${am.lastName}` : ''}
-                            </option>
-                          ))}
-                        </select>
+                        <Select value={selectedAccountManager || undefined} onValueChange={setSelectedAccountManager}>
+                          <SelectTrigger
+                            id="accountManager"
+                            className="mt-0.5 h-9 bg-foreground/20 border-background/20 text-background text-sm focus:border-primary focus:ring-0 focus:ring-offset-0 [&>span]:text-background/40 data-[placeholder]:text-background/40"
+                          >
+                            <SelectValue placeholder="Select account manager (optional)" />
+                          </SelectTrigger>
+                          <SelectContent className="z-[1400]">
+                            {accountManagers.map((am) => (
+                              <SelectItem key={am._id} value={am._id}>
+                                {am.full_name || [am.firstName, am.lastName].filter(Boolean).join(' ')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
 
