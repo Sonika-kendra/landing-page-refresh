@@ -503,7 +503,7 @@ const Header = () => {
                         </ul>
 
                         {/* ── Admin Panel — admin only ── */}
-                        {(user.role === 'admin' || user.profile?.name === 'Administrator') && (
+                        {(user.role === 'admin' || user.role === 'Administrator' || user.profile?.name === 'Administrator') && (
                           <div className="border-t border-border">
                             <button
                               type="button"
@@ -677,7 +677,7 @@ const Header = () => {
             {renderMobileMenuItems(mobileNavItems)}
 
             {/* Admin Panel Accordion */}
-            {isAuthenticated && user?.role === 'admin' && (
+            {isAuthenticated && (user?.role === 'admin' || user?.role === 'Administrator') && (
               <div className="border-t border-border px-4">
                 <button
                   type="button"
