@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
@@ -607,7 +607,13 @@ const ShopPage = () => {
   const [dynamicCertificateItems, setDynamicCertificateItems] = useState<VisualFilterItem[]>([]);
   const [youMayAlsoLikeItems, setYouMayAlsoLikeItems] = useState<{ name: string; image: string; id: string }[]>([]);
   const navigate = useNavigate();
-  const { isAuthenticated, isAuthLoading, openModal } = useAuth();
+  const { isAuthenticated, isAuthLoading, openModal, isModalOpen } = useAuth();
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const modalWasOpen = useRef(false);
+  useEffect(() => {
+    if (isModalOpen) { modalWasOpen.current = true; }
+    else if (modalWasOpen.current) { setModalDismissed(true); }
+  }, [isModalOpen]);
 
   // Filter values are derived from the URL — single source of truth
   const filterValues = useMemo<FilterValues>(() => {
@@ -929,7 +935,7 @@ const ShopPage = () => {
     }
   }, [isAuthLoading, isAuthenticated, openModal]);
 
-  if (!isAuthLoading && !isAuthenticated) {
+  if (!isAuthLoading && !isAuthenticated && !modalDismissed) {
     return (
       <PageLayout>
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">

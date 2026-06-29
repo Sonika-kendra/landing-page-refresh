@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { authApi } from '@/api/auth';
 
 const TOKEN_KEY = 'henig-auth-token';
@@ -39,7 +39,8 @@ interface AuthContextValue {
   isAuthLoading: boolean;
   isModalOpen: boolean;
   initialView: ModalInitialView;
-  openModal: (view?: ModalInitialView) => void;
+  redirectAfterLogin: string | null;
+  openModal: (view?: ModalInitialView, redirectTo?: string) => void;
   closeModal: () => void;
   setAuth: (token: string, user: AuthUser) => void;
   logout: () => void;
@@ -86,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [initialView, setInitialView] = useState<ModalInitialView>('login');
+  const [redirectAfterLogin, setRedirectAfterLogin] = useState<string | null>(null);
 
   const setAuth = (newToken: string, newUser: AuthUser) => {
     localStorage.setItem(TOKEN_KEY, newToken);
@@ -121,16 +123,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return !!(rolePerms && rolePerms[module]?.includes(action));
   };
 
-  const openModal = (view: ModalInitialView = 'login') => {
+  const openModal = useCallback((view: ModalInitialView = 'login', redirectTo?: string) => {
     setInitialView(view);
+    setRedirectAfterLogin(redirectTo ?? null);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setRedirectAfterLogin(null);
+  }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAuthenticated: !!token, isAuthLoading, isModalOpen, initialView, openModal, closeModal, setAuth, logout, waitForLogout, hasRole, hasPermission }}
+      value={{ user, token, isAuthenticated: !!token, isAuthLoading, isModalOpen, initialView, redirectAfterLogin, openModal, closeModal, setAuth, logout, waitForLogout, hasRole, hasPermission }}
     >
       {children}
     </AuthContext.Provider>

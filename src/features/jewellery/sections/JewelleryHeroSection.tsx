@@ -1,12 +1,25 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import jewelleryHero from '@/assets/jewellery/hero/banner.png';
 import { websiteUrlConfig } from '@/config/site';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
+import { useAuth } from '@/context/AuthContext';
 
-const JewelleryHeroSection = () => (
+const JewelleryHeroSection = () => {
+  const { isAuthenticated, openModal } = useAuth();
+  const navigate = useNavigate();
+
+  const handleShopClick = () => {
+    if (isAuthenticated) {
+      navigate(websiteUrlConfig.Jewellery.All);
+    } else {
+      openModal('login', websiteUrlConfig.Jewellery.All);
+    }
+  };
+
+  return (
   <section className="relative min-h-[45vh] pt-28 md:pt-32 pb-12 overflow-hidden">
     
     {/* Background Image */}
@@ -40,23 +53,28 @@ const JewelleryHeroSection = () => (
         </p>
 
         <div className="flex flex-wrap gap-3">
-          <Link to={websiteUrlConfig.Jewellery.All}>
-            <Button variant="outline" className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
-              Lab Diamonds
-              <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            onClick={handleShopClick}
+            className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
+          >
+            Lab Diamonds
+            <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
+          </Button>
 
-          <Link to={websiteUrlConfig.Jewellery.All}>
-            <Button variant="outline" className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
-              Natural Diamonds
-              <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            onClick={handleShopClick}
+            className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
+          >
+            Natural Diamonds
+            <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
+          </Button>
         </div>
       </motion.div>
     </div>
   </section>
-);
+  );
+};
 
 export default JewelleryHeroSection;

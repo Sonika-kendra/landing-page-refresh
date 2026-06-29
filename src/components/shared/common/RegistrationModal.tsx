@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,10 +41,9 @@ const mapApiError = (err: unknown): string => {
 };
 
 const RegistrationModal = () => {
-  const { isModalOpen, closeModal, initialView, setAuth, waitForLogout } = useAuth();
+  const { isModalOpen, closeModal, initialView, setAuth, waitForLogout, redirectAfterLogin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [mode, setMode] = useState<FormMode>(initialView);
   const [showPassword, setShowPassword] = useState(false);
@@ -113,11 +112,11 @@ const RegistrationModal = () => {
     try {
       await waitForLogout();
       const res = await authApi.login({ email: formData.email, password: formData.password });
+      const redirectTo = redirectAfterLogin; // capture before closeModal clears it
       setAuth(res.data.token, res.data.user);
       toast({ title: 'Welcome Back!', description: 'You are now signed in.' });
       closeModal();
-      const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname;
-      if (from && from !== '/') navigate(from, { replace: true });
+      if (redirectTo) navigate(redirectTo);
     } catch (err) {
       setApiError(mapApiError(err));
     } finally {
@@ -190,24 +189,24 @@ const RegistrationModal = () => {
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <>
-          {/* Backdrop — above header (z-[1100]) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeModal}
-            className="fixed inset-0 z-[1200] bg-foreground/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Wrapper — above backdrop */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 30 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-            className="fixed inset-0 z-[1300] overflow-y-auto"
-          >
+        <motion.div
+          key="backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={closeModal}
+          className="fixed inset-0 z-[1200] bg-foreground/60 backdrop-blur-sm"
+        />
+      )}
+      {isModalOpen && (
+        <motion.div
+          key="modal"
+          initial={{ opacity: 0, scale: 0.97, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.97, y: 30 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          className="fixed inset-0 z-[1300] overflow-y-auto"
+        >
             <div className="flex min-h-full items-end md:items-center justify-center px-0 md:px-4 md:py-6">
             {/* Modal Box */}
             <div className="w-full md:max-w-md bg-foreground text-background rounded-t-lg md:rounded-sm shadow-elevated overflow-hidden">
@@ -545,7 +544,6 @@ const RegistrationModal = () => {
             </div>
             </div>
           </motion.div>
-        </>
       )}
     </AnimatePresence>
   );
