@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
 
 const fromSlug = (slug: string) =>
   slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -607,13 +606,6 @@ const ShopPage = () => {
   const [dynamicCertificateItems, setDynamicCertificateItems] = useState<VisualFilterItem[]>([]);
   const [youMayAlsoLikeItems, setYouMayAlsoLikeItems] = useState<{ name: string; image: string; id: string }[]>([]);
   const navigate = useNavigate();
-  const { isAuthenticated, isAuthLoading, openModal, isModalOpen } = useAuth();
-  const [modalDismissed, setModalDismissed] = useState(false);
-  const modalWasOpen = useRef(false);
-  useEffect(() => {
-    if (isModalOpen) { modalWasOpen.current = true; }
-    else if (modalWasOpen.current) { setModalDismissed(true); }
-  }, [isModalOpen]);
 
   // Filter values are derived from the URL — single source of truth
   const filterValues = useMemo<FilterValues>(() => {
@@ -929,30 +921,6 @@ const ShopPage = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      openModal('login');
-    }
-  }, [isAuthLoading, isAuthenticated, openModal]);
-
-  if (!isAuthLoading && !isAuthenticated && !modalDismissed) {
-    return (
-      <PageLayout>
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-          <h2 className="font-serif text-2xl text-foreground">Members Only</h2>
-          <p className="text-sm text-foreground/60">Please sign in or register to browse products.</p>
-          <div className="flex gap-3">
-            <button onClick={() => openModal('login')} className="rounded bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent-foreground hover:bg-accent/90">
-              Sign In
-            </button>
-            <button onClick={() => openModal('register')} className="rounded border border-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent hover:bg-accent/10">
-              Register
-            </button>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
 
   return (
     <PageLayout>

@@ -1,19 +1,19 @@
 import { ReactNode, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 const ProtectedRoute = ({ children }: { children?: ReactNode }) => {
   const { isAuthenticated, isAuthLoading, openModal } = useAuth();
-  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
       openModal('login');
+      navigate(-1);
     }
-  }, [isAuthLoading, isAuthenticated, openModal]);
+  }, [isAuthLoading, isAuthenticated, openModal, navigate]);
 
-  if (isAuthLoading) return <div className="min-h-screen" />;
-  if (!isAuthenticated) return <Navigate to="/" replace state={{ from: location }} />;
+  if (isAuthLoading || !isAuthenticated) return <div className="min-h-screen" />;
 
   return <>{children}</>;
 };
