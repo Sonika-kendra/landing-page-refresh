@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,8 +41,10 @@ const mapApiError = (err: unknown): string => {
 };
 
 const RegistrationModal = () => {
-  const { isModalOpen, closeModal, initialView, setAuth } = useAuth();
+  const { isModalOpen, closeModal, initialView, setAuth, waitForLogout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [mode, setMode] = useState<FormMode>(initialView);
   const [showPassword, setShowPassword] = useState(false);
@@ -108,10 +111,13 @@ const RegistrationModal = () => {
     setApiError('');
     setIsLoading(true);
     try {
+      await waitForLogout();
       const res = await authApi.login({ email: formData.email, password: formData.password });
       setAuth(res.data.token, res.data.user);
       toast({ title: 'Welcome Back!', description: 'You are now signed in.' });
       closeModal();
+      const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname;
+      if (from && from !== '/') navigate(from, { replace: true });
     } catch (err) {
       setApiError(mapApiError(err));
     } finally {

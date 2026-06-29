@@ -52,33 +52,40 @@ const Cart = () => {
             <div className="lg:col-span-2 space-y-3">
               {items.map(item => (
                 <Card key={item.line_item_id} className="p-4 flex gap-4">
-                  <div className="h-24 w-24 flex-shrink-0 rounded overflow-hidden bg-muted">
+                  <Link to={`/jewellery/all/${item.item_id}`} className="h-24 w-24 flex-shrink-0 rounded overflow-hidden bg-muted">
                     {item.image
                       ? <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                       : <div className="h-full w-full" />}
-                  </div>
+                  </Link>
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between gap-4">
                       <div>
-                        <h3 className="font-medium text-foreground">{item.name}</h3>
-                        {item.metal && (() => {
-                          const metal = getMetalType(item.metal);
-                          return (
-                            <span
-                              className="inline-block mt-1 rounded px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide ring-2 ring-foreground/70 ring-offset-1"
-                              style={{
-                                backgroundImage: metal.image ? `url(${metal.image})` : undefined,
-                                backgroundColor: metal.image ? undefined : metal.bg,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                color: '#000',
-                              }}
-                              title={metal.name}
-                            >
-                              {metal.label}
-                            </span>
-                          );
-                        })()}
+                        <Link to={`/jewellery/all/${item.item_id}`} className="font-medium text-foreground hover:text-primary transition-colors">
+                          {item.name}
+                        </Link>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          {item.metal && (() => {
+                            const metal = getMetalType(item.metal);
+                            return (
+                              <span
+                                className="inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide ring-2 ring-foreground/70 ring-offset-1"
+                                style={{
+                                  backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                                  backgroundColor: metal.image ? undefined : metal.bg,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  color: '#000',
+                                }}
+                                title={metal.name}
+                              >
+                                {metal.label}
+                              </span>
+                            );
+                          })()}
+                          {item.size && (
+                            <span className="text-xs text-muted-foreground">Size: {item.size}</span>
+                          )}
+                        </div>
                       </div>
                       <Button
                         size="icon"

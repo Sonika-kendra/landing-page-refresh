@@ -185,7 +185,7 @@ const ProductDetail = () => {
     if (addedToBag) { navigate('/cart'); return; }
     if (!isAuthenticated) { openModal('login'); return; }
     try {
-      await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal });
+      await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal, size: selectedSizeValue || undefined });
       setBagJustAdded(true);
       setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
     } catch (err: any) {
@@ -393,7 +393,7 @@ const ProductDetail = () => {
             </div>
 
             <div>
-              <h1 className="mb-1.5 font-serif text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
+              <h1 className="mb-1.5 font-medium text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
               <div className="mb-5 flex items-center gap-1.5 text-xs">
                 <span className="font-medium text-foreground/60">SKU #: {product.sku}</span>
                 <button

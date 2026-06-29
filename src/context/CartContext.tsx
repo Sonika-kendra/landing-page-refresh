@@ -30,6 +30,7 @@ interface LineItem {
   sku?: string;
   image?: string;
   metal?: string;
+  size?: string;
 }
 
 interface Cart {
@@ -50,7 +51,7 @@ interface CartContextValue {
   cartId: string | null;
   itemCount: number;
   loading: boolean;
-  addItem: (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string }) => Promise<void>;
+  addItem: (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string; size?: string }) => Promise<void>;
   removeItem: (lineItemId: string) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -102,7 +103,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return { sub_total, tax_total, total: sub_total + tax_total };
   };
 
-  const addItem = async (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string }) => {
+  const addItem = async (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string; size?: string }) => {
     if (USE_DUMMY_CART) {
       const qty = item.quantity ?? 1;
       setCart(prev => {
@@ -124,6 +125,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               sku: item.sku,
               image: item.image,
               metal: item.metal,
+              size: item.size,
             }];
         return { ...prev, ...recalcTotals(newItems), line_items: newItems };
       });
@@ -154,8 +156,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         : currentItems.find(li => li.name === item.name);
 
       const newLineItem = hasZohoId
-        ? { item_id: item.item_id, name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }) }
-        : { name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }) };
+        ? { item_id: item.item_id, name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }), ...(item.size && { size: item.size }) }
+        : { name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }), ...(item.size && { size: item.size }) };
 
       const newItems = existing
         ? currentItems.map(li => {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { authApi } from '@/api/auth';
 
 const TOKEN_KEY = 'henig-auth-token';
@@ -43,6 +43,7 @@ interface AuthContextValue {
   closeModal: () => void;
   setAuth: (token: string, user: AuthUser) => void;
   logout: () => void;
+  waitForLogout: () => Promise<void>;
   hasRole: (role: string | string[]) => boolean;
   hasPermission: (module: string, action: string) => boolean;
 }
@@ -50,6 +51,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const logoutPromise = useRef<Promise<void> | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
@@ -93,13 +95,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    // Fire-and-forget: invalidate token server-side before clearing local state
-    authApi.logout().catch(() => {});
+    // Intercept runs sync (token still in localStorage), so the request carries the auth header.
+    // Store the promise so login can await it, preventing the race where logout's tokenVersion
+    // increment runs after the new login token is issued and invalidates it.
+    const p = authApi.logout().catch(() => {}).then(() => { logoutPromise.current = null; });
+    logoutPromise.current = p;
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
   };
+
+  const waitForLogout = (): Promise<void> => logoutPromise.current ?? Promise.resolve();
 
   const ZOHO_ROLE_MAP: Record<string, string> = { Administrator: 'admin', Standard: 'internalUser' };
   const hasRole = (role: string | string[]) => {
@@ -123,7 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAuthenticated: !!token, isAuthLoading, isModalOpen, initialView, openModal, closeModal, setAuth, logout, hasRole, hasPermission }}
+      value={{ user, token, isAuthenticated: !!token, isAuthLoading, isModalOpen, initialView, openModal, closeModal, setAuth, logout, waitForLogout, hasRole, hasPermission }}
     >
       {children}
     </AuthContext.Provider>
