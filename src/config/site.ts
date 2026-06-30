@@ -29,7 +29,7 @@ export const websiteUrlConfig = {
         Necklaces: '/jewellery/necklaces',
     },
     Diamonds: {
-        Home: `${oldWebsiteURL}/diamonds/all`,
-        All: `${oldWebsiteURL}/diamonds/all`,
+        Home: `/diamonds`,
+        All: `/diamonds/all`,
     }
 };
