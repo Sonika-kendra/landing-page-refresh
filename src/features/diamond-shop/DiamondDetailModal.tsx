@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Copy, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { productsApi } from '@/api/products';
+import client from '@/api/client';
+import { toast } from '@/hooks/use-toast';
 import { newApiURL } from '@/config/site';
 import { useFavourites } from '@/context/FavouritesContext';
 import type { DiamondItem } from './DiamondCard';
@@ -24,6 +26,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
   const [selectedImage, setSelectedImage] = useState(0);
   const [mediaItems, setMediaItems] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
   const [certCopied, setCertCopied] = useState(false);
+  const [skuCopied, setSkuCopied] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const liked = item ? isFavourite(item.id) : false;
@@ -75,6 +78,22 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: item.name, url }).catch(() => {});
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Link copied to clipboard' });
+    }
+  };
+
+  const handleDownloadImage = () => {
+    const current = galleryItems[selectedImage];
+    if (!current?.url) return;
+    client.download(current.url, `${item.sku}-diamond`);
+  };
+
   const hasMeasurements = d.table || d.depth || d.ratio || d.measurements;
 
   const certLogo = item.certificate ? getCertLogo(item.certificate) : null;
@@ -89,7 +108,8 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
             <div className="relative aspect-square overflow-hidden border border-border/20 bg-white">
               {/* Download icon */}
               <button
-                title="Download"
+                onClick={handleDownloadImage}
+                title="Download image"
                 className="absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded bg-background/80 text-foreground/60 transition-colors hover:bg-background"
               >
                 <Download className="h-4 w-4" />
@@ -159,10 +179,10 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
           <div className="relative flex flex-col p-5">
             {/* Action icons (top-right) */}
             <div className="absolute right-5 top-12 flex flex-col items-center gap-2">
-              <button onClick={() => {}} title="Share" className="text-foreground/40 transition-colors hover:text-foreground">
+              <button onClick={handleShare} title="Share" className="text-foreground/40 transition-colors hover:text-foreground">
                 <Share2 className="h-4 w-4" />
               </button>
-              <button onClick={() => {}} title="Compare" className="text-foreground/40 transition-colors hover:text-foreground">
+              <button onClick={() => toast({ title: 'Compare coming soon' })} title="Compare" className="text-foreground/40 transition-colors hover:text-foreground">
                 <BarChart2 className="h-4 w-4" />
               </button>
               <button
@@ -172,7 +192,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
               >
                 <Heart className={`h-4 w-4 transition-all duration-200 ${liked ? 'fill-primary text-primary' : 'text-foreground/40 hover:text-primary'}`} />
               </button>
-              <button onClick={() => {}} title="Download PDF" className="text-foreground/40 transition-colors hover:text-foreground">
+              <button onClick={() => toast({ title: 'PDF download coming soon' })} title="Download PDF" className="text-foreground/40 transition-colors hover:text-foreground">
                 <FileText className="h-4 w-4" />
               </button>
             </div>
@@ -185,12 +205,13 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
               <span className="flex items-center gap-1 text-xs text-foreground/55">
                 SKU : {item.sku}
                 <button
-                  onClick={() => navigator.clipboard.writeText(item.sku)}
-                  className="ml-0.5 text-foreground/40 hover:text-foreground/70 transition-colors"
+                  onClick={() => { navigator.clipboard.writeText(item.sku); setSkuCopied(true); setTimeout(() => setSkuCopied(false), 1500); }}
+                  className={`ml-0.5 transition-colors ${skuCopied ? 'text-primary' : 'text-foreground/40 hover:text-foreground/70'}`}
                   title="Copy SKU"
                 >
                   <Copy size={11} />
                 </button>
+                {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </span>
               {certLogo && <img src={certLogo} alt={item.certificate} className="ml-auto h-4 w-auto object-contain opacity-70" />}
             </div>
