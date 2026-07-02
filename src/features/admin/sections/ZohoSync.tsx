@@ -211,7 +211,7 @@ const ZohoSync = () => {
     onSuccess: (data) => {
       toast({
         title: 'Product sync triggered',
-        description: data.message ?? 'Zoho Deluge schedule triggered — items will sync to MongoDB shortly.',
+        description: data.message ?? 'Product sync started — items will sync to MongoDB shortly.',
       });
       queryClient.invalidateQueries({ queryKey: ['admin', 'zoho', 'logs'] });
     },

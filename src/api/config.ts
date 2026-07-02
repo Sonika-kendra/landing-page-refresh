@@ -137,6 +137,7 @@ export const API_CONFIG = {
     base: 'new' as ApiBase,
     endpoints: {
       all: '/products',
+      diamonds: '/products/diamonds',
       currencies: '/products/currencies',
       currency: '/products/currency',
       allFilterData: '/products/all-filter-data',
