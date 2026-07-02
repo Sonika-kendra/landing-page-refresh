@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Copy, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import client from '@/api/client';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCompare } from './CompareContext';
 import type { DiamondItem } from './DiamondCard';
@@ -65,7 +64,17 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
   const handleDownloadImage = () => {
     const current = galleryItems[selectedImage];
     if (!current?.url) return;
-    client.download(current.url, `${item.sku}-diamond`);
+    // ponytail: diamond images live on the vendor's CDN, not our API — it won't send
+    // CORS headers, so a blob fetch (client.download) fails silently. A plain anchor
+    // download doesn't need CORS since the browser fetches the resource itself.
+    const a = document.createElement('a');
+    a.href = current.url;
+    a.download = `${item.sku}-diamond`;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   return (
