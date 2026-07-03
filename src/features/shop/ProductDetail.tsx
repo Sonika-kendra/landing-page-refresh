@@ -74,7 +74,7 @@ const ProductDetail = () => {
 
   const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
-  const { addItem } = useCart();
+  const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated, isAuthLoading, openModal } = useAuth();
   const liked = product ? isFavourite(product.id) : false;
 
@@ -750,7 +750,8 @@ const ProductDetail = () => {
               <div className="mt-4 flex gap-3">
                 <button
                   onClick={handleAddToBag}
-                  className={`flex-1 py-4 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 ${
+                  disabled={cartLoading && !addedToBag}
+                  className={`flex-1 py-4 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                     bagJustAdded
                       ? 'bg-accent/80 scale-[0.98] text-accent-foreground'
                       : addedToBag
