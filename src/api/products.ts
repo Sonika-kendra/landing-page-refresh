@@ -20,7 +20,7 @@ export const productsApi = {
 
   listDiamonds: (params?: {
     page?: number; per_page?: number; status?: string;
-    category?: string; shape?: string;
+    category?: string; cf_stock_sub_category?: string; shape?: string;
     stock_type?: string;
     price_min?: number; price_max?: number;
     search?: string; sort?: string; currency?: string;

@@ -346,6 +346,7 @@ const DiamondShopPage = () => {
       per_page: PAGE_SIZE, page,
       status: 'active',
       category: 'Diamonds',
+      cf_stock_sub_category: 'Single Item',
       sort: sortBy,
       currency: currencySymbol,
       stock_type: stockTypeTab,

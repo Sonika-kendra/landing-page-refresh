@@ -37,7 +37,7 @@ export function extractDiamondFields(item: DiamondItem) {
   const polish      = cf(item, 'polish', 'cf_polish');
   const symmetry    = cf(item, 'symmetry', 'cf_symmetry');
   const fluorescence= cf(item, 'fluorescence', 'cf_fluorescence', 'fluor', 'cf_fluor');
-  const caratTotal  = cf(item, 'caratTotal', 'cf_carat_total', 'cf_carat', 'cf_carat_total_unformatted', 'carat_total');
+  const caratTotal  = cf(item, 'cf_carat_total');
   const mainTotal   = cf(item, 'mainTotal', 'cf_main_total', 'main_total');
   const pictureLink = cf(item, 'pictureLink', 'cf_picture_link');
   const certLink    = cf(item, 'certLink', 'cf_cert_link');

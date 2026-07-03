@@ -88,7 +88,7 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
   const rawStockType = getCf(item, 'stock_sub_cat', 'diamond_type', 'stock_type', 'stone_type') ?? 'Natural';
   const normalisedStockType = rawStockType.toLowerCase().includes('lab') ? 'Lab' : rawStockType;
 
-  const caratRaw = getCf(item, 'carat_options', 'carat_weight_options', 'carat') ?? '';
+  const caratRaw = getCf(item, 'carat_total') ?? '';
   const caratOptions = caratRaw
     ? caratRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
     : undefined;
@@ -136,7 +136,7 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     goldWeight:   getCf(item, 'gold_weight')                                        || undefined,
     metalWeightOptions: metalWeightOptions?.length ? metalWeightOptions : undefined,
     totalWeight:  getCf(item, 'total_weight', 'total_carat_weight', 'carat_weight')|| undefined,
-    caratWeight:  getCf(item, 'total_diamond_weight', 'centre_diamond_weight', 'side_stones_weight', 'gemstone_weight', 'carat_total') || undefined,
+    caratWeight:  getCf(item, 'carat_total') || undefined,
     itemRef:      getCf(item, 'item_ref', 'reference', 'stock_ref', 'ref')         || String(item.sku ?? '') || undefined,
     images: [imageUrl],
   };
