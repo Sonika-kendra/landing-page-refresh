@@ -43,7 +43,7 @@ function toCartAddress(a: Address) {
 
 const Checkout = () => {
   const navigate    = useNavigate();
-  const { cart, cartId, clearCart } = useCart();
+  const { cart, cartId, clearCart, loading: cartLoading } = useCart();
   const { user }    = useAuth();
 
   const [addresses,   setAddresses]   = useState<Address[]>([]);
@@ -230,9 +230,9 @@ const Checkout = () => {
             <Button
               className="w-full mt-6 gap-2"
               onClick={placeOrder}
-              disabled={placing || !cartId || items.length === 0 || !addressId}
+              disabled={placing || cartLoading || !cartId || items.length === 0 || !addressId}
             >
-              {placing
+              {placing || cartLoading
                 ? <Loader2 className="h-4 w-4 animate-spin" />
                 : <CheckCircle2 className="h-4 w-4" />}
               Place Order

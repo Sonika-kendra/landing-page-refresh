@@ -147,7 +147,7 @@ const Cart = () => {
                   <span>£{fmt(total)}</span>
                 </div>
               </div>
-              <Button className="w-full mt-6 gap-2" onClick={() => navigate('/checkout')}>
+              <Button className="w-full mt-6 gap-2" onClick={() => navigate('/checkout')} disabled={loading}>
                 Checkout <ArrowRight className="h-4 w-4" />
               </Button>
               <Link to="/jewellery/all" className="block text-center text-xs text-muted-foreground mt-3 hover:text-foreground">

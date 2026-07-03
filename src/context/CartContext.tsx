@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { cartApi } from '@/api/cart';
 import { useAuth } from './AuthContext';
 
@@ -68,6 +68,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Cart | null>(() => USE_DUMMY_CART ? DUMMY_CART : null);
   const [loading, setLoading] = useState(false);
 
+  // Cart mutations are read-modify-write (fetch fresh cart, merge, PUT whole array).
+  // Queue them so two calls in flight (e.g. a double-click on "Add to Bag") can't both
+  // read stale state and have the second PUT silently overwrite the first's change.
+  const mutationQueueRef = useRef<Promise<any>>(Promise.resolve());
+  const enqueueMutation = <T,>(fn: () => Promise<T>): Promise<T> => {
+    const run = mutationQueueRef.current.then(fn, fn);
+    mutationQueueRef.current = run.catch(() => {});
+    return run;
+  };
+
   const fetchCart = useCallback(async (id: string) => {
     if (USE_DUMMY_CART) return;
     try {
@@ -131,6 +141,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       });
       return;
     }
+    return enqueueMutation(async () => {
     setLoading(true);
     try {
       const id = await ensureCart();
@@ -184,6 +195,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
+    });
   };
 
   const removeItem = async (lineItemId: string) => {
@@ -196,6 +208,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     if (!cartId) return;
+    return enqueueMutation(async () => {
     setLoading(true);
     try {
       const res = await cartApi.removeItem(cartId, lineItemId);
@@ -203,6 +216,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
+    });
   };
 
   const updateQuantity = async (lineItemId: string, quantity: number) => {
@@ -219,18 +233,27 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     if (!cartId || !cart) return;
+    return enqueueMutation(async () => {
     setLoading(true);
     try {
-      const newItems = cart.line_items.map(li =>
+      // Fetch fresh cart to avoid stale-state race conditions (e.g. checkout firing
+      // while a previous quantity update is still in flight)
+      const freshRes = await cartApi.get(cartId);
+      const freshCart = freshRes.data?.cart;
+      const currentItems = freshCart?.line_items ?? cart.line_items;
+
+      const newItems = currentItems.map(li =>
         li.line_item_id === lineItemId ? { ...li, quantity: Math.max(1, quantity) } : li
       );
+      const customerId = freshCart?.customer_id ?? cart.customer_id;
       const updatePayload: Record<string, any> = { line_items: newItems };
-      if (cart.customer_id) updatePayload.customer_id = cart.customer_id;
+      if (customerId) updatePayload.customer_id = customerId;
       const res = await cartApi.update(cartId, updatePayload);
       setCart(res.data?.cart ?? null);
     } finally {
       setLoading(false);
     }
+    });
   };
 
   const clearCart = async () => {
