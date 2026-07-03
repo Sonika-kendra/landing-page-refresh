@@ -178,6 +178,7 @@ export const API_CONFIG = {
       update: (id: string) => `/orders/${id}`,
       confirm: (id: string) => `/orders/${id}/confirm`,
       updateStatus: (id: string) => `/orders/${id}/status`,
+      rate: (id: string) => `/orders/${id}/rating`,
       cancel: (id: string) => `/orders/${id}`,
     },
   },

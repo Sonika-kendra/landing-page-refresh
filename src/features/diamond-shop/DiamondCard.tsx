@@ -146,15 +146,17 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
       {/* Info block */}
       <div className="bg-white px-3 pb-0 pt-2">
         {/* CERT lab : number + SKU */}
-        <div className="grid grid-cols-2 text-xs text-foreground/45">
-          <span className="flex items-center truncate">
-            {d.certLab || '–'} : {d.certNumber || '–'}
+        <div className="grid grid-cols-2 gap-1 text-xs text-foreground/45">
+          <span className="flex min-w-0 items-center">
+            <span className="shrink-0">{d.certLab || '–'} : </span>
+            <span className="min-w-0 truncate">{d.certNumber || '–'}</span>
             {d.certNumber && <CopyButton text={d.certNumber} />}
           </span>
-          <span className="flex items-center justify-end truncate">
+          <span className="flex min-w-0 items-center justify-end">
             {item.sku && (
               <>
-                SKU : {item.sku}
+                <span className="shrink-0">SKU : </span>
+                <span className="min-w-0 truncate">{item.sku}</span>
                 <CopyButton text={item.sku} />
               </>
             )}

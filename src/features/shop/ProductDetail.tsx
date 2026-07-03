@@ -265,6 +265,7 @@ const ProductDetail = () => {
   const allShapes = [...new Set(_allVariantsOuter.map((v) => v.shape).filter(Boolean) as string[])];
   const allColours = [...new Set(_allVariantsOuter.map((v) => v.colour).filter(Boolean) as string[])];
   const allClarities = [...new Set(_allVariantsOuter.map((v) => v.clarity).filter(Boolean) as string[])];
+  const allCaratsOuter = [...new Set(_allVariantsOuter.flatMap((v) => v.caratOptions ?? []))];
 
   return (
     <PageLayout>
@@ -663,6 +664,7 @@ const ProductDetail = () => {
                       <tbody>
                         {([
                           ['Stone type:', product.stoneType],
+                          ['Carat weight:', allCaratsOuter.length <= 1 ? (product.caratWeight ?? selectedCaratValue) : undefined],
                           ['Shape:', allShapes.length <= 1 ? product.shape : undefined],
                           ['Colour:', allColours.length <= 1 ? product.colour : undefined],
                           ['Clarity:', allClarities.length <= 1 ? product.clarity : undefined],

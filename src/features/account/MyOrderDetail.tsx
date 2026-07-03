@@ -218,10 +218,23 @@ const ItemRequestDialog = ({ open, type, itemName, onClose }: ItemRequestDialogP
 };
 
 /* ── Star rating widget ── */
-const StarRating = () => {
+const StarRating = ({ orderId, initialRating }: { orderId: string; initialRating: number }) => {
   const [hovered, setHovered] = useState(0);
-  const [selected, setSelected] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
+  const [selected, setSelected] = useState(initialRating);
+  const [submitted, setSubmitted] = useState(initialRating > 0);
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      await ordersApi.rate(orderId, selected);
+      setSubmitted(true);
+    } catch {
+      // leave the form open so the user can retry
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (submitted) {
     return (
@@ -258,9 +271,10 @@ const StarRating = () => {
         <Button
           size="sm"
           className="w-fit"
-          onClick={() => setSubmitted(true)}
+          onClick={handleSubmit}
+          disabled={saving}
         >
-          Submit Review
+          {saving ? 'Submitting…' : 'Submit Review'}
         </Button>
       )}
     </div>
@@ -553,7 +567,10 @@ const MyOrderDetail = () => {
           <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
             How was your shopping experience with us? Tap a star to leave a rating.
           </p>
-          <StarRating />
+          <StarRating
+            orderId={id ?? order.salesorder_number}
+            initialRating={data.orderStatus?.rating?.value ?? 0}
+          />
         </div>
       </div>
 

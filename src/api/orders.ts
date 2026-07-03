@@ -22,6 +22,9 @@ export const ordersApi = {
   updateStatus: (id: string, status: string, extras?: { note?: string; trackingNumber?: string; carrier?: string }) =>
     client.patch(ep.updateStatus(id), { status, ...extras }, undefined, base),
 
+  rate: (id: string, rating: number) =>
+    client.post(ep.rate(id), { rating }, undefined, base),
+
   cancel: (id: string) =>
     client.delete(ep.cancel(id), undefined, undefined, base),
 };

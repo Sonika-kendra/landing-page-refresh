@@ -9,16 +9,16 @@ export function getCf(item: Record<string, unknown>, ...names: string[]): string
       : null;
 
   for (const name of names) {
-    if (item[`cf_${name}`] != null) return String(item[`cf_${name}`]);
-    if (item[name] != null && typeof item[name] !== 'object') return String(item[name]);
+    if (item[`cf_${name}`] != null && item[`cf_${name}`] !== '') return String(item[`cf_${name}`]);
+    if (item[name] != null && item[name] !== '' && typeof item[name] !== 'object') return String(item[name]);
     if (attrs) {
-      if (attrs[`cf_${name}`] != null) return String(attrs[`cf_${name}`]);
-      if (attrs[name] != null && typeof attrs[name] !== 'object') return String(attrs[name]);
+      if (attrs[`cf_${name}`] != null && attrs[`cf_${name}`] !== '') return String(attrs[`cf_${name}`]);
+      if (attrs[name] != null && attrs[name] !== '' && typeof attrs[name] !== 'object') return String(attrs[name]);
     }
     if (Array.isArray(item.custom_fields)) {
       const f = (item.custom_fields as Array<{ api_name?: string; label?: string; value?: unknown }>)
         .find((cf) => cf.api_name === `cf_${name}` || cf.label?.toLowerCase().replace(/ /g, '_') === name);
-      if (f?.value != null) return String(f.value);
+      if (f?.value != null && f.value !== '') return String(f.value);
     }
   }
   return undefined;
@@ -136,6 +136,7 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     goldWeight:   getCf(item, 'gold_weight')                                        || undefined,
     metalWeightOptions: metalWeightOptions?.length ? metalWeightOptions : undefined,
     totalWeight:  getCf(item, 'total_weight', 'total_carat_weight', 'carat_weight')|| undefined,
+    caratWeight:  getCf(item, 'total_diamond_weight', 'centre_diamond_weight', 'side_stones_weight', 'gemstone_weight', 'carat_total') || undefined,
     itemRef:      getCf(item, 'item_ref', 'reference', 'stock_ref', 'ref')         || String(item.sku ?? '') || undefined,
     images: [imageUrl],
   };

@@ -34,6 +34,7 @@ export interface ShopProduct {
   goldWeight?: string;
   metalWeightOptions?: string[];
   totalWeight?: string;
+  caratWeight?: string;
   description?: string;
   itemRef?: string;
   stock?: number;
