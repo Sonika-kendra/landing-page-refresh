@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, MapPin, CreditCard, Plus, Loader2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Package, Plus, Loader2 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,19 +11,20 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { addressesApi, AddressPayload } from '@/api/addresses';
 import { cartApi } from '@/api/cart';
 
 interface Address {
-  _id: string;
-  label: string;
-  fullName: string;
-  line1: string;
-  line2?: string;
-  city: string;
+  _id:        string;
+  label:      string;
+  fullName:   string;
+  line1:      string;
+  line2?:     string;
+  city:       string;
   postalCode?: string;
-  country: string;
-  phone?: string;
+  country:    string;
+  phone?:     string;
   isDefault?: boolean;
 }
 
@@ -31,15 +32,25 @@ const blank: AddressPayload = {
   label: 'Home', fullName: '', line1: '', city: '', country: 'United Kingdom',
 };
 
-const Checkout = () => {
-  const navigate = useNavigate();
-  const { cart, cartId, clearCart } = useCart();
+function toCartAddress(a: Address) {
+  return {
+    address: [a.line1, a.line2].filter(Boolean).join(', '),
+    city:    a.city,
+    zip:     a.postalCode,
+    country: a.country,
+  };
+}
 
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [addressId, setAddressId] = useState('');
-  const [addOpen, setAddOpen] = useState(false);
-  const [newAddr, setNewAddr] = useState<AddressPayload>(blank);
-  const [placing, setPlacing] = useState(false);
+const Checkout = () => {
+  const navigate    = useNavigate();
+  const { cart, cartId, clearCart } = useCart();
+  const { user }    = useAuth();
+
+  const [addresses,   setAddresses]   = useState<Address[]>([]);
+  const [addressId,   setAddressId]   = useState('');
+  const [addOpen,     setAddOpen]     = useState(false);
+  const [newAddr,     setNewAddr]     = useState<AddressPayload>(blank);
+  const [placing,     setPlacing]     = useState(false);
   const [addrLoading, setAddrLoading] = useState(true);
 
   useEffect(() => {
@@ -66,31 +77,48 @@ const Checkout = () => {
   };
 
   const placeOrder = async () => {
-    if (!cartId) {
+    if (!cartId || !cart?.line_items?.length) {
       toast({ title: 'Your cart is empty', variant: 'destructive' });
       return;
     }
+
+    const selectedAddr = addresses.find(a => a._id === addressId);
+    if (!selectedAddr) {
+      toast({ title: 'Please select a shipping address', variant: 'destructive' });
+      return;
+    }
+
     setPlacing(true);
     try {
-      await cartApi.checkout(cartId);
+      const billingAddress = toCartAddress(selectedAddr);
+      const customerName   = selectedAddr.fullName ||
+        (user ? `${user.firstName} ${user.lastName ?? ''}`.trim() : '');
+
+      await cartApi.checkout(cartId, {
+        customer_name:    customerName,
+        customer_id:      cart.customer_id ?? user?.zohoContactId,
+        billing_address:  billingAddress,
+        shipping_address: billingAddress,
+      });
+
       await clearCart();
-      toast({ title: 'Order placed!', description: 'Confirmation email sent.' });
+      toast({ title: 'Order placed!', description: 'Your order form has been created.' });
       navigate('/account/orders');
     } catch (err: any) {
       toast({
-        title: 'Could not place order',
+        title:       'Could not place order',
         description: err?.response?.data?.error ?? 'Please try again.',
-        variant: 'destructive',
+        variant:     'destructive',
       });
     } finally {
       setPlacing(false);
     }
   };
 
-  const items = cart?.line_items ?? [];
-  const subtotal = cart?.sub_total ?? 0;
-  const tax = cart?.tax_total ?? 0;
-  const total = cart?.total ?? 0;
+  const items    = cart?.line_items ?? [];
+  const subtotal = cart?.sub_total  ?? 0;
+  const tax      = cart?.tax_total  ?? 0;
+  const total    = cart?.total      ?? 0;
 
   return (
     <PageLayout>
@@ -99,6 +127,7 @@ const Checkout = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
+
             {/* Shipping Address */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -126,7 +155,7 @@ const Checkout = () => {
                       <div className="flex-1">
                         <p className="text-sm font-medium">{a.label} — {a.fullName}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {a.line1}, {a.city}, {a.postalCode}, {a.country}
+                          {a.line1}, {a.city}{a.postalCode ? `, ${a.postalCode}` : ''}, {a.country}
                         </p>
                       </div>
                     </Label>
@@ -135,39 +164,47 @@ const Checkout = () => {
               )}
             </Card>
 
-            {/* Payment */}
+            {/* Order Items (read-only review) */}
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <CreditCard className="h-4 w-4 text-primary" />
-                <h2 className="font-medium">Payment Details</h2>
+                <Package className="h-4 w-4 text-primary" />
+                <h2 className="font-medium">Order Items</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <Label>Card Number</Label>
-                  <Input placeholder="1234 5678 9012 3456" />
+              {items.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Your cart is empty.</p>
+              ) : (
+                <div className="space-y-3">
+                  {items.map(i => (
+                    <div key={i.line_item_id} className="flex items-center justify-between text-sm">
+                      <div>
+                        <p className="font-medium">{i.name}</p>
+                        {i.sku && <p className="text-xs text-muted-foreground">SKU: {i.sku}</p>}
+                      </div>
+                      <div className="text-right">
+                        <p>£{(i.rate * i.quantity).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">Qty: {i.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <Label>Expiry</Label>
-                  <Input placeholder="MM/YY" />
-                </div>
-                <div>
-                  <Label>CVC</Label>
-                  <Input placeholder="123" />
-                </div>
-              </div>
+              )}
             </Card>
+
           </div>
 
-          {/* Summary */}
+          {/* Order Summary */}
           <Card className="p-6 h-fit sticky top-24">
             <h2 className="font-serif text-xl mb-4">Order Summary</h2>
+
             {items.map(i => (
               <div key={i.line_item_id} className="flex justify-between text-sm py-1.5">
                 <span className="text-muted-foreground">{i.name} × {i.quantity}</span>
                 <span>£{(i.rate * i.quantity).toLocaleString()}</span>
               </div>
             ))}
+
             <Separator className="my-3" />
+
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
@@ -182,14 +219,30 @@ const Checkout = () => {
                 <span>£{total.toLocaleString()}</span>
               </div>
             </div>
+
+            {/* Order details summary */}
+            <div className="mt-4 p-3 bg-muted/40 rounded text-xs text-muted-foreground space-y-1">
+              <p><span className="font-medium text-foreground">Order Type:</span> Web Order</p>
+              <p><span className="font-medium text-foreground">Order Date:</span> {new Date().toLocaleDateString('en-GB')}</p>
+              <p><span className="font-medium text-foreground">Status:</span> Draft</p>
+            </div>
+
             <Button
               className="w-full mt-6 gap-2"
               onClick={placeOrder}
-              disabled={placing || !cartId || addresses.length === 0}
+              disabled={placing || !cartId || items.length === 0 || !addressId}
             >
-              {placing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {placing
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : <CheckCircle2 className="h-4 w-4" />}
               Place Order
             </Button>
+
+            {addresses.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Add a shipping address to continue
+              </p>
+            )}
           </Card>
         </div>
       </div>

@@ -26,11 +26,17 @@ interface Order {
 const MyOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    ordersApi.list({ status: 'open', per_page: 50 })
-      .then(res => setOrders(res.data?.salesorders ?? []))
-      .catch(() => {})
+    ordersApi.list({ per_page: 50 })
+      .then(res => {
+        const fetched = (res.data?.salesorders ?? []).filter(
+          (o: any) => !['draft', 'void'].includes(o.status)
+        );
+        setOrders(fetched);
+      })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,12 +48,21 @@ const MyOrders = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Card className="p-16 text-center">
+        <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+        <p className="text-muted-foreground">Unable to load orders. Please try again later.</p>
+      </Card>
+    );
+  }
+
   if (orders.length === 0) {
     return (
       <Card className="p-16 text-center">
         <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
         <p className="text-muted-foreground">No orders yet</p>
-        <Link to="/shop" className="mt-3 inline-block">
+        <Link to="/jewellery/all" className="mt-3 inline-block">
           <Button size="sm" variant="outline">Start Shopping</Button>
         </Link>
       </Card>

@@ -61,6 +61,7 @@ export const API_CONFIG = {
       statusLog:      (id: string) => `/admin/users/${id}/status-log`,
       user:           (id: string) => `/users/${id}`,
       updateUser:     (id: string) => `/users/${id}`,
+      staff:          '/admin/staff',
     },
   },
 
@@ -82,16 +83,41 @@ export const API_CONFIG = {
       all: '/configs/all',
       config: (id: string) => `/configs/${id}`,
       update: (id: string) => `/configs/${id}`,
+      delete: (id: string) => `/configs/${id}`,
+      create: '/configs',
+      announcementBar: '/configs/announcement-bar',
+    },
+  },
+
+  adminEmailTemplates: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      all: '/email-templates/all',
+      list: '/email-templates',
+      byId: (id: string) => `/email-templates/${id}`,
+      create: '/email-templates',
     },
   },
 
   adminZoho: {
     base: 'new' as ApiBase,
     endpoints: {
-      status:     '/admin/zoho/status',
-      logs:       '/admin/zoho/logs',
-      syncAll:    '/admin/zoho/sync',
-      syncModule: (module: string) => `/admin/zoho/sync/${module}`,
+      status:         '/admin/zoho/status',
+      schedule:       '/admin/zoho/schedule',
+      logs:           '/admin/zoho/logs',
+      syncAll:        '/admin/zoho/sync',
+      syncModule:     (module: string) => `/admin/zoho/sync/${module}`,
+      triggerProductsSync:  '/admin/zoho/products/sync/trigger',
+      syncDirectory:  '/admin/zoho/directory/sync',
+      inventoryItems: '/admin/zoho/items',
+    },
+  },
+
+  adminFilterConfig: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      status:  '/admin/filter-config/status',
+      rebuild: '/admin/filter-config/rebuild',
     },
   },
 
@@ -111,11 +137,23 @@ export const API_CONFIG = {
     base: 'new' as ApiBase,
     endpoints: {
       all: '/products',
+      diamonds: '/products/diamonds',
+      currencies: '/products/currencies',
+      currency: '/products/currency',
+      allFilterData: '/products/all-filter-data',
+      subcategories: '/products/subcategories',
+      metals: '/products/metals',
+      filterOptions: '/products/filter-options',
+      byName: '/products/by-name',
       one: (id: string) => `/products/${id}`,
       create: '/products',
       update: (id: string) => `/products/${id}`,
       updateTags: (zohoId: string) => `/products/${zohoId}/tags`,
       delete: (id: string) => `/products/${id}`,
+      uploadImage: (id: string) => `/products/${id}/image`,
+      deleteImage: (id: string) => `/products/${id}/image`,
+      media: (id: string) => `/products/${id}/media`,
+      file: (fileId: string) => `/products/file/${fileId}`,
     },
   },
 
@@ -140,6 +178,7 @@ export const API_CONFIG = {
       update: (id: string) => `/orders/${id}`,
       confirm: (id: string) => `/orders/${id}/confirm`,
       updateStatus: (id: string) => `/orders/${id}/status`,
+      rate: (id: string) => `/orders/${id}/rating`,
       cancel: (id: string) => `/orders/${id}`,
     },
   },
@@ -171,6 +210,29 @@ export const API_CONFIG = {
       get: '/profile',
       update: '/profile',
       changePassword: '/profile/changePassword',
+    },
+  },
+
+  users: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      accountManagers: '/users/account-managers',
+    },
+  },
+
+  contact: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      message: '/message',
+      newsletter: '/newsletter',
+    },
+  },
+
+  orderForms: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      create: '/order-forms',
+      one:    (id: string) => `/order-forms/${id}`,
     },
   },
 } as const;

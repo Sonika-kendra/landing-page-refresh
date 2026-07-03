@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { authApi } from '@/api/auth';
 import Logo from '@/assets/icons/logoDark.png';
 
 type FormMode = 'register' | 'login' | 'forgot' | 'verify-pending' | 'forgot-sent';
+type AccountManager = { _id: string; full_name?: string; firstName?: string; lastName?: string; email: string };
 
 const ERROR_MAP: Record<string, string> = {
   EMAIL_NOT_VERIFIED: 'Please verify your email before logging in.',
@@ -38,8 +41,9 @@ const mapApiError = (err: unknown): string => {
 };
 
 const RegistrationModal = () => {
-  const { isModalOpen, closeModal, initialView, setAuth } = useAuth();
+  const { isModalOpen, closeModal, initialView, setAuth, waitForLogout, redirectAfterLogin } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [mode, setMode] = useState<FormMode>(initialView);
   const [showPassword, setShowPassword] = useState(false);
@@ -48,6 +52,9 @@ const RegistrationModal = () => {
   const [apiError, setApiError] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
   const [resendSuccess, setResendSuccess] = useState(false);
+
+  const [accountManagers, setAccountManagers] = useState<AccountManager[]>([]);
+  const [selectedAccountManager, setSelectedAccountManager] = useState('');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -59,6 +66,12 @@ const RegistrationModal = () => {
     forgotEmail: '',
     acceptTerms: false,
   });
+
+  useEffect(() => {
+    authApi.getAccountManagers()
+      .then((res) => { if (res.data?.accountManagers?.length) setAccountManagers(res.data.accountManagers); })
+      .catch(() => {});
+  }, []);
 
   // Sync mode when modal opens
   useEffect(() => {
@@ -97,10 +110,13 @@ const RegistrationModal = () => {
     setApiError('');
     setIsLoading(true);
     try {
+      await waitForLogout();
       const res = await authApi.login({ email: formData.email, password: formData.password });
+      const redirectTo = redirectAfterLogin; // capture before closeModal clears it
       setAuth(res.data.token, res.data.user);
       toast({ title: 'Welcome Back!', description: 'You are now signed in.' });
       closeModal();
+      if (redirectTo) navigate(redirectTo);
     } catch (err) {
       setApiError(mapApiError(err));
     } finally {
@@ -121,6 +137,7 @@ const RegistrationModal = () => {
         email: formData.email,
         password: formData.password,
         acceptTermsAndConditions: true,
+        ...(selectedAccountManager && { accountManagerId: selectedAccountManager }),
       });
       setPendingEmail(formData.email);
       setMode('verify-pending');
@@ -172,24 +189,24 @@ const RegistrationModal = () => {
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <>
-          {/* Backdrop — above header (z-[1100]) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeModal}
-            className="fixed inset-0 z-[1200] bg-foreground/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Wrapper — above backdrop */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 30 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-            className="fixed inset-0 z-[1300] overflow-y-auto"
-          >
+        <motion.div
+          key="backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={closeModal}
+          className="fixed inset-0 z-[1200] bg-foreground/60 backdrop-blur-sm"
+        />
+      )}
+      {isModalOpen && (
+        <motion.div
+          key="modal"
+          initial={{ opacity: 0, scale: 0.97, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.97, y: 30 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          className="fixed inset-0 z-[1300] overflow-y-auto"
+        >
             <div className="flex min-h-full items-end md:items-center justify-center px-0 md:px-4 md:py-6">
             {/* Modal Box */}
             <div className="w-full md:max-w-md bg-foreground text-background rounded-t-lg md:rounded-sm shadow-elevated overflow-hidden">
@@ -370,6 +387,27 @@ const RegistrationModal = () => {
                       />
                     </div>
 
+                    {accountManagers.length > 0 && (
+                      <div>
+                        <Label htmlFor="accountManager" className="text-background text-xs">Account Manager</Label>
+                        <Select value={selectedAccountManager || undefined} onValueChange={setSelectedAccountManager}>
+                          <SelectTrigger
+                            id="accountManager"
+                            className="mt-0.5 h-9 bg-foreground/20 border-background/20 text-background text-sm focus:border-primary focus:ring-0 focus:ring-offset-0 [&>span]:text-background/40 data-[placeholder]:text-background/40"
+                          >
+                            <SelectValue placeholder="Select account manager (optional)" />
+                          </SelectTrigger>
+                          <SelectContent className="z-[1400]">
+                            {accountManagers.map((am) => (
+                              <SelectItem key={am._id} value={am._id}>
+                                {am.full_name || [am.firstName, am.lastName].filter(Boolean).join(' ')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
                     <div>
                       <Label htmlFor="reg-password" className="text-background text-xs">Password *</Label>
                       <div className="relative mt-0.5">
@@ -506,7 +544,6 @@ const RegistrationModal = () => {
             </div>
             </div>
           </motion.div>
-        </>
       )}
     </AnimatePresence>
   );

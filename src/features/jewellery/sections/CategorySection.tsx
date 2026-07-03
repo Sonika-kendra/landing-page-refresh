@@ -57,7 +57,7 @@ const CategorySection = () => (
                   asChild
                   size="sm"
                   variant="outline"
-                  className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent [&:hover_svg]:translate-x-2"
+                  className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
                 >
                   <span>
                     Shop Now

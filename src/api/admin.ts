@@ -47,6 +47,7 @@ export interface Post {
   images?: string[];
   snippet: string;
   content: string;
+  design?: object;
   status: 'draft' | 'published';
   related?: string[];
   buttons?: { label: string; url: string }[];
@@ -58,6 +59,17 @@ export interface SiteConfig {
   _id: string;
   type: string;
   fields: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EmailTemplateDoc {
+  _id: string;
+  name: string;
+  subject: string;
+  recipients: string[];
+  html: string;
+  design: object | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -92,16 +104,53 @@ export interface ZohoStatus {
   modules: string[];
 }
 
+export interface ZohoScheduleEntry {
+  cron: string;
+  description: string;
+  nextRun: string;
+}
+
+export interface ZohoSchedule {
+  ok: boolean;
+  dailySync: ZohoScheduleEntry;
+}
+
+export interface FilterConfigStatus {
+  ok: boolean;
+  exists: boolean;
+  summary: Record<string, number> | null;
+  updatedAt: string | null;
+}
+
+export interface FilterConfigRebuildResult {
+  ok: boolean;
+  message: string;
+  summary: Record<string, number>;
+}
+
 export interface ZohoSyncLog {
   _id: string;
   module: string;
   zohoId?: string;
   mongoId?: string;
   direction: 'zoho_to_mongo' | 'mongo_to_zoho';
-  action: 'create' | 'update';
+  action: 'create' | 'update' | 'delete' | 'skip' | 'sync';
   status: 'success' | 'error';
   error?: string;
+  meta?: { synced: number; errors: number; total: number };
   createdAt: string;
+}
+
+export interface StaffUser {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  full_name?: string;
+  email: string;
+  role: string;
+  status: 'active' | 'inactive';
+  profile?: { name?: string; id?: string };
+  createdAt?: string;
 }
 
 export interface ZohoSyncResult {
@@ -110,6 +159,24 @@ export interface ZohoSyncResult {
   errors?: number;
   total?: number;
   message?: string;
+}
+
+export interface ZohoInventoryItem {
+  item_id: string;
+  name: string;
+  sku?: string;
+  description?: string;
+  rate?: number;
+  purchase_rate?: number;
+  status?: string;
+  item_type?: string;
+  unit?: string;
+  category_id?: string;
+  category_name?: string;
+  image_name?: string;
+  image_document_id?: string;
+  last_modified_time?: string;
+  [key: string]: unknown;
 }
 
 const { base, endpoints } = API_CONFIG.admin;
@@ -131,6 +198,15 @@ export const adminApi = {
     apiClient.get<{ users: AdminUser[] }>(
       endpoints.pendingUsers,
       undefined,
+      undefined,
+      false,
+      base
+    ),
+
+  getStaff: (params?: { page?: number; limit?: number; status?: string }) =>
+    apiClient.get<{ staff: StaffUser[]; total: number; page: number; limit: number; totalPages: number }>(
+      endpoints.staff,
+      params,
       undefined,
       false,
       base
@@ -200,10 +276,77 @@ export const adminApi = {
       API_CONFIG.adminConfigs.base
     ),
 
-  updateConfig: (id: string, data: { fields: Record<string, unknown> }) =>
+  updateConfig: (id: string, data: { type?: string; fields: Record<string, unknown> }) =>
     apiClient.patch<SiteConfig>(
       API_CONFIG.adminConfigs.endpoints.update(id),
       data,
+      undefined,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  createConfig: (data: { type: string; fields: Record<string, unknown> }) =>
+    apiClient.post<SiteConfig>(
+      API_CONFIG.adminConfigs.endpoints.create,
+      data,
+      undefined,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  getAnnouncementBar: () =>
+    apiClient.get<SiteConfig | null>(
+      API_CONFIG.adminConfigs.endpoints.announcementBar,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminConfigs.base
+    ),
+
+  getAllEmailTemplates: () =>
+    apiClient.get<EmailTemplateDoc[]>(
+      API_CONFIG.adminEmailTemplates.endpoints.all,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  getEmailTemplateById: (id: string) =>
+    apiClient.get<EmailTemplateDoc>(
+      API_CONFIG.adminEmailTemplates.endpoints.byId(id),
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  createEmailTemplate: (name = 'New Template') =>
+    apiClient.post<EmailTemplateDoc>(
+      API_CONFIG.adminEmailTemplates.endpoints.create,
+      { name },
+      undefined,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  saveEmailTemplate: (id: string, design: object, html: string, name?: string, subject?: string, recipients?: string[]) =>
+    apiClient.patch<EmailTemplateDoc>(
+      API_CONFIG.adminEmailTemplates.endpoints.byId(id),
+      { ...(name !== undefined && { name }), ...(subject !== undefined && { subject }), ...(recipients !== undefined && { recipients }), design, html },
+      undefined,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  deleteEmailTemplate: (id: string) =>
+    apiClient.delete<{ message: string }>(
+      API_CONFIG.adminEmailTemplates.endpoints.byId(id),
+      undefined,
+      undefined,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  deleteConfig: (id: string) =>
+    apiClient.delete<{ message: string }>(
+      API_CONFIG.adminConfigs.endpoints.delete(id),
+      undefined,
       undefined,
       API_CONFIG.adminConfigs.base
     ),
@@ -257,6 +400,15 @@ export const adminApi = {
       API_CONFIG.adminZoho.base
     ),
 
+  getZohoSchedule: () =>
+    apiClient.get<ZohoSchedule>(
+      API_CONFIG.adminZoho.endpoints.schedule,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminZoho.base
+    ),
+
   getZohoLogs: (params?: { module?: string; direction?: string; status?: string }) =>
     apiClient.get<{ ok: boolean; logs: ZohoSyncLog[] }>(
       API_CONFIG.adminZoho.endpoints.logs,
@@ -280,5 +432,48 @@ export const adminApi = {
       undefined,
       undefined,
       API_CONFIG.adminZoho.base
+    ),
+
+  zohoTriggerProductsSync: () =>
+    apiClient.post<{ ok: boolean; message: string }>(
+      API_CONFIG.adminZoho.endpoints.triggerProductsSync,
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
+  zohoSyncDirectory: () =>
+    apiClient.post<ZohoSyncResult>(
+      API_CONFIG.adminZoho.endpoints.syncDirectory,
+      undefined,
+      undefined,
+      API_CONFIG.adminZoho.base
+    ),
+
+  getZohoInventoryItems: (params?: { search?: string; category_id?: string; status?: string }) =>
+    apiClient.get<{ ok: boolean; total: number; items: ZohoInventoryItem[] }>(
+      API_CONFIG.adminZoho.endpoints.inventoryItems,
+      params,
+      undefined,
+      false,
+      API_CONFIG.adminZoho.base
+    ),
+
+  // ── Filter Config ──────────────────────────────────────────────────────────
+  getFilterConfigStatus: () =>
+    apiClient.get<FilterConfigStatus>(
+      API_CONFIG.adminFilterConfig.endpoints.status,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminFilterConfig.base
+    ),
+
+  rebuildFilterConfig: () =>
+    apiClient.post<FilterConfigRebuildResult>(
+      API_CONFIG.adminFilterConfig.endpoints.rebuild,
+      undefined,
+      undefined,
+      API_CONFIG.adminFilterConfig.base
     ),
 };

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import ImageWithSkeleton from "@/components/shared/common/ImageWithSkeleton";
-import { useAuth } from "@/context/AuthContext";
+import { websiteUrlConfig } from "@/config/site";
 
 import CatalogueImg from "@/assets/jewellery/catalogue/Catalogue.jpg";
 import BespokeImg from "@/assets/jewellery/catalogue/Bespoke111.png";
@@ -24,8 +24,6 @@ const items = [
 ];
 
 const CatalogueBespokeSection = () => {
-  const { openModal } = useAuth();
-
   return (
     <section className="py-4 md:py-6 section-white">
       <div className="henig-container px-0 sm:px-0 lg:px-0">
@@ -61,11 +59,13 @@ const CatalogueBespokeSection = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => openModal('register')}
-                  className="bg-primary/80 backdrop-blur-sm border-secondary text-black transition-colors duration-300 group-hover:bg-secondary group-hover:text-accent"
+                  className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
+                  asChild
                 >
-                  Enquire
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <Link to={websiteUrlConfig.Contact}>
+                    Enquire
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
+                  </Link>
                 </Button>
               </div>
             </MotionLink>

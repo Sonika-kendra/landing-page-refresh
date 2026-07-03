@@ -10,9 +10,8 @@ import { BlogPost, fetchBlogPosts } from '@/api/blog';
 const getPostLink = (post: BlogPost) => `${websiteUrlConfig.Blogs}/${post.id}${post.params || ''}`;
 const getPostImage = (post: BlogPost) => {
   if (!post.src) return '';
-  // WorkDrive images are served via the proxy; use relative path
-  if (post.src.startsWith('/posts/image/')) return post.src;
-  return post.src.startsWith('http') ? post.src : `${newApiURL}${post.src}`;
+  if (post.src.startsWith('http')) return post.src;
+  return `${newApiURL}${post.src}`;
 };
 const getPostTimestamp = (date?: string) => {
   if (!date) return 0;

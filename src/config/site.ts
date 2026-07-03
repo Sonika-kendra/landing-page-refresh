@@ -8,6 +8,7 @@ export const websiteUrlConfig = {
     Blogs: `/blogs`,
     Careers: `/careers`,
     Contact: `/contact`,
+    Sitemap: `/sitemap`,
     TermsAndConditions: `/terms-and-conditions`,
     PrivacyPolicy: `/privacy-policy`,
     CancellationReturnsPolicy: `/cancellation-returns-policy`,
@@ -19,16 +20,16 @@ export const websiteUrlConfig = {
     },
     Jewellery: {
         Home: '/jewellery',
-        All: `${oldJewelleryWebsiteURL}/collections/all`,
-        NewArrival: `${oldJewelleryWebsiteURL}/collections/all`,
-        BestSeller: `${oldJewelleryWebsiteURL}/collections/all`,
-        Rings: `${oldJewelleryWebsiteURL}/collections/rings`,
-        Earrings: `${oldJewelleryWebsiteURL}/collections/earrings`,
-        Bracelets: `${oldJewelleryWebsiteURL}/collections/bracelets`,
-        Necklaces: `${oldJewelleryWebsiteURL}/collections/necklaces`,
+        All: '/jewellery/all',
+        NewArrival: '/jewellery/all',
+        BestSeller: '/jewellery/all',
+        Rings: '/jewellery/rings',
+        Earrings: '/jewellery/earrings',
+        Bracelets: '/jewellery/bracelets',
+        Necklaces: '/jewellery/necklaces',
     },
     Diamonds: {
-        Home: `${oldWebsiteURL}/diamonds/all`,
-        All: `${oldWebsiteURL}/diamonds/all`,
+        Home: `/diamonds`,
+        All: `/diamonds/all`,
     }
 };

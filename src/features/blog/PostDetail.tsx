@@ -6,8 +6,6 @@ import PageLayout from '@/components/shared/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import CraftRenderer from './CraftRenderer';
-import { isCraftJSON } from '@/features/admin/builder/BlogBuilder';
 
 const BlogPost = () => {
   const [searchParams] = useSearchParams();
@@ -40,11 +38,11 @@ const BlogPost = () => {
   const resolveImageSrc = (src?: string) => {
     if (!src) return '';
     if (src.startsWith('http')) return src;
-    if (src.startsWith('/posts/image/')) return src;
     return `${newApiURL}${src}`;
   };
   const featuredImage = resolveImageSrc(post?.src);
-  const htmlContent = post?.content || post?.body || '';
+  const rawContent = post?.content || post?.body || '';
+  const htmlContent = rawContent.replace(/(["'])\/posts\/image\//g, `$1${newApiURL}/posts/image/`);
   const sortedByDate = [...allPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const currentPostIndex = sortedByDate.findIndex((p) => p._id === postId || p.id === postId);
   const prevPost = currentPostIndex > 0 ? sortedByDate[currentPostIndex - 1] : null;
@@ -93,11 +91,7 @@ const BlogPost = () => {
                     </div>
                   )}
                   {htmlContent ? (
-                    isCraftJSON(htmlContent) ? (
-                      <CraftRenderer content={htmlContent} />
-                    ) : (
-                      <div className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary" dangerouslySetInnerHTML={{ __html: htmlContent }} />
-                    )
+                    <div className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary" dangerouslySetInnerHTML={{ __html: htmlContent }} />
                   ) : post.snippet ? (
                     <p className="henig-body-large text-foreground/80">{post.snippet}</p>
                   ) : (

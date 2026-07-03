@@ -12,3 +12,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /new/admin/
+Disallow: /new/account/
+Disallow: /new/cart
+Disallow: /new/checkout
+Disallow: /new/wishlist
+
+Sitemap: https://henigdiamonds.co.uk/new/sitemap.xml

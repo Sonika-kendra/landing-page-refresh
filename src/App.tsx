@@ -36,6 +36,7 @@ const BlogPost = lazy(() => import('@/features/blog/PostDetail'));
 const Contact = lazy(() => import('@/features/contact'));
 const Shop = lazy(() => import('@/features/shop'));
 const ProductDetail = lazy(() => import('@/features/shop/ProductDetail'));
+const DiamondShop = lazy(() => import('@/features/diamond-shop'));
 const VerifyEmail = lazy(() => import('@/features/auth/VerifyEmail'));
 const ResetPassword = lazy(() => import('@/features/auth/ResetPassword'));
 const AdminLayout = lazy(() => import('@/features/admin'));
@@ -44,6 +45,7 @@ const AdminUserApprovals = lazy(() => import('@/features/admin/sections/UserAppr
 const AdminAllUsers = lazy(() => import('@/features/admin/sections/AllUsers'));
 const AdminUserDetail = lazy(() => import('@/features/admin/sections/UserDetail'));
 const AdminPosts = lazy(() => import('@/features/admin/sections/Posts'));
+const AdminPostEditor = lazy(() => import('@/features/admin/sections/PostEditor'));
 const AdminSettings  = lazy(() => import('@/features/admin/sections/Settings'));
 const AdminDraftUsers = lazy(() => import('@/features/admin/sections/DraftUsers'));
 const AdminZohoSync  = lazy(() => import('@/features/admin/sections/ZohoSync'));
@@ -52,21 +54,25 @@ const AdminProducts   = lazy(() => import('@/features/admin/sections/Products'))
 const AdminOrders     = lazy(() => import('@/features/admin/sections/Orders'));
 const AdminOrderDetail= lazy(() => import('@/features/admin/sections/OrderDetail'));
 const AdminStock      = lazy(() => import('@/features/admin/sections/Stock'));
-const AdminCartMonitor= lazy(() => import('@/features/admin/sections/CartMonitor'));
+const AdminCartMonitor    = lazy(() => import('@/features/admin/sections/CartMonitor'));
+const AdminEmailTemplates = lazy(() => import('@/features/admin/sections/EmailTemplates'));
+const AdminEmailEditor    = lazy(() => import('@/features/admin/sections/Email'));
 const Cart            = lazy(() => import('@/features/cart'));
 const Checkout        = lazy(() => import('@/features/checkout'));
 const AccountLayout   = lazy(() => import('@/features/account/AccountLayout'));
 const MyOrders        = lazy(() => import('@/features/account/MyOrders'));
 const MyOrderDetail   = lazy(() => import('@/features/account/MyOrderDetail'));
 const AddressBook     = lazy(() => import('@/features/account/AddressBook'));
-const AccountProfile  = lazy(() => import('@/features/account/Profile'));
-const AccountWishlist = lazy(() => import('@/features/account/MyWishlist'));
+const AccountProfile        = lazy(() => import('@/features/account/Profile'));
+const AccountChangePassword = lazy(() => import('@/features/account/ChangePassword'));
+const AccountWishlist       = lazy(() => import('@/features/account/MyWishlist'));
 const PrivacyPolicy = lazy(() => import('@/features/privacy'));
 const TermsAndConditions = lazy(() => import('@/features/terms'));
 const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
 const QualityPolicy = lazy(() => import('@/features/quality-policy'));
 const CookiesPolicy = lazy(() => import('@/features/cookies-policy'));
 const Wishlist = lazy(() => import('@/features/wishlist'));
+const SitemapPage = lazy(() => import('@/features/sitemap'));
 const NotFound = lazy(() => import('@/features/not-found'));
 
 const queryClient = new QueryClient();
@@ -77,12 +83,15 @@ const AppRoutes = () => (
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/diamonds" element={<Diamond />} />
+        <Route path="/diamonds/all" element={<ProtectedRoute><DiamondShop /></ProtectedRoute>} />
         <Route path="/jewellery" element={<Jewellery />} />
         <Route path={websiteUrlConfig.Blogs} element={<Blogs />} />
         <Route path={`${websiteUrlConfig.Blogs}/:slug`} element={<BlogPost />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/:id" element={<ProductDetail />} />
+        <Route path={websiteUrlConfig.Contact} element={<Contact />} />
+        <Route path="/jewellery/all" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+        <Route path="/jewellery/all/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+        <Route path="/jewellery/:category/:subCategory/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+        <Route path="/jewellery/:category" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
         <Route path="/verify/:id" element={<VerifyEmail />} />
         <Route path="/reset/:id" element={<ResetPassword />} />
         <Route path={websiteUrlConfig.PrivacyPolicy} element={<PrivacyPolicy />} />
@@ -90,6 +99,7 @@ const AppRoutes = () => (
         <Route path={websiteUrlConfig.CancellationReturnsPolicy} element={<CancellationReturnsPolicy />} />
         <Route path={websiteUrlConfig.QualityPolicy} element={<QualityPolicy />} />
         <Route path={websiteUrlConfig.CookiesPolicy} element={<CookiesPolicy />} />
+        <Route path={websiteUrlConfig.Sitemap} element={<SitemapPage />} />
         <Route path="/admin" element={<AdminErrorBoundary><AdminLayout /></AdminErrorBoundary>}>
           <Route index element={<AdminDashboard />} />
           <Route path="draft"     element={<AdminDraftUsers />} />
@@ -97,6 +107,8 @@ const AppRoutes = () => (
           <Route path="users" element={<AdminAllUsers />} />
           <Route path="users/:id" element={<AdminUserDetail />} />
           <Route path="posts" element={<AdminPosts />} />
+          <Route path="posts/new" element={<AdminPostEditor />} />
+          <Route path="posts/:id" element={<AdminPostEditor />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="zoho"     element={<AdminZohoSync />} />
           <Route path="categories" element={<AdminCategories />} />
@@ -104,7 +116,9 @@ const AppRoutes = () => (
           <Route path="orders"     element={<AdminOrders />} />
           <Route path="orders/:id" element={<AdminOrderDetail />} />
           <Route path="stock"      element={<AdminStock />} />
-          <Route path="carts"      element={<AdminCartMonitor />} />
+          <Route path="carts"        element={<AdminCartMonitor />} />
+          <Route path="email"        element={<AdminEmailTemplates />} />
+          <Route path="email/:id"    element={<AdminEmailEditor />} />
         </Route>
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
@@ -116,6 +130,7 @@ const AppRoutes = () => (
           <Route path="wishlist" element={<AccountWishlist />} />
           <Route path="addresses" element={<AddressBook />} />
           <Route path="profile" element={<AccountProfile />} />
+          <Route path="change-password" element={<AccountChangePassword />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

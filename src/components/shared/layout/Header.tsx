@@ -1,13 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, ChevronDown, User, LogOut, Heart, ShoppingBag,
-  LayoutDashboard, Users, UserCheck, UserMinus, FileText,
-  Tag, Package, ClipboardList, Archive, Monitor, RefreshCw, Settings, ArrowRight,
+  LayoutDashboard, Users, UserCheck, FileEdit, FileText,
+  ShoppingCart, RefreshCw, Settings, ArrowRight, Mail,
+  Package, MapPin,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { navigationLinks } from '@/config/theme';
 import { websiteUrlConfig } from '@/config/site';
+import { productsApi } from '@/api/products';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useFavourites } from '@/context/FavouritesContext';
@@ -15,18 +17,15 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/assets/icons/logoLight.png';
 
 const adminNavLinks = [
-  { label: 'Dashboard',      href: '/admin',            icon: LayoutDashboard },
-  { label: 'Users',          href: '/admin/users',      icon: Users },
-  { label: 'User Approvals', href: '/admin/approvals',  icon: UserCheck },
-  { label: 'Draft Users',    href: '/admin/draft',      icon: UserMinus },
-  { label: 'Posts',          href: '/admin/posts',      icon: FileText },
-  { label: 'Categories',     href: '/admin/categories', icon: Tag },
-  { label: 'Products',       href: '/admin/products',   icon: Package },
-  { label: 'Orders',         href: '/admin/orders',     icon: ClipboardList },
-  { label: 'Stock',          href: '/admin/stock',      icon: Archive },
-  { label: 'Cart Monitor',   href: '/admin/carts',      icon: Monitor },
-  { label: 'Zoho Sync',      href: '/admin/zoho',       icon: RefreshCw },
-  { label: 'Settings',       href: '/admin/settings',   icon: Settings },
+  { label: 'Dashboard',        href: '/admin',            icon: LayoutDashboard },
+  { label: 'Draft Users',      href: '/admin/draft',      icon: FileEdit },
+  { label: 'Pending Approvals', href: '/admin/approvals', icon: UserCheck },
+  { label: 'All Users',        href: '/admin/users',      icon: Users },
+  { label: 'Active Carts',     href: '/admin/carts',      icon: ShoppingCart },
+  { label: 'Blog Posts',       href: '/admin/posts',      icon: FileText },
+  { label: 'Zoho Sync',        href: '/admin/zoho',       icon: RefreshCw },
+  { label: 'Email Template',   href: '/admin/email',      icon: Mail },
+  { label: 'Settings',         href: '/admin/settings',   icon: Settings },
 ] as const;
 
 
@@ -133,6 +132,13 @@ const Header = () => {
   const [adminPanelExpanded, setAdminPanelExpanded] = useState(false);
   const adminHoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [jewellerySubcats, setJewellerySubcats] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    productsApi.getSubcategories({ category: 'Jewellery' })
+      .then((res) => { if (res.data?.subcategories) setJewellerySubcats(res.data.subcategories); })
+      .catch(() => { /* fall back to static nav */ });
+  }, []);
 
   const handleAdminEnter = () => {
     if (adminHoverTimeout.current) clearTimeout(adminHoverTimeout.current);
@@ -170,6 +176,28 @@ const Header = () => {
   const activeLink = navigationLinks.find(
     (link) => link.label === activeMegaMenu
   );
+
+  const megaMenuCategories = useMemo(() => {
+    if (!activeLink || !('categories' in activeLink)) return [];
+    if (activeLink.label !== 'Jewellery' || !Object.keys(jewellerySubcats).length) {
+      return activeLink.categories;
+    }
+    const byCategory = {
+      ...activeLink.categories[0],
+      links: activeLink.categories[0].links.map((link) => ({
+        ...link,
+        href: `/jewellery/all?cf_sub_category=${encodeURIComponent(link.label)}`,
+      })),
+    };
+    const dynamicCols = Object.entries(jewellerySubcats).map(([subcat, types]) => ({
+      title: subcat,
+      links: types.map((type) => ({
+        label: type,
+        href: `/jewellery/all?cf_sub_category=${encodeURIComponent(subcat)}&cf_sub_category_type=${encodeURIComponent(type)}`,
+      })),
+    }));
+    return [byCategory, ...dynamicCols];
+  }, [activeLink, jewellerySubcats]);
 
   const toggleMobileSubmenu = (menuId: string) => {
     setOpenMobileMenus((prev) => ({
@@ -405,12 +433,13 @@ const Header = () => {
                   onMouseEnter={handleAdminEnter}
                   onMouseLeave={handleAdminLeave}
                 >
-                  <Link
-                    to={user.role === 'admin' ? '/admin' : '/account'}
+                  <button
+                    type="button"
+                    onClick={() => setAdminDropdownOpen((v) => !v)}
                     className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-accent-foreground text-sm font-bold hover:opacity-85 transition-opacity"
                   >
-                    {user.firstName?.[0]?.toUpperCase() ?? 'U'}
-                  </Link>
+                    {user.firstName?.[0]?.toUpperCase() ?? user.full_name?.[0]?.toUpperCase() ?? 'U'}
+                  </button>
 
                   <AnimatePresence>
                     {adminDropdownOpen && (
@@ -421,30 +450,73 @@ const Header = () => {
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 top-full mt-2 w-56 bg-background border border-border rounded-lg shadow-xl z-[1200] py-1 max-h-[80vh] overflow-y-auto"
                       >
-                        {user.role === 'admin' ? (
-                          <>
+                        {/* ── Greeting — always shown ── */}
+                        <div className="px-4 py-2.5 border-b border-border">
+                          <p className="text-sm font-semibold text-foreground truncate">
+                            Hi, {user.full_name
+                              ? user.full_name
+                              : user.firstName && user.lastName
+                                ? `${user.firstName} ${user.lastName}`
+                                : user.firstName ?? 'there'}
+                          </p>
+                        </div>
+
+                        {/* ── Account links ── */}
+                        <ul className="py-1">
+                          {/* Profile — always shown */}
+                          <li>
                             <Link
                               to="/account/profile"
-                              className="group flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary hover:text-primary transition-colors border-b border-border"
+                              className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
                             >
+                              <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                               <span className="flex-1">Profile</span>
                               <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
                             </Link>
+                          </li>
+
+                          {/* My Orders — always shown */}
+                          <li className="border-t border-border">
+                            <Link
+                              to="/account/orders"
+                              className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                            >
+                              <Package className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                              <span className="flex-1">My Orders</span>
+                              <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
+                            </Link>
+                          </li>
+
+                          {/* Address Book — non-admin only */}
+                          {user.role !== 'admin' && user.profile?.name !== 'Administrator' && (
+                            <li>
+                              <Link
+                                to="/account/addresses"
+                                className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                              >
+                                <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <span className="flex-1">Address Book</span>
+                                <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primary" />
+                              </Link>
+                            </li>
+                          )}
+                        </ul>
+
+                        {/* ── Admin Panel — admin only ── */}
+                        {(user.role === 'admin' || user.role === 'Administrator' || user.profile?.name === 'Administrator') && (
+                          <div className="border-t border-border">
                             <button
                               type="button"
                               onClick={() => setAdminPanelExpanded((v) => !v)}
                               className="flex w-full items-center justify-between px-4 py-2"
                             >
-                              <span className="text-sm font-semibold text-foreground">
-                                Admin Panel
-                              </span>
+                              <span className="text-sm font-semibold text-foreground">Admin Panel</span>
                               <ChevronDown
                                 className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 ${
                                   adminPanelExpanded ? 'rotate-180' : ''
                                 }`}
                               />
                             </button>
-
                             <AnimatePresence initial={false}>
                               {adminPanelExpanded && (
                                 <motion.ul
@@ -469,36 +541,10 @@ const Header = () => {
                                 </motion.ul>
                               )}
                             </AnimatePresence>
-                          </>
-                        ) : (
-                          <>
-                            <div className="px-3 py-2 border-b border-border">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                My Account
-                              </p>
-                            </div>
-                          </>
+                          </div>
                         )}
 
-                        {user.role !== 'admin' && (
-                          <ul className="py-1">
-                            {[
-                              { label: 'My Orders',    href: '/account/orders' },
-                              { label: 'Profile',      href: '/account/profile' },
-                              { label: 'Address Book', href: '/account/addresses' },
-                            ].map((item) => (
-                              <li key={item.href}>
-                                <Link
-                                  to={item.href}
-                                  className="block px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
-                                >
-                                  {item.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
+                        {/* ── Sign out — always shown ── */}
                         <div className="border-t border-border mt-1">
                           <button
                             type="button"
@@ -564,7 +610,7 @@ const Header = () => {
           >
             <div className="henig-container py-10">
               <div className="grid grid-cols-4 lg:grid-cols-5 gap-10">
-                {activeLink.categories.map((category) => (
+                {megaMenuCategories.map((category) => (
                   <div key={category.title}>
                     <h3 className="text-sm font-bold uppercase tracking-wider mb-4">
                       {category.title}
@@ -574,8 +620,8 @@ const Header = () => {
                       {category.links.map((subLink) => (
                         <li key={subLink.label}>
                           {'image' in subLink && subLink.image ? (
-                            <a
-                              href={subLink.href}
+                            <Link
+                              to={subLink.href}
                               className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
                             >
                               <img
@@ -588,26 +634,26 @@ const Header = () => {
                               <span className="text-sm font-medium hover:text-primary transition-colors">
                                 {subLink.label}
                               </span>
-                            </a>
+                            </Link>
                           ) : (
-                            <a
-                              href={subLink.href}
+                            <Link
+                              to={subLink.href}
                               className="block py-1.5 text-sm text-muted-foreground font-medium hover:text-primary transition-colors"
                             >
                               {subLink.label}
-                            </a>
+                            </Link>
                           )}
                         </li>
                       ))}
 
                       {category.showAll && (
                         <li className="pt-2">
-                          <a
-                            href={category.showAll.href}
+                          <Link
+                            to={category.showAll.href}
                             className="text-sm font-semibold text-primary hover:underline"
                           >
                             {category.showAll.label} →
-                          </a>
+                          </Link>
                         </li>
                       )}
                     </ul>
@@ -631,7 +677,7 @@ const Header = () => {
             {renderMobileMenuItems(mobileNavItems)}
 
             {/* Admin Panel Accordion */}
-            {isAuthenticated && user?.role === 'admin' && (
+            {isAuthenticated && (user?.role === 'admin' || user?.role === 'Administrator') && (
               <div className="border-t border-border px-4">
                 <button
                   type="button"

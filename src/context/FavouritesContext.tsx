@@ -2,8 +2,6 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { useAuth } from './AuthContext';
 import { wishlistApi } from '@/api/wishlist';
 
-const STORAGE_KEY = 'henig_wishlist';
-
 interface FavouritesContextValue {
   favourites: string[];
   toggleFavourite: (id: string) => void;
@@ -15,46 +13,40 @@ interface FavouritesContextValue {
 const FavouritesContext = createContext<FavouritesContextValue | null>(null);
 
 export const FavouritesProvider = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, openModal } = useAuth();
   const [favourites, setFavourites] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      setLoading(true);
-      wishlistApi.get()
-        .then(res => setFavourites(res.data.wishlist ?? []))
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    } else {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        setFavourites(stored ? JSON.parse(stored) : []);
-      } catch {
-        setFavourites([]);
-      }
+    if (!isAuthenticated) {
+      setFavourites([]);
+      return;
     }
+    setLoading(true);
+    wishlistApi.get()
+      .then(res => setFavourites(res.data.wishlist ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [isAuthenticated]);
 
   const toggleFavourite = useCallback(async (id: string) => {
+    if (!isAuthenticated) {
+      openModal('login');
+      return;
+    }
     const isCurrentlyFav = favourites.includes(id);
     const next = isCurrentlyFav ? favourites.filter(f => f !== id) : [...favourites, id];
     setFavourites(next);
-
-    if (isAuthenticated) {
-      try {
-        if (isCurrentlyFav) {
-          await wishlistApi.remove(id);
-        } else {
-          await wishlistApi.add(id);
-        }
-      } catch {
-        setFavourites(favourites);
+    try {
+      if (isCurrentlyFav) {
+        await wishlistApi.remove(id);
+      } else {
+        await wishlistApi.add(id);
       }
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      setFavourites(favourites);
     }
-  }, [favourites, isAuthenticated]);
+  }, [favourites, isAuthenticated, openModal]);
 
   const isFavourite = useCallback((id: string) => favourites.includes(id), [favourites]);
 

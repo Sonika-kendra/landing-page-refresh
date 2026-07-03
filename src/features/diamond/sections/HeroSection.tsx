@@ -28,10 +28,10 @@ const HeroSection = () => {
             From natural to lab-grown, find the perfect stone for your creation.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link to="#naturals">
+            <Link to="/diamonds/all?stock_type=Natural">
               <Button className="btn-henig-gold">Natural Diamonds</Button>
             </Link>
-            <Link to="#lab-grown">
+            <Link to="/diamonds/all?stock_type=Lab">
               <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-accent">
                 Lab-Grown Diamonds
               </Button>

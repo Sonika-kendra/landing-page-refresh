@@ -1,49 +1,163 @@
-import { useState, lazy, Suspense } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { productPath, toSlug } from '@/lib/utils';
+import { newApiURL } from '@/config/site';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
   Heart, Share2, Copy, Mail,
-  Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck, Loader2,
+  Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck,
+  Leaf,
+  Tag,
+  BadgeDollarSign,
+  Sparkles,
+  RotateCcw,
+  RefreshCw,
+  Pencil,
+  PenLine,
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
-import { youMayAlsoLike } from '@/data/shop/products';
-import { useProduct } from '@/hooks/useProducts';
+import type { ShopProduct } from '@/data/shop/products';
+import { mapZohoToShopProduct } from '@/data/shop/mappers';
+import { getMetalType } from '@/data/shop/metalTypes';
+import { productsApi } from '@/api/products';
 import { useFavourites } from '@/context/FavouritesContext';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { newApiURL } from '@/config/site';
-import igiLogo from '@/assets/landing/certification/BACKDROP LOGOS-07.svg';
+import igiLogo from '@/assets/jewellery/certification/IGI.svg';
+import giaLogo from '@/assets/jewellery/certification/GIA.svg';
+import hrdLogo from '@/assets/jewellery/certification/HRDAntwerplogo_notagline-Transperant-Background.png';
+import sglLogo from '@/assets/jewellery/certification/SGL.png';
 
-const Diamond3DViewer = lazy(() => import('@/components/shared/product/Diamond3DViewer'));
+const CERT_LOGOS: Record<string, string> = { igi: igiLogo, gia: giaLogo, hrd: hrdLogo, sgl: sglLogo };
+const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
 
-type ImgStage = 'picture' | 'proxy' | 'placeholder';
 
 const trustBadges = [
-  { icon: Truck, label: 'Free UK Delivery' },
-  { icon: Shield, label: 'Lifetime Warranty' },
-  { icon: Maximize, label: 'Free Resizing' },
-  { icon: Gem, label: 'Ethical Sourcing' },
-  { icon: HomeIcon, label: 'Handcrafted in the UK' },
-  { icon: FileCheck, label: 'Insurance Valuation' },
+  { icon: Leaf, label: 'Ethical Sourcing' },
+  { icon: BadgeDollarSign, label: 'Competitive Pricing' },
+  { icon: Sparkles, label: 'Free After Care' },
+  { icon: RotateCcw, label: '90 Day Return Policy' },
+  { icon: PenLine, label: 'Bespoke Available' },
+  { icon: FileCheck, label: '100% Certified Jewellery' },
 ];
 
 const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const { product, loading, error } = useProduct(id);
-
+  const { category: categoryParam, subCategory: subCategoryParam, id } = useParams<{ category?: string; subCategory?: string; id: string }>();
+  const [product, setProduct] = useState<ShopProduct | null>(null);
+  const [variants, setVariants] = useState<ShopProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [show3D, setShow3D] = useState(false);
+  const [thumbOffset, setThumbOffset] = useState(0);
+  const [selectedMetalCode, setSelectedMetalCode] = useState('');
+  const [selectedCaratValue, setSelectedCaratValue] = useState('');
+  const [selectedSizeValue, setSelectedSizeValue] = useState('');
+  const [selectedMetalWeight, setSelectedMetalWeight] = useState('');
+  const [selectedShape, setSelectedShape] = useState('');
+  const [selectedColour, setSelectedColour] = useState('');
+  const [selectedClarity, setSelectedClarity] = useState('');
+  const [mediaItems, setMediaItems] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
+  const [mediaFetchId, setMediaFetchId] = useState(id ?? '');
+  const [displayPrice, setDisplayPrice] = useState<number>(0);
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
   const [bagJustAdded, setBagJustAdded] = useState(false);
+  const [addedToBag, setAddedToBag] = useState(false);
   const [copied, setCopied] = useState(false);
   const [skuCopied, setSkuCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [imgStage, setImgStage] = useState<ImgStage>('picture');
+  const [similarProducts, setSimilarProducts] = useState<{ name: string; image: string; id: string }[]>([]);
 
+  const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
+  const { addItem } = useCart();
+  const { isAuthenticated, isAuthLoading, openModal } = useAuth();
   const liked = product ? isFavourite(product.id) : false;
+
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      openModal('login');
+    }
+  }, [isAuthLoading, isAuthenticated, openModal]);
+
+  useEffect(() => {
+    if (!id) return;
+    setIsLoading(true);
+    setFetchError(null);
+    setSelectedImage(0);
+    setThumbOffset(0);
+    setVariants([]);
+    setMediaFetchId(id);
+    productsApi.getOne(id)
+      .then((res) => {
+        const item = res.data?.item as Record<string, unknown> | undefined;
+        if (!item) {
+          setFetchError('not_found');
+          return;
+        }
+        const p = mapZohoToShopProduct(item);
+        setProduct(p);
+        setDisplayPrice(p.price);
+        setSelectedMetalCode(p.metalOptions[0] ?? '');
+        setSelectedCaratValue(p.caratOptions?.[0] ?? '');
+        setSelectedSizeValue(p.sizeOptions?.[0] ?? '');
+        setSelectedMetalWeight(p.metalWeightOptions?.[0] ?? '');
+        setSelectedShape(p.shape ?? '');
+        setSelectedColour(p.colour ?? '');
+        setSelectedClarity(p.clarity ?? '');
+        const raw = (res.data?.variants ?? []) as Record<string, unknown>[];
+        if (raw.length > 0) setVariants(raw.map((i) => mapZohoToShopProduct(i)));
+      })
+      .catch(() => setFetchError('error'))
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!mediaFetchId) return;
+    setMediaItems([]);
+    setSelectedImage(0);
+    setThumbOffset(0);
+    productsApi.getMedia(mediaFetchId)
+      .then((res) => {
+        const { thumbnail, images, video } = res.data ?? {};
+        const fileUrl = (fileId: string) => `${newApiURL}/products/file/${fileId}`;
+        const items: { url: string; type: 'image' | 'video' }[] = [];
+        if (thumbnail) items.push({ url: fileUrl(thumbnail), type: 'image' });
+        (images ?? []).forEach((fid: string) => items.push({ url: fileUrl(fid), type: 'image' }));
+        if (video) items.push({ url: fileUrl(video), type: 'video' });
+        if (items.length > 0) setMediaItems(items);
+      })
+      .catch(() => {});
+  }, [mediaFetchId]);
+
+  // Redirect old /jewellery/all/:id URLs to the new /jewellery/:category/:subCategory/:id format
+  useEffect(() => {
+    if (!product || !id || categoryParam) return;
+    navigate(productPath(product.category, product.subCategory, id), { replace: true });
+  }, [product, id, categoryParam, navigate]);
+
+  useEffect(() => {
+    if (!product) return;
+    productsApi.list({
+      per_page: 8,
+      page: 1,
+      status: 'active',
+      category: 'Jewellery',
+      ...(product.subCategory && { cf_sub_category_type: product.subCategory }),
+    }).then((res) => {
+      const items = (res.data?.items ?? []) as ShopProduct[];
+      setSimilarProducts(
+        items
+          .filter((p) => p.id !== product.id)
+          .slice(0, 6)
+          .map((p) => ({ name: p.name, image: p.image, id: p.id }))
+      );
+    }).catch(() => {});
+  }, [product?.id, product?.subCategory]);
 
   const copySku = () => {
     navigator.clipboard.writeText(product?.sku ?? '');
@@ -66,77 +180,92 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAddToBag = () => {
-    setBagJustAdded(true);
-    setTimeout(() => setBagJustAdded(false), 600);
+  const handleAddToBag = async () => {
+    if (!product) return;
+    if (addedToBag) { navigate('/cart'); return; }
+    if (!isAuthenticated) { openModal('login'); return; }
+    try {
+      await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal, size: selectedSizeValue || undefined });
+      setBagJustAdded(true);
+      setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
+    } catch (err: any) {
+      toast({ title: 'Could not add to bag', description: err?.message ?? 'Please try again.', variant: 'destructive' });
+    }
   };
 
-  if (loading) {
+  if (!isAuthLoading && !isAuthenticated) {
     return (
       <PageLayout>
-        <div className="henig-container flex min-h-[60vh] flex-col items-center justify-center gap-3 py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-accent" />
-          <p className="text-sm text-foreground/50">Loading product…</p>
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
+          <h2 className="font-serif text-2xl text-foreground">Members Only</h2>
+          <p className="text-sm text-foreground/60">Please sign in or register to view product details.</p>
+          <div className="flex gap-3">
+            <button onClick={() => openModal('login')} className="rounded bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent-foreground hover:bg-accent/90">
+              Sign In
+            </button>
+            <button onClick={() => openModal('register')} className="rounded border border-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent hover:bg-accent/10">
+              Register
+            </button>
+          </div>
         </div>
       </PageLayout>
     );
   }
 
-  if (error || !product) {
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="henig-container py-12">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="animate-pulse">
+              <div className="aspect-square bg-foreground/5" />
+              <div className="mt-3 flex gap-2">
+                {[...Array(3)].map((_, i) => <div key={i} className="h-[90px] w-[90px] bg-foreground/5" />)}
+              </div>
+            </div>
+            <div className="animate-pulse space-y-4 pt-2">
+              <div className="h-7 w-2/3 rounded bg-foreground/10" />
+              <div className="h-4 w-1/4 rounded bg-foreground/10" />
+              <div className="h-4 w-1/2 rounded bg-foreground/10" />
+              <div className="mt-8 h-12 w-full rounded bg-foreground/10" />
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (fetchError || !product) {
     return (
       <PageLayout>
         <div className="henig-container py-24 text-center">
           <h1 className="font-serif text-3xl text-foreground">Product not found</h1>
-          {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
-          <Link to="/shop" className="mt-4 inline-block text-primary underline">Back to shop</Link>
+          <Link to="/jewellery/all" className="mt-4 inline-block text-primary underline">Back to shop</Link>
         </div>
       </PageLayout>
     );
   }
 
-  // Build image list: prefer CF Picture link; fall back to Zoho image proxy
-  const proxyUrl = `${newApiURL}/products/${product.id}/image`;
-  const images = [product.pictureLink || proxyUrl];
+  const galleryItems = mediaItems.length > 0
+    ? mediaItems
+    : (product.images || [product.image]).map((url) => ({ url, type: 'image' as const }));
+  const THUMB_PAGE = 5;
+  const prevImage = () => setSelectedImage((i) => {
+    const next = i === 0 ? galleryItems.length - 1 : i - 1;
+    setThumbOffset((o) => next < o ? Math.max(0, next) : next >= o + THUMB_PAGE ? next - THUMB_PAGE + 1 : o);
+    return next;
+  });
+  const nextImage = () => setSelectedImage((i) => {
+    const next = i === galleryItems.length - 1 ? 0 : i + 1;
+    setThumbOffset((o) => next >= o + THUMB_PAGE ? next - THUMB_PAGE + 1 : next < o ? 0 : o);
+    return next;
+  });
 
-  const handleDetailImgError = () => {
-    if (imgStage === 'picture') setImgStage('proxy');
-    else setImgStage('placeholder');
-  };
-
-  const detailImgSrc = imgStage === 'picture'
-    ? (product.pictureLink || proxyUrl)
-    : imgStage === 'proxy'
-    ? proxyUrl
-    : null;
-
-  const prevImage = () => setSelectedImage((i) => (i === 0 ? images.length - 1 : i - 1));
-  const nextImage = () => setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1));
-
-  // Derived display values
-  const category = product.parentCategory || product.categoryName || 'Shop';
-  const subCat = product.subCategory;
-  const stoneType = product.productType || (product.growthMethod ? `${product.growthMethod} Diamond` : null);
-  const itemRef = product.stockCodeNumber || product.stockCode;
-  const stockLeft = product.stock_on_hand;
-
-  const specs: [string, string | null | undefined][] = [
-    ['Stone type:', stoneType],
-    ['Shape:', product.shape],
-    ['Colour:', product.colour],
-    ['Clarity:', product.clarity],
-    ['Carats:', product.caratsTotal],
-    ['Centre diamond:', product.centreDiamondWeight],
-    ['Total diamond wt:', product.totalDiamondWeight],
-    ['Diamond shape(s):', product.diamondShapes],
-    ['Metal colour:', product.metalColour],
-    ['Metal purity:', product.metalPurity],
-    ['Metal weight:', product.metalWeight],
-    ['Side stones:', product.sideStonesWeight],
-    ['Gemstone wt:', product.gemstoneWeight],
-    ['Size:', product.size],
-    ['Style ID:', product.styleId],
-    ['Stock code:', product.stockCode],
-  ].filter(([, v]) => v) as [string, string][];
+  const _allVariantsOuter = variants.length ? variants : [product];
+  const allShapes = [...new Set(_allVariantsOuter.map((v) => v.shape).filter(Boolean) as string[])];
+  const allColours = [...new Set(_allVariantsOuter.map((v) => v.colour).filter(Boolean) as string[])];
+  const allClarities = [...new Set(_allVariantsOuter.map((v) => v.clarity).filter(Boolean) as string[])];
+  const allCaratsOuter = [...new Set(_allVariantsOuter.flatMap((v) => v.caratOptions ?? []))];
 
   return (
     <PageLayout>
@@ -144,19 +273,19 @@ const ProductDetail = () => {
       <div className="bg-accent">
         <div className="henig-container py-3">
           <nav className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
-            <Link to="/" className="flex items-center gap-1 font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+            <Link to="/jewellery/all" className="flex items-center gap-1 font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
               <HomeIcon className="h-3.5 w-3.5" />
               <span>Home</span>
             </Link>
             <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-            <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
-              {category}
+            <Link to={`/jewellery/${toSlug(product.category)}`} className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+              {product.category}
             </Link>
-            {subCat && (
+            {product.subCategory && (
               <>
                 <BreadcrumbArrow className="h-4 w-4 text-accent-foreground/40" />
-                <Link to="/shop" className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
-                  {subCat}
+                <Link to={`/jewellery/${toSlug(product.category)}?type=${product.subCategory}`} className="font-semibold text-accent-foreground/70 transition-colors hover:text-accent-foreground">
+                  {product.subCategory}
                 </Link>
               </>
             )}
@@ -169,79 +298,87 @@ const ProductDetail = () => {
       <section className="bg-white py-8 md:py-12">
         <div className="henig-container">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            {/* ── Left: images ── */}
             <div>
-              <div className="relative mb-3 aspect-square overflow-hidden border border-border/20 bg-white">
-                {show3D ? (
-                  <Suspense fallback={<div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-widest text-foreground/30">Loading 3D view…</div>}>
-                    <Diamond3DViewer />
-                  </Suspense>
+              <div className={`relative mb-3 aspect-square overflow-hidden bg-white ${galleryItems[selectedImage]?.type === 'video' ? '' : 'border border-border/20'}`}>
+                {galleryItems[selectedImage]?.type === 'video' ? (
+                  <video
+                    key={galleryItems[selectedImage].url}
+                    src={galleryItems[selectedImage].url}
+                    className="h-full w-full object-contain outline-none"
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
                 ) : (
+                  <img src={galleryItems[selectedImage]?.url} alt={product.name} className="h-full w-full object-contain p-8" />
+                )}
+                {galleryItems.length > 1 && (
                   <>
-                    {detailImgSrc ? (
-                      <img
-                        src={detailImgSrc}
-                        alt={product.name}
-                        onError={handleDetailImgError}
-                        className="h-full w-full object-contain p-8"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-foreground/20">
-                        <Gem className="h-16 w-16" />
-                        <span className="text-xs font-medium uppercase tracking-widest">No image available</span>
-                      </div>
-                    )}
-                    {images.length > 1 && (
-                      <>
-                        <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                          <ChevronLeft className="h-9 w-9" />
-                        </button>
-                        <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/25 transition-colors hover:text-foreground/60">
-                          <ChevronRight className="h-9 w-9" />
-                        </button>
-                      </>
-                    )}
+                    <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-background/90 transition-colors hover:bg-background">
+                      <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+                    </button>
+                    <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-background/90 transition-colors hover:bg-background">
+                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+                    </button>
                   </>
                 )}
               </div>
-
-              {/* Thumbnails + media buttons */}
-              <div className="flex gap-2 flex-wrap">
-                {images.map((img, i) => (
-                  <button key={i} onClick={() => { setSelectedImage(i); setShow3D(false); }} className={`h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${!show3D && i === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}>
-                    <img src={img} alt="" className="h-full w-full object-contain p-1" />
-                  </button>
-                ))}
-                <button
-                  onClick={() => setShow3D((v) => !v)}
-                  className={`flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border bg-white transition-all ${show3D ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
-                >
-                  <Gem className="h-6 w-6 text-foreground/40" />
-                  <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">3D View</span>
-                </button>
-                {product.mp4Url && (
-                  <a
-                    href={product.mp4Url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border border-border/30 bg-white transition-all hover:border-border/60"
-                  >
-                    <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">▶ Video</span>
-                  </a>
-                )}
-                {product.video360Url && (
-                  <a
-                    href={product.video360Url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-[90px] w-[90px] flex-shrink-0 flex-col items-center justify-center gap-1.5 border border-border/30 bg-white transition-all hover:border-border/60"
-                  >
-                    <span className="text-[9px] font-medium uppercase tracking-wider text-foreground/40">360°</span>
-                  </a>
-                )}
-              </div>
-
-              {/* Description accordion */}
+              {(() => {
+                const THUMB_PAGE = 5;
+                const canPrev = thumbOffset > 0;
+                const canNext = thumbOffset + THUMB_PAGE < galleryItems.length;
+                const visibleThumbs = galleryItems.slice(thumbOffset, thumbOffset + THUMB_PAGE);
+                const handleThumbSelect = (absoluteIndex: number) => {
+                  setSelectedImage(absoluteIndex);
+                };
+                const goPrev = () => setThumbOffset((o) => Math.max(0, o - 1));
+                const goNext = () => setThumbOffset((o) => Math.min(galleryItems.length - THUMB_PAGE, o + 1));
+                return (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={goPrev}
+                      disabled={!canPrev}
+                      aria-label="Previous thumbnails"
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border/30 bg-background/90 text-foreground/60 transition-colors hover:bg-background disabled:pointer-events-none disabled:opacity-20"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <div className="flex flex-1 gap-1.5">
+                      {visibleThumbs.map((item, vi) => {
+                        const absoluteIndex = thumbOffset + vi;
+                        return (
+                          <button
+                            key={absoluteIndex}
+                            onClick={() => handleThumbSelect(absoluteIndex)}
+                            className={`relative h-[90px] flex-1 overflow-hidden border bg-white transition-all ${absoluteIndex === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
+                          >
+                            {item.type === 'video' ? (
+                              <>
+                                <video src={item.url} className="h-full w-full object-contain" muted playsInline preload="metadata" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                  <svg className="h-6 w-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                </div>
+                              </>
+                            ) : (
+                              <img src={item.url} alt="" className="h-full w-full object-contain p-1" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={goNext}
+                      disabled={!canNext}
+                      aria-label="Next thumbnails"
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-border/30 bg-background/90 text-foreground/60 transition-colors hover:bg-background disabled:pointer-events-none disabled:opacity-20"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })()}
               <div className="mt-8 border-t border-border/30">
                 <button onClick={() => setDescOpen(!descOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-sm font-medium text-foreground">Product Description</span>
@@ -249,31 +386,15 @@ const ProductDetail = () => {
                 </button>
                 {descOpen && (
                   <div className="pb-5 text-sm leading-relaxed text-foreground/60">
-                    {itemRef && <p className="mb-1 text-xs">Item Ref: {itemRef}</p>}
-                    <p>{product.description || 'No description available.'}</p>
-                    {product.certComments && (
-                      <p className="mt-2 text-xs text-foreground/50">{product.certComments}</p>
-                    )}
-                    {product.certLink && (
-                      <a
-                        href={product.certLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-xs text-primary underline"
-                      >
-                        View Certificate
-                      </a>
-                    )}
+                    <p className="mb-1 text-xs">Item Ref: {product.itemRef}</p>
+                    <p>{product.description}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* ── Right: details ── */}
             <div>
-              <h1 className="mb-1.5 font-serif text-2xl leading-snug text-foreground md:text-[1.7rem]">
-                {product.name}
-              </h1>
+              <h1 className="mb-1.5 font-medium text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
               <div className="mb-5 flex items-center gap-1.5 text-xs">
                 <span className="font-medium text-foreground/60">SKU #: {product.sku}</span>
                 <button
@@ -286,70 +407,302 @@ const ProductDetail = () => {
                 {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </div>
 
-              {/* Key attributes */}
+              {(() => {
+                const allVariants = variants.length ? variants : [product];
+
+                const seenMetal = new Set<string>();
+                const metalList = allVariants.flatMap((v) =>
+                  v.metalOptions.map((m) => ({ metal: m, variant: v }))
+                ).filter((o) => {
+                  if (seenMetal.has(o.metal)) return false;
+                  seenMetal.add(o.metal);
+                  return true;
+                });
+
+                const allCarats = [...new Set(allVariants.flatMap((v) => v.caratOptions ?? []))];
+                const allMetalWeights = [...new Set(
+                  allVariants
+                    .filter((v) => v.metalOptions.includes(selectedMetalCode))
+                    .flatMap((v) => v.metalWeightOptions ?? [])
+                )];
+                const DEFAULT_RING_SIZES = ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
+                const allSizes = [...new Set(allVariants.flatMap((v) => v.sizeOptions ?? []))];
+                const isRingProduct = product.category.toLowerCase().includes('ring');
+                const ringSizeOptions = allSizes.length > 0 ? allSizes : (isRingProduct ? DEFAULT_RING_SIZES : []);
+                const allCerts = [...new Set(allVariants.map((v) => v.certificate).filter(Boolean) as string[])];
+
+                // Score each variant: metal=8, shape=4, colour=2, clarity=2, carat=2, size=2, weight=1
+                const resolveVariant = (metal: string, carat: string, weight: string, shape: string, colour: string, clarity: string, size: string) => {
+                  if (allVariants.length === 1) return allVariants[0];
+                  return allVariants
+                    .map((v) => ({
+                      v,
+                      score:
+                        (v.metalOptions.includes(metal) ? 8 : 0) +
+                        (shape && v.shape === shape ? 4 : 0) +
+                        (colour && v.colour === colour ? 2 : 0) +
+                        (clarity && v.clarity === clarity ? 2 : 0) +
+                        (carat && v.caratOptions?.includes(carat) ? 2 : 0) +
+                        (size && v.sizeOptions?.includes(size) ? 2 : 0) +
+                        (weight && v.metalWeightOptions?.includes(weight) ? 1 : 0),
+                    }))
+                    .sort((a, b) => b.score - a.score)[0].v;
+                };
+
+                const switchVariant = (resolved: ShopProduct) => {
+                  if (resolved.id !== product.id) { setProduct(resolved); setMediaFetchId(resolved.id); }
+                };
+
+                const handleMetalSelect = (metalCode: string) => {
+                  setSelectedMetalCode(metalCode);
+                  const weightsForMetal = [...new Set(
+                    allVariants
+                      .filter((v) => v.metalOptions.includes(metalCode))
+                      .flatMap((v) => v.metalWeightOptions ?? [])
+                  )];
+                  const newWeight = weightsForMetal.includes(selectedMetalWeight)
+                    ? selectedMetalWeight
+                    : (weightsForMetal[0] ?? '');
+                  setSelectedMetalWeight(newWeight);
+                  const resolved = resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                const handleCaratSelect = (carat: string) => {
+                  setSelectedCaratValue(carat);
+                  const resolved = resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                const handleMetalWeightSelect = (weight: string) => {
+                  setSelectedMetalWeight(weight);
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                const handleShapeSelect = (shape: string) => {
+                  setSelectedShape(shape);
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                const handleColourSelect = (colour: string) => {
+                  setSelectedColour(colour);
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                const handleClaritySelect = (clarity: string) => {
+                  setSelectedClarity(clarity);
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity, selectedSizeValue);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                const handleSizeSelect = (size: string) => {
+                  setSelectedSizeValue(size);
+                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, size);
+                  setDisplayPrice(resolved.price);
+                  switchVariant(resolved);
+                };
+
+                return (
               <div className="mb-5 space-y-3">
-                {product.metalColour && (
-                  <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal:</span>
-                    <span className="rounded bg-secondary px-2.5 py-1 text-xs font-semibold text-foreground/80">
-                      {product.metalColour}{product.metalPurity ? ` · ${product.metalPurity}` : ''}
-                    </span>
+                <div className="flex items-center gap-3">
+                  <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal type:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {metalList.map((opt, i) => {
+                      const metal = getMetalType(opt.metal);
+                      const isSelected = opt.metal === selectedMetalCode;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => handleMetalSelect(opt.metal)}
+                          title={metal.name}
+                          style={{
+                            backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                            backgroundColor: metal.image ? undefined : metal.bg,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            color: '#000',
+                          }}
+                          className={`rounded px-2 py-1 text-[10px] font-bold uppercase leading-none tracking-wide transition-all ${isSelected ? 'ring-2 ring-foreground/70 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
+                        >
+                          {metal.label}
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-                {product.size && (
+                </div>
+                {allShapes.length > 1 && (
                   <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Size:</span>
-                    <span className="text-sm text-foreground/70">{product.size}</span>
-                  </div>
-                )}
-                {product.lab && (
-                  <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
-                    <div className="flex items-center gap-2">
-                      <img src={igiLogo} alt={product.lab} className="h-5 w-auto object-contain" />
-                      {product.certNo && (
-                        <span className="text-xs text-foreground/50">#{product.certNo}</span>
-                      )}
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Shape:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allShapes.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => handleShapeSelect(s)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${s === selectedShape ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {s}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
-                {product.growthMethod && (
+                {allColours.length > 1 && (
                   <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Origin:</span>
-                    <span className="text-sm text-foreground/70">{product.growthMethod}</span>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Colour:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allColours.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleColourSelect(c)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${c === selectedColour ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allClarities.length > 1 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Clarity:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allClarities.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleClaritySelect(c)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${c === selectedClarity ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allCarats.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Carat Wt.:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allCarats.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleCaratSelect(c)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${c === selectedCaratValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allMetalWeights.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal weight:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {allMetalWeights.map((w) => (
+                        <button
+                          key={w}
+                          onClick={() => handleMetalWeightSelect(w)}
+                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${w === selectedMetalWeight ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {w}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {ringSizeOptions.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Ring size:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {ringSizeOptions.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => handleSizeSelect(s)}
+                          className={`h-8 w-8 border text-xs font-medium transition-colors ${s === selectedSizeValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {allCerts.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Certificate:</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {allCerts.map((cert) => {
+                        const logo = getCertLogo(cert);
+                        return logo
+                          ? <img key={cert} src={logo} alt={cert} className="h-5 w-auto object-contain" />
+                          : <span key={cert} className="rounded border border-foreground/20 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground/60">{cert}</span>;
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
+                );
+              })()}
 
-              {/* Specifications */}
               <div className="border-t border-border/30">
                 <button onClick={() => setSpecsOpen(!specsOpen)} className="flex w-full items-center justify-between py-4 text-left">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground">Product Specifications</span>
                   <span className="text-xl leading-none text-foreground/50">{specsOpen ? '−' : '+'}</span>
                 </button>
-                {specsOpen && specs.length > 0 && (
+                {specsOpen && (
                   <div className="pb-5">
+                    <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stone</p>
                     <table className="w-full">
                       <tbody>
-                        {specs.map(([label, value]) => (
+                        {([
+                          ['Stone type:', product.stoneType],
+                          ['Carat weight:', allCaratsOuter.length <= 1 ? (product.caratWeight ?? selectedCaratValue) : undefined],
+                          ['Shape:', allShapes.length <= 1 ? product.shape : undefined],
+                          ['Colour:', allColours.length <= 1 ? product.colour : undefined],
+                          ['Clarity:', allClarities.length <= 1 ? product.clarity : undefined],
+                          ['Setting:', product.setting],
+                          ['Gold weight:', product.goldWeight],
+                          ['Total weight:', product.totalWeight],
+                        ] as [string, string | undefined][]).filter(([, value]) => Boolean(value)).map(([label, value]) => (
                           <tr key={label}>
-                            <td className="w-[140px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">{label}</td>
+                            <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">{label}</td>
                             <td className="py-[3px] text-xs font-semibold text-foreground">{value}</td>
                           </tr>
                         ))}
+                        {product.certificate && (() => {
+                          const logo = getCertLogo(product.certificate);
+                          return (
+                            <tr>
+                              <td className="w-[110px] py-[3px] pr-4 align-top text-xs font-medium text-foreground/55">Certificate:</td>
+                              <td className="py-[3px]">
+                                {logo
+                                  ? <img src={logo} alt={product.certificate} className="h-4 w-auto object-contain" />
+                                  : <span className="rounded border border-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground/60">{product.certificate}</span>
+                                }
+                              </td>
+                            </tr>
+                          );
+                        })()}
                       </tbody>
                     </table>
                   </div>
                 )}
               </div>
 
-              {/* Price + actions */}
               <div className="mt-4 flex items-center gap-3">
                 <span className="border border-border/30 bg-gray-100 px-5 py-2.5 text-[1.6rem] font-bold leading-none tracking-tight text-foreground">
-                  £{product.price.toLocaleString()}
+                  £{displayPrice.toLocaleString()}
                 </span>
-                {stockLeft !== undefined && stockLeft > 0 && stockLeft <= 5 && (
-                  <span className="text-sm text-foreground/55">Only {stockLeft} left</span>
+                {product.stock !== undefined && product.stock > 0 && product.stock <= 5 && (
+                  <span className="text-sm text-foreground/55">Only {product.stock} left</span>
                 )}
 
                 {/* Share popover */}
@@ -400,19 +753,27 @@ const ProductDetail = () => {
                   className={`flex-1 py-4 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 ${
                     bagJustAdded
                       ? 'bg-accent/80 scale-[0.98] text-accent-foreground'
+                      : addedToBag
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'bg-accent text-accent-foreground hover:bg-accent/90'
                   }`}
                 >
-                  {bagJustAdded ? 'Added!' : 'Add to Bag'}
+                  {bagJustAdded ? 'Added!' : addedToBag ? 'Go to Bag' : 'Add to Bag'}
                 </button>
                 <button
                   onClick={handleToggleLiked}
                   aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
                   className={`flex w-[54px] items-center justify-center bg-accent text-accent-foreground transition-all duration-200 hover:bg-accent/90 ${justLiked ? 'scale-95' : ''}`}
                 >
-                  <Heart className={`h-5 w-5 transition-all duration-200 ${liked ? 'fill-white scale-110' : 'scale-100'}`} />
+                  <Heart
+                    className={`h-5 w-5 transition-all duration-200 ${
+                      liked ? 'fill-white scale-110' : 'scale-100'
+                    }`}
+                  />
                 </button>
               </div>
+
+              <p className="mt-3 text-center text-xs text-primary">Order within 02 hours to receive by Thu, 26 Mar</p>
 
               <div className="mt-7 border-t border-border/30 pt-6">
                 <div className="grid grid-cols-3 gap-3 rounded border border-border/20 bg-secondary/60 p-4">
@@ -431,7 +792,7 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      <YouMayAlsoLike items={youMayAlsoLike} />
+      {similarProducts.length > 0 && <YouMayAlsoLike items={similarProducts} />}
     </PageLayout>
   );
 };

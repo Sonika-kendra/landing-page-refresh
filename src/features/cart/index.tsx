@@ -5,10 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
+import { getMetalType } from '@/data/shop/metalTypes';
+import { toast } from '@/hooks/use-toast';
+
+const fmt = (n: number) => n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, loading, removeItem, updateQuantity } = useCart();
+
+  const handleRemove = async (lineItemId: string) => {
+    try { await removeItem(lineItemId); }
+    catch { toast({ title: 'Could not remove item', variant: 'destructive' }); }
+  };
+
+  const handleUpdateQty = async (lineItemId: string, qty: number) => {
+    try { await updateQuantity(lineItemId, qty); }
+    catch { toast({ title: 'Could not update quantity', variant: 'destructive' }); }
+  };
 
   const items = cart?.line_items ?? [];
   const subtotal = cart?.sub_total ?? 0;
@@ -31,26 +45,52 @@ const Cart = () => {
           <Card className="p-16 text-center">
             <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
             <p className="text-muted-foreground mb-4">Your bag is empty</p>
-            <Link to="/shop"><Button>Continue Shopping</Button></Link>
+            <Link to="/jewellery/all"><Button>Continue Shopping</Button></Link>
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-3">
               {items.map(item => (
                 <Card key={item.line_item_id} className="p-4 flex gap-4">
-                  {item.image && (
-                    <img src={item.image} alt={item.name} className="h-24 w-24 object-cover rounded" />
-                  )}
+                  <Link to={`/jewellery/all/${item.item_id}`} className="h-24 w-24 flex-shrink-0 rounded overflow-hidden bg-muted">
+                    {item.image
+                      ? <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                      : <div className="h-full w-full" />}
+                  </Link>
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between gap-4">
                       <div>
-                        <h3 className="font-medium text-foreground">{item.name}</h3>
-                        {item.sku && <p className="text-xs text-muted-foreground mt-0.5">SKU: {item.sku}</p>}
+                        <Link to={`/jewellery/all/${item.item_id}`} className="font-medium text-foreground hover:text-primary transition-colors">
+                          {item.name}
+                        </Link>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          {item.metal && (() => {
+                            const metal = getMetalType(item.metal);
+                            return (
+                              <span
+                                className="inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide ring-2 ring-foreground/70 ring-offset-1"
+                                style={{
+                                  backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                                  backgroundColor: metal.image ? undefined : metal.bg,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  color: '#000',
+                                }}
+                                title={metal.name}
+                              >
+                                {metal.label}
+                              </span>
+                            );
+                          })()}
+                          {item.size && (
+                            <span className="text-xs text-muted-foreground">Size: {item.size}</span>
+                          )}
+                        </div>
                       </div>
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => removeItem(item.line_item_id)}
+                        onClick={() => handleRemove(item.line_item_id)}
                         disabled={loading}
                         className="text-destructive"
                       >
@@ -64,7 +104,7 @@ const Cart = () => {
                           variant="ghost"
                           className="h-8 w-8"
                           disabled={loading}
-                          onClick={() => updateQuantity(item.line_item_id, item.quantity - 1)}
+                          onClick={() => handleUpdateQty(item.line_item_id, item.quantity - 1)}
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </Button>
@@ -74,12 +114,12 @@ const Cart = () => {
                           variant="ghost"
                           className="h-8 w-8"
                           disabled={loading}
-                          onClick={() => updateQuantity(item.line_item_id, item.quantity + 1)}
+                          onClick={() => handleUpdateQty(item.line_item_id, item.quantity + 1)}
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
                       </div>
-                      <p className="font-medium">£{(item.rate * item.quantity).toLocaleString()}</p>
+                      <p className="font-medium">£{fmt(item.rate * item.quantity)}</p>
                     </div>
                   </div>
                 </Card>
@@ -91,11 +131,11 @@ const Cart = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>£{subtotal.toLocaleString()}</span>
+                  <span>£{fmt(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">VAT</span>
-                  <span>£{tax.toLocaleString()}</span>
+                  <span>£{fmt(tax)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
@@ -104,13 +144,13 @@ const Cart = () => {
                 <Separator className="my-3" />
                 <div className="flex justify-between text-base font-medium">
                   <span>Total</span>
-                  <span>£{total.toLocaleString()}</span>
+                  <span>£{fmt(total)}</span>
                 </div>
               </div>
               <Button className="w-full mt-6 gap-2" onClick={() => navigate('/checkout')}>
                 Checkout <ArrowRight className="h-4 w-4" />
               </Button>
-              <Link to="/shop" className="block text-center text-xs text-muted-foreground mt-3 hover:text-foreground">
+              <Link to="/jewellery/all" className="block text-center text-xs text-muted-foreground mt-3 hover:text-foreground">
                 Continue shopping
               </Link>
             </Card>

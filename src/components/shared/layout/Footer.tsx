@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer';
 import { brandConfig } from '@/config/theme';
 import { websiteUrlConfig, oldWebsiteURL } from '@/config/site';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Logo from '@/assets/icons/logoDark.png';
+import { toast } from 'sonner';
+import { contactApi } from '@/api/contact';
 
 // Certification & partner logos for footer strip
 const certificationModules = import.meta.glob(
@@ -19,23 +22,56 @@ const footerLogos = Object.values(certificationModules).map((mod) => {
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
 
-  const handleFaqClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (location.pathname === websiteUrlConfig.Home) {
-      document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      navigate(websiteUrlConfig.Home, { replace: false });
-      setTimeout(() => {
-        document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+    setNewsletterSubmitting(true);
+    try {
+      await contactApi.subscribeNewsletter(newsletterEmail);
+      toast.success("You're subscribed! Check your inbox for your 15% discount.");
+      setNewsletterEmail('');
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setNewsletterSubmitting(false);
     }
   };
 
   return (
     <footer className="relative z-10 bg-accent text-accent-foreground">
+
+      {/* Newsletter Signup */}
+      <div className="border-b border-accent-foreground/10">
+        <div className="henig-container py-10 text-center">
+          <h3 className="font-serif text-2xl text-accent-foreground mb-2">Newsletter Signup</h3>
+          <p className="text-sm text-accent-foreground/60 mb-6">
+            Subscribe to receive updates on new collections, exclusive offers, and more.
+          </p>
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row sm:items-stretch gap-3 justify-center max-w-xl mx-auto">
+            <input
+              type="email"
+              placeholder="Your email address"
+              value={newsletterEmail}
+              onChange={(e) => setNewsletterEmail(e.target.value)}
+              required
+              disabled={newsletterSubmitting}
+              className="flex-1 px-4 py-2.5 bg-accent-foreground/10 border border-accent-foreground/20 text-accent-foreground placeholder:text-accent-foreground/40 text-sm rounded-sm focus:outline-none focus:border-primary disabled:opacity-50"
+            />
+            <Button
+              type="submit"
+              size="sm"
+              variant="outline"
+              disabled={newsletterSubmitting}
+              className="h-auto bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white disabled:opacity-50 whitespace-nowrap [&:hover_svg]:translate-x-2"
+            >
+              {newsletterSubmitting ? 'Subscribing...' : 'Subscribe'}
+              {!newsletterSubmitting && <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />}
+            </Button>
+          </form>
+        </div>
+      </div>
 
       {/* Main Footer */}
       <div className="henig-container py-14 md:py-18">
@@ -138,20 +174,28 @@ const Footer = () => {
                   Blogs
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   to={websiteUrlConfig.Careers}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Careers
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
                   to={websiteUrlConfig.Careers}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Warranty Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.Sitemap}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Sitemap
                 </Link>
               </li>
             </ul>
@@ -209,7 +253,7 @@ const Footer = () => {
 
               {/* Emails */}
               <li className="pl-7">
-                <p className="text-xs font-semibold uppercase tracking-widest text-accent-foreground/50 mb-2">General Enquiries</p>
+                {/* <p className="text-xs font-semibold uppercase tracking-widest text-accent-foreground/50 mb-2">General Enquiries</p> */}
                 <div className="space-y-1.5">
                   <div>
                     <a
@@ -234,16 +278,14 @@ const Footer = () => {
               <li className="pl-7 pt-1">
                 <Button
                   size="sm"
-                  className="btn-henig-outline !hover:bg-secondary !hover:text-accent group"
+                  variant="outline"
+                  className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
                   asChild
                 >
-                  <a
-                    href={websiteUrlConfig.Contact}
-                    rel="noopener noreferrer"
-                  >
-                    SEND AN ENQUIRY
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </a>
+                  <Link to={websiteUrlConfig.Contact}>
+                    Send an enquiry
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
+                  </Link>
                 </Button>
               </li>
 

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -9,13 +10,15 @@ import {
 interface Suggestion {
   name: string;
   image: string;
+  id?: string;
 }
 
 interface YouMayAlsoLikeProps {
   items: Suggestion[];
+  hasActiveFilters?: boolean;
 }
 
-const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
+const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
   return (
     <section className="border-t border-border/30 bg-gray-50 py-12 md:py-16">
       <div className="henig-container">
@@ -26,12 +29,17 @@ const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
           </h2>
           <div className="h-px flex-1 bg-foreground/20" />
         </div>
+        {hasActiveFilters && (
+          <p className="-mt-4 mb-6 text-center text-xs tracking-wider text-foreground/45 uppercase">
+            Not affected by your active filters
+          </p>
+        )}
 
         <div className="relative px-12">
           <Carousel opts={{ align: "start" }}>
             <CarouselContent>
-              {items.map((item, i) => (
-                <CarouselItem key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+              {items.map((item, i) => {
+                const inner = (
                   <div className="group cursor-pointer px-2 text-center">
                     <div className="mb-3 aspect-square overflow-hidden bg-white">
                       <img
@@ -42,8 +50,16 @@ const YouMayAlsoLike = ({ items }: YouMayAlsoLikeProps) => {
                     </div>
                     <p className="text-sm leading-tight text-foreground">{item.name}</p>
                   </div>
-                </CarouselItem>
-              ))}
+                );
+                return (
+                  <CarouselItem key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                    {item.id
+                      ? <Link to={`/jewellery/all/${item.id}`}>{inner}</Link>
+                      : inner
+                    }
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
