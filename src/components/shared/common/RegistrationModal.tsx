@@ -24,6 +24,7 @@ const ERROR_MAP: Record<string, string> = {
   CURRENT_CLIENT: 'You already have an account. Please sign in.',
   WRONG_STATUS: 'Your account is pending approval. You will be notified once approved.',
   NO_STATUS: 'Your account is pending review. Please contact us.',
+  ZOHO_CONTACT_INACTIVE: 'Your account is currently inactive. Please contact us.',
   TOO_MANY_LOGIN_ATTEMPTS: 'Too many login attempts. Please try again later.',
   TOO_MANY_REGISTER_ATTEMPTS: 'Too many registration attempts. Please try again later.',
   TOO_MANY_FORGOT_PASSWORD_ATTEMPTS: 'Too many reset attempts. Please try again later.',

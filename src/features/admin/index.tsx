@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { to: '/admin/users',     label: 'All Users',        icon: Users,           countKey: undefined },
   { to: '/admin/carts',     label: 'Active Carts',     icon: ShoppingCart,    countKey: undefined },
   { to: '/admin/posts',     label: 'Blog Posts',       icon: FileText,        countKey: undefined },
-  { to: '/admin/zoho',      label: 'Zoho Sync',        icon: RefreshCw,       countKey: undefined },
+  { to: '/admin/zoho',      label: 'Zoho Sync',        icon: RefreshCw,       countKey: 'zohoOrderFormErrors' as const },
   { to: '/admin/email',     label: 'Email Template',   icon: Mail,            countKey: undefined },
   { to: '/admin/settings',  label: 'Settings',         icon: SettingsIcon,    countKey: undefined },
 ];
@@ -166,8 +166,9 @@ const AdminLayout = () => {
 
   const sidebarProps: SidebarNavProps = {
     counts: {
-      draftUsers:       stats?.draftUsers       ?? 0,
-      pendingApprovals: stats?.pendingApprovals  ?? 0,
+      draftUsers:          stats?.draftUsers          ?? 0,
+      pendingApprovals:    stats?.pendingApprovals     ?? 0,
+      zohoOrderFormErrors: stats?.zohoOrderFormErrors  ?? 0,
     },
     userName,
     userEmail:        user.email,

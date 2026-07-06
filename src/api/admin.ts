@@ -37,6 +37,7 @@ export interface AdminStats {
   rejectedUsers: number;
   inactiveUsers: number;
   blockedUsers: number;
+  zohoOrderFormErrors: number;
 }
 
 export interface Post {
