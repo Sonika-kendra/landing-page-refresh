@@ -146,7 +146,7 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
       {/* Info block */}
       <div className="bg-white px-3 pb-0 pt-2">
         {/* CERT lab : number + SKU */}
-        <div className="grid grid-cols-2 gap-1 text-xs text-foreground/45">
+        <div className="grid grid-cols-2 gap-1 text-sm text-foreground/45">
           <span className="flex min-w-0 items-center">
             <span className="shrink-0">{d.certLab || '–'} : </span>
             <span className="min-w-0 truncate">{d.certNumber || '–'}</span>
@@ -169,7 +169,7 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
         </p>
 
         {/* Measurements */}
-        <div className="mt-1 flex justify-between text-xs leading-tight text-foreground/55">
+        <div className="mt-1 flex justify-between text-sm leading-tight text-foreground/55">
           <span>T: {d.table || '-'}</span>
           <span>D: {d.depth || '-'}</span>
           <span>R: {d.ratio || '-'}</span>
@@ -179,14 +179,14 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
         {/* Prices */}
         <div className="-mx-3 mt-2 border-t border-border/30 bg-secondary/40 px-3 pt-2 pb-3 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-primary">Unit Price (PPC)</span>
-            <span className="text-base font-semibold text-foreground">
+            <span className="text-sm text-primary">Unit Price</span>
+            <span className="text-lg font-semibold text-foreground">
               {item.currency}{item.price.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-foreground">Total Value (PPC x Ct Wt)</span>
-            <span className="text-base font-bold text-foreground">
+            <span className="text-sm font-semibold text-foreground">Total Value</span>
+            <span className="text-lg font-bold text-foreground">
               {d.mainTotal != null ? `${item.currency}${Number(d.mainTotal).toLocaleString()}` : '–'}
             </span>
           </div>

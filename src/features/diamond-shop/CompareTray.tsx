@@ -55,17 +55,17 @@ const CompareTray = () => {
               );
             })}
           </div>
-          <span className="whitespace-nowrap text-xs text-foreground/50">{items.length}/{MAX_COMPARE} selected</span>
+          <span className="whitespace-nowrap text-sm text-foreground/50">{items.length}/{MAX_COMPARE} selected</span>
           <button
             onClick={clear}
-            className="whitespace-nowrap text-xs text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground"
+            className="whitespace-nowrap text-sm text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground"
           >
             Clear
           </button>
           <button
             onClick={() => setOpen(true)}
             disabled={items.length < 2}
-            className="flex items-center gap-1.5 whitespace-nowrap rounded bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-wider text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded bg-accent px-4 py-2 text-sm font-semibold uppercase tracking-wider text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <BarChart2 className="h-3.5 w-3.5" />
             Compare
@@ -74,9 +74,9 @@ const CompareTray = () => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto bg-white">
+        <DialogContent className="henig-diamond-shop max-h-[90vh] max-w-5xl overflow-y-auto bg-white">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[500px] border-collapse text-sm">
+            <table className="w-full min-w-[500px] border-collapse text-base">
               <thead>
                 <tr>
                   <th className="w-32" />
@@ -99,8 +99,8 @@ const CompareTray = () => {
                             <X className="h-3 w-3" />
                           </button>
                         </div>
-                        <p className="line-clamp-2 text-xs font-semibold leading-snug text-foreground">{d.title}</p>
-                        <p className="mt-1 text-sm font-bold text-primary">
+                        <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">{d.title}</p>
+                        <p className="mt-1 text-base font-bold text-primary">
                           {item.currency}{item.price.toLocaleString()}
                         </p>
                       </th>

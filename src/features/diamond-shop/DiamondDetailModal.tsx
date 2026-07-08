@@ -79,7 +79,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto p-0 gap-0 bg-white">
+      <DialogContent className="henig-diamond-shop max-h-[90vh] max-w-4xl overflow-y-auto p-0 gap-0 bg-white">
         <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
           {/* Left: gallery */}
           <div className="border-r border-border/30 p-4">
@@ -145,8 +145,12 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                   >
                     {gi.type === 'video' ? (
                       <>
-                        <video src={gi.url} className="h-full w-full object-contain" muted playsInline preload="metadata" />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                        <video
+                          src={gi.url}
+                          className="h-full w-full object-contain"
+                          muted loop autoPlay playsInline preload="auto"
+                        />
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
                           <svg className="h-5 w-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                         </div>
                         <span className="absolute bottom-0.5 left-0.5 text-[8px] font-semibold text-white drop-shadow">Video</span>
@@ -227,13 +231,13 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                 {/* Pricing box */}
                 <div className="rounded border border-primary/30 bg-primary/10 px-4 py-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-primary">Unit Price (PPC)</span>
+                    <span className="text-sm text-primary">Unit Price</span>
                     <span className="text-sm font-semibold text-primary">
                       {item.currency}{item.price.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-foreground">Total Value (PPC x Ct Wt)</span>
+                    <span className="text-sm font-bold text-foreground">Total Value</span>
                     <span className="text-sm font-bold text-foreground">
                       {d.mainTotal != null ? `${item.currency}${Number(d.mainTotal).toLocaleString()}` : '–'}
                     </span>

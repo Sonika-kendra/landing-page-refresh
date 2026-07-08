@@ -32,7 +32,7 @@ export const productsApi = {
     table_min?: number; table_max?: number;
     total_min?: number; total_max?: number;
   }) =>
-    client.get(ep.diamonds, params, undefined, false, base),
+    client.get(ep.diamonds, params, undefined, true, base),
 
   getCurrencies: () =>
     client.get<{ ok: boolean; currencies: { currency_code: string; currency_symbol: string; currency_name: string; is_base_currency: boolean }[] }>(ep.currencies, undefined, undefined, false, base),

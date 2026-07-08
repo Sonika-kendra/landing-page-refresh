@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PaginationBar } from '@/components/ui/PaginationBar';
@@ -388,12 +389,14 @@ const DiamondShopPage = () => {
         const items = (res.data?.items ?? []) as DiamondItem[];
         setTotal(res.data?.page_context?.total ?? items.length);
         setProducts(items);
+        setIsLoading(false);
       })
       .catch((err) => {
+        if (axios.isCancel(err)) return; // superseded by a newer request; that one owns isLoading/error state
         console.error('[DiamondShop] Failed to load:', err);
         setFetchError('Unable to load diamonds right now. Please try again later.');
-      })
-      .finally(() => setIsLoading(false));
+        setIsLoading(false);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, currencySymbol, sortBy, debouncedSearch, stockTypeTab,
       filterValues.shape, filterValues.colour, filterValues.clarity,
@@ -510,6 +513,7 @@ const DiamondShopPage = () => {
   return (
     <CompareProvider>
     <PageLayout>
+    <div className="henig-diamond-shop">
       {/* Sticky toolbar */}
       <div className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20">
         <div className="henig-container">
@@ -527,7 +531,7 @@ const DiamondShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[340px] flex-col p-0 sm:w-[400px] top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
+              <SheetContent side="left" className="henig-diamond-shop flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
                 <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
                   <SheetHeader className="text-left">
                     <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">Filters</SheetTitle>
@@ -557,7 +561,7 @@ const DiamondShopPage = () => {
                           <AccordionTrigger className="py-3.5 hover:no-underline [&>svg]:hidden">
                             <div className="flex w-full items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">{tab.label}</span>
+                                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-foreground">{tab.label}</span>
                                 {isActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
                               </div>
                               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground">
@@ -747,6 +751,7 @@ const DiamondShopPage = () => {
 
       <DiamondDetailModal item={selectedItem} open={modalOpen} onClose={() => setModalOpen(false)} />
       <CompareTray />
+    </div>
     </PageLayout>
     </CompareProvider>
   );

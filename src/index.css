@@ -229,6 +229,12 @@
     @apply max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* Diamond shop page uses Times New Roman instead of the site default */
+  .henig-diamond-shop,
+  .henig-diamond-shop * {
+    font-family: 'Times New Roman', Times, serif;
+  }
+
   .henig-heading-display {
     font-family: 'Playfair Display', serif;
     @apply text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-tight;
