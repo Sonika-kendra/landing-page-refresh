@@ -16,6 +16,7 @@ import {
   PenLine,
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import type { ShopProduct } from '@/data/shop/products';
 import { mapZohoToShopProduct } from '@/data/shop/mappers';
@@ -61,6 +62,7 @@ const ProductDetail = () => {
   const [selectedClarity, setSelectedClarity] = useState('');
   const [mediaItems, setMediaItems] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
   const [mediaFetchId, setMediaFetchId] = useState(id ?? '');
+  const [isMediaLoading, setIsMediaLoading] = useState(false);
   const [displayPrice, setDisplayPrice] = useState<number>(0);
   const [specsOpen, setSpecsOpen] = useState(true);
   const [descOpen, setDescOpen] = useState(false);
@@ -121,6 +123,7 @@ const ProductDetail = () => {
     setMediaItems([]);
     setSelectedImage(0);
     setThumbOffset(0);
+    setIsMediaLoading(true);
     productsApi.getMedia(mediaFetchId)
       .then((res) => {
         const { thumbnail, images, video } = res.data ?? {};
@@ -131,7 +134,8 @@ const ProductDetail = () => {
         if (video) items.push({ url: fileUrl(video), type: 'video' });
         if (items.length > 0) setMediaItems(items);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsMediaLoading(false));
   }, [mediaFetchId]);
 
   // Redirect old /jewellery/all/:id URLs to the new /jewellery/:category/:subCategory/:id format
@@ -215,21 +219,8 @@ const ProductDetail = () => {
   if (isLoading) {
     return (
       <PageLayout>
-        <div className="henig-container py-12">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            <div className="animate-pulse">
-              <div className="aspect-square bg-foreground/5" />
-              <div className="mt-3 flex gap-2">
-                {[...Array(3)].map((_, i) => <div key={i} className="h-[90px] w-[90px] bg-foreground/5" />)}
-              </div>
-            </div>
-            <div className="animate-pulse space-y-4 pt-2">
-              <div className="h-7 w-2/3 rounded bg-foreground/10" />
-              <div className="h-4 w-1/4 rounded bg-foreground/10" />
-              <div className="h-4 w-1/2 rounded bg-foreground/10" />
-              <div className="mt-8 h-12 w-full rounded bg-foreground/10" />
-            </div>
-          </div>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <LoadingSpinner size={56} />
         </div>
       </PageLayout>
     );
@@ -300,6 +291,11 @@ const ProductDetail = () => {
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <div className={`relative mb-3 aspect-square overflow-hidden bg-white ${galleryItems[selectedImage]?.type === 'video' ? '' : 'border border-border/20'}`}>
+                {isMediaLoading && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+                    <LoadingSpinner size={40} />
+                  </div>
+                )}
                 {galleryItems[selectedImage]?.type === 'video' ? (
                   <video
                     key={galleryItems[selectedImage].url}
@@ -420,15 +416,7 @@ const ProductDetail = () => {
                 });
 
                 const allCarats = [...new Set(allVariants.flatMap((v) => v.caratOptions ?? []))];
-                const allMetalWeights = [...new Set(
-                  allVariants
-                    .filter((v) => v.metalOptions.includes(selectedMetalCode))
-                    .flatMap((v) => v.metalWeightOptions ?? [])
-                )];
-                const DEFAULT_RING_SIZES = ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
-                const allSizes = [...new Set(allVariants.flatMap((v) => v.sizeOptions ?? []))];
-                const isRingProduct = product.category.toLowerCase().includes('ring');
-                const ringSizeOptions = allSizes.length > 0 ? allSizes : (isRingProduct ? DEFAULT_RING_SIZES : []);
+                const sizeOptions = [...new Set(allVariants.flatMap((v) => v.sizeOptions ?? []))];
                 const allCerts = [...new Set(allVariants.map((v) => v.certificate).filter(Boolean) as string[])];
 
                 // Score each variant: metal=8, shape=4, colour=2, clarity=2, carat=2, size=2, weight=1
@@ -453,62 +441,40 @@ const ProductDetail = () => {
                   if (resolved.id !== product.id) { setProduct(resolved); setMediaFetchId(resolved.id); }
                 };
 
-                const handleMetalSelect = (metalCode: string) => {
-                  setSelectedMetalCode(metalCode);
-                  const weightsForMetal = [...new Set(
-                    allVariants
-                      .filter((v) => v.metalOptions.includes(metalCode))
-                      .flatMap((v) => v.metalWeightOptions ?? [])
-                  )];
-                  const newWeight = weightsForMetal.includes(selectedMetalWeight)
-                    ? selectedMetalWeight
-                    : (weightsForMetal[0] ?? '');
-                  setSelectedMetalWeight(newWeight);
-                  const resolved = resolveVariant(metalCode, selectedCaratValue, newWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
+                const applyResolved = (resolved: ShopProduct) => {
+                  setSelectedMetalWeight(resolved.metalWeightOptions?.[0] ?? '');
                   setDisplayPrice(resolved.price);
                   switchVariant(resolved);
+                };
+
+                const handleMetalSelect = (metalCode: string) => {
+                  setSelectedMetalCode(metalCode);
+                  applyResolved(resolveVariant(metalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleCaratSelect = (carat: string) => {
                   setSelectedCaratValue(carat);
-                  const resolved = resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
-                  setDisplayPrice(resolved.price);
-                  switchVariant(resolved);
-                };
-
-                const handleMetalWeightSelect = (weight: string) => {
-                  setSelectedMetalWeight(weight);
-                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, weight, selectedShape, selectedColour, selectedClarity, selectedSizeValue);
-                  setDisplayPrice(resolved.price);
-                  switchVariant(resolved);
+                  applyResolved(resolveVariant(selectedMetalCode, carat, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleShapeSelect = (shape: string) => {
                   setSelectedShape(shape);
-                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity, selectedSizeValue);
-                  setDisplayPrice(resolved.price);
-                  switchVariant(resolved);
+                  applyResolved(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, shape, selectedColour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleColourSelect = (colour: string) => {
                   setSelectedColour(colour);
-                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity, selectedSizeValue);
-                  setDisplayPrice(resolved.price);
-                  switchVariant(resolved);
+                  applyResolved(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, colour, selectedClarity, selectedSizeValue));
                 };
 
                 const handleClaritySelect = (clarity: string) => {
                   setSelectedClarity(clarity);
-                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity, selectedSizeValue);
-                  setDisplayPrice(resolved.price);
-                  switchVariant(resolved);
+                  applyResolved(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, clarity, selectedSizeValue));
                 };
 
                 const handleSizeSelect = (size: string) => {
                   setSelectedSizeValue(size);
-                  const resolved = resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, size);
-                  setDisplayPrice(resolved.price);
-                  switchVariant(resolved);
+                  applyResolved(resolveVariant(selectedMetalCode, selectedCaratValue, selectedMetalWeight, selectedShape, selectedColour, selectedClarity, size));
                 };
 
                 return (
@@ -603,31 +569,27 @@ const ProductDetail = () => {
                     </div>
                   </div>
                 )}
-                {allMetalWeights.length > 0 && (
+                {product.metalWeightOptions && product.metalWeightOptions.length > 0 && (
                   <div className="flex items-center gap-3">
                     <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Metal weight:</span>
                     <div className="flex flex-wrap gap-2">
-                      {allMetalWeights.map((w) => (
-                        <button
-                          key={w}
-                          onClick={() => handleMetalWeightSelect(w)}
-                          className={`min-w-[2rem] border px-2 py-1.5 text-xs font-medium transition-colors ${w === selectedMetalWeight ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
-                        >
+                      {product.metalWeightOptions.map((w) => (
+                        <span key={w} className="min-w-[2rem] border border-border/50 px-2 py-1.5 text-xs font-medium text-foreground">
                           {w}
-                        </button>
+                        </span>
                       ))}
                     </div>
                   </div>
                 )}
-                {ringSizeOptions.length > 0 && (
+                {sizeOptions.length > 0 && (
                   <div className="flex items-center gap-3">
-                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Ring size:</span>
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-foreground">Size:</span>
                     <div className="flex flex-wrap gap-2">
-                      {ringSizeOptions.map((s) => (
+                      {sizeOptions.map((s) => (
                         <button
                           key={s}
                           onClick={() => handleSizeSelect(s)}
-                          className={`h-8 w-8 border text-xs font-medium transition-colors ${s === selectedSizeValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
+                          className={`h-8 min-w-[2rem] border px-2 text-xs font-medium transition-colors ${s === selectedSizeValue ? 'border-accent bg-accent text-accent-foreground' : 'border-border/50 text-foreground hover:border-foreground/50'}`}
                         >
                           {s}
                         </button>
@@ -659,7 +621,6 @@ const ProductDetail = () => {
                 </button>
                 {specsOpen && (
                   <div className="pb-5">
-                    <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stone</p>
                     <table className="w-full">
                       <tbody>
                         {([

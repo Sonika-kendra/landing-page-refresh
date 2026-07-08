@@ -3,13 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EmailEditor, { EditorRef } from 'react-email-editor';
 import {
-  ArrowLeft, Eye, ImagePlus, Loader2, X, Calendar,
+  ArrowLeft, Eye, ImagePlus, X, Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { adminApi } from '@/api/admin';
 import { newApiURL } from '@/config/site';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { toast } from 'sonner';
 
 type PostStatus = 'draft' | 'published';
@@ -409,7 +410,7 @@ const PostEditor = () => {
             />
             {isCoverUploading && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-                <Loader2 className="w-6 h-6 text-white animate-spin" />
+                <LoadingSpinner size={24} />
               </div>
             )}
             {!isCoverUploading && isDragOver && (

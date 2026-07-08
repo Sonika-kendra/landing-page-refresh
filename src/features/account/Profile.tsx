@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, ChevronDown, ArrowRight } from 'lucide-react';
+import { ChevronDown, ArrowRight } from 'lucide-react';
 import { authApi, ProfileUpdatePayload } from '@/api/auth';
 import { toast } from '@/hooks/use-toast';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 
 const PHONE_CODES = [
   { code: '+44', cc: 'gb', name: 'United Kingdom' },
@@ -220,7 +221,7 @@ const Profile = () => {
   if (fetchLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        <LoadingSpinner size={24} />
       </div>
     );
   }
@@ -285,7 +286,7 @@ const Profile = () => {
       </div>
       <div className="flex justify-end mt-6">
         <Button variant="outline" onClick={handleProfileSave} disabled={profileLoading} className="bg-primary border-primary text-white transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2">
-          {profileLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          {profileLoading && <LoadingSpinner size={16} className="mr-2" />}
           Save Changes
           {!profileLoading && <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />}
         </Button>

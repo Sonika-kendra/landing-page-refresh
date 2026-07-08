@@ -93,7 +93,7 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     ? caratRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
     : undefined;
 
-  const sizeRaw = getCf(item, 'size_options', 'ring_size_options', 'ring_size', 'size') ?? '';
+  const sizeRaw = getCf(item, 'size_options', 'ring_size_options', 'ring_size', 'size_range', 'size') ?? '';
   const sizeOptions = sizeRaw
     ? sizeRaw.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
     : undefined;
@@ -138,6 +138,7 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     totalWeight:  getCf(item, 'total_weight', 'total_carat_weight', 'carat_weight')|| undefined,
     caratWeight:  getCf(item, 'carat_total') || undefined,
     itemRef:      getCf(item, 'item_ref', 'reference', 'stock_ref', 'ref')         || String(item.sku ?? '') || undefined,
+    styleId:      getCf(item, 'styleid') || undefined,
     images: [imageUrl],
   };
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, MapPin, Package, Plus, Loader2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Package, Plus } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -141,7 +142,7 @@ const Checkout = () => {
               </div>
 
               {addrLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <LoadingSpinner size={20} />
               ) : addresses.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No saved addresses. Add one to continue.</p>
               ) : (
@@ -233,7 +234,7 @@ const Checkout = () => {
               disabled={placing || cartLoading || !cartId || items.length === 0 || !addressId}
             >
               {placing || cartLoading
-                ? <Loader2 className="h-4 w-4 animate-spin" />
+                ? <LoadingSpinner size={16} />
                 : <CheckCircle2 className="h-4 w-4" />}
               Place Order
             </Button>

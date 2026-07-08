@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, User, Package, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, User, Package } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -89,7 +90,7 @@ const OrderDetail = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <LoadingSpinner size={24} />
       </div>
     );
   }
@@ -115,7 +116,7 @@ const OrderDetail = () => {
           <div className="flex items-center gap-2">
             {nextStatus && (
               <Button size="sm" onClick={advanceStatus} disabled={updating} className="gap-2">
-                {updating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {updating && <LoadingSpinner size={14} />}
                 Advance to "{nextStatus.replace('_', ' ')}"
               </Button>
             )}

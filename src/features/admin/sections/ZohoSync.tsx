@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -267,7 +268,7 @@ const ZohoSync = () => {
           disabled={anySyncRunning || !statusData?.configured}
           className="gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isFullSyncRunning ? 'animate-spin' : ''}`} />
+          {isFullSyncRunning ? <LoadingSpinner size={16} /> : <RefreshCw className="h-4 w-4" />}
           {isFullSyncRunning ? 'Syncing…' : 'Full Sync'}
         </Button>
       </div>
@@ -320,7 +321,7 @@ const ZohoSync = () => {
                       disabled={anySyncRunning}
                       onClick={() => syncModuleMutation.mutate(mod)}
                     >
-                      <RefreshCw className={`h-3 w-3 ${isThisModuleSyncing ? 'animate-spin' : ''}`} />
+                      {isThisModuleSyncing ? <LoadingSpinner size={12} /> : <RefreshCw className="h-3 w-3" />}
                       {isThisModuleSyncing ? 'Syncing…' : `Sync ${mod}`}
                     </Button>
                   );
@@ -332,7 +333,7 @@ const ZohoSync = () => {
                   disabled={anySyncRunning}
                   onClick={() => syncProductsMutation.mutate()}
                 >
-                  <RefreshCw className={`h-3 w-3 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
+                  {syncProductsMutation.isPending ? <LoadingSpinner size={12} /> : <RefreshCw className="h-3 w-3" />}
                   {syncProductsMutation.isPending ? 'Syncing…' : 'Sync Products'}
                 </Button>
                 <Button
@@ -342,7 +343,7 @@ const ZohoSync = () => {
                   disabled={anySyncRunning}
                   onClick={() => syncDirectoryMutation.mutate()}
                 >
-                  <RefreshCw className={`h-3 w-3 ${syncDirectoryMutation.isPending ? 'animate-spin' : ''}`} />
+                  {syncDirectoryMutation.isPending ? <LoadingSpinner size={12} /> : <RefreshCw className="h-3 w-3" />}
                   {syncDirectoryMutation.isPending ? 'Syncing…' : 'Sync Internal Users'}
                 </Button>
               </div>
@@ -352,7 +353,7 @@ const ZohoSync = () => {
 
         {anySyncRunning && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-            <RefreshCw className="h-3.5 w-3.5 animate-spin shrink-0" />
+            <LoadingSpinner size={14} className="shrink-0" />
             {isFullSyncRunning
               ? 'Full sync in progress — please wait until it completes.'
               : syncProductsMutation.isPending

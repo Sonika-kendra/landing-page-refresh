@@ -85,6 +85,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The backend token lasts 72h but /token only renews an already-valid token (no post-expiry
+  // refresh). Without this, an open tab silently loses its session at the 72h mark. Refreshing
+  // periodically keeps an active session alive indefinitely; an idle one still expires as designed.
+  useEffect(() => {
+    if (!token) return;
+    const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h — well inside the 72h expiry
+    const id = setInterval(() => {
+      authApi.getRefreshToken()
+        .then(res => localStorage.setItem(TOKEN_KEY, res.data.token))
+        .catch(() => {}); // transient failure; a truly dead session is caught on next app load
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [token]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [initialView, setInitialView] = useState<ModalInitialView>('login');
   const [redirectAfterLogin, setRedirectAfterLogin] = useState<string | null>(null);

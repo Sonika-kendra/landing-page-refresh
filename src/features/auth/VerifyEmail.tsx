@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authApi } from '@/api/auth';
 import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import Logo from '@/assets/icons/logoLight.png';
 
 type Status = 'loading' | 'success' | 'error';
@@ -46,7 +47,7 @@ const VerifyEmail = () => {
       <div className="w-full max-w-sm text-center space-y-6">
         {status === 'loading' && (
           <>
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+            <LoadingSpinner size={40} className="mx-auto" />
             <p className="text-sm text-muted-foreground">Verifying your email address…</p>
           </>
         )}

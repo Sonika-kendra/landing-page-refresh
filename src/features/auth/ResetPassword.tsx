@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { authApi } from '@/api/auth';
 import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import Logo from '@/assets/icons/logoLight.png';
 
 const resetSchema = z
@@ -151,7 +152,7 @@ const ResetPassword = () => {
                 />
 
                 <Button type="submit" className="w-full btn-henig-gold mt-2" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Set New Password'}
+                  {isLoading ? <LoadingSpinner size={16} /> : 'Set New Password'}
                 </Button>
               </form>
             </Form>

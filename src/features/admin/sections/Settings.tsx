@@ -17,6 +17,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { adminApi, SiteConfig, StaffUser } from '@/api/admin';
 import { announcementBar as staticConfig } from '@/config/theme';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 
 const FILTER_KEY_LABELS: Record<string, string> = {
   metals: 'Metals',
@@ -392,7 +393,9 @@ const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
               onClick={() => rebuildMutation.mutate()}
               disabled={rebuildMutation.isPending}
             >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${rebuildMutation.isPending ? 'animate-spin' : ''}`} />
+              {rebuildMutation.isPending
+                ? <LoadingSpinner size={14} className="mr-1.5" />
+                : <RefreshCw className="w-3.5 h-3.5 mr-1.5" />}
               {rebuildMutation.isPending ? 'Rebuilding…' : 'Rebuild Now'}
             </Button>
           </div>

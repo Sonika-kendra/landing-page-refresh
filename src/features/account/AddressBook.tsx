@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, Trash2, Star, Loader2, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -187,7 +188,7 @@ const AddressBook = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <LoadingSpinner size={24} />
       </div>
     );
   }
@@ -357,7 +358,7 @@ const AddressBook = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Save
+              {saving && <LoadingSpinner size={16} className="mr-2" />} Save
             </Button>
           </DialogFooter>
         </DialogContent>

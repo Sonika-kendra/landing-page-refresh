@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -39,7 +40,7 @@ const Cart = () => {
 
         {loading && items.length === 0 ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <LoadingSpinner size={32} />
           </div>
         ) : items.length === 0 ? (
           <Card className="p-16 text-center">

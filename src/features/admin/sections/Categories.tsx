@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminPageHeader from '../components/AdminPageHeader';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { categoriesApi } from '@/api/categories';
 import { toast } from '@/hooks/use-toast';
 
@@ -135,7 +136,7 @@ const Categories = () => {
         </div>
         {loading ? (
           <div className="p-10 flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <LoadingSpinner size={24} />
           </div>
         ) : tree.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted-foreground">No categories yet</div>
@@ -192,7 +193,7 @@ const Categories = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Save
+              {saving && <LoadingSpinner size={16} className="mr-2" />} Save
             </Button>
           </DialogFooter>
         </DialogContent>

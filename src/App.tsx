@@ -10,6 +10,7 @@ import { CartProvider } from '@/context/CartContext';
 import { FavouritesProvider } from '@/context/FavouritesContext';
 import RegistrationModal from '@/components/shared/common/RegistrationModal';
 import ProtectedRoute from '@/components/shared/common/ProtectedRoute';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 
 class AdminErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -79,7 +80,11 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => (
   <>
-    <Suspense fallback={<div className="min-h-screen" />}>
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <LoadingSpinner size={48} />
+      </div>
+    }>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/diamonds" element={<Diamond />} />

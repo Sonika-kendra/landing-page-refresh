@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Star, Package, ImagePlus, Loader2 } from 'lucide-react';
+import { Sparkles, Star, Package, ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -150,7 +151,7 @@ const Products = () => {
             disabled={uploadingId === p.item_id}
           >
             {uploadingId === p.item_id
-              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ? <LoadingSpinner size={14} />
               : <ImagePlus className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
             }
           </Button>

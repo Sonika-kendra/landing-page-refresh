@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Loader2, Package } from 'lucide-react';
+import { Eye, Package } from 'lucide-react';
 import { ordersApi } from '@/api/orders';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 
 type OrderStatus = 'web_order' | 'placed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
@@ -43,7 +44,7 @@ const MyOrders = () => {
   if (loading) {
     return (
       <Card className="p-16 flex justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <LoadingSpinner size={24} />
       </Card>
     );
   }

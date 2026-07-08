@@ -37,6 +37,7 @@ export interface ShopProduct {
   caratWeight?: string;
   description?: string;
   itemRef?: string;
+  styleId?: string;
   stock?: number;
   images?: string[];
 }

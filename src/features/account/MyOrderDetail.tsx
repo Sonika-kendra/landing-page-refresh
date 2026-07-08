@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ArrowLeft, MapPin, Loader2, Package, CheckCircle2, Circle,
+  ArrowLeft, MapPin, Package, CheckCircle2, Circle,
   Truck, ShoppingBag, Clock, Download, MessageCircle, Star, CalendarCheck,
   RefreshCw, Repeat2, Mail, Phone, User,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose,
 } from '@/components/ui/dialog';
@@ -304,7 +305,7 @@ const MyOrderDetail = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-24">
-        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
+        <LoadingSpinner size={28} />
       </div>
     );
   }
