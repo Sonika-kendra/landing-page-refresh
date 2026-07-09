@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+    <defs>
+        <style>
+            .cls-2{fill:none;stroke:#f0f1f2;stroke-linejoin:bevel;stroke-width:.5px}
+        </style>
+    </defs>
+    <g id="oval" transform="translate(-560 -807)">
+        <g id="Group_6385" transform="translate(-420.508 278.541)">
+            <ellipse id="Ellipse_149" cx="7.223" cy="9" fill="none" stroke="#f0f1f2" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="0.5px" rx="7.223" ry="9" transform="translate(983.508 529.459)"/>
+            <path id="Path_3327" d="M983.508 538.459l2.206 2.561-.428 3.351 3.143.62 2.3 2.468 2.3-2.468 3.143-.62-.428-3.351 2.206-2.561-2.206-2.561.428-3.351-3.143-.62-2.3-2.468-2.3 2.468-3.143.62.428 3.351z" class="cls-2"/>
+            <path id="Path_3328" d="M987.076 538.459l-1.356 2.558 2.441.814.271 3.153 2.3-1.661 2.3 1.661.271-3.153 2.441-.814-1.356-2.558 1.356-2.558-2.441-.814-.271-3.153-2.3 1.661-2.3-1.661-.271 3.153-2.441.814z" class="cls-2"/>
+            <path id="Path_3329" d="M990.731 533.6l-2.566 1.49-1.083 3.368 1.083 3.368 2.566 1.49 2.566-1.49 1.083-3.368-1.083-3.368z" class="cls-2"/>
+            <path id="Line_173" d="M0 1.231L1.361 0" class="cls-2" transform="translate(993.03 530.702)"/>
+            <path id="Line_174" d="M1.361 1.231L0 0" class="cls-2" transform="translate(987.071 530.702)"/>
+            <path id="Line_175" d="M1.361 0L0 1.231" class="cls-2" transform="translate(987.071 544.984)"/>
+            <path id="Line_176" d="M0 0L1.361 1.231" class="cls-2" transform="translate(993.03 544.984)"/>
+        </g>
+    </g>
+</svg>

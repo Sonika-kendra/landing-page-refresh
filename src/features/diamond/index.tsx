@@ -1,22 +1,20 @@
 import Header from '@/components/shared/layout/Header';
 import Footer from '@/components/shared/layout/Footer';
+import BlogSection from '@/features/landing/sections/BlogSection';
 import HeroSection from './sections/HeroSection';
-import FilterSection from './sections/FilterSection';
-import CollectionsGrid from './sections/CollectionsGrid';
-import FeaturedCollections from './sections/FeaturedCollections';
+import CategoryTypesSection from './sections/CategoryTypesSection';
+import ShapeSection from './sections/ShapeSection';
 import StatsSection from './sections/StatsSection';
-import CTASection from './sections/CTASection';
 
 const DiamondPage = () => (
   <div className="min-h-screen bg-background">
     <Header />
     <main>
       <HeroSection />
-      <FilterSection />
-      <CollectionsGrid />
-      <FeaturedCollections />
+      <CategoryTypesSection />
+      <ShapeSection />
       <StatsSection />
-      <CTASection />
+      <BlogSection />
     </main>
     <Footer />
   </div>

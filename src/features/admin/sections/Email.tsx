@@ -38,6 +38,9 @@ const TEMPLATE_VARIABLES = [
       { key: 'orderNumber',   desc: 'Zoho CRM Quote / Order Form ID' },
       { key: 'orderDate',     desc: 'Date the order was placed (DD/MM/YYYY)' },
       { key: 'itemsList',     desc: 'Plain-text list of all line items' },
+      { key: 'itemsTable', raw: true, desc: 'HTML table of line items (Category, Stock code, CT, YG/WG, Qty, Unit price, Total)' },
+      { key: 'clientCode',    desc: 'Short customer reference code (e.g. CLA1B2C3)' },
+      { key: 'totalQty',      desc: 'Sum of all line-item quantities' },
       { key: 'subtotal',      desc: 'Subtotal (e.g. £398.00)' },
       { key: 'vat',           desc: 'VAT amount (e.g. £79.60)' },
       { key: 'shipping',      desc: 'Shipping cost or "Free"' },
@@ -158,9 +161,10 @@ const AdminEmailEditor = () => {
     }
   }, [id]);
 
-  const copyVariable = (key: string) => {
-    navigator.clipboard.writeText(`{{${key}}}`).catch(() => {});
-    toast.success(`Copied {{${key}}}`);
+  const copyVariable = (key: string, raw?: boolean) => {
+    const tag = raw ? `{{{${key}}}}` : `{{${key}}}`;
+    navigator.clipboard.writeText(tag).catch(() => {});
+    toast.success(`Copied ${tag}`);
   };
 
   const saveDesign = () => {
@@ -301,19 +305,22 @@ const AdminEmailEditor = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {vars.map(({ key, desc }, idx) => (
+                            {vars.map(({ key, desc, raw }, idx) => {
+                              const tag = raw ? `{{{${key}}}}` : `{{${key}}}`;
+                              return (
                               <tr key={key} className={`${idx !== vars.length - 1 ? 'border-b border-border' : ''} hover:bg-primary/5 transition-colors`}>
                                 <td className="px-2 py-1.5">
-                                  <span className="font-mono text-[10px] bg-background border border-border rounded px-1 py-0.5">{`{{${key}}}`}</span>
+                                  <span className="font-mono text-[10px] bg-background border border-border rounded px-1 py-0.5">{tag}</span>
                                 </td>
                                 <td className="px-2 py-1.5 text-muted-foreground text-[11px]">{desc}</td>
                                 <td className="px-1.5 py-1.5 text-right">
-                                  <button type="button" onClick={() => copyVariable(key)} title={`Copy {{${key}}}`} className="text-muted-foreground hover:text-primary transition-colors">
+                                  <button type="button" onClick={() => copyVariable(key, raw)} title={`Copy ${tag}`} className="text-muted-foreground hover:text-primary transition-colors">
                                     <Copy className="h-3 w-3" />
                                   </button>
                                 </td>
                               </tr>
-                            ))}
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>

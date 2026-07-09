@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+    <defs>
+        <style>
+            .cls-1{fill:none;stroke:#f0f1f2;stroke-linejoin:bevel;stroke-width:.5px}
+        </style>
+    </defs>
+    <g id="asher" transform="translate(-796 -808)">
+        <g id="Group_6392" transform="translate(-156.583 256.134)">
+            <path id="Path_3372" d="M968.583 570.866h-12l-3-3v-12l3-3h12l3 3v12z" class="cls-1"/>
+            <path id="Path_3373" d="M967.083 569.366h-9l-3-3v-9l3-3h9l3 3v9z" class="cls-1"/>
+            <path id="Path_3374" d="M965.583 567.866h-6l-3-3v-6l3-3h6l3 3v6z" class="cls-1"/>
+            <g id="Group_6387">
+                <path id="Line_194" d="M3 0L0 3" class="cls-1" transform="translate(965.583 552.866)"/>
+                <path id="Line_195" d="M0 3L3 0" class="cls-1" transform="translate(968.583 555.866)"/>
+            </g>
+            <g id="Group_6388">
+                <path id="Line_196" d="M0 0L3 3" class="cls-1" transform="translate(956.583 552.866)"/>
+                <path id="Line_197" d="M3 3L0 0" class="cls-1" transform="translate(953.583 555.866)"/>
+            </g>
+            <g id="Group_6389">
+                <path id="Line_198" d="M0 3L3 0" class="cls-1" transform="translate(956.583 567.866)"/>
+                <path id="Line_199" d="M3 0L0 3" class="cls-1" transform="translate(953.583 564.866)"/>
+            </g>
+            <g id="Group_6390">
+                <path id="Line_200" d="M3 3L0 0" class="cls-1" transform="translate(965.583 567.866)"/>
+                <path id="Line_201" d="M0 0L3 3" class="cls-1" transform="translate(968.583 564.866)"/>
+            </g>
+        </g>
+    </g>
+</svg>

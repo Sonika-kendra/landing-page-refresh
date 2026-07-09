@@ -189,7 +189,7 @@ const ProductDetail = () => {
     if (addedToBag) { navigate('/cart'); return; }
     if (!isAuthenticated) { openModal('login'); return; }
     try {
-      await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal, size: selectedSizeValue || undefined });
+      await addItem({ item_id: product.id, name: product.name, rate: product.price, quantity: 1, sku: product.sku, image: product.image, metal: product.metal, size: selectedSizeValue || undefined, category: product.category, carat: selectedCaratValue || product.caratWeight || undefined });
       setBagJustAdded(true);
       setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
     } catch (err: any) {

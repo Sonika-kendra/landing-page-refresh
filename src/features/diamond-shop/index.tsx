@@ -284,6 +284,14 @@ const DiamondShopPage = () => {
   const [selectedItem, setSelectedItem] = useState<DiamondItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Browsers restore the previous scroll offset on a manual reload (F5) for the same
+  // history entry, which looks like "landing on row 2" when a filter was scrolled to earlier.
+  // Take manual control so a fresh mount always starts at the top.
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, []);
+
   // stock type tab derived from URL, defaults to 'Natural'
   const stockTypeTab = (searchParams.get('stock_type') ?? 'Natural') as 'Natural' | 'Lab';
 
@@ -439,6 +447,7 @@ const DiamondShopPage = () => {
 
     setPage(1);
     setSearchParams(newParams, { replace: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [searchParams, stockTypeTab, setSearchParams]);
 
   const setStockType = (type: 'Natural' | 'Lab') => {
@@ -446,12 +455,14 @@ const DiamondShopPage = () => {
     newParams.set('stock_type', type);
     setPage(1);
     setSearchParams(newParams, { replace: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleReset = useCallback(() => {
     setSearchInput('');
     setPage(1);
     setSearchParams({ stock_type: stockTypeTab }, { replace: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [stockTypeTab, setSearchParams]);
 
   // Note: 'type' (Natural/Lab) mirrors the persistent header toggle, not a clearable filter —
@@ -513,7 +524,6 @@ const DiamondShopPage = () => {
   return (
     <CompareProvider>
     <PageLayout>
-    <div className="henig-diamond-shop">
       {/* Sticky toolbar */}
       <div className="sticky top-16 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm md:top-20">
         <div className="henig-container">
@@ -531,7 +541,7 @@ const DiamondShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="henig-diamond-shop flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
+              <SheetContent side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
                 <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
                   <SheetHeader className="text-left">
                     <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">Filters</SheetTitle>
@@ -751,7 +761,6 @@ const DiamondShopPage = () => {
 
       <DiamondDetailModal item={selectedItem} open={modalOpen} onClose={() => setModalOpen(false)} />
       <CompareTray />
-    </div>
     </PageLayout>
     </CompareProvider>
   );

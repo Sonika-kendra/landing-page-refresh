@@ -74,7 +74,7 @@ const CompareTray = () => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="henig-diamond-shop max-h-[90vh] max-w-5xl overflow-y-auto bg-white">
+        <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px] border-collapse text-base">
               <thead>

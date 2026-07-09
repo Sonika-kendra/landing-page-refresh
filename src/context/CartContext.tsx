@@ -31,6 +31,8 @@ interface LineItem {
   image?: string;
   metal?: string;
   size?: string;
+  category?: string;
+  carat?: string;
 }
 
 interface Cart {
@@ -51,7 +53,7 @@ interface CartContextValue {
   cartId: string | null;
   itemCount: number;
   loading: boolean;
-  addItem: (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string; size?: string }) => Promise<void>;
+  addItem: (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string; size?: string; category?: string; carat?: string }) => Promise<void>;
   removeItem: (lineItemId: string) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -113,7 +115,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return { sub_total, tax_total, total: sub_total + tax_total };
   };
 
-  const addItem = async (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string; size?: string }) => {
+  const addItem = async (item: { item_id: string; name: string; rate: number; quantity?: number; sku?: string; image?: string; metal?: string; size?: string; category?: string; carat?: string }) => {
     if (USE_DUMMY_CART) {
       const qty = item.quantity ?? 1;
       setCart(prev => {
@@ -136,6 +138,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               image: item.image,
               metal: item.metal,
               size: item.size,
+              category: item.category,
+              carat: item.carat,
             }];
         return { ...prev, ...recalcTotals(newItems), line_items: newItems };
       });
@@ -166,9 +170,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         ? currentItems.find(li => li.item_id === item.item_id)
         : currentItems.find(li => li.name === item.name);
 
+      const optionalFields = { ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }), ...(item.size && { size: item.size }), ...(item.category && { category: item.category }), ...(item.carat && { carat: item.carat }) };
       const newLineItem = hasZohoId
-        ? { item_id: item.item_id, name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }), ...(item.size && { size: item.size }) }
-        : { name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...(item.sku && { sku: item.sku }), ...(item.image && { image: item.image }), ...(item.metal && { metal: item.metal }), ...(item.size && { size: item.size }) };
+        ? { item_id: item.item_id, name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...optionalFields }
+        : { name: item.name, rate: item.rate, quantity: item.quantity ?? 1, ...optionalFields };
 
       const newItems = existing
         ? currentItems.map(li => {

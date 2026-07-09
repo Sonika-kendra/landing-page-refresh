@@ -79,7 +79,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="henig-diamond-shop max-h-[90vh] max-w-4xl overflow-y-auto p-0 gap-0 bg-white">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto p-0 gap-0 bg-white">
         <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
           {/* Left: gallery */}
           <div className="border-r border-border/30 p-4">

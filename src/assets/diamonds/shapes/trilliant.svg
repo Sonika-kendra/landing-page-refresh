@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+    <defs>
+        <style>
+            .cls-1{fill:none;stroke:#f0f1f2;stroke-linejoin:bevel;stroke-width:.5px}
+        </style>
+    </defs>
+    <g id="trilliant" transform="translate(-640 -804)">
+        <g id="Layer_4" transform="translate(-443.453 275.559)">
+            <g id="Group_6377">
+                <g id="Group_6376">
+                    <path id="Path_3365" d="M1093.828 547.441l-2.988-2.866-3.346-3.458-1.833-4.708-.208-4.375 3.875-1.667 4.5-.926 4.5.926 3.875 1.667-.208 4.375-1.833 4.708-3.346 3.458z" class="cls-1"/>
+                    <g id="Group_6374">
+                        <path id="Path_3366" d="M1093.828 547.441l1.083-3.324 5.25-3 .167-7.176 1.875-1.908-3.085.365-.79-2.031" class="cls-1"/>
+                        <path id="Path_3367" d="M1098.328 533.941l-3.417 10.176-1.083-1.176 6.5-9" class="cls-1"/>
+                        <path id="Path_3368" d="M1093.828 533.941l5.29-1.543-.79 1.543h2l1.667 2.467" class="cls-1"/>
+                        <path id="Line_191" d="M0 0L5.29 2.957" class="cls-1" transform="translate(1093.828 529.441)"/>
+                    </g>
+                    <g id="Group_6375">
+                        <path id="Path_3369" d="M1093.91 547.441l-1.083-3.324-5.25-3-.167-7.176-1.875-1.908 3.084.365.791-2.031" class="cls-1"/>
+                        <path id="Path_3370" d="M1089.41 533.941l3.417 10.176 1.083-1.176-6.5-9" class="cls-1"/>
+                        <path id="Path_3371" d="M1089.41 533.941h4.5l-5.291-1.543.791 1.543h-2l-1.667 2.467" class="cls-1"/>
+                        <path id="Line_192" d="M5.29 0L0 2.957" class="cls-1" transform="translate(1088.619 529.441)"/>
+                    </g>
+                </g>
+                <path id="Line_193" d="M4.418 0L0 0" class="cls-1" transform="translate(1093.91 533.941)"/>
+            </g>
+        </g>
+    </g>
+</svg>

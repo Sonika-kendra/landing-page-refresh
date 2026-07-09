@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+    <defs>
+        <style>
+            .cls-1,.cls-3{fill:none;stroke:#f0f1f2;stroke-width:.5px;stroke-miterlimit:10}.cls-3{stroke-linejoin:bevel}
+        </style>
+    </defs>
+    <g id="princess" transform="translate(-481 -807)">
+        <g id="Group_6384" transform="translate(-2723 -2199.128)">
+            <path id="Path_3325" d="M919.98 529.545v17.933h17.933v-17.933H919.98z" class="cls-1" transform="translate(2285.02 2477.583)"/>
+            <path id="Path_3326" fill="none" stroke="#f0f1f2" stroke-linejoin="bevel" stroke-width="0.5px" d="M933.919 538.545l-1.671 3.3-3.3 1.636-3.358-1.636-1.615-3.3 1.625-3.345 3.351-1.658 3.313 1.647z" transform="translate(2285.02 2477.583)"/>
+            <path id="Rectangle_3306" d="M0 0H14.393V9.946H0z" class="cls-1" transform="translate(3206.77 3011.122)"/>
+            <path id="Rectangle_3309" d="M0 0H9.946V14.393H0z" class="cls-1" transform="translate(3208.993 3008.898)"/>
+            <path id="Path_3335" d="M928.98 533.539l9-3.993-3.993 9.033" class="cls-3" transform="translate(2284.953 2477.583)"/>
+            <path id="Path_3336" d="M928.98 533.539l-9-3.993 3.993 9.033" class="cls-3" transform="translate(2285.02 2477.583)"/>
+            <path id="Path_3337" d="M928.98 543.619l-9 3.993 3.993-9.033" class="cls-3" transform="translate(2285.02 2477.516)"/>
+            <path id="Path_3338" d="M928.98 543.619l9 3.993-3.993-9.033" class="cls-3" transform="translate(2284.953 2477.516)"/>
+        </g>
+    </g>
+</svg>

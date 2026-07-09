@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+    <defs>
+        <style>
+            .cls-1{fill:none;stroke:#f0f1f2;stroke-linejoin:bevel;stroke-width:.5px}
+        </style>
+    </defs>
+    <g id="marquise" transform="translate(-172 -804)">
+        <g id="Group_6379" transform="translate(-839.946 275.583)">
+            <path id="Path_3339" d="M1027.418 538.417c0 7.286-5.236 9-5.236 9s-5.236-1.709-5.236-9c0-7.445 5.236-9 5.236-9s5.236 1.712 5.236 9z" class="cls-1"/>
+            <path id="Path_3340" d="M1016.946 538.417l1.751-2.391v-3.8l2.136.125 1.35-2.938 1.35 2.938 2.136-.125v3.8l1.751 2.391-1.751 2.391v3.8l-2.136-.125-1.35 2.938-1.35-2.938-2.136.125v-3.8z" class="cls-1"/>
+            <path id="Path_3341" d="M1024.175 530.6l-.626 1.763 2.142 8.475-4.848 3.681" class="cls-1" transform="translate(-.019)"/>
+            <path id="Path_3342" d="M1020.2 530.559l.641 1.8-2.142 8.475 4.848 3.681" class="cls-1" transform="translate(-.009)"/>
+            <path id="Path_3343" d="M1020.216 546.281l.626-1.763-2.142-8.475 4.848-3.681" class="cls-1" transform="translate(-.009 -.047)"/>
+            <path id="Path_3344" d="M1020.843 532.363l4.848 3.681-2.142 8.475.626 1.763" class="cls-1" transform="translate(-.019 -.047)"/>
+        </g>
+    </g>
+</svg>
