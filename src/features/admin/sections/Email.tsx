@@ -38,9 +38,9 @@ const TEMPLATE_VARIABLES = [
     group: 'Order',
     vars: [
       { key: 'orderNumber',   desc: 'Zoho CRM Quote / Order Form ID' },
-      { key: 'orderDate',     desc: 'Date the order was placed (DD/MM/YYYY)' },
+      { key: 'orderDate',     desc: 'Date the order was placed (DD.MM.YY)' },
       { key: 'itemsList',     desc: 'Plain-text list of all line items' },
-      { key: 'itemsTable', raw: true, desc: 'HTML table of line items (Category, Stock code, CT, YG/WG, Qty, Unit price, Total)' },
+      { key: 'itemsTable', raw: true, desc: 'HTML table of line items (#, Description, Qty, Price)' },
       { key: 'clientCode',    desc: 'Short customer reference code (e.g. CLA1B2C3)' },
       { key: 'totalQty',      desc: 'Sum of all line-item quantities' },
       { key: 'subtotal',      desc: 'Subtotal (e.g. £398.00)' },
@@ -48,7 +48,6 @@ const TEMPLATE_VARIABLES = [
       { key: 'shipping',      desc: 'Shipping cost or "Free"' },
       { key: 'total',         desc: 'Order total (e.g. £477.60)' },
       { key: 'trackUrl',      desc: 'Link to order tracking page' },
-      { key: 'adminOrderUrl', desc: 'Admin link to view the order (admin template)' },
     ],
   },
   {
@@ -75,9 +74,22 @@ const SAMPLE_TAG_VALUES: Record<string, string> = {
   role: 'user',
   status: 'approved',
   orderNumber: 'SO-10234',
-  orderDate: '01/01/2026',
+  orderDate: '10.02.26',
   itemsList: '1. Round Brilliant 1.20ct - SKU1234 - Qty 1     £3,200.00',
-  itemsTable: '<table><tr><td>Round Brilliant 1.20ct</td><td>Qty 1</td><td>£3,200.00</td></tr></table>',
+  itemsTable: `<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #bfc3c8;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222">
+  <tr style="font-weight:700;color:#263d2e;border-bottom:1px solid #263d2e">
+    <td style="padding:6px 6px;text-align:left">#</td>
+    <td style="padding:6px 6px;text-align:left">Description</td>
+    <td style="padding:6px 6px;text-align:center">Qty</td>
+    <td style="padding:6px 6px;text-align:right">Price</td>
+  </tr>
+  <tr>
+    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:left">1</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:left">Round Brilliant 1.20ct</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:center">1</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:right;font-weight:700;white-space:nowrap">&pound;3200.00</td>
+  </tr>
+</table>`,
   clientCode: 'CLA1B2C3',
   totalQty: '1',
   subtotal: '£3,200.00',
@@ -85,7 +97,6 @@ const SAMPLE_TAG_VALUES: Record<string, string> = {
   shipping: 'Free',
   total: '£3,840.00',
   trackUrl: '#',
-  adminOrderUrl: '#',
   reason: 'Incomplete supporting documents',
   verification: 'sample-verification-token',
 };
