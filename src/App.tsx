@@ -48,6 +48,7 @@ const AdminUserDetail = lazy(() => import('@/features/admin/sections/UserDetail'
 const AdminPosts = lazy(() => import('@/features/admin/sections/Posts'));
 const AdminPostEditor = lazy(() => import('@/features/admin/sections/PostEditor'));
 const AdminSettings  = lazy(() => import('@/features/admin/sections/Settings'));
+const AdminInternalUsers = lazy(() => import('@/features/admin/sections/InternalUsers'));
 const AdminDraftUsers = lazy(() => import('@/features/admin/sections/DraftUsers'));
 const AdminZohoSync  = lazy(() => import('@/features/admin/sections/ZohoSync'));
 const AdminCategories = lazy(() => import('@/features/admin/sections/Categories'));
@@ -115,6 +116,7 @@ const AppRoutes = () => (
           <Route path="posts/new" element={<AdminPostEditor />} />
           <Route path="posts/:id" element={<AdminPostEditor />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="internal-users" element={<AdminInternalUsers />} />
           <Route path="zoho"     element={<AdminZohoSync />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="products"   element={<AdminProducts />} />

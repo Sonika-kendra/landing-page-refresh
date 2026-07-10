@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InstagramSvg, Linkedin, Whatsapp } from '@/assets/footer';
@@ -8,6 +9,9 @@ import { Link } from 'react-router-dom';
 import Logo from '@/assets/icons/logoDark.png';
 import { toast } from 'sonner';
 import { contactApi } from '@/api/contact';
+import { adminApi } from '@/api/admin';
+
+const DEFAULT_CONTACT = { phone: '+44 (0)207 404 0146', email: 'info@henigdiamonds.co.uk' };
 
 // Certification & partner logos for footer strip
 const certificationModules = import.meta.glob(
@@ -24,6 +28,14 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+
+  const { data: configs } = useQuery({
+    queryKey: ['admin', 'configs'],
+    queryFn: () => adminApi.getConfigs().then(r => r.data),
+  });
+  const socialLinksConfig = configs?.find(c => c.type === 'social_links')?.fields;
+  const social = (socialLinksConfig?.social as typeof brandConfig.social) ?? brandConfig.social;
+  const contact = (socialLinksConfig?.contact as typeof DEFAULT_CONTACT) ?? DEFAULT_CONTACT;
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,9 +107,9 @@ const Footer = () => {
 
             <div className="flex gap-4">
               {[
-                { href: brandConfig.social.linkedin, src: Linkedin, alt: "Linkedin" },
-                { href: brandConfig.social.instagram, src: InstagramSvg, alt: "Instagram" },
-                { href: brandConfig.social.whatsApp, src: Whatsapp, alt: "Whatsapp" },
+                { href: social.linkedin, src: Linkedin, alt: "Linkedin" },
+                { href: social.instagram, src: InstagramSvg, alt: "Instagram" },
+                { href: social.whatsApp, src: Whatsapp, alt: "Whatsapp" },
               ].map(({ href, src, alt }) => (
                 <a
                   key={alt}
@@ -210,10 +222,10 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-primary mt-1 shrink-0" />
                 <a
-                  href="tel:+442074040146"
+                  href={`tel:${contact.phone}`}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
-                  +44 (0)207 404 0146
+                  {contact.phone}
                 </a>
               </li>
 
@@ -265,10 +277,10 @@ const Footer = () => {
                   </div>
                   <div>
                     <a
-                      href="mailto:info@henigdiamonds.co.uk"
+                      href={`mailto:${contact.email}`}
                       className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                     >
-                      info@henigdiamonds.co.uk
+                      {contact.email}
                     </a>
                   </div>
                 </div>

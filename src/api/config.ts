@@ -96,6 +96,8 @@ export const API_CONFIG = {
       list: '/email-templates',
       byId: (id: string) => `/email-templates/${id}`,
       create: '/email-templates',
+      preview: (id: string) => `/email-templates/${id}/preview`,
+      sendTest: (id: string) => `/email-templates/${id}/send-test`,
     },
   },
 
@@ -118,6 +120,8 @@ export const API_CONFIG = {
     endpoints: {
       status:  '/admin/filter-config/status',
       rebuild: '/admin/filter-config/rebuild',
+      diamondsStatus:  '/admin/filter-config/diamonds/status',
+      diamondsRebuild: '/admin/filter-config/diamonds/rebuild',
     },
   },
 

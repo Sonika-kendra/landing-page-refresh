@@ -344,6 +344,22 @@ export const adminApi = {
       API_CONFIG.adminEmailTemplates.base
     ),
 
+  previewEmailTemplate: (id: string, tags?: Record<string, string>) =>
+    apiClient.post<{ subject: string; html: string }>(
+      API_CONFIG.adminEmailTemplates.endpoints.preview(id),
+      { tags },
+      undefined,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
+  sendTestEmailTemplate: (id: string, email: string, tags?: Record<string, string>) =>
+    apiClient.post<{ sent: boolean }>(
+      API_CONFIG.adminEmailTemplates.endpoints.sendTest(id),
+      { email, tags },
+      undefined,
+      API_CONFIG.adminEmailTemplates.base
+    ),
+
   deleteConfig: (id: string) =>
     apiClient.delete<{ message: string }>(
       API_CONFIG.adminConfigs.endpoints.delete(id),
@@ -473,6 +489,23 @@ export const adminApi = {
   rebuildFilterConfig: () =>
     apiClient.post<FilterConfigRebuildResult>(
       API_CONFIG.adminFilterConfig.endpoints.rebuild,
+      undefined,
+      undefined,
+      API_CONFIG.adminFilterConfig.base
+    ),
+
+  getDiamondsFilterConfigStatus: () =>
+    apiClient.get<FilterConfigStatus>(
+      API_CONFIG.adminFilterConfig.endpoints.diamondsStatus,
+      undefined,
+      undefined,
+      false,
+      API_CONFIG.adminFilterConfig.base
+    ),
+
+  rebuildDiamondsFilterConfig: () =>
+    apiClient.post<FilterConfigRebuildResult>(
+      API_CONFIG.adminFilterConfig.endpoints.diamondsRebuild,
       undefined,
       undefined,
       API_CONFIG.adminFilterConfig.base

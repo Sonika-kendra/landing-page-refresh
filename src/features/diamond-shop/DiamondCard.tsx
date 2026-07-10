@@ -180,13 +180,13 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
         <div className="-mx-3 mt-2 border-t border-border/30 bg-secondary/40 px-3 pt-2 pb-3 space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-sm text-primary">Unit Price</span>
-            <span className="text-lg font-semibold text-foreground">
+            <span className="text-lg font-semibold tabular-nums text-foreground">
               {item.currency}{item.price.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">Total Value</span>
-            <span className="text-lg font-bold text-foreground">
+            <span className="text-lg font-bold tabular-nums text-foreground">
               {d.mainTotal != null ? `${item.currency}${Number(d.mainTotal).toLocaleString()}` : '–'}
             </span>
           </div>

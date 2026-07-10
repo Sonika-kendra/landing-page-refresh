@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Navigate, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, Boxes, ShoppingCart, Mail, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, Users, UserCog, UserCheck, LogOut, Menu, FileText, Settings as SettingsIcon, RefreshCw, FileEdit, Boxes, ShoppingCart, Mail, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { adminApi } from '@/api/admin';
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/admin/posts',     label: 'Blog Posts',       icon: FileText,        countKey: undefined },
   { to: '/admin/zoho',      label: 'Zoho Sync',        icon: RefreshCw,       countKey: 'zohoOrderFormErrors' as const },
   { to: '/admin/email',     label: 'Email Template',   icon: Mail,            countKey: undefined },
+  { to: '/admin/internal-users', label: 'Internal Users', icon: UserCog,      countKey: undefined },
   { to: '/admin/settings',  label: 'Settings',         icon: SettingsIcon,    countKey: undefined },
 ];
 

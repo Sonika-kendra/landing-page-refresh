@@ -2,7 +2,7 @@ import React, { useRef, useState, useCallback, useEffect, KeyboardEvent } from '
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import EmailEditor, { EditorRef } from 'react-email-editor';
-import { ArrowLeft, Mail, ChevronDown, Check, X, Copy, Info } from 'lucide-react';
+import { ArrowLeft, Mail, ChevronDown, Check, X, Copy, Info, Eye, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -73,8 +73,42 @@ const AdminEmailEditor = () => {
   const [recipients, setRecipients] = useState<string[]>([]);
   const [recipientInput, setRecipientInput] = useState('');
   const recipientInputRef = useRef<HTMLInputElement>(null);
+  const [testEmail, setTestEmail] = useState('');
+  const [sendingTest, setSendingTest] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handlePreview = async () => {
+    if (!id) return;
+    setPreviewing(true);
+    try {
+      const res = await adminApi.previewEmailTemplate(id);
+      const url = URL.createObjectURL(new Blob([res.data.html], { type: 'text/html' }));
+      window.open(url, '_blank');
+    } catch {
+      toast.error('Failed to render preview — save the template first');
+    } finally {
+      setPreviewing(false);
+    }
+  };
+
+  const handleSendTest = async () => {
+    if (!id) return;
+    if (!isValidEmail(testEmail)) {
+      toast.error('Enter a valid email address');
+      return;
+    }
+    setSendingTest(true);
+    try {
+      await adminApi.sendTestEmailTemplate(id, testEmail);
+      toast.success(`Test email sent to ${testEmail}`);
+    } catch {
+      toast.error('Failed to send test email — save the template first');
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   const addRecipient = () => {
     const email = recipientInput.trim();
@@ -194,6 +228,10 @@ const AdminEmailEditor = () => {
             <Button variant="outline" size="sm" onClick={handleCancel}>
               <ArrowLeft className="h-4 w-4 mr-1.5" />
               All Templates
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePreview} disabled={!id || previewing}>
+              <Eye className="h-4 w-4 mr-1.5" />
+              Preview
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -349,6 +387,24 @@ const AdminEmailEditor = () => {
               ))}
             </div>
           )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-foreground">Send Test Email</label>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendTest(); } }}
+              placeholder="e.g. you@example.com"
+              className="h-9 text-sm"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={handleSendTest} disabled={!id || sendingTest} className="shrink-0 h-9 px-4">
+              <Send className="h-3.5 w-3.5 mr-1.5" />
+              {sendingTest ? 'Sending…' : 'Send Test'}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">Uses the last saved version of this template.</p>
         </div>
       </div>
       <div className="relative">

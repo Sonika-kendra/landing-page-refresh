@@ -232,13 +232,13 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                 <div className="rounded border border-primary/30 bg-primary/10 px-4 py-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-primary">Unit Price</span>
-                    <span className="text-sm font-semibold text-primary">
+                    <span className="text-base font-semibold tabular-nums text-primary">
                       {item.currency}{item.price.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-foreground">Total Value</span>
-                    <span className="text-sm font-bold text-foreground">
+                    <span className="text-base font-bold tabular-nums text-foreground">
                       {d.mainTotal != null ? `${item.currency}${Number(d.mainTotal).toLocaleString()}` : '–'}
                     </span>
                   </div>

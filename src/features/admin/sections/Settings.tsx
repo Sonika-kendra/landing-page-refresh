@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings2, Plus, Trash2, GripVertical, RefreshCw, Users } from 'lucide-react';
+import { Settings2, Plus, Trash2, GripVertical, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { Switch } from '@/components/ui/switch';
@@ -15,9 +16,18 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { adminApi, SiteConfig, StaffUser } from '@/api/admin';
-import { announcementBar as staticConfig } from '@/config/theme';
+import { adminApi, SiteConfig, FilterConfigStatus, FilterConfigRebuildResult } from '@/api/admin';
+import { announcementBar as staticConfig, brandConfig } from '@/config/theme';
 import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
+
+const SOCIAL_LINK_FIELDS = [
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'whatsApp', label: 'WhatsApp' },
+  { key: 'facebook', label: 'Facebook' },
+  { key: 'twitter', label: 'Twitter / X' },
+  { key: 'youtube', label: 'YouTube' },
+] as const;
 
 const FILTER_KEY_LABELS: Record<string, string> = {
   metals: 'Metals',
@@ -286,15 +296,123 @@ const AnnouncementManager = ({ config, isLoading }: AnnouncementManagerProps) =>
   );
 };
 
+// ── Social & Contact Links Manager ────────────────────────────────────────────
+
+interface SocialLinksManagerProps {
+  config: SiteConfig | null;
+  isLoading: boolean;
+}
+
+const SocialLinksManager = ({ config, isLoading }: SocialLinksManagerProps) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const configIdRef = useRef<string | null>(config?._id ?? null);
+
+  const initSocial = (config?.fields?.social as Record<string, string>) ?? brandConfig.social;
+  const initContact = (config?.fields?.contact as Record<string, string>) ?? {};
+
+  const [social, setSocial] = useState<Record<string, string>>(initSocial);
+  const [contact, setContact] = useState<Record<string, string>>(initContact);
+
+  useEffect(() => {
+    if (!config?._id || config._id === configIdRef.current) return;
+    configIdRef.current = config._id;
+    setSocial((config.fields.social as Record<string, string>) ?? brandConfig.social);
+    setContact((config.fields.contact as Record<string, string>) ?? {});
+  }, [config?._id]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      const fields = { social, contact };
+      const id = configIdRef.current;
+      if (id) return adminApi.updateConfig(id, { type: 'social_links', fields });
+      return adminApi.createConfig({ type: 'social_links', fields });
+    },
+    onSuccess: (res) => {
+      configIdRef.current = res.data._id;
+      queryClient.invalidateQueries({ queryKey: ['admin', 'configs'] });
+      toast({ title: 'Saved' });
+    },
+    onError: (err: any) => {
+      const detail = err?.response?.data?.errors?.msg || err?.message || 'Unknown error';
+      toast({ title: 'Save failed', description: String(detail), variant: 'destructive' });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-background rounded-sm border border-border p-5 space-y-3">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background rounded-sm border border-border p-5 space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-medium tracking-widest uppercase">Social &amp; Contact Links</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Used on the website footer and in transactional emails.
+          </p>
+        </div>
+        <Button size="sm" className="h-8" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+          {saveMutation.isPending ? 'Saving…' : 'Save'}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {SOCIAL_LINK_FIELDS.map(({ key, label }) => (
+          <div key={key} className="flex flex-col gap-1.5">
+            <Label className="text-xs text-muted-foreground">{label}</Label>
+            <Input
+              value={social[key] ?? ''}
+              onChange={(e) => setSocial(s => ({ ...s, [key]: e.target.value }))}
+              placeholder="https://..."
+              className="h-9 text-sm"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border">
+        <div className="flex flex-col gap-1.5">
+          <Label className="text-xs text-muted-foreground">Contact Phone</Label>
+          <Input
+            value={contact.phone ?? ''}
+            onChange={(e) => setContact(c => ({ ...c, phone: e.target.value }))}
+            placeholder="+442074040146"
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label className="text-xs text-muted-foreground">Contact Email</Label>
+          <Input
+            value={contact.email ?? ''}
+            onChange={(e) => setContact(c => ({ ...c, email: e.target.value }))}
+            placeholder="info@henigdiamonds.co.uk"
+            className="h-9 text-sm"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── Jewellery Filter Config Panel ─────────────────────────────────────────────
 
 interface FilterConfigPanelProps {
   config: SiteConfig | null;
+  title: string;
+  queryKey: string;
+  getStatus: () => Promise<{ data: FilterConfigStatus }>;
+  rebuild: () => Promise<{ data: FilterConfigRebuildResult }>;
 }
 
 const ARRAY_FILTER_KEYS = ['metals', 'shapes', 'stockTypes', 'ringSizes', 'certificates', 'caratValues'] as const;
 
-const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
+const FilterConfigPanel = ({ config, title, queryKey, getStatus, rebuild }: FilterConfigPanelProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -304,12 +422,12 @@ const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
   const [jsonError, setJsonError] = useState('');
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'filter-config-status'],
-    queryFn: () => adminApi.getFilterConfigStatus().then(r => r.data),
+    queryKey: ['admin', queryKey],
+    queryFn: () => getStatus().then(r => r.data),
   });
 
   const rebuildMutation = useMutation({
-    mutationFn: () => adminApi.rebuildFilterConfig().then(r => r.data),
+    mutationFn: () => rebuild().then(r => r.data),
     onSuccess: (result) => {
       refetch();
       toast({ title: 'Filter config rebuilt', description: result.message });
@@ -375,7 +493,7 @@ const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-sm font-medium tracking-widest uppercase">Jewellery Filter Config</h2>
+            <h2 className="text-sm font-medium tracking-widest uppercase">{title}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               Rebuilt automatically every hour from Zoho product data.
             </p>
@@ -432,7 +550,7 @@ const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-light tracking-widest uppercase">
-              Jewellery Filter Config
+              {title}
             </DialogTitle>
           </DialogHeader>
 
@@ -531,83 +649,6 @@ const FilterConfigPanel = ({ config }: FilterConfigPanelProps) => {
   );
 };
 
-// ── Internal Users Panel ──────────────────────────────────────────────────────
-
-const statusDot = (status: StaffUser['status']) =>
-  status === 'active'
-    ? 'bg-green-500'
-    : 'bg-muted-foreground/40';
-
-const InternalUsersPanel = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin', 'staff'],
-    queryFn: () => adminApi.getStaff({ limit: 100 }).then(r => r.data),
-  });
-
-  const staff = data?.staff ?? [];
-
-  const displayName = (u: StaffUser) =>
-    u.full_name || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email;
-
-  if (isLoading) {
-    return (
-      <div className="bg-background rounded-sm border border-border p-5 space-y-3">
-        <Skeleton className="h-6 w-40" />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full" />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-background rounded-sm border border-border p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-medium tracking-widest uppercase">Internal Users</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {data?.total ?? staff.length} zoho_directory account{(data?.total ?? staff.length) !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <Users className="w-4 h-4 text-muted-foreground" />
-      </div>
-
-      {staff.length === 0 ? (
-        <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-sm">
-          No internal users found.
-        </p>
-      ) : (
-        <div className="divide-y divide-border rounded-sm border border-border overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-3 py-2 bg-muted/50">
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Name / Email</span>
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Profile</span>
-            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">Status</span>
-          </div>
-          {staff.map(u => (
-            <div
-              key={u._id}
-              className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-3 py-2.5 bg-background hover:bg-muted/20 transition-colors"
-            >
-              <div className="min-w-0">
-                <p className="text-sm truncate">{displayName(u)}</p>
-                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-              </div>
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {u.profile?.name ?? u.role ?? '—'}
-              </span>
-              <div className="flex items-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(u.status)}`} />
-                <span className="text-xs text-muted-foreground capitalize">{u.status}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 // ── Main Settings Page ────────────────────────────────────────────────────────
 
 const Settings = () => {
@@ -623,12 +664,13 @@ const Settings = () => {
     queryFn: () => adminApi.getConfigs().then(r => r.data),
   });
 
-  // Separate announcement_bar and jewellery_filter_config from the generic list
+  // Separate announcement_bar, social_links and filter configs from the generic list
   const annConfig = configs.find(c => c.type === 'announcement_bar') ?? null;
+  const socialLinksConfig = configs.find(c => c.type === 'social_links') ?? null;
   const filterConfig = configs.find(c => c.type === 'jewellery_filter_config') ?? null;
-  const otherConfigs = configs.filter(
-    c => c.type !== 'announcement_bar' && c.type !== 'jewellery_filter_config'
-  );
+  const diamondsFilterConfig = configs.find(c => c.type === 'diamonds_filter_config') ?? null;
+  const FILTER_CONFIG_TYPES = ['announcement_bar', 'social_links', 'jewellery_filter_config', 'diamonds_filter_config'];
+  const otherConfigs = configs.filter(c => !FILTER_CONFIG_TYPES.includes(c.type));
 
   const openEdit = (config: SiteConfig) => {
     setEditConfig(config);
@@ -673,11 +715,26 @@ const Settings = () => {
       {/* Announcement Bar — dedicated UI */}
       <AnnouncementManager config={annConfig} isLoading={isLoading} />
 
-      {/* Jewellery Filter Config */}
-      <FilterConfigPanel config={filterConfig} />
+      {/* Social & Contact Links — dedicated UI */}
+      <SocialLinksManager config={socialLinksConfig} isLoading={isLoading} />
 
-      {/* Internal Users */}
-      <InternalUsersPanel />
+      {/* Jewellery Filter Config */}
+      <FilterConfigPanel
+        config={filterConfig}
+        title="Jewellery Filter Config"
+        queryKey="filter-config-status"
+        getStatus={adminApi.getFilterConfigStatus}
+        rebuild={adminApi.rebuildFilterConfig}
+      />
+
+      {/* Diamonds Filter Config */}
+      <FilterConfigPanel
+        config={diamondsFilterConfig}
+        title="Diamonds Filter Config"
+        queryKey="diamonds-filter-config-status"
+        getStatus={adminApi.getDiamondsFilterConfigStatus}
+        rebuild={adminApi.rebuildDiamondsFilterConfig}
+      />
 
       {/* Generic configs */}
       {isLoading ? (
