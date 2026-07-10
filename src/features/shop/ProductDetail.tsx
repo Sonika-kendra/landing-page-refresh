@@ -390,7 +390,7 @@ const ProductDetail = () => {
             </div>
 
             <div>
-              <h1 className="mb-1.5 font-medium text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
+              <h1 className="mb-1.5 font-sans font-medium text-2xl leading-snug text-foreground md:text-[1.7rem]">{product.name}</h1>
               <div className="mb-5 flex items-center gap-1.5 text-xs">
                 <span className="font-medium text-foreground/60">SKU #: {product.sku}</span>
                 <button

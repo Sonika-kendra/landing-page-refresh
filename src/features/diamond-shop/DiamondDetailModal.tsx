@@ -194,7 +194,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
               </div>
 
               {/* Title */}
-              <h2 className="mb-4 text-base font-bold leading-snug text-foreground">{d.title}</h2>
+              <h2 className="mb-4 font-sans text-base font-bold leading-snug text-foreground">{d.title}</h2>
 
               <div className="flex flex-col gap-4">
                 {/* Measurements */}
@@ -232,7 +232,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                 <div className="rounded border border-primary/30 bg-primary/10 px-4 py-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-primary">Unit Price</span>
-                    <span className="text-base font-semibold tabular-nums text-primary">
+                    <span className="text-base font-semibold tabular-nums text-foreground">
                       {item.currency}{item.price.toLocaleString()}
                     </span>
                   </div>

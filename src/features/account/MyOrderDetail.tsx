@@ -356,7 +356,7 @@ const MyOrderDetail = () => {
             {/* Left: order info */}
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-widest text-white/50">Order</p>
-              <h2 className="font-serif text-3xl text-white">{order.salesorder_number}</h2>
+              <h2 className="font-sans text-3xl text-white">{order.salesorder_number}</h2>
               <p className="text-sm text-white/60">
                 Placed on {order.date ? fmt(order.date) : '—'}
               </p>

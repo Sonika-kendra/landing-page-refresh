@@ -5,6 +5,8 @@ import EmailEditor, { EditorRef } from 'react-email-editor';
 import { ArrowLeft, Mail, ChevronDown, Check, X, Copy, Info, Eye, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +60,36 @@ const TEMPLATE_VARIABLES = [
   },
 ];
 
+// Sample values so Preview/Send Test show real-looking content instead of blank
+// `{{variable}}` gaps — real data is only available when an actual event (registration,
+// order, etc.) triggers the send.
+const SAMPLE_TAG_VALUES: Record<string, string> = {
+  email: 'jane.doe@example.com',
+  firstName: 'Jane',
+  lastName: 'Doe',
+  userName: 'Jane',
+  title: 'Ms',
+  companyName: 'Doe Jewellers Ltd',
+  companyWebsite: 'https://doejewellers.example.com',
+  phone: '+44 7700 900000',
+  role: 'user',
+  status: 'approved',
+  orderNumber: 'SO-10234',
+  orderDate: '01/01/2026',
+  itemsList: '1. Round Brilliant 1.20ct - SKU1234 - Qty 1     £3,200.00',
+  itemsTable: '<table><tr><td>Round Brilliant 1.20ct</td><td>Qty 1</td><td>£3,200.00</td></tr></table>',
+  clientCode: 'CLA1B2C3',
+  totalQty: '1',
+  subtotal: '£3,200.00',
+  vat: '£640.00',
+  shipping: 'Free',
+  total: '£3,840.00',
+  trackUrl: '#',
+  adminOrderUrl: '#',
+  reason: 'Incomplete supporting documents',
+  verification: 'sample-verification-token',
+};
+
 const AdminEmailEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -73,6 +105,7 @@ const AdminEmailEditor = () => {
   const [recipients, setRecipients] = useState<string[]>([]);
   const [recipientInput, setRecipientInput] = useState('');
   const recipientInputRef = useRef<HTMLInputElement>(null);
+  const [dynamicRecipient, setDynamicRecipient] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
   const [previewing, setPreviewing] = useState(false);
@@ -83,7 +116,7 @@ const AdminEmailEditor = () => {
     if (!id) return;
     setPreviewing(true);
     try {
-      const res = await adminApi.previewEmailTemplate(id);
+      const res = await adminApi.previewEmailTemplate(id, SAMPLE_TAG_VALUES);
       const url = URL.createObjectURL(new Blob([res.data.html], { type: 'text/html' }));
       window.open(url, '_blank');
     } catch {
@@ -101,7 +134,7 @@ const AdminEmailEditor = () => {
     }
     setSendingTest(true);
     try {
-      await adminApi.sendTestEmailTemplate(id, testEmail);
+      await adminApi.sendTestEmailTemplate(id, testEmail, SAMPLE_TAG_VALUES);
       toast.success(`Test email sent to ${testEmail}`);
     } catch {
       toast.error('Failed to send test email — save the template first');
@@ -166,6 +199,7 @@ const AdminEmailEditor = () => {
       setName(res.data.name || 'New Template');
       setSubject(res.data.subject || '');
       setRecipients(res.data.recipients ?? []);
+      setDynamicRecipient(res.data.dynamicRecipient ?? false);
       if (emailEditorRef.current?.editor) {
         if (res.data.design) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -207,7 +241,7 @@ const AdminEmailEditor = () => {
     emailEditorRef.current.editor.exportHtml(async (data) => {
       const { design, html } = data;
       try {
-        await adminApi.saveEmailTemplate(id, design, html, name, subject, recipients);
+        await adminApi.saveEmailTemplate(id, design, html, name, subject, recipients, dynamicRecipient);
         savedRef.current = true;
         toast.success('Template saved');
       } catch {
@@ -291,7 +325,25 @@ const AdminEmailEditor = () => {
       {/* Recipients */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground">Recipients</label>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-foreground">Recipients</label>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="dynamic-recipient" className="text-xs text-muted-foreground">
+                Sent automatically to a specific user
+              </Label>
+              <Switch
+                id="dynamic-recipient"
+                checked={dynamicRecipient}
+                onCheckedChange={setDynamicRecipient}
+              />
+            </div>
+          </div>
+          {dynamicRecipient ? (
+            <p className="text-xs text-muted-foreground border border-dashed border-border rounded-sm px-3 py-2.5">
+              This template is sent automatically to whichever user/order triggers it (e.g. the person who just registered, or placed an order) — the recipients list below is not used.
+            </p>
+          ) : (
+          <>
           <div className="flex gap-2">
             <Input
               ref={recipientInputRef}
@@ -386,6 +438,8 @@ const AdminEmailEditor = () => {
                 </span>
               ))}
             </div>
+          )}
+          </>
           )}
         </div>
         <div className="flex flex-col gap-1.5">
