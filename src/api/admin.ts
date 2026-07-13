@@ -38,6 +38,11 @@ export interface AdminStats {
   inactiveUsers: number;
   blockedUsers: number;
   zohoOrderFormErrors: number;
+  zohoSyncErrors: number;
+  zohoContactsCount: number;
+  totalOrders: number;
+  activeCarts: number;
+  lowStockCount: number;
 }
 
 export interface Post {
@@ -81,6 +86,17 @@ export type UserStatus = 'draft' | 'pending' | 'approved' | 'inactive' | 'blocke
 export interface UserStatusLogEntry {
   _id: string;
   userId: string;
+  fromStatus?: string;
+  toStatus: string;
+  action: string;
+  reason?: string;
+  changedBy?: { _id: string; firstName: string; lastName?: string; email: string };
+  createdAt: string;
+}
+
+export interface ActivityLogEntry {
+  _id: string;
+  userId?: { _id: string; firstName: string; lastName?: string; email: string; companyName?: string };
   fromStatus?: string;
   toStatus: string;
   action: string;
@@ -163,6 +179,28 @@ export interface ZohoSyncResult {
   message?: string;
 }
 
+export interface ZohoContactPerson {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  mobile?: string;
+  isPrimaryContact?: boolean;
+}
+
+export interface ZohoContactRow {
+  _id: string;
+  _zohoId?: string;
+  name?: string;
+  companyName?: string;
+  email?: string;
+  phone?: string;
+  status?: string;
+  createdAt?: string;
+  contactPersons?: ZohoContactPerson[];
+  [key: string]: unknown;
+}
+
 export interface ZohoInventoryItem {
   item_id: string;
   name: string;
@@ -187,6 +225,9 @@ export const adminApi = {
   getStats: () =>
     apiClient.get<AdminStats>(endpoints.stats, undefined, undefined, false, base),
 
+  getRecentActivity: (limit?: number) =>
+    apiClient.get<{ logs: ActivityLogEntry[] }>(endpoints.activity, { limit }, undefined, false, base),
+
   getUsers: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
     apiClient.get<{ users: AdminUser[]; total: number; page: number; limit: number; totalPages: number }>(
       endpoints.users,
@@ -208,6 +249,15 @@ export const adminApi = {
   getStaff: (params?: { page?: number; limit?: number; status?: string }) =>
     apiClient.get<{ staff: StaffUser[]; total: number; page: number; limit: number; totalPages: number }>(
       endpoints.staff,
+      params,
+      undefined,
+      false,
+      base
+    ),
+
+  getZohoContacts: (params?: { page?: number; limit?: number; search?: string }) =>
+    apiClient.get<{ contacts: ZohoContactRow[]; total: number; page: number; limit: number; totalPages: number }>(
+      endpoints.zohoContacts,
       params,
       undefined,
       false,
