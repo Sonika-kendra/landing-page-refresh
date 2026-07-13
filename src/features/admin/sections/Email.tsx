@@ -76,18 +76,33 @@ const SAMPLE_TAG_VALUES: Record<string, string> = {
   orderNumber: 'SO-10234',
   orderDate: '10.02.26',
   itemsList: '1. Round Brilliant 1.20ct - SKU1234 - Qty 1     £3,200.00',
-  itemsTable: `<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #bfc3c8;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222">
-  <tr style="font-weight:700;color:#263d2e;border-bottom:1px solid #263d2e">
-    <td style="padding:6px 6px;text-align:left">#</td>
-    <td style="padding:6px 6px;text-align:left">Description</td>
-    <td style="padding:6px 6px;text-align:center">Qty</td>
-    <td style="padding:6px 6px;text-align:right">Price</td>
-  </tr>
+  // Mirrors the real row markup from api/src/infrastructure/email/orderEmailFields.js
+  // (numbered row + divider) so Preview/Send Test look like an actual order email.
+  itemsTable: `<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#222">
   <tr>
-    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:left">1</td>
-    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:left">Round Brilliant 1.20ct</td>
-    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:center">1</td>
-    <td style="padding:8px 6px;border-bottom:1px solid #bfc3c8;text-align:right;font-weight:700;white-space:nowrap">&pound;3200.00</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">No.</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">Category</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">Stock Code</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">CT</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">Metal</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">Qty</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e">Unit Price</td>
+    <td style="padding:0 6px 10px;text-align:center;font-weight:700;color:#263d2e;white-space:nowrap">Total</td>
+  </tr>
+  <tr><td colspan="8" style="padding:0 0 20px">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td height="1" style="height:1px;line-height:1px;font-size:0;border-radius:999px;background-color:#bfc3c8">&nbsp;</td>
+    </tr></table>
+  </td></tr>
+  <tr>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">1</td>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">Round Brilliant</td>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">SKU1234</td>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">1.20ct</td>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">YG</td>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">1</td>
+    <td style="padding:0 6px 20px;text-align:center;vertical-align:top">&pound;3200.00</td>
+    <td style="padding:0 6px 20px;text-align:center;font-weight:700;white-space:nowrap;vertical-align:top">&pound;3200.00</td>
   </tr>
 </table>`,
   clientCode: 'CLA1B2C3',
