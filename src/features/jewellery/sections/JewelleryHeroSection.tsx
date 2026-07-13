@@ -58,7 +58,7 @@ const JewelleryHeroSection = () => {
             onClick={handleShopClick}
             className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
           >
-            Lab Diamonds
+            Lab Jewellery
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
           </Button>
 
@@ -67,7 +67,7 @@ const JewelleryHeroSection = () => {
             onClick={handleShopClick}
             className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
           >
-            Natural Diamonds
+            Natural Jewellery
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
           </Button>
         </div>

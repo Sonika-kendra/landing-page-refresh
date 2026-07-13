@@ -104,6 +104,11 @@ const SAMPLE_TAG_VALUES: Record<string, string> = {
     <td style="padding:0 6px 20px;text-align:center;vertical-align:top">&pound;3200.00</td>
     <td style="padding:0 6px 20px;text-align:center;font-weight:700;white-space:nowrap;vertical-align:top">&pound;3200.00</td>
   </tr>
+  <tr><td colspan="8" style="padding:0 0 20px">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td height="1" style="height:1px;line-height:1px;font-size:0;border-radius:999px;background-color:#bfc3c8">&nbsp;</td>
+    </tr></table>
+  </td></tr>
 </table>`,
   clientCode: 'CLA1B2C3',
   totalQty: '1',
