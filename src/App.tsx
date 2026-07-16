@@ -38,6 +38,7 @@ const Contact = lazy(() => import('@/features/contact'));
 const Shop = lazy(() => import('@/features/shop'));
 const ProductDetail = lazy(() => import('@/features/shop/ProductDetail'));
 const DiamondShop = lazy(() => import('@/features/diamond-shop'));
+const DiamondDetail = lazy(() => import('@/features/diamond-shop/DiamondDetail'));
 const VerifyEmail = lazy(() => import('@/features/auth/VerifyEmail'));
 const ResetPassword = lazy(() => import('@/features/auth/ResetPassword'));
 const AdminLayout = lazy(() => import('@/features/admin'));
@@ -90,6 +91,7 @@ const AppRoutes = () => (
         <Route path="/" element={<Landing />} />
         <Route path="/diamonds" element={<Diamond />} />
         <Route path="/diamonds/all" element={<ProtectedRoute><DiamondShop /></ProtectedRoute>} />
+        <Route path="/diamonds/all/:id" element={<ProtectedRoute><DiamondDetail /></ProtectedRoute>} />
         <Route path="/jewellery" element={<Jewellery />} />
         <Route path={websiteUrlConfig.Blogs} element={<Blogs />} />
         <Route path={`${websiteUrlConfig.Blogs}/:slug`} element={<BlogPost />} />

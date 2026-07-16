@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Copy, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Copy, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCompare } from './CompareContext';
@@ -262,6 +263,9 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
 
             {/* Icon rail — its own column, so it can never overlap the content */}
             <div className="flex flex-col items-center gap-4 pr-4 pt-1">
+              <Link to={`/diamonds/all/${item.id}`} onClick={onClose} title="View full details" className="text-foreground/40 transition-colors hover:text-foreground">
+                <Maximize className="h-4 w-4" />
+              </Link>
               <button onClick={() => shareDiamond(d.title)} title="Share" className="text-foreground/40 transition-colors hover:text-foreground">
                 <Share2 className="h-4 w-4" />
               </button>

@@ -33,10 +33,9 @@ import hrdLogo from '@/assets/jewellery/certification/HRDAntwerplogo_notagline-T
 import sglLogo from '@/assets/jewellery/certification/SGL.png';
 
 const CERT_LOGOS: Record<string, string> = { igi: igiLogo, gia: giaLogo, hrd: hrdLogo, sgl: sglLogo };
-const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
+export const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
 
-
-const trustBadges = [
+export const trustBadges = [
   { icon: Leaf, label: 'Ethical Sourcing' },
   { icon: BadgeDollarSign, label: 'Competitive Pricing' },
   { icon: Sparkles, label: 'Free After Care' },

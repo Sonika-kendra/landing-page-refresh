@@ -6,6 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import defaultProductImage from "@/assets/product-placeholder.svg";
 
 interface Suggestion {
   name: string;
@@ -16,9 +17,10 @@ interface Suggestion {
 interface YouMayAlsoLikeProps {
   items: Suggestion[];
   hasActiveFilters?: boolean;
+  basePath?: string;
 }
 
-const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
+const YouMayAlsoLike = ({ items, hasActiveFilters, basePath = "/jewellery/all" }: YouMayAlsoLikeProps) => {
   return (
     <section className="border-t border-border/30 bg-gray-50 py-12 md:py-16">
       <div className="henig-container">
@@ -43,9 +45,13 @@ const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
                   <div className="group cursor-pointer px-2 text-center">
                     <div className="mb-3 aspect-square overflow-hidden bg-white">
                       <img
-                        src={item.image}
+                        src={item.image || defaultProductImage}
                         alt={item.name}
                         className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = defaultProductImage;
+                        }}
                       />
                     </div>
                     <p className="text-sm leading-tight text-foreground">{item.name}</p>
@@ -54,7 +60,7 @@ const YouMayAlsoLike = ({ items, hasActiveFilters }: YouMayAlsoLikeProps) => {
                 return (
                   <CarouselItem key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                     {item.id
-                      ? <Link to={`/jewellery/all/${item.id}`}>{inner}</Link>
+                      ? <Link to={`${basePath}/${item.id}`}>{inner}</Link>
                       : inner
                     }
                   </CarouselItem>
