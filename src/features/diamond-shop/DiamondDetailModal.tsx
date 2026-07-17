@@ -162,7 +162,12 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                       </div>
                     ) : (
                       <>
-                        <img src={gi.url} alt="" className="h-full w-full object-contain p-1" />
+                        <img
+                          src={gi.url || defaultProductImage}
+                          alt=""
+                          className="h-full w-full object-contain p-1"
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                        />
                         {idx === 0 && galleryItems.length > 1 && <span className="absolute bottom-0.5 left-0.5 text-[8px] font-semibold text-foreground/60">Front view</span>}
                       </>
                     )}

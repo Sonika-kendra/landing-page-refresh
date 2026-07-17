@@ -10,7 +10,6 @@ import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import YouMayAlsoLike from '@/features/shop/components/YouMayAlsoLike';
 import { trustBadges, getCertLogo } from '@/features/shop/ProductDetail';
 import { productsApi } from '@/api/products';
-import { mapZohoToShopProduct } from '@/data/shop/mappers';
 import type { DiamondItem } from './DiamondCard';
 import { extractDiamondFields } from './DiamondCard';
 import { CompareProvider, useCompare } from './CompareContext';
@@ -53,14 +52,11 @@ const DiamondDetailInner = () => {
     setIsLoading(true);
     setFetchError(null);
     setSelectedImage(0);
-    productsApi.getOne(id)
+    productsApi.getOneDiamond(id)
       .then((res) => {
         const raw = res.data?.item as Record<string, unknown> | undefined;
         if (!raw) { setFetchError('not_found'); return; }
-        // Same merge order the /products/diamonds list endpoint uses server-side:
-        // raw cf_ fields first so extractDiamondFields still sees them, then the
-        // mapped ShopProduct shape wins on shared keys (id, sku, price, ...).
-        setItem({ ...raw, ...mapZohoToShopProduct(raw) } as DiamondItem);
+        setItem(raw as DiamondItem);
       })
       .catch(() => setFetchError('error'))
       .finally(() => setIsLoading(false));
@@ -256,7 +252,7 @@ const DiamondDetailInner = () => {
                     >
                       {gi.type === 'video' ? (
                         <>
-                          <video src={gi.url} className="h-full w-full object-contain" muted playsInline preload="metadata" />
+                          <video src={gi.url} className="h-full w-full object-contain" muted loop autoPlay playsInline preload="auto" />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                             <svg className="h-6 w-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                           </div>
@@ -264,7 +260,12 @@ const DiamondDetailInner = () => {
                       ) : gi.type === '360' ? (
                         <div className="flex h-full w-full items-center justify-center bg-secondary/40 text-[10px] font-semibold text-foreground/60">360°</div>
                       ) : (
-                        <img src={gi.url} alt="" className="h-full w-full object-contain p-1" />
+                        <img
+                          src={gi.url || defaultProductImage}
+                          alt=""
+                          className="h-full w-full object-contain p-1"
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                        />
                       )}
                     </button>
                   ))}

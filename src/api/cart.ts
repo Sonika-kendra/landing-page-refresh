@@ -19,6 +19,9 @@ export const cartApi = {
   checkout: (id: string, data?: Record<string, any>) =>
     client.post(ep.checkout(id), data ?? {}, undefined, base),
 
+  pushOrderForm: (id: string, data?: Record<string, any>) =>
+    client.post(ep.pushOrderForm(id), data ?? {}, undefined, base),
+
   abandon: (id: string) =>
     client.delete(ep.delete(id), undefined, undefined, base),
 };

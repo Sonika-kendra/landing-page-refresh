@@ -1,23 +1,33 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
+import { useFavourites } from '@/context/FavouritesContext';
 import { getMetalType } from '@/data/shop/metalTypes';
 import { toast } from '@/hooks/use-toast';
+import defaultProductImage from '@/assets/product-placeholder.svg';
 
 const fmt = (n: number) => n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, loading, removeItem, updateQuantity } = useCart();
+  const { addFavourite } = useFavourites();
 
   const handleRemove = async (lineItemId: string) => {
     try { await removeItem(lineItemId); }
     catch { toast({ title: 'Could not remove item', variant: 'destructive' }); }
+  };
+
+  const handleMoveToWishlist = async (lineItemId: string, itemId: string) => {
+    try {
+      addFavourite(itemId);
+      await removeItem(lineItemId);
+    } catch { toast({ title: 'Could not move item to wishlist', variant: 'destructive' }); }
   };
 
   const handleUpdateQty = async (lineItemId: string, qty: number) => {
@@ -54,9 +64,12 @@ const Cart = () => {
               {items.map(item => (
                 <Card key={item.line_item_id} className="p-4 flex gap-4">
                   <Link to={`/jewellery/all/${item.item_id}`} className="h-24 w-24 flex-shrink-0 rounded overflow-hidden bg-muted">
-                    {item.image
-                      ? <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                      : <div className="h-full w-full" />}
+                    <img
+                      src={item.image || defaultProductImage}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                    />
                   </Link>
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between gap-4">
@@ -88,15 +101,27 @@ const Cart = () => {
                           )}
                         </div>
                       </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleRemove(item.line_item_id)}
-                        disabled={loading}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleMoveToWishlist(item.line_item_id, item.item_id)}
+                          disabled={loading}
+                          title="Move to wishlist"
+                        >
+                          <Heart className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleRemove(item.line_item_id)}
+                          disabled={loading}
+                          className="text-destructive"
+                          title="Remove"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="mt-auto flex items-center justify-between">
                       <div className="flex items-center border border-border rounded">

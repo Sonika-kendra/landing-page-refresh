@@ -490,7 +490,7 @@ const Header = () => {
 
                           {/* Address Book — non-admin only */}
                           {user.role !== 'admin' && user.profile?.name !== 'Administrator' && (
-                            <li>
+                            <li className="border-t border-border">
                               <Link
                                 to="/account/addresses"
                                 className="group flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
@@ -505,7 +505,7 @@ const Header = () => {
 
                         {/* ── Admin Panel — admin only ── */}
                         {(user.role === 'admin' || user.role === 'Administrator' || user.profile?.name === 'Administrator') && (
-                          <div className="border-t border-border">
+                          <div className="border-t border-border pb-1">
                             <button
                               type="button"
                               onClick={() => setAdminPanelExpanded((v) => !v)}
@@ -546,7 +546,7 @@ const Header = () => {
                         )}
 
                         {/* ── Sign out — always shown ── */}
-                        <div className="border-t border-border mt-1">
+                        <div className="border-t border-border">
                           <button
                             type="button"
                             onClick={logout}
@@ -610,7 +610,10 @@ const Header = () => {
             onMouseLeave={handleLeave}
           >
             <div className="henig-container py-10">
-              <div className="grid grid-cols-4 lg:grid-cols-5 gap-10">
+              <div
+                className="grid gap-10"
+                style={{ gridTemplateColumns: `repeat(${megaMenuCategories.length}, minmax(0, 1fr))` }}
+              >
                 {megaMenuCategories.map((category) => (
                   <div key={category.title}>
                     <h3 className="text-sm font-bold uppercase tracking-wider mb-4">

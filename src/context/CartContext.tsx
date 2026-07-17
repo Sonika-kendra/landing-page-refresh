@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { cartApi } from '@/api/cart';
 import { useAuth } from './AuthContext';
+import { useFavourites } from './FavouritesContext';
 
 const CART_ID_KEY = 'henig-cart-id';
 
@@ -64,6 +65,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
+  const { removeFavourite } = useFavourites();
   const [cartId, setCartId] = useState<string | null>(() =>
     USE_DUMMY_CART ? DUMMY_CART.salesorder_id : localStorage.getItem(CART_ID_KEY)
   );
@@ -143,6 +145,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             }];
         return { ...prev, ...recalcTotals(newItems), line_items: newItems };
       });
+      removeFavourite(item.item_id);
       return;
     }
     return enqueueMutation(async () => {
@@ -188,6 +191,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       const res = await cartApi.update(id, updatePayload);
       setCart(res.data?.cart ?? null);
+      removeFavourite(item.item_id);
     } catch (err: any) {
       console.error('addItem failed:', err);
       // Clear stale cart IDs so the next attempt creates a fresh cart

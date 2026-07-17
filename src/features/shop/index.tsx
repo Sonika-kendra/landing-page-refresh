@@ -942,7 +942,7 @@ const ShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[340px] flex-col p-0 sm:w-[400px] top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
+              <SheetContent side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
                 <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
                   <SheetHeader className="text-left">
                     <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">

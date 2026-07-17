@@ -71,6 +71,9 @@ export const productsApi = {
   getOne: (id: string) =>
     client.get(ep.one(id), undefined, undefined, false, base),
 
+  getOneDiamond: (id: string) =>
+    client.get(ep.oneDiamond(id), undefined, undefined, false, base),
+
   getByName: (name: string) =>
     client.get(ep.byName, { name }, undefined, false, base),
 

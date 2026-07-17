@@ -31,6 +31,7 @@ import igiLogo from '@/assets/jewellery/certification/IGI.svg';
 import giaLogo from '@/assets/jewellery/certification/GIA.svg';
 import hrdLogo from '@/assets/jewellery/certification/HRDAntwerplogo_notagline-Transperant-Background.png';
 import sglLogo from '@/assets/jewellery/certification/SGL.png';
+import defaultProductImage from '@/assets/product-placeholder.svg';
 
 const CERT_LOGOS: Record<string, string> = { igi: igiLogo, gia: giaLogo, hrd: hrdLogo, sgl: sglLogo };
 export const getCertLogo = (cert: string): string | null => CERT_LOGOS[cert.toLowerCase().trim()] ?? null;
@@ -307,7 +308,12 @@ const ProductDetail = () => {
                     playsInline
                   />
                 ) : (
-                  <img src={galleryItems[selectedImage]?.url} alt={product.name} className="h-full w-full object-contain p-8" />
+                  <img
+                    src={galleryItems[selectedImage]?.url || defaultProductImage}
+                    alt={product.name}
+                    className="h-full w-full object-contain p-8"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                  />
                 )}
                 {galleryItems.length > 1 && (
                   <>
@@ -340,24 +346,29 @@ const ProductDetail = () => {
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <div className="flex flex-1 gap-1.5">
+                    <div className="flex gap-1.5">
                       {visibleThumbs.map((item, vi) => {
                         const absoluteIndex = thumbOffset + vi;
                         return (
                           <button
                             key={absoluteIndex}
                             onClick={() => handleThumbSelect(absoluteIndex)}
-                            className={`relative h-[90px] flex-1 overflow-hidden border bg-white transition-all ${absoluteIndex === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
+                            className={`relative h-[90px] w-[90px] flex-shrink-0 overflow-hidden border bg-white transition-all ${absoluteIndex === selectedImage ? 'border-foreground/60' : 'border-border/30 hover:border-border/60'}`}
                           >
                             {item.type === 'video' ? (
                               <>
-                                <video src={item.url} className="h-full w-full object-contain" muted playsInline preload="metadata" />
+                                <video src={item.url} className="h-full w-full object-contain" muted loop autoPlay playsInline preload="auto" />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                                   <svg className="h-6 w-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                 </div>
                               </>
                             ) : (
-                              <img src={item.url} alt="" className="h-full w-full object-contain p-1" />
+                              <img
+                                src={item.url || defaultProductImage}
+                                alt=""
+                                className="h-full w-full object-contain p-1"
+                                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                              />
                             )}
                           </button>
                         );

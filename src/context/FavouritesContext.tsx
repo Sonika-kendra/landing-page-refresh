@@ -5,6 +5,8 @@ import { wishlistApi } from '@/api/wishlist';
 interface FavouritesContextValue {
   favourites: string[];
   toggleFavourite: (id: string) => void;
+  addFavourite: (id: string) => void;
+  removeFavourite: (id: string) => void;
   isFavourite: (id: string) => boolean;
   count: number;
   loading: boolean;
@@ -48,11 +50,31 @@ export const FavouritesProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [favourites, isAuthenticated, openModal]);
 
+  const addFavourite = useCallback(async (id: string) => {
+    if (favourites.includes(id)) return;
+    setFavourites(prev => [...prev, id]);
+    try {
+      await wishlistApi.add(id);
+    } catch {
+      setFavourites(prev => prev.filter(f => f !== id));
+    }
+  }, [favourites]);
+
+  const removeFavourite = useCallback(async (id: string) => {
+    if (!favourites.includes(id)) return;
+    setFavourites(prev => prev.filter(f => f !== id));
+    try {
+      await wishlistApi.remove(id);
+    } catch {
+      setFavourites(prev => prev.includes(id) ? prev : [...prev, id]);
+    }
+  }, [favourites]);
+
   const isFavourite = useCallback((id: string) => favourites.includes(id), [favourites]);
 
   return (
     <FavouritesContext.Provider
-      value={{ favourites, toggleFavourite, isFavourite, count: favourites.length, loading }}
+      value={{ favourites, toggleFavourite, addFavourite, removeFavourite, isFavourite, count: favourites.length, loading }}
     >
       {children}
     </FavouritesContext.Provider>
