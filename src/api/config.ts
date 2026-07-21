@@ -45,7 +45,6 @@ export const API_CONFIG = {
     base: 'new' as ApiBase,
     endpoints: {
       stats:        '/admin/stats',
-      activity:     '/admin/activity',
       users:        '/admin/users',
       pendingUsers: '/admin/users/pending',
       approveUser:    (id: string) => `/admin/users/${id}/approve`,

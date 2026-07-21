@@ -1,14 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
-  Users, UserX, Activity, Clock, FileEdit, Building2, History,
+  Users, UserX, Activity, Clock, FileEdit, Building2,
   ShoppingCart, ShoppingBag, PackageX, Newspaper, RefreshCw, ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { adminApi, ActivityLogEntry } from '@/api/admin';
+import { adminApi } from '@/api/admin';
 
 // One accent per section (fixed, never cycled) — cards inside a section share it;
 // "flag" overrides to the destructive tint when a card's own value needs attention.
@@ -25,37 +24,6 @@ const formatStat = (n: number) =>
   n >= 10000
     ? new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
     : n.toLocaleString();
-
-const ACTION_LABELS: Record<string, string> = {
-  approve: 'approved',
-  reject: 'rejected',
-  block: 'blocked',
-  unblock: 'unblocked',
-  activate: 'activated',
-  deactivate: 'deactivated',
-  'submit-draft': 'submitted',
-  'role-change': 'changed role for',
-  'scope-change': 'changed scopes for',
-  delete: 'deleted',
-};
-
-const ACTION_VARIANT: Record<string, 'default' | 'outline' | 'destructive' | 'secondary'> = {
-  approve: 'default',
-  activate: 'default',
-  reject: 'destructive',
-  block: 'destructive',
-  delete: 'destructive',
-  unblock: 'secondary',
-  deactivate: 'secondary',
-  'submit-draft': 'outline',
-  'role-change': 'outline',
-  'scope-change': 'outline',
-};
-
-const formatWhen = (iso: string) =>
-  new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
-  });
 
 const StatCard = ({
   title,
@@ -110,47 +78,16 @@ const SectionHeading = ({ children }: { children: React.ReactNode }) => (
   </h2>
 );
 
-const ActivityRow = ({ entry }: { entry: ActivityLogEntry }) => {
-  const target = entry.userId
-    ? [entry.userId.firstName, entry.userId.lastName].filter(Boolean).join(' ') || entry.userId.email
-    : 'a user';
-  const actor = entry.changedBy
-    ? [entry.changedBy.firstName, entry.changedBy.lastName].filter(Boolean).join(' ') || entry.changedBy.email
-    : 'Someone';
-  const label = ACTION_LABELS[entry.action] ?? entry.action;
-
-  return (
-    <div className="flex items-center justify-between py-3 gap-3">
-      <div className="min-w-0">
-        <p className="text-sm truncate">
-          <span className="font-medium">{actor}</span> {label} <span className="font-medium">{target}</span>
-        </p>
-        <p className="text-xs text-muted-foreground truncate">{formatWhen(entry.createdAt)}</p>
-      </div>
-      <Badge variant={ACTION_VARIANT[entry.action] ?? 'outline'} className="text-xs shrink-0 capitalize">
-        {entry.action.replace('-', ' ')}
-      </Badge>
-    </div>
-  );
-};
-
 const Dashboard = () => {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: () => adminApi.getStats().then(r => r.data),
   });
 
-  const { data: activityData, isLoading: activityLoading } = useQuery({
-    queryKey: ['admin', 'activity'],
-    queryFn: () => adminApi.getRecentActivity(10).then(r => r.data),
-  });
-
   const { data: posts, isLoading: postsLoading } = useQuery({
     queryKey: ['admin', 'posts'],
     queryFn: () => adminApi.getPosts().then(r => r.data),
   });
-
-  const recentActivity = activityData?.logs ?? [];
 
   return (
     <div className="space-y-6">
@@ -271,32 +208,6 @@ const Dashboard = () => {
           />
         </div>
       </div>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-medium">Recent Admin Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activityLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : recentActivity.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <History className="h-10 w-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No admin activity yet</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {recentActivity.map(entry => (
-                <ActivityRow key={entry._id} entry={entry} />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 };

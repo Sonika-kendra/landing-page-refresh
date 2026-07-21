@@ -94,17 +94,6 @@ export interface UserStatusLogEntry {
   createdAt: string;
 }
 
-export interface ActivityLogEntry {
-  _id: string;
-  userId?: { _id: string; firstName: string; lastName?: string; email: string; companyName?: string };
-  fromStatus?: string;
-  toStatus: string;
-  action: string;
-  reason?: string;
-  changedBy?: { _id: string; firstName: string; lastName?: string; email: string };
-  createdAt: string;
-}
-
 export interface CreateUserPayload {
   firstName: string;
   lastName?: string;
@@ -224,9 +213,6 @@ const { base, endpoints } = API_CONFIG.admin;
 export const adminApi = {
   getStats: () =>
     apiClient.get<AdminStats>(endpoints.stats, undefined, undefined, false, base),
-
-  getRecentActivity: (limit?: number) =>
-    apiClient.get<{ logs: ActivityLogEntry[] }>(endpoints.activity, { limit }, undefined, false, base),
 
   getUsers: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
     apiClient.get<{ users: AdminUser[]; total: number; page: number; limit: number; totalPages: number }>(

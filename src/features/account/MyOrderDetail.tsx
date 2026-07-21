@@ -241,6 +241,16 @@ const StarRating = ({ orderId, initialRating }: { orderId: string; initialRating
   if (submitted) {
     return (
       <div className="flex flex-col items-center gap-2 py-2 text-center">
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map(n => (
+            <Star
+              key={n}
+              className={`h-6 w-6 ${
+                n <= selected ? 'fill-primary text-primary' : 'fill-none text-muted-foreground/30'
+              }`}
+            />
+          ))}
+        </div>
         <CheckCircle2 className="h-8 w-8 text-primary" />
         <p className="text-sm font-medium">Thanks for your feedback!</p>
         <p className="text-xs text-muted-foreground">Your review helps us improve.</p>
