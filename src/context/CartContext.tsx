@@ -151,10 +151,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return enqueueMutation(async () => {
     setLoading(true);
     try {
-      const id = await ensureCart();
+      let id = await ensureCart();
       // Fetch fresh cart to avoid stale-state race conditions when items are added quickly
-      const freshRes = await cartApi.get(id);
-      const freshCart = freshRes.data?.cart;
+      let freshCart;
+      try {
+        const freshRes = await cartApi.get(id);
+        freshCart = freshRes.data?.cart;
+      } catch (err: any) {
+        if (err?.response?.status !== 404) throw err;
+        // Stale cart id (e.g. it emptied out and was deleted server-side) — start a fresh one
+        setCartId(null);
+        localStorage.removeItem(CART_ID_KEY);
+        id = await ensureCart();
+        freshCart = null;
+      }
 
       // If the cart is no longer editable (checked out / voided), discard it and start fresh
       if (freshCart && freshCart.status && freshCart.status !== 'draft') {
@@ -221,7 +231,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const res = await cartApi.removeItem(cartId, lineItemId);
-      setCart(res.data?.cart ?? null);
+      const updatedCart = res.data?.cart ?? null;
+      setCart(updatedCart);
+      // Backend deletes the draft cart once it's emptied out — drop the stale local id too
+      if (!updatedCart) {
+        setCartId(null);
+        localStorage.removeItem(CART_ID_KEY);
+      }
     } finally {
       setLoading(false);
     }
@@ -265,15 +281,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  // Detaches the local cart reference only — does not call the abandon API.
+  // A checked-out cart is now a real order, so it must never be voided here.
   const clearCart = async () => {
-    if (USE_DUMMY_CART || !cartId) return;
-    try {
-      await cartApi.abandon(cartId);
-    } finally {
-      setCart(null);
-      setCartId(null);
-      localStorage.removeItem(CART_ID_KEY);
-    }
+    setCart(null);
+    setCartId(null);
+    localStorage.removeItem(CART_ID_KEY);
   };
 
   const refreshCart = async () => {

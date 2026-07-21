@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
-  Heart, Share2, Copy, Mail, BarChart2, Download, FileText,
+  Heart, Share2, Copy, Check, Mail, BarChart2, Download, FileText,
   Truck, RotateCcw, Home as HomeIcon,
 } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
@@ -282,9 +282,8 @@ const DiamondDetailInner = () => {
               <div className="mb-5 flex items-center gap-1.5 text-xs">
                 <span className="font-medium text-foreground/60">SKU #: {item.sku}</span>
                 <button onClick={copySku} title="Copy SKU" className={`transition-colors ${skuCopied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`}>
-                  <Copy className="h-3.5 w-3.5" />
+                  {skuCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 </button>
-                {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </div>
 
               <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-foreground/60 sm:grid-cols-4">
@@ -323,10 +322,9 @@ const DiamondDetailInner = () => {
                           <span>: {d.certNumber || '–'}</span>
                           {d.certNumber && (
                             <button onClick={copyCert} className={`transition-colors ${certCopied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`} title="Copy cert number">
-                              <Copy className="h-3.5 w-3.5" />
+                              {certCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                             </button>
                           )}
-                          {certCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
                         </span>
                       </td>
                     </tr>

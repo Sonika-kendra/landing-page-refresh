@@ -38,6 +38,12 @@ const STATUSES = [
   { value: 'error', label: 'Error' },
 ];
 
+// ponytail: order_forms sync is hidden from the admin UI until its phase-2
+// workflow ships — it's excluded from the scheduled/full sync on the backend
+// too (see zoho.scheduler.js), so hiding it here also keeps it out of the
+// full-sync completion poller below.
+const HIDDEN_MODULES = ['order_forms'];
+
 const makeLogColumns = (onErrorClick: (msg: string) => void): ColumnDef<ZohoSyncLog>[] => [
   {
     key: 'status',
@@ -149,7 +155,7 @@ const ZohoSync = () => {
     }
 
     const startMs = fullSyncStartedAt.getTime();
-    const modules = statusData?.modules ?? [];
+    const modules = (statusData?.modules ?? []).filter(m => !HIDDEN_MODULES.includes(m));
 
     pollRef.current = setInterval(async () => {
       try {
@@ -246,7 +252,7 @@ const ZohoSync = () => {
   });
 
   const anySyncRunning = isFullSyncRunning || syncModuleMutation.isPending || syncProductsMutation.isPending || syncDirectoryMutation.isPending;
-  const modules = statusData?.modules ?? [];
+  const modules = (statusData?.modules ?? []).filter(m => !HIDDEN_MODULES.includes(m));
 
   // Log filter key — forces DataTable remount (page reset) when filters change
   const logsFilterKey = `${moduleFilter}-${directionFilter}-${statusFilter}`;

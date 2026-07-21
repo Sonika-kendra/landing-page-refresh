@@ -15,6 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { ordersApi } from '@/api/orders';
+import defaultProductImage from '@/assets/product-placeholder.svg';
 
 import ring1    from '@/assets/jewellery/bestseller/product1.png';
 import ring2    from '@/assets/jewellery/category/ring.png';
@@ -322,8 +323,14 @@ const MyOrderDetail = () => {
 
   const order        = data.salesorder;
   const extStatus: OrderStatus = data.orderStatus?.status ?? 'placed';
-  const stepIdx      = ORDER_STATUS_FLOW.findIndex(s => s.key === extStatus);
   const isCancelled  = extStatus === 'cancelled';
+  // Cancelled orders aren't part of the linear flow — show progress up to whatever
+  // stage they'd reached (from history) rather than hiding the tracker entirely.
+  const history: { status: OrderStatus }[] = data.orderStatus?.history ?? [];
+  const lastRealStatus: OrderStatus = isCancelled
+    ? ([...history].reverse().find((h) => h.status !== 'cancelled')?.status ?? 'web_order')
+    : extStatus;
+  const stepIdx      = ORDER_STATUS_FLOW.findIndex(s => s.key === lastRealStatus);
   const isDelivered  = extStatus === 'delivered';
   const address      = order.shipping_address;
   const statusBadge  = STATUS_BADGE[extStatus];
@@ -385,32 +392,36 @@ const MyOrderDetail = () => {
         </div>
 
         {/* Status tracker */}
-        {!isCancelled && (
-          <div className="px-6 pb-6">
-            <div className="flex items-start">
-              {ORDER_STATUS_FLOW.map((step, i) => {
-                const done   = i <= stepIdx;
-                const active = i === stepIdx;
-                return (
-                  <div key={step.key} className="flex-1 flex flex-col items-center gap-1.5 relative">
-                    {i !== 0 && (
-                      <div className={`absolute top-4 right-1/2 w-full h-0.5 ${i <= stepIdx ? 'bg-white/60' : 'bg-white/15'}`} />
-                    )}
-                    <div className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all
-                      ${active ? 'bg-white border-white text-accent shadow-lg scale-110'
-                        : done  ? 'bg-white/20 border-white/60 text-white'
-                                : 'bg-transparent border-white/20 text-white/30'}`}>
-                      {done ? step.icon : <Circle className="h-3 w-3" />}
-                    </div>
-                    <span className={`text-[10px] text-center leading-tight ${done ? 'text-white/80' : 'text-white/30'}`}>
-                      {step.label}
-                    </span>
+        <div className="px-6 pb-6">
+          <div className="flex items-start">
+            {ORDER_STATUS_FLOW.map((step, i) => {
+              const done   = i <= stepIdx;
+              const active = i === stepIdx;
+              return (
+                <div key={step.key} className="flex-1 flex flex-col items-center gap-1.5 relative">
+                  {i !== 0 && (
+                    <div className={`absolute top-4 right-1/2 w-full h-0.5 ${i <= stepIdx ? (isCancelled ? 'bg-red-400/60' : 'bg-white/60') : 'bg-white/15'}`} />
+                  )}
+                  <div className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all
+                    ${active ? (isCancelled ? 'bg-red-400 border-red-400 text-white shadow-lg' : 'bg-white border-white text-accent shadow-lg scale-110')
+                      : done  ? (isCancelled ? 'bg-red-400/30 border-red-400/60 text-white' : 'bg-white/20 border-white/60 text-white')
+                              : 'bg-transparent border-white/20 text-white/30'}`}>
+                    {done ? step.icon : <Circle className="h-3 w-3" />}
                   </div>
-                );
-              })}
-            </div>
+                  <span className={`text-[10px] text-center leading-tight ${done ? 'text-white/80' : 'text-white/30'}`}>
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
-        )}
+          {isCancelled && (
+            <p className="mt-3 text-xs text-white/60">
+              Cancelled after reaching "{ORDER_STATUS_FLOW.find(s => s.key === lastRealStatus)?.label ?? lastRealStatus}"
+              {data.orderStatus?.cancelReason && ` — ${data.orderStatus.cancelReason}`}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Items + Address — 50/50 */}
@@ -423,28 +434,29 @@ const MyOrderDetail = () => {
           </div>
           <div className="divide-y divide-border">
             {(order.line_items ?? []).map((item: any) => {
-              const img = ITEM_IMAGES[item.name] ?? null;
               return (
                 <div key={item.line_item_id} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/10 transition-colors">
                   <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-muted/30 border border-border">
-                    {img
-                      ? <img src={img} alt={item.name} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-6 w-6 text-muted-foreground/30" />
-                        </div>
-                    }
+                    <img
+                      src={item.image || ITEM_IMAGES[item.name] || defaultProductImage}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">Qty: {item.quantity}</p>
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => setDialog({ type: 'exchange', itemName: item.name })}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 py-1 transition-colors hover:bg-muted/30"
-                      >
-                        <Repeat2 className="h-3 w-3" /> Exchange
-                      </button>
-                    </div>
+                    {isDelivered && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => setDialog({ type: 'exchange', itemName: item.name })}
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 py-1 transition-colors hover:bg-muted/30"
+                        >
+                          <Repeat2 className="h-3 w-3" /> Exchange
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <p className="font-semibold text-sm whitespace-nowrap self-start">
                     £{(item.rate * item.quantity).toLocaleString()}
@@ -478,7 +490,7 @@ const MyOrderDetail = () => {
                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted/40">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-semibold">Shipping Address</p>
+                <p className="text-sm font-semibold">Delivery Address</p>
               </div>
             </div>
 
@@ -515,7 +527,7 @@ const MyOrderDetail = () => {
               )}
             </div>
 
-            {/* Download Invoice */}
+            {/* Download Invoice — commented out until invoice generation is integrated
             <div className="px-5 py-4 border-t border-border bg-muted/10">
               <button
                 onClick={() => window.print()}
@@ -525,6 +537,7 @@ const MyOrderDetail = () => {
                 Download Invoice
               </button>
             </div>
+            */}
           </div>
         )}
       </div>

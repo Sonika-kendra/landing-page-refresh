@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
+import CheckoutSteps from '@/components/shared/common/CheckoutSteps';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -59,6 +60,8 @@ const Cart = () => {
             <Link to="/jewellery/all"><Button>Continue Shopping</Button></Link>
           </Card>
         ) : (
+          <>
+          <CheckoutSteps currentStep={0} />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-3">
               {items.map(item => (
@@ -181,6 +184,7 @@ const Cart = () => {
               </Link>
             </Card>
           </div>
+          </>
         )}
       </div>
     </PageLayout>

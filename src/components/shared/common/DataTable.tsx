@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Fragment, useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import type { QueryKey } from '@tanstack/react-query';
 import type { AxiosResponse } from 'axios';
@@ -101,6 +101,11 @@ export interface DataTableProps<T extends Record<string, any>> {
    * Default: matches any string field containing the search term.
    */
   clientSideSearchFn?: (row: T, search: string) => boolean;
+  /**
+   * Extra facet filter applied (client-side, before search) when clientSidePagination is true.
+   * Pass a memoized function — a new reference each render resets the page back to 1.
+   */
+  clientSideFilterFn?: (row: T) => boolean;
 
   // ── Features ─────────────────────────────────────────────────────────────
   searchable?: boolean;
@@ -120,6 +125,8 @@ export interface DataTableProps<T extends Record<string, any>> {
   onRowClick?: (row: T) => void;
   rowActions?: RowAction<T>[];
   rowKey?: keyof T | ((row: T, index: number) => string);
+  /** When provided, each row gets a chevron toggle that expands an extra content row beneath it */
+  renderExpandedRow?: (row: T, index: number) => React.ReactNode;
 
   // ── Extras ───────────────────────────────────────────────────────────────
   /** Rendered in the toolbar area alongside the search bar */
@@ -164,6 +171,7 @@ function DataTable<T extends Record<string, any>>({
   columns,
   clientSidePagination = false,
   clientSideSearchFn,
+  clientSideFilterFn,
   searchable = false,
   searchPlaceholder = 'Search…',
   defaultPageSize = 10,
@@ -177,6 +185,7 @@ function DataTable<T extends Record<string, any>>({
   onRowClick,
   rowActions,
   rowKey,
+  renderExpandedRow,
   toolbar,
   extraParams,
   refreshKey,
@@ -205,6 +214,11 @@ function DataTable<T extends Record<string, any>>({
     }, 350);
     return () => clearTimeout(id);
   }, [searchInput]);
+
+  // Reset to page 1 whenever the caller's facet filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [clientSideFilterFn]);
 
   // ── Server-side fetch params ─────────────────────────────────────────────
   const serverParams: FetchParams = useMemo(() => ({
@@ -246,15 +260,21 @@ function DataTable<T extends Record<string, any>>({
     return Array.isArray(extracted) ? (extracted as T[]) : [];
   }, [response, dataKey]);
 
+  // ── Client-side facet filter ─────────────────────────────────────────────
+  const filteredRows: T[] = useMemo(() => {
+    if (!clientSidePagination || !clientSideFilterFn) return allRows;
+    return allRows.filter(clientSideFilterFn);
+  }, [clientSidePagination, allRows, clientSideFilterFn]);
+
   // ── Client-side search ───────────────────────────────────────────────────
   const searchedRows: T[] = useMemo(() => {
-    if (!clientSidePagination || !search) return allRows;
+    if (!clientSidePagination || !search) return filteredRows;
     const q = search.toLowerCase();
     const fn = clientSideSearchFn
       ? (row: T) => clientSideSearchFn(row, search)
       : (row: T) => defaultClientSearch(row, q);
-    return allRows.filter(fn);
-  }, [clientSidePagination, allRows, search, clientSideSearchFn]);
+    return filteredRows.filter(fn);
+  }, [clientSidePagination, filteredRows, search, clientSideSearchFn]);
 
   // ── Client-side sort ─────────────────────────────────────────────────────
   const sortedRows: T[] = useMemo(() => {
@@ -313,10 +333,22 @@ function DataTable<T extends Record<string, any>>({
     return String(row._id ?? row.id ?? index);
   }, [rowKey]);
 
+  // ── Row expansion ────────────────────────────────────────────────────────
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  const toggleExpanded = useCallback((key: string) => {
+    setExpandedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }, []);
+
   // ── Layout ───────────────────────────────────────────────────────────────
   const cellPy = compact ? 'py-2' : 'py-3';
   const hasActions = !!rowActions?.length;
+  const hasExpand = !!renderExpandedRow;
   const skeletonCount = Math.min(pageSize, 8);
+  const totalColSpan = columns.length + (hasActions ? 1 : 0) + (hasExpand ? 1 : 0);
 
   const SortIcon = ({ colKey }: { colKey: string }) => {
     if (sortBy !== colKey) return <ChevronsUpDown className="h-3 w-3 opacity-40 shrink-0" />;
@@ -381,6 +413,7 @@ function DataTable<T extends Record<string, any>>({
               {/* ── Header ── */}
               <thead>
                 <tr className="border-b border-border bg-muted/50">
+                  {hasExpand && <th className="w-8 px-2" />}
                   {columns.map((col) => (
                     <th
                       key={col.key}
@@ -415,6 +448,7 @@ function DataTable<T extends Record<string, any>>({
                 {isLoading ? (
                   Array.from({ length: skeletonCount }).map((_, i) => (
                     <tr key={i} className="border-b border-border last:border-0">
+                      {hasExpand && <td className="px-2"><Skeleton className="h-4 w-4 rounded-sm" /></td>}
                       {columns.map((col) => (
                         <td key={col.key} className={cn('px-4 align-middle', cellPy)}>
                           <div className="flex items-center">
@@ -434,7 +468,7 @@ function DataTable<T extends Record<string, any>>({
                   ))
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length + (hasActions ? 1 : 0)}>
+                    <td colSpan={totalColSpan}>
                       <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
                         {emptyIcon ?? <Inbox className="h-10 w-10 opacity-25" />}
                         <p className="text-sm">{emptyMessage}</p>
@@ -442,15 +476,35 @@ function DataTable<T extends Record<string, any>>({
                     </td>
                   </tr>
                 ) : (
-                  rows.map((row, index) => (
+                  rows.map((row, index) => {
+                    const rk = getRowKey(row, index);
+                    const isExpanded = hasExpand && expandedKeys.has(rk);
+                    return (
+                    <Fragment key={rk}>
                     <tr
-                      key={getRowKey(row, index)}
                       className={cn(
                         'border-b border-border last:border-0 hover:bg-muted/20 transition-colors',
-                        onRowClick && 'cursor-pointer',
+                        (onRowClick || hasExpand) && 'cursor-pointer',
                       )}
-                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      onClick={
+                        onRowClick ? () => onRowClick(row)
+                          : hasExpand ? () => toggleExpanded(rk)
+                          : undefined
+                      }
                     >
+                      {hasExpand && (
+                        <td
+                          className="px-2 align-middle"
+                          onClick={(e) => { e.stopPropagation(); toggleExpanded(rk); }}
+                        >
+                          <ChevronDown
+                            className={cn(
+                              'h-4 w-4 text-muted-foreground transition-transform',
+                              !isExpanded && '-rotate-90',
+                            )}
+                          />
+                        </td>
+                      )}
                       {columns.map((col) => (
                         <td
                           key={col.key}
@@ -510,7 +564,15 @@ function DataTable<T extends Record<string, any>>({
                         </td>
                       )}
                     </tr>
-                  ))
+                    {isExpanded && (
+                      <tr className="border-b border-border last:border-0 bg-muted/10">
+                        <td colSpan={totalColSpan} className="px-4 py-4">
+                          {renderExpandedRow!(row, index)}
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
+                  );})
                 )}
               </tbody>
             </table>

@@ -57,7 +57,6 @@ const AdminProducts   = lazy(() => import('@/features/admin/sections/Products'))
 const AdminOrders     = lazy(() => import('@/features/admin/sections/Orders'));
 const AdminOrderDetail= lazy(() => import('@/features/admin/sections/OrderDetail'));
 const AdminStock      = lazy(() => import('@/features/admin/sections/Stock'));
-const AdminCartMonitor    = lazy(() => import('@/features/admin/sections/CartMonitor'));
 const AdminEmailTemplates = lazy(() => import('@/features/admin/sections/EmailTemplates'));
 const AdminEmailEditor    = lazy(() => import('@/features/admin/sections/Email'));
 const Cart            = lazy(() => import('@/features/cart'));
@@ -125,7 +124,6 @@ const AppRoutes = () => (
           <Route path="orders"     element={<AdminOrders />} />
           <Route path="orders/:id" element={<AdminOrderDetail />} />
           <Route path="stock"      element={<AdminStock />} />
-          <Route path="carts"        element={<AdminCartMonitor />} />
           <Route path="email"        element={<AdminEmailTemplates />} />
           <Route path="email/:id"    element={<AdminEmailEditor />} />
         </Route>

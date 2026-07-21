@@ -1,18 +1,17 @@
 import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 
 const ProtectedRoute = ({ children }: { children?: ReactNode }) => {
   const { isAuthenticated, isAuthLoading, openModal } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      openModal('login');
-      navigate(-1);
+      openModal('login', location.pathname + location.search);
     }
-  }, [isAuthLoading, isAuthenticated, openModal, navigate]);
+  }, [isAuthLoading, isAuthenticated, openModal, location]);
 
   if (isAuthLoading) {
     return (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Copy, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, Check, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCompare } from './CompareContext';
@@ -193,9 +193,8 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                     className={`ml-0.5 transition-colors ${skuCopied ? 'text-primary' : 'text-foreground/40 hover:text-foreground/70'}`}
                     title="Copy SKU"
                   >
-                    <Copy size={11} />
+                    {skuCopied ? <Check size={11} /> : <Copy size={11} />}
                   </button>
-                  {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
                 </span>
               </div>
 
@@ -216,10 +215,9 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                   <span>{d.certLab || '–'} : {d.certNumber || '–'}</span>
                   {d.certNumber && (
                     <button onClick={copyCert} className={`transition-colors ${certCopied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`} title="Copy cert number">
-                      <Copy className="h-3.5 w-3.5" />
+                      {certCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     </button>
                   )}
-                  {certCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
                 </div>
 
                 {/* Availability */}

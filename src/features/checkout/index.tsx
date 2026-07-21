@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, MapPin, Package, Plus } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, MapPin, Package, Plus } from 'lucide-react';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
+import CheckoutSteps from '@/components/shared/common/CheckoutSteps';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,8 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { addressesApi, AddressPayload } from '@/api/addresses';
 import { cartApi } from '@/api/cart';
+import { getMetalType } from '@/data/shop/metalTypes';
+import defaultProductImage from '@/assets/product-placeholder.svg';
 
 interface Address {
   _id:        string;
@@ -35,10 +38,12 @@ const blank: AddressPayload = {
 
 function toCartAddress(a: Address) {
   return {
-    address: [a.line1, a.line2].filter(Boolean).join(', '),
-    city:    a.city,
-    zip:     a.postalCode,
-    country: a.country,
+    attention: a.fullName,
+    address:   [a.line1, a.line2].filter(Boolean).join(', '),
+    city:      a.city,
+    zip:       a.postalCode,
+    country:   a.country,
+    phone:     a.phone,
   };
 }
 
@@ -124,7 +129,18 @@ const Checkout = () => {
   return (
     <PageLayout>
       <div className="henig-container py-12">
-        <h1 className="font-serif text-4xl text-foreground mb-8">Checkout</h1>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 -ml-3 mb-2 text-muted-foreground"
+          onClick={() => navigate('/cart')}
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Cart
+        </Button>
+
+        <h1 className="font-serif text-4xl text-foreground mb-6">Checkout</h1>
+
+        <CheckoutSteps currentStep={1} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
@@ -176,14 +192,46 @@ const Checkout = () => {
               ) : (
                 <div className="space-y-3">
                   {items.map(i => (
-                    <div key={i.line_item_id} className="flex items-center justify-between text-sm">
-                      <div>
-                        <p className="font-medium">{i.name}</p>
-                        {i.sku && <p className="text-xs text-muted-foreground">SKU: {i.sku}</p>}
+                    <div key={i.line_item_id} className="flex items-center gap-4 text-sm">
+                      <div className="h-14 w-14 flex-shrink-0 rounded overflow-hidden bg-muted">
+                        <img
+                          src={i.image || defaultProductImage}
+                          alt={i.name}
+                          className="h-full w-full object-cover"
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = defaultProductImage; }}
+                        />
                       </div>
-                      <div className="text-right">
-                        <p>£{(i.rate * i.quantity).toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Qty: {i.quantity}</p>
+                      <div className="flex-1 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{i.name}</p>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            {i.metal && (() => {
+                              const metal = getMetalType(i.metal);
+                              return (
+                                <span
+                                  className="inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide ring-2 ring-foreground/70 ring-offset-1"
+                                  style={{
+                                    backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                                    backgroundColor: metal.image ? undefined : metal.bg,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    color: '#000',
+                                  }}
+                                  title={metal.name}
+                                >
+                                  {metal.label}
+                                </span>
+                              );
+                            })()}
+                            {i.size && (
+                              <span className="text-xs text-muted-foreground">Size: {i.size}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p>£{(i.rate * i.quantity).toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Qty: {i.quantity}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -223,9 +271,7 @@ const Checkout = () => {
 
             {/* Order details summary */}
             <div className="mt-4 p-3 bg-muted/40 rounded text-xs text-muted-foreground space-y-1">
-              <p><span className="font-medium text-foreground">Order Type:</span> Web Order</p>
               <p><span className="font-medium text-foreground">Order Date:</span> {new Date().toLocaleDateString('en-GB')}</p>
-              <p><span className="font-medium text-foreground">Status:</span> Draft</p>
             </div>
 
             <Button

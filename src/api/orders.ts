@@ -4,7 +4,7 @@ import { API_CONFIG } from './config';
 const { base, endpoints: ep } = API_CONFIG.orders;
 
 export const ordersApi = {
-  list: (params?: { page?: number; per_page?: number; status?: string; customer_id?: string }) =>
+  list: (params?: { page?: number; per_page?: number; status?: string; customer_id?: string; source?: 'web' | 'zoho' }) =>
     client.get(ep.all, params, undefined, false, base),
 
   getOne: (id: string) =>
@@ -25,6 +25,6 @@ export const ordersApi = {
   rate: (id: string, rating: number) =>
     client.post(ep.rate(id), { rating }, undefined, base),
 
-  cancel: (id: string) =>
-    client.delete(ep.cancel(id), undefined, undefined, base),
+  cancel: (id: string, reason?: string) =>
+    client.delete(ep.cancel(id), { reason }, undefined, base),
 };

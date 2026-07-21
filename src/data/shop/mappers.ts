@@ -108,7 +108,7 @@ export function mapZohoToShopProduct(item: Record<string, unknown>, currency = '
     (normalisedStockType === 'Lab' ? 'Lab Created Diamond' :
       normalisedStockType === 'Natural' ? 'Natural Diamond' : undefined);
 
-  const imageUrl = `${newApiURL}/products/${item.item_id}/image`;
+  const imageUrl = getCf(item, 'picture_link') || `${newApiURL}/products/${item.item_id}/image`;
 
   return {
     id: String(item.item_id ?? ''),

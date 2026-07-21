@@ -4,7 +4,7 @@ import { productPath, toSlug } from '@/lib/utils';
 import { newApiURL } from '@/config/site';
 import {
   ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow,
-  Heart, Share2, Copy, Mail,
+  Heart, Share2, Copy, Check, Mail,
   Truck, Shield, Maximize, Gem, Home as HomeIcon, FileCheck,
   Leaf,
   Tag,
@@ -408,9 +408,8 @@ const ProductDetail = () => {
                   title="Copy SKU"
                   className={`transition-colors ${skuCopied ? 'text-primary' : 'text-foreground/30 hover:text-foreground/60'}`}
                 >
-                  <Copy className="h-3.5 w-3.5" />
+                  {skuCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 </button>
-                {skuCopied && <span className="text-[10px] font-medium text-primary">Copied!</span>}
               </div>
 
               {(() => {

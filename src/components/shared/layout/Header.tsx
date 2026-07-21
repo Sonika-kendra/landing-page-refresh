@@ -21,7 +21,7 @@ const adminNavLinks = [
   { label: 'Draft Users',      href: '/admin/draft',      icon: FileEdit },
   { label: 'Pending Approvals', href: '/admin/approvals', icon: UserCheck },
   { label: 'All Users',        href: '/admin/users',      icon: Users },
-  { label: 'Active Carts',     href: '/admin/carts',      icon: ShoppingCart },
+  { label: 'Orders',           href: '/admin/orders',     icon: ShoppingCart },
   { label: 'Blog Posts',       href: '/admin/posts',      icon: FileText },
   { label: 'Zoho Sync',        href: '/admin/zoho',       icon: RefreshCw },
   { label: 'Email Template',   href: '/admin/email',      icon: Mail },

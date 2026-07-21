@@ -234,7 +234,7 @@ const Dashboard = () => {
             icon={ShoppingCart}
             description="In-progress checkouts"
             loading={statsLoading}
-            to="/admin/carts"
+            to="/admin/orders?status=draft"
             tint="accent"
           />
           <StatCard

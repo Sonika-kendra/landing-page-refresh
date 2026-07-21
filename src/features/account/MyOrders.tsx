@@ -32,9 +32,9 @@ const MyOrders = () => {
   useEffect(() => {
     ordersApi.list({ per_page: 50 })
       .then(res => {
-        const fetched = (res.data?.salesorders ?? []).filter(
-          (o: any) => !['draft', 'void'].includes(o.status)
-        );
+        // A cart only becomes a real order once it has an orderStatus (set at checkout).
+        // 'void' also covers admin-cancelled orders, which must still show up here.
+        const fetched = (res.data?.salesorders ?? []).filter((o: any) => !!o.orderStatus);
         setOrders(fetched);
       })
       .catch(() => setError(true))
