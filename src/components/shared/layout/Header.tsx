@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, ChevronDown, User, LogOut, Heart, ShoppingBag,
   LayoutDashboard, Users, UserCog, UserCheck, FileEdit, FileText,
-  ShoppingCart, RefreshCw, Settings, ArrowRight, Mail,
+  ShoppingCart, RefreshCw, Settings, ArrowRight, Mail, History,
   Package, MapPin,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,6 +25,7 @@ const adminNavLinks = [
   { label: 'Blog Posts',       href: '/admin/posts',      icon: FileText },
   { label: 'Zoho Sync',        href: '/admin/zoho',       icon: RefreshCw },
   { label: 'Email Template',   href: '/admin/email',      icon: Mail },
+  { label: 'Email Logs',       href: '/admin/email-logs', icon: History },
   { label: 'Internal Users',   href: '/admin/internal-users', icon: UserCog },
   { label: 'Settings',         href: '/admin/settings',   icon: Settings },
 ] as const;

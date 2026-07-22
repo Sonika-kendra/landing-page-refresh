@@ -148,6 +148,15 @@ export interface ZohoSyncLog {
   createdAt: string;
 }
 
+export interface EmailLog {
+  _id: string;
+  templateName: string;
+  recipient: string;
+  status: 'success' | 'error' | 'skipped';
+  error?: string;
+  createdAt: string;
+}
+
 export interface StaffUser {
   _id: string;
   firstName?: string;
@@ -477,6 +486,15 @@ export const adminApi = {
       undefined,
       false,
       API_CONFIG.adminZoho.base
+    ),
+
+  getEmailLogs: (params?: { status?: string; templateName?: string }) =>
+    apiClient.get<{ ok: boolean; logs: EmailLog[] }>(
+      API_CONFIG.adminEmailLogs.endpoints.list,
+      params,
+      undefined,
+      false,
+      API_CONFIG.adminEmailLogs.base
     ),
 
   zohoSyncAll: () =>

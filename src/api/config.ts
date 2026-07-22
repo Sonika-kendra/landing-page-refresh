@@ -102,6 +102,13 @@ export const API_CONFIG = {
     },
   },
 
+  adminEmailLogs: {
+    base: 'new' as ApiBase,
+    endpoints: {
+      list: '/admin/email/logs',
+    },
+  },
+
   adminZoho: {
     base: 'new' as ApiBase,
     endpoints: {
