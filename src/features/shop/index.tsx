@@ -9,6 +9,7 @@ import { PaginationBar } from '@/components/ui/PaginationBar';
 import PageLayout from '@/components/shared/layout/PageLayout';
 import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSort';
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
+import ShapeIcon from '@/components/shared/ShapeIcon';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -400,11 +401,12 @@ const renderFilterItems = (
                 type="button"
                 onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
                 aria-pressed={isActive}
-                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+                className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
                     ? 'border-accent bg-accent text-accent-foreground shadow-sm'
                     : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
                   }`}
               >
+                {tab.key === 'shape' && <ShapeIcon shape={item.value as string} />}
                 {item.label}
               </button>
             );

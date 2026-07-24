@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
     <defs>
         <style>
-            .cls-3{fill:none;stroke:#f0f1f2;stroke-width:.5px;stroke-linejoin:bevel}
+            .cls-3{fill:none;stroke:currentColor;stroke-width:.5px;stroke-linejoin:bevel}
         </style>
     </defs>
     <g id="radiant" transform="translate(-322 -807)">
         <g id="Group_6381" transform="translate(-705.726 278.559)">
-            <path id="Path_3345" fill="none" stroke="#f0f1f2" stroke-miterlimit="10" stroke-width="0.5px" d="M1042.226 547.441h-9.5l-2-2v-14l2-2h9.5l2 2v14z"/>
-            <path id="Path_3346" fill="none" stroke="#f0f1f2" stroke-linecap="square" stroke-miterlimit="10" stroke-width="0.5px" d="M1040.726 530.941h-6.5l-2 2v11l2 2h6.5l2-2v-11z"/>
+            <path id="Path_3345" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="0.5px" d="M1042.226 547.441h-9.5l-2-2v-14l2-2h9.5l2 2v14z"/>
+            <path id="Path_3346" fill="none" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" stroke-width="0.5px" d="M1040.726 530.941h-6.5l-2 2v11l2 2h6.5l2-2v-11z"/>
             <path id="Path_3347" d="M1044.226 531.441l-1.5 1.5-2.911 1.033.911-3.032 1.5-1.5" class="cls-3"/>
             <path id="Path_3348" d="M1044.226 545.44l-1.5-1.5-2.911-1.033.911 3.032 1.5 1.5" class="cls-3"/>
             <path id="Path_3349" d="M1030.726 531.441l1.5 1.5 2.94 1.061-.939-3.061-1.5-1.5" class="cls-3"/>

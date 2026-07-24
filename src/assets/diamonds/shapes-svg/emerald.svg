@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
     <defs>
         <style>
-            .cls-1,.cls-2,.cls-3{fill:none;stroke:#f0f1f2;stroke-width:.5px}.cls-1,.cls-2{stroke-miterlimit:10}.cls-2{stroke-linecap:square}.cls-3{stroke-linejoin:bevel}
+            .cls-1,.cls-2,.cls-3{fill:none;stroke:currentColor;stroke-width:.5px}.cls-1,.cls-2{stroke-miterlimit:10}.cls-2{stroke-linecap:square}.cls-3{stroke-linejoin:bevel}
         </style>
     </defs>
     <g id="esmerald" transform="translate(-250 -804)">

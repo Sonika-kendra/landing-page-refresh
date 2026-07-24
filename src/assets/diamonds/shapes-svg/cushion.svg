@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
     <defs>
         <style>
-            .cls-2{fill:none;stroke:#f0f1f2;stroke-width:.5px;stroke-miterlimit:10}
+            .cls-2{fill:none;stroke:currentColor;stroke-width:.5px;stroke-miterlimit:10}
         </style>
     </defs>
     <g id="cushion" transform="translate(-874 -807)">
         <g id="Group_6393" transform="translate(-86.192 278.541)">
             <path id="Path_3330" d="M977.288 530.63l.1.107a4.226 4.226 0 0 1 1.058 2.829v9.787a4.223 4.223 0 0 1-1.058 2.828l-.1.107a3.444 3.444 0 0 1-2.553 1.172H965.9a3.444 3.444 0 0 1-2.553-1.172l-.1-.107a4.229 4.229 0 0 1-1.058-2.828v-9.787a4.231 4.231 0 0 1 1.058-2.829l.1-.107a3.443 3.443 0 0 1 2.553-1.171h8.836a3.443 3.443 0 0 1 2.552 1.171z" class="cls-2"/>
-            <path id="Path_3331" fill="none" stroke="#f0f1f2" stroke-linejoin="bevel" stroke-width="0.5px" d="M978.442 535.438l-3.624-1.479-1.739-4.5-2.762 2.636-2.762-2.636-1.738 4.5-3.625 1.479 1.76 3.021-1.76 3.021 3.625 1.478 1.738 4.5 2.762-2.635 2.762 2.635 1.739-4.5 3.624-1.478-1.76-3.021z"/>
+            <path id="Path_3331" fill="none" stroke="currentColor" stroke-linejoin="bevel" stroke-width="0.5px" d="M978.442 535.438l-3.624-1.479-1.739-4.5-2.762 2.636-2.762-2.636-1.738 4.5-3.625 1.479 1.76 3.021-1.76 3.021 3.625 1.478 1.738 4.5 2.762-2.635 2.762 2.635 1.739-4.5 3.624-1.478-1.76-3.021z"/>
             <path id="Rectangle_3307" d="M0 0H9.001V9.001H0z" class="cls-2" transform="translate(965.817 533.958)"/>
             <path id="Rectangle_3308" d="M0 0H9.001V9.001H0z" class="cls-2" transform="rotate(45 -157.136 1437.323)"/>
             <g id="Group_6365">

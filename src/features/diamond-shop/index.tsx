@@ -14,6 +14,7 @@ import DiamondCard, { type DiamondItem } from './DiamondCard';
 import DiamondDetailModal from './DiamondDetailModal';
 import { CompareProvider } from './CompareContext';
 import CompareTray from './CompareTray';
+import ShapeIcon from '@/components/shared/ShapeIcon';
 
 const PAGE_SIZE = 12;
 const DEFAULT_CARAT_RANGE: [number, number] = [0, 99];
@@ -317,8 +318,9 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
             key={opt} type="button"
             onClick={() => onChange(tab.key, isActive ? '' : opt)}
             aria-pressed={isActive}
-            className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
+            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
           >
+            {tab.key === 'shape' && <ShapeIcon shape={opt} />}
             {opt}
           </button>
         );

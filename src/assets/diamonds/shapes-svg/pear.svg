@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
     <defs>
         <style>
-            .cls-2{fill:none;stroke:#f0f1f2;stroke-linecap:square;stroke-width:.5px;stroke-linejoin:bevel}
+            .cls-2{fill:none;stroke:currentColor;stroke-linecap:square;stroke-width:.5px;stroke-linejoin:bevel}
         </style>
     </defs>
     <g id="pear" transform="translate(-402 -808)">
         <g id="Group_6394" transform="translate(406 809)">
             <g id="Group_6299">
-                <path id="Path_3346" fill="none" stroke="#f0f1f2" stroke-linecap="square" stroke-miterlimit="10" stroke-width="0.5px" d="M1056.225 529.556c3.692 3.141 9.45 13.16 3.37 17.03a6.341 6.341 0 0 1-6.742 0c-6.079-3.87-.321-13.886 3.372-17.03z" transform="translate(-1050.197 -529.556)"/>
+                <path id="Path_3346" fill="none" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" stroke-width="0.5px" d="M1056.225 529.556c3.692 3.141 9.45 13.16 3.37 17.03a6.341 6.341 0 0 1-6.742 0c-6.079-3.87-.321-13.886 3.372-17.03z" transform="translate(-1050.197 -529.556)"/>
             </g>
             <path id="Path_3347" d="M1056.224 529.556l-1.4 3.545-2.537 1.538-.051 3.325-1.952 2.308 2.046 2.555-.592 2.847 2.743-.228 1.745 2.111 1.745-2.111 2.743.228-.592-2.847 2.046-2.555-1.952-2.308-.051-3.325-2.536-1.538z" class="cls-2" transform="translate(-1050.198 -529.556)"/>
             <path id="Path_3348" d="M1057.625 533.111l.591 2.9.984 4.191.915 2.614-3.891 1.452-3.891-1.452.915-2.614.984-4.191.591-2.9" class="cls-2" transform="translate(-1050.197 -529.556)"/>
