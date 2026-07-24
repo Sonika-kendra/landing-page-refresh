@@ -504,9 +504,9 @@ const ProductDetail = () => {
                             backgroundColor: metal.image ? undefined : metal.bg,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
-                            color: '#000',
+                            color: metal.color,
                           }}
-                          className={`rounded px-2 py-1 text-[10px] font-bold uppercase leading-none tracking-wide transition-all ${isSelected ? 'ring-2 ring-foreground/70 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
+                          className={`flex h-5 w-10 items-center justify-center rounded border-2 text-[11px] font-bold uppercase leading-none tracking-wide transition-all ${isSelected ? 'border-accent' : 'border-transparent opacity-80 hover:opacity-100'}`}
                         >
                           {metal.label}
                         </button>

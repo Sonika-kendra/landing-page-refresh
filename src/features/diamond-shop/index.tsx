@@ -107,22 +107,52 @@ const CaratRangeSlider = ({
   const [local, setLocal] = useState<[number, number]>(currentValue);
   useEffect(() => { setLocal(currentValue); }, [currentValue[0], currentValue[1]]);
 
+  const handleCommit = (v: [number, number]) => {
+    const lo = Math.max(0, Math.min(v[0], v[1]));
+    const hi = Math.min(10, Math.max(v[0], v[1]));
+    onChange(lo === 0 && hi >= 10 ? DEFAULT_CARAT_RANGE : [lo, hi]);
+  };
+
   return (
     <div className="px-1 pb-3 pt-4">
       <Slider
         min={0} max={10} step={0.01}
         value={[Math.min(local[0], 10), Math.min(local[1], 10)]}
         onValueChange={(v) => setLocal([v[0], v[1]] as [number, number])}
-        onValueCommit={(v) => onChange(v[0] === 0 && v[1] >= 10 ? DEFAULT_CARAT_RANGE : [v[0], v[1]] as [number, number])}
+        onValueCommit={(v) => handleCommit(v as [number, number])}
       />
       <div className="mt-4 flex items-center justify-between gap-2">
-        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
-          {Math.min(local[0], 10).toFixed(2)}ct
-        </span>
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <input
+            type="number"
+            inputMode="decimal"
+            step={0.01}
+            min={0}
+            max={10}
+            value={local[0]}
+            onChange={(e) => setLocal([Number(e.target.value) || 0, local[1]])}
+            onBlur={() => handleCommit(local)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-10 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+          <span className="text-xs font-medium text-foreground/70">ct</span>
+        </label>
         <span className="text-[10px] text-foreground/35">–</span>
-        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
-          {Math.min(local[1], 10).toFixed(2)}ct
-        </span>
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <input
+            type="number"
+            inputMode="decimal"
+            step={0.01}
+            min={0}
+            max={10}
+            value={local[1]}
+            onChange={(e) => setLocal([local[0], Number(e.target.value) || 0])}
+            onBlur={() => handleCommit(local)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-10 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+          <span className="text-xs font-medium text-foreground/70">ct</span>
+        </label>
       </div>
     </div>
   );
@@ -160,31 +190,71 @@ const NumberRangeSlider = ({
   );
 };
 
-const PricePresetList = ({
-  presets, value, onChange,
+const PriceRangeSlider = ({
+  min, max, currentValue, onChange, currencySymbol,
 }: {
-  presets: { label: string; value: [number, number] }[];
-  value: [number, number];
+  min: number; max: number;
+  currentValue: [number, number];
   onChange: (v: [number, number]) => void;
-}) => (
-  <div className="space-y-0.5">
-    {presets.map((p) => {
-      const isActive = isSameRange(value, p.value);
-      return (
-        <button
-          key={p.label} type="button"
-          onClick={() => onChange(p.value)}
-          className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-all ${isActive ? 'bg-accent/10 text-accent' : 'text-foreground/60 hover:bg-secondary/40 hover:text-foreground'}`}
-        >
-          <span className={isActive ? 'font-semibold' : ''}>{p.label}</span>
-          {isActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
-        </button>
-      );
-    })}
-  </div>
-);
+  currencySymbol: string;
+}) => {
+  const [local, setLocal] = useState<[number, number]>(currentValue);
+  useEffect(() => { setLocal(currentValue); }, [currentValue[0], currentValue[1]]);
 
-const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabKey], onChange: (k: TabKey, v: unknown) => void) => {
+  const handleCommit = (v: [number, number]) => {
+    const lo = Math.max(min, Math.min(v[0], v[1]));
+    const hi = Math.min(max, Math.max(v[0], v[1]));
+    onChange(lo === min && hi >= max ? [min, max] : [lo, hi]);
+  };
+
+  return (
+    <div className="px-1 pb-3 pt-4">
+      <Slider
+        min={min}
+        max={max}
+        step={10}
+        value={local}
+        onValueChange={(v) => setLocal(v as [number, number])}
+        onValueCommit={(v) => handleCommit(v as [number, number])}
+      />
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            step={10}
+            min={min}
+            max={max}
+            value={local[0]}
+            onChange={(e) => setLocal([Number(e.target.value) || 0, local[1]])}
+            onBlur={() => handleCommit(local)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-16 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+        </label>
+        <span className="text-[10px] text-foreground/35">–</span>
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            step={10}
+            min={min}
+            max={max}
+            value={local[1]}
+            onChange={(e) => setLocal([local[0], Number(e.target.value) || 0])}
+            onBlur={() => handleCommit(local)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-16 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+        </label>
+      </div>
+    </div>
+  );
+};
+
+const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabKey], onChange: (k: TabKey, v: unknown) => void, currencySymbol = '£') => {
   if (tab.key === 'caratWeight') {
     return (
       <CaratRangeSlider
@@ -206,26 +276,19 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
   }
 
   if (tab.key === 'totalValue') {
-    const presets: { label: string; value: [number, number] }[] = [
-      { label: 'Under £1,000',        value: [0, 1000] },
-      { label: '£1,000 – £5,000',    value: [1000, 5000] },
-      { label: '£5,000 – £10,000',   value: [5000, 10000] },
-      { label: '£10,000 – £25,000',  value: [10000, 25000] },
-      { label: '£25,000+',            value: [25000, DEFAULT_TOTAL_VALUE_RANGE[1]] },
-      { label: 'All Prices',          value: DEFAULT_TOTAL_VALUE_RANGE },
-    ];
     return (
-      <PricePresetList
-        presets={presets}
-        value={value as [number, number]}
+      <PriceRangeSlider
+        min={DEFAULT_TOTAL_VALUE_RANGE[0]} max={DEFAULT_TOTAL_VALUE_RANGE[1]}
+        currentValue={value as [number, number]}
         onChange={(v) => onChange(tab.key, v)}
+        currencySymbol={currencySymbol}
       />
     );
   }
 
   if (tab.key === 'type') {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {STOCK_TYPES.map((opt) => {
           const isActive = value === opt;
           return (
@@ -246,7 +309,7 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
   // Pill buttons for shape, colour, clarity, cut, polish, symmetry, fluorescence, certificate
   const options = staticOptions[tab.key] ?? [];
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {options.map((opt) => {
         const isActive = value === opt;
         return (
@@ -276,7 +339,7 @@ const DiamondShopPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [openAccordion, setOpenAccordion] = useState<string[]>([]);
+  const [openAccordion, setOpenAccordion] = useState<string[]>(filterTabs.map((tab) => tab.key));
   const [sortBy, setSortBy] = useState('price-asc');
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
@@ -504,10 +567,10 @@ const DiamondShopPage = () => {
     }
     if (!isSameRange(filterValues.totalValue, DEFAULT_TOTAL_VALUE_RANGE)) {
       const [lo, hi] = filterValues.totalValue;
-      chips.push({ key: 'totalValue', label: `Price: £${lo.toLocaleString()}–£${hi.toLocaleString()}` });
+      chips.push({ key: 'totalValue', label: `Price: ${currencySymbol}${lo.toLocaleString()}–${currencySymbol}${hi.toLocaleString()}` });
     }
     return chips;
-  }, [filterValues]);
+  }, [filterValues, currencySymbol]);
 
   const openModal = (item: DiamondItem) => {
     setSelectedItem(item);
@@ -541,7 +604,7 @@ const DiamondShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
+              <SheetContent hideCloseButton side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none">
                 <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
                   <SheetHeader className="text-left">
                     <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">Filters</SheetTitle>
@@ -552,7 +615,7 @@ const DiamondShopPage = () => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-6 py-6">
-                  <div className="mb-5 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between">
                     <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-foreground/45">Refine By</h2>
                     {hasActiveFilters && (
                       <button type="button" onClick={handleReset} className="text-xs text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground">
@@ -561,14 +624,14 @@ const DiamondShopPage = () => {
                     )}
                   </div>
 
-                  <Accordion type="multiple" value={openAccordion} onValueChange={setOpenAccordion} className="space-y-2">
+                  <Accordion type="multiple" value={openAccordion} onValueChange={setOpenAccordion} className="space-y-1">
                     {filterTabs.map((tab) => {
                       const val = filterValues[tab.key];
                       const isActive = Boolean(val) && !isDefaultValue(tab.key, val);
 
                       return (
                         <AccordionItem key={tab.key} value={tab.key} className="rounded-2xl border border-border/60 bg-background px-3.5">
-                          <AccordionTrigger className="py-3.5 hover:no-underline [&>svg]:hidden">
+                          <AccordionTrigger className="py-2 hover:no-underline [&>svg]:hidden">
                             <div className="flex w-full items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-foreground">{tab.label}</span>
@@ -579,9 +642,9 @@ const DiamondShopPage = () => {
                               </span>
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="pb-4 pt-0">
+                          <AccordionContent className="pb-2 pt-0">
                             {isActive && (
-                              <div className="mb-3 flex justify-end">
+                              <div className="mb-1.5 flex justify-end">
                                 <button
                                   type="button"
                                   onClick={() => setFilter(tab.key, defaultFor(tab.key))}
@@ -591,7 +654,7 @@ const DiamondShopPage = () => {
                                 </button>
                               </div>
                             )}
-                            {renderTab(tab, filterValues[tab.key], setFilter)}
+                            {renderTab(tab, filterValues[tab.key], setFilter, currencySymbol)}
                           </AccordionContent>
                         </AccordionItem>
                       );

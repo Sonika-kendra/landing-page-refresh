@@ -76,6 +76,7 @@ function CopyButton({ text }: { text: string }) {
 
 const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
   const [justLiked, setJustLiked] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const { isCompared, toggleCompare } = useCompare();
   const liked = isFavourite(item.id);
@@ -97,6 +98,8 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
     <div
       className="group relative cursor-pointer border border-border/30 bg-card shadow-sm transition-shadow hover:shadow-lg"
       onClick={() => onClick(item)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Stock badge */}
       <span className="absolute left-3 top-3 z-10 rounded bg-foreground/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background">
@@ -130,17 +133,29 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
         </button>
       </div>
 
-      {/* Image */}
+      {/* Image / hover video */}
       <div className="aspect-square overflow-hidden bg-white p-4">
-        <img
-          src={d.pictureLink || item.image}
-          alt={d.title}
-          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = defaultProductImage;
-          }}
-        />
+        {isHovered && d.mp4 ? (
+          <video
+            key={d.mp4}
+            src={d.mp4}
+            className="h-full w-full object-contain"
+            muted
+            loop
+            autoPlay
+            playsInline
+          />
+        ) : (
+          <img
+            src={d.pictureLink || item.image}
+            alt={d.title}
+            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = defaultProductImage;
+            }}
+          />
+        )}
       </div>
 
       {/* Info block */}

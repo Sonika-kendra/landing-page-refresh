@@ -14,17 +14,17 @@ export interface MetalType {
 
 export const metalTypes: MetalType[] = [
   // Yellow Gold
-  { id: '22K_YG', label: '22K', name: '22ct Yellow Gold', group: 'yellow-gold', bg: '#C9922A', color: '#000', image: yellowGoldImg },
-  { id: '18K_YG', label: '18K', name: '18ct Yellow Gold', group: 'yellow-gold', bg: '#C5A028', color: '#000', image: yellowGoldImg },
-  { id: '9K_YG',  label: '9K',  name: '9ct Yellow Gold',  group: 'yellow-gold', bg: '#C5A028', color: '#000', image: yellowGoldImg },
+  { id: '22K_YG', label: '22K', name: '22kt Yellow Gold', group: 'yellow-gold', bg: '#C9922A', color: '#000', image: yellowGoldImg },
+  { id: '18K_YG', label: '18K', name: '18kt Yellow Gold', group: 'yellow-gold', bg: '#C5A028', color: '#000', image: yellowGoldImg },
+  { id: '9K_YG',  label: '9K',  name: '9kt Yellow Gold',  group: 'yellow-gold', bg: '#C5A028', color: '#000', image: yellowGoldImg },
 
   // White Gold
-  { id: '18K_WG', label: '18K', name: '18ct White Gold', group: 'white-gold', bg: '#B8B8C8', color: '#000', image: whiteGoldImg },
-  { id: '9K_WG',  label: '9K',  name: '9ct White Gold',  group: 'white-gold', bg: '#B8B8C8', color: '#000', image: whiteGoldImg },
+  { id: '18K_WG', label: '18K', name: '18kt White Gold', group: 'white-gold', bg: '#B8B8C8', color: '#000', image: whiteGoldImg },
+  { id: '9K_WG',  label: '9K',  name: '9kt White Gold',  group: 'white-gold', bg: '#B8B8C8', color: '#000', image: whiteGoldImg },
 
   // Rose Gold
-  { id: '18K_RG', label: '18K', name: '18ct Rose Gold', group: 'rose-gold', bg: '#C08070', color: '#000' },
-  { id: '9K_RG',  label: '9K',  name: '9ct Rose Gold',  group: 'rose-gold', bg: '#C08070', color: '#000' },
+  { id: '18K_RG', label: '18K', name: '18kt Rose Gold', group: 'rose-gold', bg: '#C08070', color: '#000' },
+  { id: '9K_RG',  label: '9K',  name: '9kt Rose Gold',  group: 'rose-gold', bg: '#C08070', color: '#000' },
 
   // Platinum
   { id: 'Pt950', label: 'Pt', name: 'Platinum 950', group: 'platinum', bg: '#7A7A8E', color: '#000', image: platinumImg },

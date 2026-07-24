@@ -11,11 +11,12 @@ const JewelleryHeroSection = () => {
   const { isAuthenticated, openModal } = useAuth();
   const navigate = useNavigate();
 
-  const handleShopClick = () => {
+  const handleShopClick = (stockType: 'Natural' | 'Lab') => {
+    const target = `${websiteUrlConfig.Jewellery.All}?stock_type=${stockType}`;
     if (isAuthenticated) {
-      navigate(websiteUrlConfig.Jewellery.All);
+      navigate(target);
     } else {
-      openModal('login', websiteUrlConfig.Jewellery.All);
+      openModal('login', target);
     }
   };
 
@@ -55,7 +56,7 @@ const JewelleryHeroSection = () => {
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
-            onClick={handleShopClick}
+            onClick={() => handleShopClick('Lab')}
             className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
           >
             Lab Jewellery
@@ -64,7 +65,7 @@ const JewelleryHeroSection = () => {
 
           <Button
             variant="outline"
-            onClick={handleShopClick}
+            onClick={() => handleShopClick('Natural')}
             className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"
           >
             Natural Jewellery

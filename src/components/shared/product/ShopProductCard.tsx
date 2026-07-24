@@ -109,7 +109,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
                       backgroundPosition: 'center',
                       color: metal.color,
                     }}
-                    className="rounded px-1.5 py-[3px] text-[9px] font-bold uppercase leading-none tracking-wide"
+                    className="flex h-4 w-8 items-center justify-center rounded border-2 border-transparent text-[15px] font-bold uppercase leading-none tracking-wide"
                   >
                     {metal.label}
                   </span>
@@ -171,7 +171,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
 
   return (
     <div
-      className="group relative border border-border/40 bg-card transition-shadow hover:shadow-md"
+      className="group relative flex h-full flex-col border border-border/40 bg-card transition-shadow hover:shadow-md"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -213,10 +213,10 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
       </Link>
 
       {/* Info */}
-      <div className="px-3 pb-3 pt-2">
+      <div className="flex flex-1 flex-col px-3 pb-3 pt-2">
         {/* Title + certificate */}
         <div className="flex items-start justify-between gap-1.5">
-          <Link to={`${productPath(product.category, product.subCategory, product.id)}`} className="min-w-0 flex-1">
+          <Link to={`${productPath(product.category, product.subCategory, product.id)}`} className="min-h-[2.1rem] min-w-0 flex-1">
             <h3 className="line-clamp-2 text-xs font-medium uppercase leading-snug tracking-wide text-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {product.name}
             </h3>
@@ -239,51 +239,53 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
           })()}
         </div>
 
-        {/* Metal badges + price */}
-        <div className="mt-2 flex items-end justify-between gap-1">
-          <div className="flex flex-col gap-1">
-            <span className="text-[8px] font-medium uppercase leading-none tracking-widest text-foreground/40">Metal type</span>
-            <div className="flex flex-wrap gap-1">
-              {product.metalOptions.map((m, i) => {
-                const metal = getMetalType(m);
-                return (
-                  <span
-                    key={i}
-                    title={metal.name}
-                    style={{
-                      backgroundImage: metal.image ? `url(${metal.image})` : undefined,
-                      backgroundColor: metal.image ? undefined : metal.bg,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      color: metal.color,
-                    }}
-                    className="rounded px-1.5 py-[3px] text-[9px] font-bold uppercase leading-none tracking-wide"
-                  >
-                    {metal.label}
-                  </span>
-                );
-              })}
+        {/* Metal badges + price, pinned to the bottom so it lines up across cards regardless of title length */}
+        <div className="mt-auto">
+          <div className="mt-2 flex items-end justify-between gap-1">
+            <div className="flex flex-col gap-1">
+              <span className="text-[8px] font-medium uppercase leading-none tracking-widest text-foreground/40">Metal type</span>
+              <div className="flex flex-wrap gap-1">
+                {product.metalOptions.map((m, i) => {
+                  const metal = getMetalType(m);
+                  return (
+                    <span
+                      key={i}
+                      title={metal.name}
+                      style={{
+                        backgroundImage: metal.image ? `url(${metal.image})` : undefined,
+                        backgroundColor: metal.image ? undefined : metal.bg,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        color: metal.color,
+                      }}
+                      className="flex h-4 w-9 items-center justify-center rounded border-2 border-transparent text-[10px] font-bold uppercase leading-none tracking-wide"
+                    >
+                      {metal.label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-baseline gap-0.5">
+              <span className="mb-0.5 text-[10px] leading-none text-foreground/50">From</span>
+              <span className="text-xl font-bold leading-none text-foreground">{product.currency}{product.price.toLocaleString()}</span>
             </div>
           </div>
-          <div className="flex shrink-0 items-baseline gap-0.5">
-            <span className="mb-0.5 text-[10px] leading-none text-foreground/50">From</span>
-            <span className="text-xl font-bold leading-none text-foreground">{product.currency}{product.price.toLocaleString()}</span>
-          </div>
-        </div>
 
-        {onAddToBag && (
-          <button
-            onClick={handleAddToBag}
-            className={`mt-2 flex w-full items-center justify-center gap-1.5 py-2 text-[10px] font-semibold uppercase tracking-widest transition-all duration-200 ${
-              bagJustAdded
-                ? 'bg-accent/80 text-accent-foreground scale-[0.98]'
-                : 'bg-accent text-accent-foreground hover:bg-accent/90'
-            }`}
-          >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            {bagJustAdded ? 'Added!' : 'Add to Bag'}
-          </button>
-        )}
+          {onAddToBag && (
+            <button
+              onClick={handleAddToBag}
+              className={`mt-2 flex w-full items-center justify-center gap-1.5 py-2 text-[10px] font-semibold uppercase tracking-widest transition-all duration-200 ${
+                bagJustAdded
+                  ? 'bg-accent/80 text-accent-foreground scale-[0.98]'
+                  : 'bg-accent text-accent-foreground hover:bg-accent/90'
+              }`}
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              {bagJustAdded ? 'Added!' : 'Add to Bag'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

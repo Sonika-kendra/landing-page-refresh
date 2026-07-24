@@ -42,6 +42,7 @@ import diamondsImage from '@/assets/diamonds-category.jpg';
 const PAGE_SIZE = 12;
 const DEFAULT_PRICE_RANGE: [number, number] = [0, 5000];
 const DEFAULT_CARAT_RANGE: [number, number] = [0, 99];
+const DEFAULT_STOCK_TYPE = 'Natural';
 
 const shopSort = {
   options: [
@@ -71,7 +72,7 @@ const filterTabs: { key: FilterTabKey; label: string }[] = [
   { key: 'shape', label: 'Shapes' },
   { key: 'stockType', label: 'Stock Type' },
   { key: 'caratWeight', label: 'Carat Weight' },
-  { key: 'ringSize', label: 'Ring Size' },
+  // { key: 'ringSize', label: 'Ring Size' }, // ponytail: disabled for now, re-enable when ready
   { key: 'certificate', label: 'Certificates' },
   { key: 'price', label: 'Price' },
 ];
@@ -126,13 +127,7 @@ const visualFilters: Record<FilterTabKey, VisualFilterItem[]> = {
     { label: stockTypes[0], value: stockTypes[0], image: naturalDiamondImage },
     { label: stockTypes[1], value: stockTypes[1], image: labDiamondImage },
   ],
-  price: [
-    { label: 'Under £750', value: [0, 750] },
-    { label: '£750 – £1,000', value: [750, 1000] },
-    { label: '£1,000 – £1,500', value: [1000, 1500] },
-    { label: '£1,500+', value: [1500, 5000] },
-    { label: 'All Prices', value: DEFAULT_PRICE_RANGE },
-  ],
+  price: [],
   caratWeight: [
     { label: 'Under 0.50ct', value: [0, 0.5] },
     { label: '0.50 – 1.00ct', value: [0.5, 1.0] },
@@ -161,7 +156,7 @@ const defaultValues: FilterValues = {
   cfSubCategoryType: '',
   metal: '',
   shape: '',
-  stockType: '',
+  stockType: DEFAULT_STOCK_TYPE,
   price: DEFAULT_PRICE_RANGE,
   inStock: '',
   caratWeight: DEFAULT_CARAT_RANGE,
@@ -215,7 +210,9 @@ const CaratRangeSlider = ({
   }, [currentValue[0], currentValue[1], sliderMin, sliderMax]);
 
   const handleCommit = (v: number[]) => {
-    const [lo, hi] = v as [number, number];
+    const [a, b] = v as [number, number];
+    const lo = Math.max(sliderMin, Math.min(a, b));
+    const hi = Math.min(sliderMax, Math.max(a, b));
     onChange(lo <= sliderMin && hi >= sliderMax ? DEFAULT_CARAT_RANGE : [lo, hi]);
   };
 
@@ -230,13 +227,103 @@ const CaratRangeSlider = ({
         onValueCommit={handleCommit}
       />
       <div className="mt-4 flex items-center justify-between gap-2">
-        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
-          {localValue[0].toFixed(2)}ct
-        </span>
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <input
+            type="number"
+            inputMode="decimal"
+            step={0.01}
+            min={sliderMin}
+            max={sliderMax}
+            value={localValue[0]}
+            onChange={(e) => setLocalValue([Number(e.target.value) || 0, localValue[1]])}
+            onBlur={() => handleCommit(localValue)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-10 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+          <span className="text-xs font-medium text-foreground/70">ct</span>
+        </label>
         <span className="text-[10px] text-foreground/35">–</span>
-        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
-          {localValue[1].toFixed(2)}ct
-        </span>
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <input
+            type="number"
+            inputMode="decimal"
+            step={0.01}
+            min={sliderMin}
+            max={sliderMax}
+            value={localValue[1]}
+            onChange={(e) => setLocalValue([localValue[0], Number(e.target.value) || 0])}
+            onBlur={() => handleCommit(localValue)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-10 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+          <span className="text-xs font-medium text-foreground/70">ct</span>
+        </label>
+      </div>
+    </div>
+  );
+};
+
+const PriceRangeSlider = ({
+  currentValue,
+  onChange,
+  currencySymbol,
+}: {
+  currentValue: [number, number];
+  onChange: (val: [number, number]) => void;
+  currencySymbol: string;
+}) => {
+  const [min, max] = DEFAULT_PRICE_RANGE;
+  const [local, setLocal] = useState<[number, number]>(currentValue);
+  useEffect(() => { setLocal(currentValue); }, [currentValue[0], currentValue[1]]);
+
+  const handleCommit = (v: [number, number]) => {
+    const lo = Math.max(min, Math.min(v[0], v[1]));
+    const hi = Math.min(max, Math.max(v[0], v[1]));
+    onChange(lo === min && hi >= max ? DEFAULT_PRICE_RANGE : [lo, hi]);
+  };
+
+  return (
+    <div className="px-1 pb-3 pt-4">
+      <Slider
+        min={min}
+        max={max}
+        step={10}
+        value={local}
+        onValueChange={(v) => setLocal(v as [number, number])}
+        onValueCommit={(v) => handleCommit(v as [number, number])}
+      />
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            step={10}
+            min={min}
+            max={max}
+            value={local[0]}
+            onChange={(e) => setLocal([Number(e.target.value) || 0, local[1]])}
+            onBlur={() => handleCommit(local)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-14 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+        </label>
+        <span className="text-[10px] text-foreground/35">–</span>
+        <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
+          <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            step={10}
+            min={min}
+            max={max}
+            value={local[1]}
+            onChange={(e) => setLocal([local[0], Number(e.target.value) || 0])}
+            onBlur={() => handleCommit(local)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="w-14 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+          />
+        </label>
       </div>
     </div>
   );
@@ -253,7 +340,8 @@ const renderFilterItems = (
   dynamicStockTypeItems?: VisualFilterItem[],
   dynamicCaratItems?: VisualFilterItem[],
   dynamicRingSizeItems?: VisualFilterItem[],
-  dynamicCertificateItems?: VisualFilterItem[]
+  dynamicCertificateItems?: VisualFilterItem[],
+  currencySymbol = '£'
 ) => {
   const items =
     (tab.key === 'category'          && dynamicCategoryItems)    ? dynamicCategoryItems    :
@@ -280,7 +368,7 @@ const renderFilterItems = (
                 key={`metal-${itemKey}`}
                 onClick={() => onChange(tab.key, isActive ? '' : item.value)}
                 title={metalConfig.name}
-                className={`rounded border-2 px-2.5 py-1.5 text-[11px] font-bold uppercase leading-none tracking-wide transition-all ${
+                className={`flex h-5 w-10 translate-y-px items-center justify-center rounded border-2 text-[11px] font-bold uppercase leading-none tracking-wide transition-all ${
                   isActive ? 'border-accent' : 'border-transparent opacity-80 hover:opacity-100'
                 }`}
                 style={{
@@ -301,7 +389,7 @@ const renderFilterItems = (
 
   if (tab.key === 'shape' || tab.key === 'cfSubCategoryType' || tab.key === 'stockType' || tab.key === 'certificate') {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {items
           .filter((item) => item.value !== '')
           .map((item) => {
@@ -327,27 +415,11 @@ const renderFilterItems = (
 
   if (tab.key === 'price') {
     return (
-      <div className="space-y-0.5">
-        {items.map((item) => {
-          const isActive = isFilterItemActive(currentValue, item.value);
-          const itemKey = Array.isArray(item.value) ? item.value.join('-') : 'all';
-          return (
-            <button
-              key={`price-${itemKey}`}
-              type="button"
-              onClick={() => onChange(tab.key, item.value)}
-              aria-pressed={isActive}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 ${isActive
-                  ? 'bg-accent/10 text-accent'
-                  : 'text-foreground/60 hover:bg-secondary/40 hover:text-foreground'
-                }`}
-            >
-              <span className={isActive ? 'font-semibold' : ''}>{item.label}</span>
-              {isActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
-            </button>
-          );
-        })}
-      </div>
+      <PriceRangeSlider
+        currentValue={currentValue as [number, number]}
+        onChange={(val) => onChange(tab.key, val)}
+        currencySymbol={currencySymbol}
+      />
     );
   }
 
@@ -363,7 +435,7 @@ const renderFilterItems = (
 
   if (tab.key === 'category') {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {items
           .filter((item) => item.value !== '')
           .map((item) => {
@@ -389,7 +461,7 @@ const renderFilterItems = (
 
   if (tab.key === 'ringSize') {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {items.map((item) => {
           const isActive = isFilterItemActive(currentValue, item.value);
           return (
@@ -422,7 +494,7 @@ const renderFilterItems = (
           return (
             <label
               key={`${tab.key}-${itemKey}`}
-              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-secondary/40"
+              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-secondary/40"
             >
               <input
                 type="checkbox"
@@ -458,6 +530,7 @@ type FilterSidebarContentProps = {
   dynamicCaratItems?: VisualFilterItem[];
   dynamicRingSizeItems?: VisualFilterItem[];
   dynamicCertificateItems?: VisualFilterItem[];
+  currencySymbol: string;
 };
 
 const FilterSidebarContent = ({
@@ -475,9 +548,10 @@ const FilterSidebarContent = ({
   dynamicCaratItems,
   dynamicRingSizeItems,
   dynamicCertificateItems,
+  currencySymbol,
 }: FilterSidebarContentProps) => (
   <div>
-    <div className="mb-5 flex items-center justify-between">
+    <div className="mb-2 flex items-center justify-between">
       <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-foreground/45">
         Refine By
       </h2>
@@ -492,13 +566,13 @@ const FilterSidebarContent = ({
       )}
     </div>
 
-    <div className="mb-4 rounded-2xl border border-border/60 bg-background px-3.5 py-3.5">
-      <div className="mb-3">
+    <div className="mb-1.5 rounded-2xl border border-border/60 bg-background px-3.5 py-2">
+      <div className="mb-1">
         <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
           Availability
         </span>
       </div>
-      <label className="flex cursor-pointer items-center justify-between gap-3 px-2 py-1">
+      <label className="flex cursor-pointer items-center justify-between gap-3">
         <span className="text-sm text-foreground">In-Stock and Ready to Ship</span>
         <button
           type="button"
@@ -518,7 +592,7 @@ const FilterSidebarContent = ({
       type="multiple"
       value={openAccordionItems}
       onValueChange={setOpenAccordionItems}
-      className="space-y-2"
+      className="space-y-1"
     >
       {filterTabs.map((tab) => {
         const isFilterActive =
@@ -532,7 +606,8 @@ const FilterSidebarContent = ({
             tab.key === 'caratWeight' &&
             Array.isArray(filterValues.caratWeight) &&
             isSameRange(filterValues.caratWeight as [number, number], DEFAULT_CARAT_RANGE)
-          );
+          ) &&
+          !(tab.key === 'stockType' && filterValues.stockType === DEFAULT_STOCK_TYPE);
 
         return (
           <AccordionItem
@@ -540,7 +615,7 @@ const FilterSidebarContent = ({
             value={tab.key}
             className="rounded-2xl border border-border/60 bg-background px-3.5"
           >
-            <AccordionTrigger className="py-3.5 hover:no-underline [&>svg]:hidden">
+            <AccordionTrigger className="py-2 hover:no-underline [&>svg]:hidden">
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
@@ -556,9 +631,9 @@ const FilterSidebarContent = ({
               </div>
             </AccordionTrigger>
 
-            <AccordionContent className="pb-4 pt-0">
+            <AccordionContent className="pb-2 pt-0">
               {isFilterActive && (
-                <div className="mb-3 flex justify-end">
+                <div className="mb-1.5 flex justify-end">
                   <button
                     type="button"
                     onClick={() =>
@@ -570,7 +645,7 @@ const FilterSidebarContent = ({
                   </button>
                 </div>
               )}
-              {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems)}
+              {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems, currencySymbol)}
             </AccordionContent>
           </AccordionItem>
         );
@@ -592,7 +667,7 @@ const ShopPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
-  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(filterTabs.map((tab) => tab.key));
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
@@ -615,6 +690,7 @@ const ShopPage = () => {
         ...defaultValues,
         cfSubCategory: fromSlug(categorySlug),
         cfSubCategoryType: searchParams.get('type') ?? '',
+        stockType: searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE,
       };
     }
     const priceMin = searchParams.get('price_min');
@@ -629,7 +705,7 @@ const ShopPage = () => {
       cfSubCategoryType: searchParams.get('cf_sub_category_type') ?? '',
       metal: searchParams.get('metal') ?? '',
       shape: searchParams.get('shape') ?? '',
-      stockType: searchParams.get('stock_type') ?? '',
+      stockType: searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE,
       inStock: searchParams.get('in_stock') ?? '',
       price: (priceMin !== null || priceMax !== null)
         ? [Number(priceMin) || DEFAULT_PRICE_RANGE[0], Number(priceMax) || DEFAULT_PRICE_RANGE[1]] as [number, number]
@@ -849,12 +925,14 @@ const ShopPage = () => {
   const handleReset = useCallback(() => {
     setSearchInput('');
     setPage(1);
-    navigate('/jewellery/all');
-  }, [navigate]);
+    navigate(`/jewellery/all?stock_type=${filterValues.stockType}`);
+  }, [navigate, filterValues.stockType]);
 
 
+  // stockType mirrors the persistent Naturals/Lab Grown header toggle, not a clearable filter —
+  // handleReset intentionally preserves it, so it's excluded from hasActiveFilters/chips too.
   const hasActiveFilters = useMemo(() => {
-    const { category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, stockType, price, inStock, caratWeight, ringSize, certificate } = filterValues;
+    const { category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, price, inStock, caratWeight, ringSize, certificate } = filterValues;
     const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
     const [clo, chi] = Array.isArray(caratWeight) ? (caratWeight as [number, number]) : DEFAULT_CARAT_RANGE;
     return Boolean(
@@ -866,7 +944,6 @@ const ShopPage = () => {
       metal ||
       (typeof shape === 'string' && shape) ||
       (Array.isArray(shape) && shape.length > 0) ||
-      stockType ||
       inStock === 'true' ||
       !isSameRange([lo, hi], DEFAULT_PRICE_RANGE) ||
       !isSameRange([clo, chi], DEFAULT_CARAT_RANGE) ||
@@ -889,8 +966,6 @@ const ShopPage = () => {
       chips.push({ key: 'metal', label: getMetalType(filterValues.metal).name });
     if (typeof filterValues.shape === 'string' && filterValues.shape)
       chips.push({ key: 'shape', label: filterValues.shape });
-    if (typeof filterValues.stockType === 'string' && filterValues.stockType)
-      chips.push({ key: 'stockType', label: filterValues.stockType });
     if (filterValues.inStock === 'true')
       chips.push({ key: 'inStock', label: 'In-Stock & Ready to Ship' });
     if (
@@ -898,10 +973,7 @@ const ShopPage = () => {
       !isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
     ) {
       const [lo, hi] = filterValues.price as [number, number];
-      const priceItem = visualFilters.price.find(
-        (p) => Array.isArray(p.value) && isSameRange(p.value as [number, number], [lo, hi])
-      );
-      chips.push({ key: 'price', label: priceItem?.label ?? `£${lo}–£${hi}` });
+      chips.push({ key: 'price', label: `${currencySymbol}${lo}–${currencySymbol}${hi}` });
     }
     if (
       Array.isArray(filterValues.caratWeight) &&
@@ -918,7 +990,7 @@ const ShopPage = () => {
     if (typeof filterValues.certificate === 'string' && filterValues.certificate)
       chips.push({ key: 'certificate', label: filterValues.certificate });
     return chips;
-  }, [filterValues]);
+  }, [filterValues, currencySymbol]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -942,7 +1014,7 @@ const ShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
+              <SheetContent hideCloseButton side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none">
                 <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
                   <SheetHeader className="text-left">
                     <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">
@@ -969,6 +1041,7 @@ const ShopPage = () => {
                     dynamicCaratItems={dynamicCaratItems.length ? dynamicCaratItems : undefined}
                     dynamicRingSizeItems={dynamicRingSizeItems.length ? dynamicRingSizeItems : undefined}
                     dynamicCertificateItems={dynamicCertificateItems.length ? dynamicCertificateItems : undefined}
+                    currencySymbol={currencySymbol}
                   />
                 </div>
                 <div className="shrink-0 border-t border-border/40 px-6 py-4">
@@ -1018,6 +1091,21 @@ const ShopPage = () => {
                 ))}
               </select>
             </label>
+
+            {/* Naturals / Lab Grown toggle */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className={filterValues.stockType === 'Natural' ? 'font-semibold text-foreground' : 'text-foreground/45'}>Naturals</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={filterValues.stockType === 'Lab'}
+                onClick={() => handleFilterChange('stockType', filterValues.stockType === 'Lab' ? 'Natural' : 'Lab')}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${filterValues.stockType === 'Lab' ? 'bg-accent' : 'bg-foreground/20'}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${filterValues.stockType === 'Lab' ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+              <span className={filterValues.stockType === 'Lab' ? 'font-semibold text-foreground' : 'text-foreground/45'}>Lab Grown</span>
+            </div>
 
             <span className="ml-auto text-sm text-foreground/55">
               {total.toLocaleString()}{total === 1 ? 'result' : 'results'}
