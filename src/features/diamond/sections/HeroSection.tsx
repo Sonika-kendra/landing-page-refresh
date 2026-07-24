@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import diamondsShowcase from '@/assets/landing/category/Diamonds.png';
 import { websiteUrlConfig } from '@/config/site';
+import { useAuth } from '@/context/AuthContext';
 
 const HeroSection = () => {
+  const { isAuthenticated, openModal } = useAuth();
   return (
     <section className="relative min-h-[45vh] pt-28 md:pt-32 pb-12 overflow-hidden bg-accent">
       <div className="absolute inset-0">
@@ -25,7 +27,10 @@ const HeroSection = () => {
           className="max-w-xl"
         >
           <h1 className="henig-heading-display text-secondary mb-6">Diamonds</h1>
-          <Link to={websiteUrlConfig.Diamonds.All}>
+          <Link
+            to={websiteUrlConfig.Diamonds.All}
+            onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); openModal('login', websiteUrlConfig.Diamonds.All); } }}
+          >
             <Button
               variant="outline"
               className="bg-primary border-primary text-white py-4 px-6 text-md w-auto transition-colors duration-300 hover:bg-white hover:text-accent hover:border-white [&:hover_svg]:translate-x-2"

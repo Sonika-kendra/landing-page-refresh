@@ -403,6 +403,7 @@ const Header = () => {
             {/* Favourites */}
             <Link
               to="/wishlist"
+              onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); openModal('login', '/wishlist'); } }}
               aria-label={`Wishlist${favCount > 0 ? ` (${favCount})` : ''}`}
               className="relative p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
             >
@@ -417,6 +418,7 @@ const Header = () => {
             {/* Cart */}
             <Link
               to="/cart"
+              onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); openModal('login', '/cart'); } }}
               aria-label={`Cart (${cartCount} items)`}
               className="relative p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
             >

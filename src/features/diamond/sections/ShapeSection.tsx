@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { websiteUrlConfig } from '@/config/site';
+import { useAuth } from '@/context/AuthContext';
 import round from '@/assets/diamonds/shapes/round.png';
 import oval from '@/assets/diamonds/shapes/oval.png';
 import cushion from '@/assets/diamonds/shapes/cushion.png';
@@ -24,16 +25,21 @@ const shapes = [
   { label: 'Radiant', image: radiant },
 ];
 
-const ShapeSection = () => (
+const ShapeSection = () => {
+  const { isAuthenticated, openModal } = useAuth();
+  return (
   <section className="pt-2 md:pt-3 pb-10 md:pb-12 px-4 sm:px-6 lg:px-8 bg-white">
     <h2 className="henig-heading-section text-center text-foreground mb-6">
       Shop diamonds by shape
     </h2>
     <div className="flex flex-wrap justify-between gap-y-6">
-      {shapes.map((shape) => (
+      {shapes.map((shape) => {
+        const href = `${websiteUrlConfig.Diamonds.All}?shape=${shape.label}`;
+        return (
         <Link
           key={shape.label}
-          to={`${websiteUrlConfig.Diamonds.All}?shape=${shape.label}`}
+          to={href}
+          onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); openModal('login', href); } }}
           className="group flex flex-col items-center gap-2 flex-1 min-w-[80px]"
         >
           <div className="w-20 h-20 md:w-28 md:h-28 flex items-center justify-center">
@@ -47,9 +53,11 @@ const ShapeSection = () => (
             {shape.label}
           </span>
         </Link>
-      ))}
+        );
+      })}
     </div>
   </section>
-);
+  );
+};
 
 export default ShapeSection;

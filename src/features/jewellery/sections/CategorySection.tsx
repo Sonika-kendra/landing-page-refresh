@@ -5,8 +5,11 @@ import { jewelleryCategories } from '@/data/jewellery/categories';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
-const CategorySection = () => (
+const CategorySection = () => {
+  const { isAuthenticated, openModal } = useAuth();
+  return (
   <section className="py-5 section-white">
     <div className="flex justify-center">
       <SectionHeader
@@ -26,7 +29,11 @@ const CategorySection = () => (
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Link to={category.link} className="group block text-left">
+          <Link
+            to={category.link}
+            onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); openModal('login', category.link); } }}
+            className="group block text-left"
+          >
             {/* Image */}
             <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-3 bg-secondary">
               {category.image ? (
@@ -78,6 +85,7 @@ const CategorySection = () => (
       ))}
     </div>
   </section>
-);
+  );
+};
 
 export default CategorySection;

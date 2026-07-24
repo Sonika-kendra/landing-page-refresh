@@ -16,17 +16,18 @@ const FeaturesGridSection = lazy(() => import('@/components/shared/common/Featur
 const LandingPage = () => {
   const { openModal, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) return;
-    const hasSeenModal = sessionStorage.getItem('henig-modal-shown');
-    if (!hasSeenModal) {
-      const timer = setTimeout(() => {
-        openModal('register');
-        sessionStorage.setItem('henig-modal-shown', 'true');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated, openModal]);
+  // ponytail: auto-popup on first home page load disabled per request
+  // useEffect(() => {
+  //   if (isAuthenticated) return;
+  //   const hasSeenModal = sessionStorage.getItem('henig-modal-shown');
+  //   if (!hasSeenModal) {
+  //     const timer = setTimeout(() => {
+  //       openModal('register');
+  //       sessionStorage.setItem('henig-modal-shown', 'true');
+  //     }, 2000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [isAuthenticated, openModal]);
 
   return (
     <PageLayout>

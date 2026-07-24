@@ -6,6 +6,7 @@ import labGrownDiamond from '@/assets/diamonds/lab-grown-diamond.jpg';
 import gemstoneNecklace from '@/assets/gemstone-necklace.jpg';
 import diamondPairs from '@/assets/diamond-pairs.jpg';
 import { websiteUrlConfig } from '@/config/site';
+import { useAuth } from '@/context/AuthContext';
 
 const types = [
   { label: 'Naturals', image: diamondsCategory, href: `${websiteUrlConfig.Diamonds.All}?stock_type=Natural` },
@@ -14,7 +15,9 @@ const types = [
   { label: 'Matching Pairs', image: diamondPairs, href: websiteUrlConfig.Diamonds.All },
 ];
 
-const CategoryTypesSection = () => (
+const CategoryTypesSection = () => {
+  const { isAuthenticated, openModal } = useAuth();
+  return (
   <section className="py-10 md:py-14 bg-white">
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
       {types.map((type, index) => (
@@ -25,7 +28,11 @@ const CategoryTypesSection = () => (
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Link to={type.href} className="group block relative aspect-[4/5] overflow-hidden">
+          <Link
+            to={type.href}
+            onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); openModal('login', type.href); } }}
+            className="group block relative aspect-[4/5] overflow-hidden"
+          >
             <img
               src={type.image}
               alt={type.label}
@@ -40,6 +47,7 @@ const CategoryTypesSection = () => (
       ))}
     </div>
   </section>
-);
+  );
+};
 
 export default CategoryTypesSection;

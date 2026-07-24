@@ -3,8 +3,12 @@ import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import ImageWithSkeleton from '@/components/shared/common/ImageWithSkeleton';
+import { useAuth } from '@/context/AuthContext';
 
 const MotionLink = motion(Link);
+
+const isProtectedPath = (path: string) =>
+  /^\/(diamonds\/all|jewellery\/[^/]+|cart|wishlist|checkout|account)(\/|$)/.test(path);
 
 export type CarouselItem = {
   image: string;
@@ -59,6 +63,7 @@ const Carousel = ({
 
   linkTarget = '_self',
 }: CarouselProps) => {
+  const { isAuthenticated, openModal } = useAuth();
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   const touchResetRef = useRef<NodeJS.Timeout | null>(null);
@@ -206,6 +211,12 @@ const Carousel = ({
                 target={linkTarget}
                 className={`flex-shrink-0 group px-1 ${isTouched ? 'is-touched' : ''}`}
                 style={{ width: `calc(100% / ${visibleItems})` }}
+                onClick={(e) => {
+                  if (!isAuthenticated && isProtectedPath(item.link)) {
+                    e.preventDefault();
+                    openModal('login', item.link);
+                  }
+                }}
                 onTouchStart={() => {
                   if (touchResetRef.current) {
                     clearTimeout(touchResetRef.current);

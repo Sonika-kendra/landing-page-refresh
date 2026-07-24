@@ -1050,7 +1050,7 @@ const ShopPage = () => {
                       type="button"
                       className="w-full rounded bg-accent py-3 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90"
                     >
-                      View {total.toLocaleString()}{total === 1 ? 'Product' : 'Products'}
+                      View {total.toLocaleString()} {total === 1 ? 'Product' : 'Products'}
                     </button>
                   </SheetClose>
                 </div>
