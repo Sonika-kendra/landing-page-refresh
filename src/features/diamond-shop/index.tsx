@@ -616,15 +616,14 @@ const DiamondShopPage = () => {
                   </SheetClose>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-6 py-6">
-                  <div className="mb-2 flex items-center justify-between">
-                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-foreground/45">Refine By</h2>
-                    {hasActiveFilters && (
+                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                  {hasActiveFilters && (
+                    <div className="mb-2 flex justify-end">
                       <button type="button" onClick={handleReset} className="text-xs text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground">
                         Clear all
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   <Accordion type="multiple" value={openAccordion} onValueChange={setOpenAccordion} className="space-y-1">
                     {filterTabs.map((tab) => {

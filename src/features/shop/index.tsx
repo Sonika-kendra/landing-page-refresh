@@ -553,11 +553,8 @@ const FilterSidebarContent = ({
   currencySymbol,
 }: FilterSidebarContentProps) => (
   <div>
-    <div className="mb-2 flex items-center justify-between">
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-foreground/45">
-        Refine By
-      </h2>
-      {hasActiveFilters && (
+    {hasActiveFilters && (
+      <div className="mb-2 flex justify-end">
         <button
           type="button"
           onClick={handleReset}
@@ -565,8 +562,8 @@ const FilterSidebarContent = ({
         >
           Clear all
         </button>
-      )}
-    </div>
+      </div>
+    )}
 
     <div className="mb-1.5 rounded-2xl border border-border/60 bg-background px-3.5 py-2">
       <div className="mb-1">
@@ -1027,7 +1024,7 @@ const ShopPage = () => {
                     <X className="h-4 w-4" />
                   </SheetClose>
                 </div>
-                <div className="flex-1 overflow-y-auto px-6 py-6">
+                <div className="flex-1 overflow-y-auto px-6 pb-6">
                   <FilterSidebarContent
                     filterValues={filterValues}
                     openAccordionItems={openAccordionItems}
