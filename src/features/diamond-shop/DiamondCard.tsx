@@ -167,7 +167,7 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
           <video
             key={d.mp4}
             src={d.mp4}
-            className="h-full w-full object-contain"
+            className="h-full w-full object-cover"
             muted
             loop
             autoPlay
@@ -177,7 +177,7 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
           <img
             src={d.pictureLink || item.image}
             alt={d.title}
-            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = defaultProductImage;
