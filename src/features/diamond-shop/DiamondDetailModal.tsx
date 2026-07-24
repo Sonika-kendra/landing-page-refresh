@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Copy, Check, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Copy, Check, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize, ShoppingBag } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCompare } from './CompareContext';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import type { DiamondItem } from './DiamondCard';
 import { extractDiamondFields, shareDiamond } from './DiamondCard';
 import defaultProductImage from '@/assets/product-placeholder.svg';
@@ -17,17 +20,23 @@ interface DiamondDetailModalProps {
 type GalleryItem = { url: string; type: 'image' | 'video' | '360' };
 
 const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) => {
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [certCopied, setCertCopied] = useState(false);
   const [skuCopied, setSkuCopied] = useState(false);
   const [justLiked, setJustLiked] = useState(false);
+  const [bagJustAdded, setBagJustAdded] = useState(false);
+  const [addedToBag, setAddedToBag] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const { isCompared, toggleCompare } = useCompare();
+  const { addItem, loading: cartLoading } = useCart();
+  const { isAuthenticated, openModal } = useAuth();
   const liked = item ? isFavourite(item.id) : false;
   const compared = item ? isCompared(item.id) : false;
 
   useEffect(() => {
     setSelectedImage(0);
+    setAddedToBag(false);
   }, [item?.id, open]);
 
   if (!item) return null;
@@ -59,6 +68,22 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
     if (!liked) {
       setJustLiked(true);
       setTimeout(() => setJustLiked(false), 400);
+    }
+  };
+
+  const handleAddToBag = async () => {
+    if (addedToBag) { onClose(); navigate('/cart'); return; }
+    if (!isAuthenticated) { openModal('login'); return; }
+    try {
+      await addItem({
+        item_id: item.id, name: d.title, rate: item.price, quantity: 1,
+        sku: item.sku, image: d.pictureLink || item.image, category: 'Diamonds',
+        carat: d.caratTotal ? `${d.caratTotal}ct` : undefined,
+      });
+      setBagJustAdded(true);
+      setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
+    } catch (err: any) {
+      toast({ title: 'Could not add to bag', description: err?.message ?? 'Please try again.', variant: 'destructive' });
     }
   };
 
@@ -247,6 +272,22 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                     </span>
                   </div>
                 </div>
+
+                {/* Add to bag */}
+                <button
+                  onClick={handleAddToBag}
+                  disabled={cartLoading && !addedToBag}
+                  className={`flex items-center justify-center gap-1.5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
+                    bagJustAdded
+                      ? 'bg-accent/80 scale-[0.98] text-accent-foreground'
+                      : addedToBag
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-accent text-accent-foreground hover:bg-accent/90'
+                  }`}
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  {bagJustAdded ? 'Added!' : addedToBag ? 'Go to Bag' : 'Add to Bag'}
+                </button>
 
                 {/* Return policy */}
                 <div className="space-y-1">

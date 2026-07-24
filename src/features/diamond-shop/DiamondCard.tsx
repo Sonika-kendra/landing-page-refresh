@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Heart, Share2, BarChart2, Copy, Check } from 'lucide-react';
+import { Heart, Share2, BarChart2, Copy, Check, ShoppingBag } from 'lucide-react';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCompare } from './CompareContext';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import type { ShopProduct } from '@/data/shop/products';
 import defaultProductImage from '@/assets/product-placeholder.svg';
@@ -77,8 +79,11 @@ function CopyButton({ text }: { text: string }) {
 const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
   const [justLiked, setJustLiked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [bagJustAdded, setBagJustAdded] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const { isCompared, toggleCompare } = useCompare();
+  const { addItem } = useCart();
+  const { isAuthenticated, openModal } = useAuth();
   const liked = isFavourite(item.id);
   const compared = isCompared(item.id);
   const d = extractDiamondFields(item);
@@ -89,6 +94,22 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
     if (!liked) {
       setJustLiked(true);
       setTimeout(() => setJustLiked(false), 400);
+    }
+  };
+
+  const handleAddToBag = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) { openModal('login'); return; }
+    try {
+      await addItem({
+        item_id: item.id, name: d.title, rate: item.price, quantity: 1,
+        sku: item.sku, image: d.pictureLink || item.image, category: 'Diamonds',
+        carat: d.caratTotal ? `${d.caratTotal}ct` : undefined,
+      });
+      setBagJustAdded(true);
+      setTimeout(() => setBagJustAdded(false), 600);
+    } catch (err: any) {
+      toast({ title: 'Could not add to bag', description: err?.message ?? 'Please try again.', variant: 'destructive' });
     }
   };
 
@@ -130,6 +151,13 @@ const DiamondCard = ({ item, onClick }: DiamondCardProps) => {
           className="text-foreground/35 transition-colors hover:text-foreground"
         >
           <Share2 className="h-4 w-4" />
+        </button>
+        <button
+          onClick={handleAddToBag}
+          title="Add to Bag"
+          className={`transition-all duration-200 ${bagJustAdded ? 'scale-125 text-primary' : 'text-foreground/35 hover:text-foreground'}`}
+        >
+          <ShoppingBag className="h-4 w-4" />
         </button>
       </div>
 
