@@ -163,12 +163,9 @@ const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
         type: 'ul',
         items: [
           'Supply of Goods Terms & Conditions: {{LINK:[Link]|/supply-of-goods-terms}}',
-          'Purchase of Goods Terms & Conditions: **[Link]**',
           'Return Policy: {{LINK:[Link]|/cancellation-returns-policy}}',
           'Warranty Policy: {{LINK:[Link]|/warranty-policy}}',
-          'KYB & Supplier Onboarding Procedure: **[Link]**',
           'AML & Compliance Procedure: {{LINK:[Link]|/aml-policy}}',
-          'Responsible Sourcing Procedure: **[Link]**',
           'Privacy Policy: {{LINK:[Link]|/privacy-policy}}',
           'Website Terms of Use: {{LINK:[Link]|/website-terms-of-use}}',
           'IT & Cyber Security Policy (where applicable): **[Link]**',
