@@ -12,7 +12,6 @@ import ShopProductCard from '@/components/shared/product/ShopProductCard';
 import ShapeIcon from '@/components/shared/ShapeIcon';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -218,7 +217,7 @@ const CaratRangeSlider = ({
   };
 
   return (
-    <div className="px-1 pb-3 pt-4">
+    <div className="px-1 pb-2.5 pt-3">
       <Slider
         min={sliderMin}
         max={sliderMax}
@@ -227,7 +226,7 @@ const CaratRangeSlider = ({
         onValueChange={(v) => setLocalValue(v as [number, number])}
         onValueCommit={handleCommit}
       />
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
           <input
             type="number"
@@ -284,7 +283,7 @@ const PriceRangeSlider = ({
   };
 
   return (
-    <div className="px-1 pb-3 pt-4">
+    <div className="px-1 pb-2.5 pt-3">
       <Slider
         min={min}
         max={max}
@@ -293,7 +292,7 @@ const PriceRangeSlider = ({
         onValueChange={(v) => setLocal(v as [number, number])}
         onValueCommit={(v) => handleCommit(v as [number, number])}
       />
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
           <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
           <input
@@ -401,7 +400,7 @@ const renderFilterItems = (
                 type="button"
                 onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
                 aria-pressed={isActive}
-                className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+                className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-all duration-200 ${isActive
                     ? 'border-accent bg-accent text-accent-foreground shadow-sm'
                     : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
                   }`}
@@ -448,7 +447,7 @@ const renderFilterItems = (
                 type="button"
                 onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
                 aria-pressed={isActive}
-                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-all duration-200 ${isActive
                     ? 'border-accent bg-accent text-accent-foreground shadow-sm'
                     : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
                   }`}
@@ -472,7 +471,7 @@ const renderFilterItems = (
               type="button"
               onClick={() => onChange(tab.key, isActive ? '' : item.value as string)}
               aria-pressed={isActive}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-all duration-200 ${isActive
                   ? 'border-accent bg-accent text-accent-foreground shadow-sm'
                   : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'
                 }`}
@@ -519,8 +518,6 @@ const renderFilterItems = (
 
 type FilterSidebarContentProps = {
   filterValues: FilterValues;
-  openAccordionItems: string[];
-  setOpenAccordionItems: (items: string[]) => void;
   handleFilterChange: FilterChangeHandler;
   handleReset: () => void;
   hasActiveFilters: boolean;
@@ -535,10 +532,26 @@ type FilterSidebarContentProps = {
   currencySymbol: string;
 };
 
+// A titled filter section, flat and border-divided — same look as the diamond shop sidebar,
+// with an optional "Clear" action when that section has a non-default value.
+const FilterSection = ({
+  title, isActive, onClear, children, noBorder,
+}: { title: string; isActive?: boolean; onClear?: () => void; children: React.ReactNode; noBorder?: boolean }) => (
+  <div className={`py-4 first:pt-0 ${noBorder ? '' : 'border-b border-border/50'}`}>
+    <div className="mb-2.5 flex items-center justify-between">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">{title}</h3>
+      {isActive && onClear && (
+        <button type="button" onClick={onClear} className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">
+          Clear
+        </button>
+      )}
+    </div>
+    {children}
+  </div>
+);
+
 const FilterSidebarContent = ({
   filterValues,
-  openAccordionItems,
-  setOpenAccordionItems,
   handleFilterChange,
   handleReset,
   hasActiveFilters,
@@ -554,23 +567,22 @@ const FilterSidebarContent = ({
 }: FilterSidebarContentProps) => (
   <div>
     {hasActiveFilters && (
-      <div className="mb-2 flex justify-end">
+      <div className="mb-1.5 flex justify-end">
         <button
           type="button"
           onClick={handleReset}
-          className="text-xs text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground"
+          className="text-[11px] text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground"
         >
           Clear all
         </button>
       </div>
     )}
 
-    <div className="mb-1.5 rounded-2xl border border-border/60 bg-background px-3.5 py-2">
-      <div className="mb-1">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
-          Availability
-        </span>
-      </div>
+    <FilterSection
+      title="Availability"
+      isActive={filterValues.inStock === 'true'}
+      onClear={() => handleFilterChange('inStock', '')}
+    >
       <label className="flex cursor-pointer items-center justify-between gap-3">
         <span className="text-sm text-foreground">In-Stock and Ready to Ship</span>
         <button
@@ -585,71 +597,37 @@ const FilterSidebarContent = ({
           />
         </button>
       </label>
-    </div>
+    </FilterSection>
 
-    <Accordion
-      type="multiple"
-      value={openAccordionItems}
-      onValueChange={setOpenAccordionItems}
-      className="space-y-1"
-    >
-      {filterTabs.map((tab) => {
-        const isFilterActive =
-          Boolean(filterValues[tab.key]) &&
-          !(
-            tab.key === 'price' &&
-            Array.isArray(filterValues.price) &&
-            isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
-          ) &&
-          !(
-            tab.key === 'caratWeight' &&
-            Array.isArray(filterValues.caratWeight) &&
-            isSameRange(filterValues.caratWeight as [number, number], DEFAULT_CARAT_RANGE)
-          ) &&
-          !(tab.key === 'stockType' && filterValues.stockType === DEFAULT_STOCK_TYPE);
+    {filterTabs.map((tab, i) => {
+      const isFilterActive =
+        Boolean(filterValues[tab.key]) &&
+        !(
+          tab.key === 'price' &&
+          Array.isArray(filterValues.price) &&
+          isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
+        ) &&
+        !(
+          tab.key === 'caratWeight' &&
+          Array.isArray(filterValues.caratWeight) &&
+          isSameRange(filterValues.caratWeight as [number, number], DEFAULT_CARAT_RANGE)
+        ) &&
+        !(tab.key === 'stockType' && filterValues.stockType === DEFAULT_STOCK_TYPE);
 
-        return (
-          <AccordionItem
-            key={tab.key}
-            value={tab.key}
-            className="rounded-2xl border border-border/60 bg-background px-3.5"
-          >
-            <AccordionTrigger className="py-2 hover:no-underline [&>svg]:hidden">
-              <div className="flex w-full items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
-                    {tab.label}
-                  </span>
-                  {isFilterActive && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                  )}
-                </div>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground">
-                  {openAccordionItems.includes(tab.key) ? '−' : '+'}
-                </span>
-              </div>
-            </AccordionTrigger>
-
-            <AccordionContent className="pb-2 pt-0">
-              {isFilterActive && (
-                <div className="mb-1.5 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleFilterChange(tab.key, tab.key === 'price' ? DEFAULT_PRICE_RANGE : tab.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
-                    }
-                    className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground"
-                  >
-                    Clear
-                  </button>
-                </div>
-              )}
-              {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems, currencySymbol)}
-            </AccordionContent>
-          </AccordionItem>
-        );
-      })}
-    </Accordion>
+      return (
+        <FilterSection
+          key={tab.key}
+          title={tab.label}
+          isActive={isFilterActive}
+          onClear={() =>
+            handleFilterChange(tab.key, tab.key === 'price' ? DEFAULT_PRICE_RANGE : tab.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
+          }
+          noBorder={i === filterTabs.length - 1}
+        >
+          {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems, currencySymbol)}
+        </FilterSection>
+      );
+    })}
   </div>
 );
 
@@ -666,7 +644,6 @@ const ShopPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
-  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(filterTabs.map((tab) => tab.key));
   const [sortBy, setSortBy] = useState(shopSort.defaultValue);
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
@@ -1014,21 +991,19 @@ const ShopPage = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent hideCloseButton side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none">
-                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
+                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-5 py-4">
                   <SheetHeader className="text-left">
-                    <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">
+                    <SheetTitle className="text-sm font-semibold uppercase tracking-[0.2em]">
                       Filters
                     </SheetTitle>
                   </SheetHeader>
-                  <SheetClose className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 text-foreground transition-colors hover:bg-foreground/20">
-                    <X className="h-4 w-4" />
+                  <SheetClose className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 text-foreground transition-colors hover:bg-foreground/20">
+                    <X className="h-3.5 w-3.5" />
                   </SheetClose>
                 </div>
-                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                <div className="flex-1 overflow-y-auto px-5 pb-5">
                   <FilterSidebarContent
                     filterValues={filterValues}
-                    openAccordionItems={openAccordionItems}
-                    setOpenAccordionItems={setOpenAccordionItems}
                     handleFilterChange={handleFilterChange}
                     handleReset={handleReset}
                     hasActiveFilters={hasActiveFilters}
@@ -1043,11 +1018,11 @@ const ShopPage = () => {
                     currencySymbol={currencySymbol}
                   />
                 </div>
-                <div className="shrink-0 border-t border-border/40 px-6 py-4">
+                <div className="shrink-0 border-t border-border/40 px-5 py-3">
                   <SheetClose asChild>
                     <button
                       type="button"
-                      className="w-full rounded bg-accent py-3 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90"
+                      className="w-full rounded bg-accent py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90"
                     >
                       View {total.toLocaleString()} {total === 1 ? 'Product' : 'Products'}
                     </button>

@@ -5,7 +5,6 @@ import { ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PaginationBar } from '@/components/ui/PaginationBar';
 import { productsApi } from '@/api/products';
 import PageLayout from '@/components/shared/layout/PageLayout';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -64,38 +63,28 @@ type TabKey = keyof FilterValues;
 const MULTI_SELECT_KEYS: TabKey[] = ['shape', 'colour', 'clarity', 'cut', 'polish', 'symmetry', 'fluorescence', 'certificate'];
 
 // Range-typed tabs need their default and isSameRange comparison instead of plain truthiness
+// totalValue is handled separately by rangeDefaultFor since its ceiling is fetched dynamically.
 const RANGE_DEFAULTS: Partial<Record<TabKey, [number, number]>> = {
   caratWeight: DEFAULT_CARAT_RANGE,
-  depth: DEFAULT_DEPTH_RANGE, table: DEFAULT_TABLE_RANGE, totalValue: DEFAULT_TOTAL_VALUE_RANGE,
+  depth: DEFAULT_DEPTH_RANGE, table: DEFAULT_TABLE_RANGE,
 };
 // Non-range, non-multi-select tabs whose "no filter applied" state isn't an empty string
 const NON_EMPTY_DEFAULTS: Partial<Record<TabKey, string>> = { type: DEFAULT_STOCK_TYPE };
 
-const defaultFor = (key: TabKey): unknown =>
-  RANGE_DEFAULTS[key] ?? (MULTI_SELECT_KEYS.includes(key) ? [] : NON_EMPTY_DEFAULTS[key] ?? '');
+// totalValue's real ceiling is fetched from live stock (see maxPrice state), so callers pass
+// the current range in explicitly instead of relying on the static RANGE_DEFAULTS fallback.
+const rangeDefaultFor = (key: TabKey, totalValueRange: [number, number]): [number, number] | undefined =>
+  key === 'totalValue' ? totalValueRange : RANGE_DEFAULTS[key];
 
-const isDefaultValue = (key: TabKey, value: unknown): boolean => {
-  const def = RANGE_DEFAULTS[key];
+const defaultFor = (key: TabKey, totalValueRange: [number, number] = DEFAULT_TOTAL_VALUE_RANGE): unknown =>
+  rangeDefaultFor(key, totalValueRange) ?? (MULTI_SELECT_KEYS.includes(key) ? [] : NON_EMPTY_DEFAULTS[key] ?? '');
+
+const isDefaultValue = (key: TabKey, value: unknown, totalValueRange: [number, number] = DEFAULT_TOTAL_VALUE_RANGE): boolean => {
+  const def = rangeDefaultFor(key, totalValueRange);
   if (def) return isSameRange(value as [number, number], def);
   if (Array.isArray(value)) return value.length === 0;
-  return value === defaultFor(key);
+  return value === defaultFor(key, totalValueRange);
 };
-
-const filterTabs: { key: TabKey; label: string }[] = [
-  { key: 'type',        label: 'Type' },
-  { key: 'shape',       label: 'Shape' },
-  { key: 'colour',      label: 'Colour' },
-  { key: 'clarity',     label: 'Clarity' },
-  { key: 'cut',         label: 'Cut' },
-  { key: 'polish',      label: 'Polish' },
-  { key: 'symmetry',    label: 'Symmetry' },
-  { key: 'fluorescence',label: 'Fluorescence' },
-  { key: 'caratWeight', label: 'Carat Weight' },
-  { key: 'depth',       label: 'Depth' },
-  { key: 'table',       label: 'Table' },
-  { key: 'totalValue',  label: 'Price' },
-  { key: 'certificate', label: 'Certificate' },
-];
 
 const staticOptions: Record<string, string[]> = {
   shape: SHAPES, colour: COLOURS, clarity: CLARITIES,
@@ -120,14 +109,14 @@ const CaratRangeSlider = ({
   };
 
   return (
-    <div className="px-1 pb-3 pt-4">
+    <div className="px-1 pb-2.5 pt-3">
       <Slider
         min={0} max={10} step={0.01}
         value={[Math.min(local[0], 10), Math.min(local[1], 10)]}
         onValueChange={(v) => setLocal([v[0], v[1]] as [number, number])}
         onValueCommit={(v) => handleCommit(v as [number, number])}
       />
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
           <input
             type="number"
@@ -139,11 +128,11 @@ const CaratRangeSlider = ({
             onChange={(e) => setLocal([Number(e.target.value) || 0, local[1]])}
             onBlur={() => handleCommit(local)}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            className="w-10 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+            className="w-10 bg-transparent text-sm font-medium text-foreground/70 outline-none"
           />
-          <span className="text-xs font-medium text-foreground/70">ct</span>
+          <span className="text-sm font-medium text-foreground/70">ct</span>
         </label>
-        <span className="text-[10px] text-foreground/35">–</span>
+        <span className="text-xs text-foreground/35">–</span>
         <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
           <input
             type="number"
@@ -155,9 +144,9 @@ const CaratRangeSlider = ({
             onChange={(e) => setLocal([local[0], Number(e.target.value) || 0])}
             onBlur={() => handleCommit(local)}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            className="w-10 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+            className="w-10 bg-transparent text-sm font-medium text-foreground/70 outline-none"
           />
-          <span className="text-xs font-medium text-foreground/70">ct</span>
+          <span className="text-sm font-medium text-foreground/70">ct</span>
         </label>
       </div>
     </div>
@@ -176,19 +165,19 @@ const NumberRangeSlider = ({
   useEffect(() => { setLocal(currentValue); }, [currentValue[0], currentValue[1]]);
 
   return (
-    <div className="px-1 pb-3 pt-4">
+    <div className="px-1 pb-2.5 pt-3">
       <Slider
         min={min} max={max} step={step}
         value={local}
         onValueChange={(v) => setLocal([v[0], v[1]] as [number, number])}
         onValueCommit={(v) => onChange([v[0], v[1]] as [number, number])}
       />
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="rounded bg-secondary/60 px-2 py-0.5 text-sm font-medium text-foreground/70">
           {local[0].toFixed(1)}{unit}
         </span>
-        <span className="text-[10px] text-foreground/35">–</span>
-        <span className="rounded bg-secondary/60 px-2 py-0.5 text-xs font-medium text-foreground/70">
+        <span className="text-xs text-foreground/35">–</span>
+        <span className="rounded bg-secondary/60 px-2 py-0.5 text-sm font-medium text-foreground/70">
           {local[1].toFixed(1)}{unit}
         </span>
       </div>
@@ -214,7 +203,7 @@ const PriceRangeSlider = ({
   };
 
   return (
-    <div className="px-1 pb-3 pt-4">
+    <div className="px-1 pb-2.5 pt-3">
       <Slider
         min={min}
         max={max}
@@ -223,9 +212,9 @@ const PriceRangeSlider = ({
         onValueChange={(v) => setLocal(v as [number, number])}
         onValueCommit={(v) => handleCommit(v as [number, number])}
       />
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
-          <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
+          <span className="text-sm font-medium text-foreground/70">{currencySymbol}</span>
           <input
             type="number"
             inputMode="decimal"
@@ -236,12 +225,12 @@ const PriceRangeSlider = ({
             onChange={(e) => setLocal([Number(e.target.value) || 0, local[1]])}
             onBlur={() => handleCommit(local)}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            className="w-16 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+            className="w-16 bg-transparent text-sm font-medium text-foreground/70 outline-none"
           />
         </label>
-        <span className="text-[10px] text-foreground/35">–</span>
+        <span className="text-xs text-foreground/35">–</span>
         <label className="flex items-center gap-1 rounded bg-secondary/60 px-2 py-0.5">
-          <span className="text-xs font-medium text-foreground/70">{currencySymbol}</span>
+          <span className="text-sm font-medium text-foreground/70">{currencySymbol}</span>
           <input
             type="number"
             inputMode="decimal"
@@ -252,7 +241,7 @@ const PriceRangeSlider = ({
             onChange={(e) => setLocal([local[0], Number(e.target.value) || 0])}
             onBlur={() => handleCommit(local)}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            className="w-16 bg-transparent text-xs font-medium text-foreground/70 outline-none"
+            className="w-16 bg-transparent text-sm font-medium text-foreground/70 outline-none"
           />
         </label>
       </div>
@@ -260,7 +249,27 @@ const PriceRangeSlider = ({
   );
 };
 
-const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabKey], onChange: (k: TabKey, v: unknown) => void, currencySymbol = '£') => {
+// A titled section of the filter sidebar, with an optional per-section "Clear" action.
+const FilterSection = ({
+  title, isActive, onClear, children, noBorder,
+}: { title: string; isActive?: boolean; onClear?: () => void; children: React.ReactNode; noBorder?: boolean }) => (
+  <div className={`py-4 first:pt-0 ${noBorder ? '' : 'border-b border-border/50'}`}>
+    <div className="mb-2.5 flex items-center justify-between">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">{title}</h3>
+      {isActive && onClear && (
+        <button type="button" onClick={onClear} className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">
+          Clear
+        </button>
+      )}
+    </div>
+    {children}
+  </div>
+);
+
+const renderTab = (
+  tab: { key: TabKey; label: string }, value: FilterValues[TabKey], onChange: (k: TabKey, v: unknown) => void,
+  currencySymbol = '£', totalValueRange: [number, number] = DEFAULT_TOTAL_VALUE_RANGE,
+) => {
   if (tab.key === 'caratWeight') {
     return (
       <CaratRangeSlider
@@ -284,7 +293,7 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
   if (tab.key === 'totalValue') {
     return (
       <PriceRangeSlider
-        min={DEFAULT_TOTAL_VALUE_RANGE[0]} max={DEFAULT_TOTAL_VALUE_RANGE[1]}
+        min={totalValueRange[0]} max={totalValueRange[1]}
         currentValue={value as [number, number]}
         onChange={(v) => onChange(tab.key, v)}
         currencySymbol={currencySymbol}
@@ -302,7 +311,7 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
               key={opt} type="button"
               onClick={() => onChange(tab.key, opt)}
               aria-pressed={isActive}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
+              className={`rounded-md border px-3 py-1 text-sm font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
             >
               {opt === 'Lab' ? 'Lab Grown' : opt}
             </button>
@@ -312,7 +321,30 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
     );
   }
 
-  // Pill buttons for shape, colour, clarity, cut, polish, symmetry, fluorescence, certificate — multi-select
+  // Shape: icon tile grid rather than text pills
+  if (tab.key === 'shape') {
+    const selected = value as string[];
+    return (
+      <div className="grid grid-cols-5 gap-1.5">
+        {SHAPES.map((opt) => {
+          const isActive = selected.includes(opt);
+          return (
+            <button
+              key={opt} type="button"
+              onClick={() => onChange(tab.key, isActive ? selected.filter((v) => v !== opt) : [...selected, opt])}
+              aria-pressed={isActive}
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border py-3 text-center transition-all duration-200 ${isActive ? 'border-accent bg-accent/10 text-accent shadow-sm' : 'border-border text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
+            >
+              <ShapeIcon shape={opt} className="h-9 w-9" />
+              <span className="text-[11px] font-medium">{opt}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Swatch buttons for colour, clarity, cut, polish, symmetry, fluorescence, certificate — multi-select
   const options = staticOptions[tab.key] ?? [];
   const selected = value as string[];
   return (
@@ -324,7 +356,7 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
             key={opt} type="button"
             onClick={() => onChange(tab.key, isActive ? selected.filter((v) => v !== opt) : [...selected, opt])}
             aria-pressed={isActive}
-            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
+            className={`flex min-w-[2.25rem] items-center justify-center gap-1 rounded-md border px-2 py-1 text-sm font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
           >
             {tab.key === 'shape' && <ShapeIcon shape={opt} />}
             {opt}
@@ -347,13 +379,13 @@ const DiamondShopPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [openAccordion, setOpenAccordion] = useState<string[]>(filterTabs.map((tab) => tab.key));
   const [sortBy, setSortBy] = useState('price-asc');
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<DiamondItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(DEFAULT_TOTAL_VALUE_RANGE[1]);
 
   // Browsers restore the previous scroll offset on a manual reload (F5) for the same
   // history entry, which looks like "landing on row 2" when a filter was scrolled to earlier.
@@ -366,6 +398,23 @@ const DiamondShopPage = () => {
   // stock type tab derived from URL, defaults to 'Natural'
   const stockTypeTab = (searchParams.get('stock_type') ?? 'Natural') as 'Natural' | 'Lab';
 
+  // Price slider ceiling: the highest-priced diamond currently in stock for this type,
+  // rounded up to a clean step. Falls back to DEFAULT_TOTAL_VALUE_RANGE until it loads.
+  const totalValueRange = useMemo<[number, number]>(() => [0, maxPrice], [maxPrice]);
+
+  useEffect(() => {
+    productsApi.listDiamonds({
+      per_page: 1, page: 1, status: 'active', category: 'Diamonds',
+      cf_stock_sub_category: 'Single Item', sort: 'price-desc', stock_type: stockTypeTab,
+    })
+      .then((res) => {
+        const top = (res.data?.items ?? [])[0] as DiamondItem | undefined;
+        const topPrice = typeof top?.price === 'number' ? top.price : 0;
+        if (topPrice > 0) setMaxPrice(Math.ceil(topPrice / 1000) * 1000);
+      })
+      .catch(() => {});
+  }, [stockTypeTab]);
+
   // All other filters from URL
   const filterValues = useMemo<FilterValues>(() => {
     const parseMulti = (key: string) =>
@@ -376,8 +425,8 @@ const DiamondShopPage = () => {
     const depthMax = searchParams.get('depth_max');
     const tableMin = searchParams.get('table_min');
     const tableMax = searchParams.get('table_max');
-    const totalMin = searchParams.get('total_min');
-    const totalMax = searchParams.get('total_max');
+    const totalMin = searchParams.get('price_min');
+    const totalMax = searchParams.get('price_max');
     return {
       shape:       parseMulti('shape'),
       colour:      parseMulti('colour'),
@@ -398,10 +447,10 @@ const DiamondShopPage = () => {
         ? [Number(tableMin) || DEFAULT_TABLE_RANGE[0], Number(tableMax) || DEFAULT_TABLE_RANGE[1]] as [number, number]
         : DEFAULT_TABLE_RANGE,
       totalValue: (totalMin || totalMax)
-        ? [Number(totalMin) || DEFAULT_TOTAL_VALUE_RANGE[0], Number(totalMax) || DEFAULT_TOTAL_VALUE_RANGE[1]] as [number, number]
-        : DEFAULT_TOTAL_VALUE_RANGE,
+        ? [Number(totalMin) || totalValueRange[0], Number(totalMax) || totalValueRange[1]] as [number, number]
+        : totalValueRange,
     };
-  }, [searchParams]);
+  }, [searchParams, totalValueRange]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchInput), 400);
@@ -459,10 +508,10 @@ const DiamondShopPage = () => {
       if (lo > DEFAULT_TABLE_RANGE[0]) params.table_min = lo;
       if (hi < DEFAULT_TABLE_RANGE[1]) params.table_max = hi;
     }
-    if (!isSameRange(filterValues.totalValue, DEFAULT_TOTAL_VALUE_RANGE)) {
+    if (!isSameRange(filterValues.totalValue, totalValueRange)) {
       const [lo, hi] = filterValues.totalValue;
-      if (lo > DEFAULT_TOTAL_VALUE_RANGE[0]) params.total_min = lo;
-      if (hi < DEFAULT_TOTAL_VALUE_RANGE[1]) params.total_max = hi;
+      if (lo > totalValueRange[0]) params.price_min = lo;
+      if (hi < totalValueRange[1]) params.price_max = hi;
     }
 
     productsApi.listDiamonds(params as Parameters<typeof productsApi.listDiamonds>[0])
@@ -511,7 +560,7 @@ const DiamondShopPage = () => {
       writeRange(lo, hi, DEFAULT_TABLE_RANGE, 'table_min', 'table_max');
     } else if (key === 'totalValue') {
       const [lo, hi] = value as [number, number];
-      writeRange(lo, hi, DEFAULT_TOTAL_VALUE_RANGE, 'total_min', 'total_max');
+      writeRange(lo, hi, totalValueRange, 'price_min', 'price_max');
     } else if (key === 'type') {
       newParams.set('stock_type', value as string);
     } else {
@@ -521,7 +570,7 @@ const DiamondShopPage = () => {
     setPage(1);
     setSearchParams(newParams, { replace: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [searchParams, stockTypeTab, setSearchParams]);
+  }, [searchParams, stockTypeTab, setSearchParams, totalValueRange]);
 
   // Removes a single value from a multi-select tab's array (e.g. unchecking one shape pill)
   // without clearing the other selected values in that same tab.
@@ -536,6 +585,12 @@ const DiamondShopPage = () => {
     setSearchParams(newParams, { replace: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const isTabActive = (key: TabKey) => {
+    const val = filterValues[key];
+    return Boolean(val) && !isDefaultValue(key, val, totalValueRange);
+  };
+  const clearTab = (key: TabKey) => setFilter(key, defaultFor(key, totalValueRange));
 
   const handleReset = useCallback(() => {
     setSearchInput('');
@@ -555,9 +610,9 @@ const DiamondShopPage = () => {
       !isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE) ||
       !isSameRange(filterValues.depth, DEFAULT_DEPTH_RANGE) ||
       !isSameRange(filterValues.table, DEFAULT_TABLE_RANGE) ||
-      !isSameRange(filterValues.totalValue, DEFAULT_TOTAL_VALUE_RANGE)
+      !isSameRange(filterValues.totalValue, totalValueRange)
     );
-  }, [filterValues, debouncedSearch]);
+  }, [filterValues, debouncedSearch, totalValueRange]);
 
   const activeChips = useMemo(() => {
     // removeValue is set for multi-select tabs so a chip removes just that one value;
@@ -586,12 +641,12 @@ const DiamondShopPage = () => {
       const [lo, hi] = filterValues.table;
       chips.push({ key: 'table', label: `Table: ${lo.toFixed(1)}–${hi.toFixed(1)}%` });
     }
-    if (!isSameRange(filterValues.totalValue, DEFAULT_TOTAL_VALUE_RANGE)) {
+    if (!isSameRange(filterValues.totalValue, totalValueRange)) {
       const [lo, hi] = filterValues.totalValue;
       chips.push({ key: 'totalValue', label: `Price: ${currencySymbol}${lo.toLocaleString()}–${currencySymbol}${hi.toLocaleString()}` });
     }
     return chips;
-  }, [filterValues, currencySymbol]);
+  }, [filterValues, currencySymbol, totalValueRange]);
 
   const openModal = (item: DiamondItem) => {
     setSelectedItem(item);
@@ -625,66 +680,114 @@ const DiamondShopPage = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent hideCloseButton side="left" className="flex w-[480px] max-w-none flex-col p-0 sm:w-[560px] sm:max-w-none">
-                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-6 py-5">
+              <SheetContent hideCloseButton side="left" className="flex w-[90vw] max-w-none flex-col p-0 sm:w-[640px] sm:max-w-none md:w-[720px]">
+                <div className="flex shrink-0 items-center justify-between border-b border-border/40 px-5 py-4">
                   <SheetHeader className="text-left">
-                    <SheetTitle className="text-base font-semibold uppercase tracking-[0.2em]">Filters</SheetTitle>
+                    <SheetTitle className="text-sm font-semibold uppercase tracking-[0.2em]">Filters</SheetTitle>
                   </SheetHeader>
-                  <SheetClose className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 text-foreground transition-colors hover:bg-foreground/20">
-                    <X className="h-4 w-4" />
+                  <SheetClose className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 text-foreground transition-colors hover:bg-foreground/20">
+                    <X className="h-3.5 w-3.5" />
                   </SheetClose>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-6 pb-6">
-                  {hasActiveFilters && (
-                    <div className="mb-2 flex justify-end">
-                      <button type="button" onClick={handleReset} className="text-xs text-foreground/45 underline underline-offset-4 transition-colors hover:text-foreground">
-                        Clear all
-                      </button>
+                <div className="flex-1 overflow-y-auto px-5 pb-5">
+
+                  <FilterSection title="Type" isActive={isTabActive('type')} onClear={() => clearTab('type')}>
+                    {renderTab({ key: 'type', label: 'Type' }, filterValues.type, setFilter)}
+                  </FilterSection>
+
+                  <FilterSection title="Shape" isActive={isTabActive('shape')} onClear={() => clearTab('shape')}>
+                    {renderTab({ key: 'shape', label: 'Shape' }, filterValues.shape, setFilter)}
+                  </FilterSection>
+
+                  <FilterSection title="Carat" isActive={isTabActive('caratWeight')} onClear={() => clearTab('caratWeight')}>
+                    {renderTab({ key: 'caratWeight', label: 'Carat' }, filterValues.caratWeight, setFilter)}
+                  </FilterSection>
+
+                  <div className="grid grid-cols-2 gap-x-5 border-b border-border/50 py-4">
+                    <div>
+                      <div className="mb-2.5 flex items-center justify-between">
+                        <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Colour</h3>
+                        {isTabActive('colour') && (
+                          <button type="button" onClick={() => clearTab('colour')} className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">Clear</button>
+                        )}
+                      </div>
+                      {renderTab({ key: 'colour', label: 'Colour' }, filterValues.colour, setFilter)}
                     </div>
-                  )}
+                    <div>
+                      <div className="mb-2.5 flex items-center justify-between">
+                        <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Clarity</h3>
+                        {isTabActive('clarity') && (
+                          <button type="button" onClick={() => clearTab('clarity')} className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">Clear</button>
+                        )}
+                      </div>
+                      {renderTab({ key: 'clarity', label: 'Clarity' }, filterValues.clarity, setFilter)}
+                    </div>
+                  </div>
 
-                  <Accordion type="multiple" value={openAccordion} onValueChange={setOpenAccordion} className="space-y-1">
-                    {filterTabs.map((tab) => {
-                      const val = filterValues[tab.key];
-                      const isActive = Boolean(val) && !isDefaultValue(tab.key, val);
-
-                      return (
-                        <AccordionItem key={tab.key} value={tab.key} className="rounded-2xl border border-border/60 bg-background px-3.5">
-                          <AccordionTrigger className="py-2 hover:no-underline [&>svg]:hidden">
-                            <div className="flex w-full items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-foreground">{tab.label}</span>
-                                {isActive && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
-                              </div>
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[11px] font-light text-foreground">
-                                {openAccordion.includes(tab.key) ? '−' : '+'}
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent className="pb-2 pt-0">
-                            {isActive && (
-                              <div className="mb-1.5 flex justify-end">
-                                <button
-                                  type="button"
-                                  onClick={() => setFilter(tab.key, defaultFor(tab.key))}
-                                  className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground"
-                                >
-                                  Clear
-                                </button>
-                              </div>
+                  <div className="border-b border-border/50 py-4">
+                    <h3 className="mb-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Cut, Polish &amp; Symmetry</h3>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      {(['cut', 'polish', 'symmetry'] as const).map((key) => (
+                        <div key={key}>
+                          <div className="mb-1.5 flex items-center justify-between">
+                            <span className="text-[11px] font-medium capitalize text-foreground/60">{key}</span>
+                            {isTabActive(key) && (
+                              <button type="button" onClick={() => clearTab(key)} className="text-[10px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">Clear</button>
                             )}
-                            {renderTab(tab, filterValues[tab.key], setFilter, currencySymbol)}
-                          </AccordionContent>
-                        </AccordionItem>
-                      );
-                    })}
-                  </Accordion>
+                          </div>
+                          {renderTab({ key, label: key }, filterValues[key], setFilter)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <FilterSection title="Fluorescence" isActive={isTabActive('fluorescence')} onClear={() => clearTab('fluorescence')}>
+                    {renderTab({ key: 'fluorescence', label: 'Fluorescence' }, filterValues.fluorescence, setFilter)}
+                  </FilterSection>
+
+                  <FilterSection title="Certificate" isActive={isTabActive('certificate')} onClear={() => clearTab('certificate')}>
+                    {renderTab({ key: 'certificate', label: 'Certificate' }, filterValues.certificate, setFilter)}
+                  </FilterSection>
+
+                  <div className="grid grid-cols-2 gap-x-5 border-b border-border/50 py-4">
+                    <div>
+                      <div className="mb-2.5 flex items-center justify-between">
+                        <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Depth</h3>
+                        {isTabActive('depth') && (
+                          <button type="button" onClick={() => clearTab('depth')} className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">Clear</button>
+                        )}
+                      </div>
+                      {renderTab({ key: 'depth', label: 'Depth' }, filterValues.depth, setFilter)}
+                    </div>
+                    <div>
+                      <div className="mb-2.5 flex items-center justify-between">
+                        <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Table</h3>
+                        {isTabActive('table') && (
+                          <button type="button" onClick={() => clearTab('table')} className="text-[11px] text-foreground/40 underline underline-offset-4 transition-colors hover:text-foreground">Clear</button>
+                        )}
+                      </div>
+                      {renderTab({ key: 'table', label: 'Table' }, filterValues.table, setFilter)}
+                    </div>
+                  </div>
+
+                  <FilterSection title="Price" isActive={isTabActive('totalValue')} onClear={() => clearTab('totalValue')} noBorder>
+                    {renderTab({ key: 'totalValue', label: 'Price' }, filterValues.totalValue, setFilter, currencySymbol, totalValueRange)}
+                  </FilterSection>
                 </div>
 
-                <div className="shrink-0 border-t border-border/40 px-6 py-4">
+                <div className="flex shrink-0 items-center gap-3 border-t border-border/40 px-5 py-3">
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="flex-1 rounded border border-border py-2.5 px-3.5 text-sm font-semibold uppercase tracking-[0.12em] text-foreground/70 transition-colors hover:bg-foreground/5"
+                    >
+                      Clear all
+                    </button>
+                  )}
                   <SheetClose asChild>
-                    <button type="button" className="w-full rounded bg-accent py-3 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90">
+                    <button type="button" className="flex-1 rounded bg-accent py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-accent-foreground transition-colors hover:bg-accent/90">
                       View {total.toLocaleString()} {total === 1 ? 'Diamond' : 'Diamonds'}
                     </button>
                   </SheetClose>
@@ -777,7 +880,7 @@ const DiamondShopPage = () => {
               {activeChips.map((chip) => (
                 <button
                   key={`${chip.key}-${chip.removeValue ?? ''}`} type="button"
-                  onClick={() => chip.removeValue !== undefined ? removeFilterValue(chip.key, chip.removeValue) : setFilter(chip.key, defaultFor(chip.key))}
+                  onClick={() => chip.removeValue !== undefined ? removeFilterValue(chip.key, chip.removeValue) : setFilter(chip.key, defaultFor(chip.key, totalValueRange))}
                   className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >
                   {chip.label}

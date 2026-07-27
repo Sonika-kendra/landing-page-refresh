@@ -468,6 +468,20 @@
   height: 0;
 }
 
+/* Shape icon SVGs (src/assets/diamonds/shapes-svg) hardcode width="20" height="20" on the root
+   <svg>, which wins over the wrapper's Tailwind size classes since they're injected as raw markup
+   via dangerouslySetInnerHTML — without this the icon never actually resizes past 20x20px. */
+.shape-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* These SVGs are also hairline-thin (stroke-width: .5 in a 20-unit viewBox) by design; at icon
+   sizes above their native ~20px they read as barely visible. */
+.shape-icon svg path {
+  stroke-width: 1px !important;
+}
+
 /* Keyframes for @theme animations */
 @keyframes accordion-down {
   from { height: 0; overflow: hidden; }

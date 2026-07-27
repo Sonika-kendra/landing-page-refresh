@@ -30,7 +30,6 @@ export const productsApi = {
     polish?: string; symmetry?: string;
     depth_min?: number; depth_max?: number;
     table_min?: number; table_max?: number;
-    total_min?: number; total_max?: number;
   }) =>
     client.get(ep.diamonds, params, undefined, true, base),
 
