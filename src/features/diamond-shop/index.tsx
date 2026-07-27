@@ -36,43 +36,48 @@ const STOCK_TYPES  = ['Natural', 'Lab'];
 const isSameRange = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1];
 
 type FilterValues = {
-  shape: string;
-  colour: string;
-  clarity: string;
-  cut: string;
-  polish: string;
-  symmetry: string;
-  fluorescence: string;
+  shape: string[];
+  colour: string[];
+  clarity: string[];
+  cut: string[];
+  polish: string[];
+  symmetry: string[];
+  fluorescence: string[];
   caratWeight: [number, number];
   depth: [number, number];
   table: [number, number];
   totalValue: [number, number];
-  certificate: string;
+  certificate: string[];
   type: string;
 };
 
 const defaultValues: FilterValues = {
-  shape: '', colour: '', clarity: '', cut: '', polish: '', symmetry: '', fluorescence: '',
+  shape: [], colour: [], clarity: [], cut: [], polish: [], symmetry: [], fluorescence: [],
   caratWeight: DEFAULT_CARAT_RANGE,
   depth: DEFAULT_DEPTH_RANGE, table: DEFAULT_TABLE_RANGE, totalValue: DEFAULT_TOTAL_VALUE_RANGE,
-  certificate: '', type: DEFAULT_STOCK_TYPE,
+  certificate: [], type: DEFAULT_STOCK_TYPE,
 };
 
 type TabKey = keyof FilterValues;
+
+// Tabs whose value is a multi-select array of pill options rather than a single string
+const MULTI_SELECT_KEYS: TabKey[] = ['shape', 'colour', 'clarity', 'cut', 'polish', 'symmetry', 'fluorescence', 'certificate'];
 
 // Range-typed tabs need their default and isSameRange comparison instead of plain truthiness
 const RANGE_DEFAULTS: Partial<Record<TabKey, [number, number]>> = {
   caratWeight: DEFAULT_CARAT_RANGE,
   depth: DEFAULT_DEPTH_RANGE, table: DEFAULT_TABLE_RANGE, totalValue: DEFAULT_TOTAL_VALUE_RANGE,
 };
-// Non-range tabs whose "no filter applied" state isn't an empty string
+// Non-range, non-multi-select tabs whose "no filter applied" state isn't an empty string
 const NON_EMPTY_DEFAULTS: Partial<Record<TabKey, string>> = { type: DEFAULT_STOCK_TYPE };
 
-const defaultFor = (key: TabKey): unknown => RANGE_DEFAULTS[key] ?? NON_EMPTY_DEFAULTS[key] ?? '';
+const defaultFor = (key: TabKey): unknown =>
+  RANGE_DEFAULTS[key] ?? (MULTI_SELECT_KEYS.includes(key) ? [] : NON_EMPTY_DEFAULTS[key] ?? '');
 
 const isDefaultValue = (key: TabKey, value: unknown): boolean => {
   const def = RANGE_DEFAULTS[key];
   if (def) return isSameRange(value as [number, number], def);
+  if (Array.isArray(value)) return value.length === 0;
   return value === defaultFor(key);
 };
 
@@ -307,16 +312,17 @@ const renderTab = (tab: { key: TabKey; label: string }, value: FilterValues[TabK
     );
   }
 
-  // Pill buttons for shape, colour, clarity, cut, polish, symmetry, fluorescence, certificate
+  // Pill buttons for shape, colour, clarity, cut, polish, symmetry, fluorescence, certificate — multi-select
   const options = staticOptions[tab.key] ?? [];
+  const selected = value as string[];
   return (
     <div className="flex flex-wrap gap-1.5">
       {options.map((opt) => {
-        const isActive = value === opt;
+        const isActive = selected.includes(opt);
         return (
           <button
             key={opt} type="button"
-            onClick={() => onChange(tab.key, isActive ? '' : opt)}
+            onClick={() => onChange(tab.key, isActive ? selected.filter((v) => v !== opt) : [...selected, opt])}
             aria-pressed={isActive}
             className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
           >
@@ -362,6 +368,8 @@ const DiamondShopPage = () => {
 
   // All other filters from URL
   const filterValues = useMemo<FilterValues>(() => {
+    const parseMulti = (key: string) =>
+      (searchParams.get(key) ?? '').split(',').map((v) => v.trim()).filter(Boolean);
     const caratMin = searchParams.get('carat_min');
     const caratMax = searchParams.get('carat_max');
     const depthMin = searchParams.get('depth_min');
@@ -371,14 +379,14 @@ const DiamondShopPage = () => {
     const totalMin = searchParams.get('total_min');
     const totalMax = searchParams.get('total_max');
     return {
-      shape:       searchParams.get('shape')       ?? '',
-      colour:      searchParams.get('colour')      ?? '',
-      clarity:     searchParams.get('clarity')     ?? '',
-      cut:         searchParams.get('cut')         ?? '',
-      polish:      searchParams.get('polish')      ?? '',
-      symmetry:    searchParams.get('symmetry')    ?? '',
-      fluorescence:searchParams.get('fluorescence')?? '',
-      certificate: searchParams.get('certificate') ?? '',
+      shape:       parseMulti('shape'),
+      colour:      parseMulti('colour'),
+      clarity:     parseMulti('clarity'),
+      cut:         parseMulti('cut'),
+      polish:      parseMulti('polish'),
+      symmetry:    parseMulti('symmetry'),
+      fluorescence:parseMulti('fluorescence'),
+      certificate: parseMulti('certificate'),
       type:        searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE,
       caratWeight: (caratMin || caratMax)
         ? [Number(caratMin) || DEFAULT_CARAT_RANGE[0], Number(caratMax) || DEFAULT_CARAT_RANGE[1]] as [number, number]
@@ -426,15 +434,15 @@ const DiamondShopPage = () => {
       stock_type: stockTypeTab,
     };
 
-    if (filterValues.shape)        params.shape        = filterValues.shape;
-    if (filterValues.colour)       params.colour       = filterValues.colour;
-    if (filterValues.clarity)      params.clarity      = filterValues.clarity;
-    if (filterValues.cut)          params.cut          = filterValues.cut;
-    if (filterValues.polish)       params.polish       = filterValues.polish;
-    if (filterValues.symmetry)     params.symmetry     = filterValues.symmetry;
-    if (filterValues.fluorescence) params.fluorescence = filterValues.fluorescence;
-    if (filterValues.certificate)  params.certificate  = filterValues.certificate;
-    if (debouncedSearch)           params.search       = debouncedSearch;
+    if (filterValues.shape.length)        params.shape        = filterValues.shape.join(',');
+    if (filterValues.colour.length)       params.colour       = filterValues.colour.join(',');
+    if (filterValues.clarity.length)      params.clarity      = filterValues.clarity.join(',');
+    if (filterValues.cut.length)          params.cut          = filterValues.cut.join(',');
+    if (filterValues.polish.length)       params.polish       = filterValues.polish.join(',');
+    if (filterValues.symmetry.length)     params.symmetry     = filterValues.symmetry.join(',');
+    if (filterValues.fluorescence.length) params.fluorescence = filterValues.fluorescence.join(',');
+    if (filterValues.certificate.length)  params.certificate  = filterValues.certificate.join(',');
+    if (debouncedSearch)                  params.search       = debouncedSearch;
 
     if (!isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE)) {
       const [lo, hi] = filterValues.caratWeight;
@@ -483,8 +491,8 @@ const DiamondShopPage = () => {
     newParams.set('stock_type', stockTypeTab);
 
     const write = (k: string, v: unknown) => {
-      if (v == null || v === '') { newParams.delete(k); return; }
-      newParams.set(k, String(v));
+      if (v == null || v === '' || (Array.isArray(v) && v.length === 0)) { newParams.delete(k); return; }
+      newParams.set(k, Array.isArray(v) ? v.join(',') : String(v));
     };
 
     const writeRange = (lo: number, hi: number, def: [number, number], minKey: string, maxKey: string) => {
@@ -515,6 +523,12 @@ const DiamondShopPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [searchParams, stockTypeTab, setSearchParams]);
 
+  // Removes a single value from a multi-select tab's array (e.g. unchecking one shape pill)
+  // without clearing the other selected values in that same tab.
+  const removeFilterValue = useCallback((key: TabKey, val: string) => {
+    setFilter(key, (filterValues[key] as string[]).filter((v) => v !== val));
+  }, [filterValues, setFilter]);
+
   const setStockType = (type: 'Natural' | 'Lab') => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set('stock_type', type);
@@ -535,9 +549,9 @@ const DiamondShopPage = () => {
   const hasActiveFilters = useMemo(() => {
     return Boolean(
       debouncedSearch.trim() ||
-      filterValues.shape || filterValues.colour || filterValues.clarity ||
-      filterValues.cut || filterValues.polish || filterValues.symmetry ||
-      filterValues.fluorescence || filterValues.certificate ||
+      filterValues.shape.length || filterValues.colour.length || filterValues.clarity.length ||
+      filterValues.cut.length || filterValues.polish.length || filterValues.symmetry.length ||
+      filterValues.fluorescence.length || filterValues.certificate.length ||
       !isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE) ||
       !isSameRange(filterValues.depth, DEFAULT_DEPTH_RANGE) ||
       !isSameRange(filterValues.table, DEFAULT_TABLE_RANGE) ||
@@ -546,15 +560,20 @@ const DiamondShopPage = () => {
   }, [filterValues, debouncedSearch]);
 
   const activeChips = useMemo(() => {
-    const chips: { key: TabKey; label: string }[] = [];
-    if (filterValues.shape)        chips.push({ key: 'shape',        label: filterValues.shape });
-    if (filterValues.colour)       chips.push({ key: 'colour',       label: `Colour: ${filterValues.colour}` });
-    if (filterValues.clarity)      chips.push({ key: 'clarity',      label: `Clarity: ${filterValues.clarity}` });
-    if (filterValues.cut)          chips.push({ key: 'cut',          label: `Cut: ${filterValues.cut}` });
-    if (filterValues.polish)       chips.push({ key: 'polish',       label: `Polish: ${filterValues.polish}` });
-    if (filterValues.symmetry)     chips.push({ key: 'symmetry',     label: `Symmetry: ${filterValues.symmetry}` });
-    if (filterValues.fluorescence) chips.push({ key: 'fluorescence', label: filterValues.fluorescence });
-    if (filterValues.certificate)  chips.push({ key: 'certificate',  label: filterValues.certificate });
+    // removeValue is set for multi-select tabs so a chip removes just that one value;
+    // omitted for range/type chips, which clear the whole tab instead.
+    const chips: { key: TabKey; label: string; removeValue?: string }[] = [];
+    const pushMulti = (key: TabKey, prefix: string) => {
+      (filterValues[key] as string[]).forEach((v) => chips.push({ key, label: prefix ? `${prefix}: ${v}` : v, removeValue: v }));
+    };
+    pushMulti('shape', '');
+    pushMulti('colour', 'Colour');
+    pushMulti('clarity', 'Clarity');
+    pushMulti('cut', 'Cut');
+    pushMulti('polish', 'Polish');
+    pushMulti('symmetry', 'Symmetry');
+    pushMulti('fluorescence', '');
+    pushMulti('certificate', '');
     if (!isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE)) {
       const [lo, hi] = filterValues.caratWeight;
       chips.push({ key: 'caratWeight', label: `${lo.toFixed(2)}–${hi.toFixed(2)}ct` });
@@ -757,8 +776,8 @@ const DiamondShopPage = () => {
               <span className="text-[11px] uppercase tracking-wider text-foreground/40">Active:</span>
               {activeChips.map((chip) => (
                 <button
-                  key={chip.key} type="button"
-                  onClick={() => setFilter(chip.key, defaultFor(chip.key))}
+                  key={`${chip.key}-${chip.removeValue ?? ''}`} type="button"
+                  onClick={() => chip.removeValue !== undefined ? removeFilterValue(chip.key, chip.removeValue) : setFilter(chip.key, defaultFor(chip.key))}
                   className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >
                   {chip.label}
