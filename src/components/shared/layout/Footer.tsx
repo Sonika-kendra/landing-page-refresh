@@ -140,6 +140,14 @@ const Footer = () => {
               </li>
               <li>
                 <Link
+                  to={websiteUrlConfig.Blogs}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Blogs
+                </Link>
+              </li>
+              <li>
+                <Link
                   to={websiteUrlConfig.PrivacyPolicy}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
@@ -156,22 +164,6 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to={websiteUrlConfig.CancellationReturnsPolicy}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Cancellation &amp; Returns
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={websiteUrlConfig.WarrantyPolicy}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Warranty Policy
-                </Link>
-              </li>
-              <li>
-                <Link
                   to={websiteUrlConfig.SupplyOfGoodsTerms}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
@@ -184,6 +176,22 @@ const Footer = () => {
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Website Terms of Use
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.CancellationReturnsPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Cancellation &amp; Returns
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.WarrantyPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Warranty Policy
                 </Link>
               </li>
               <li>
@@ -208,30 +216,6 @@ const Footer = () => {
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   Cookies Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={websiteUrlConfig.Blogs}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Blogs
-                </Link>
-              </li>
-              {/* <li>
-                <Link
-                  to={websiteUrlConfig.Careers}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Careers
-                </Link>
-              </li> */}
-              <li>
-                <Link
-                  to={websiteUrlConfig.Careers}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Warranty Policy
                 </Link>
               </li>
               <li>
