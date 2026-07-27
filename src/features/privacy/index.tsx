@@ -1,310 +1,317 @@
 import PageLayout from '@/components/shared/layout/PageLayout';
-import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import PolicyTabs from '@/components/shared/policy/PolicyTabs';
+import { renderBlocks, type PolicyBlock } from '@/components/shared/policy/richText';
 
-const policyNav = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms & Conditions', href: '/terms-and-conditions' },
-  { label: 'Cancellation & Returns', href: '/cancellation-returns-policy' },
-  { label: 'Quality Policy', href: '/quality-policy' },
-  { label: 'Cookies Policy', href: '/cookies-policy' },
-];
-
-const sections = [
+const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
   {
-    id: 'introduction',
-    heading: 'Introduction',
-    content: (
-      <>
-        <p>
-          Henig Diamonds Ltd ("we", "us", "our") is committed to protecting your personal data and
-          respecting your privacy. This Privacy Policy explains how we collect, use, store, and
-          protect your personal information when you interact with us — whether through our website,
-          in person at our offices, or by any other means of communication.
-        </p>
-        <p className="mt-3">
-          We are registered in England and Wales. Our registered office is Suite Two, First Floor,
-          63–66 Hatton Garden, London EC1N 8LE. We are the data controller for the personal
-          information we hold about you.
-        </p>
-        <p className="mt-3">
-          Please read this policy carefully. If you have any questions, you can contact us at{' '}
-          <a href="mailto:info@henigdiamonds.co.uk" className="text-primary hover:underline">
-            info@henigdiamonds.co.uk
-          </a>
-          .
-        </p>
-      </>
-    ),
+    id: 'about-us',
+    heading: 'About Us',
+    blocks: [
+      { type: 'p', text: 'Henig Diamonds Ltd ("Henig Diamonds", "we", "our" or "us") is committed to protecting and respecting your privacy.' },
+      { type: 'p', text: 'This Privacy Policy explains how we collect, use, disclose and safeguard personal information when you:' },
+      {
+        type: 'ul',
+        items: [
+          'Visit our Website;',
+          'Apply for a trade account;',
+          'Submit enquiries;',
+          'Purchase products;',
+          'Interact with our team; or',
+          'Use our services.',
+        ],
+      },
+      { type: 'subheading', text: 'Company Details' },
+      {
+        type: 'address',
+        lines: [
+          'Henig Diamonds Ltd',
+          'Suite 2 First Floor',
+          '63–66 Hatton Garden',
+          'London',
+          'EC1N 8LE',
+          'United Kingdom',
+          'Company Registration Number: **11618219**',
+          'Email: **info@henigdiamonds.co.uk**',
+        ],
+      },
+    ],
   },
   {
-    id: 'information-we-collect',
-    heading: 'Information We Collect',
-    content: (
-      <>
-        <p>We may collect and process the following categories of personal data:</p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>
-            <strong>Identity data:</strong> your name, title, company name, and position.
-          </li>
-          <li>
-            <strong>Contact data:</strong> your email address, telephone number, and business or
-            billing address.
-          </li>
-          <li>
-            <strong>Transaction data:</strong> details of orders placed, invoices, payments, and
-            goods purchased or enquired about.
-          </li>
-          <li>
-            <strong>Technical data:</strong> IP address, browser type and version, pages visited,
-            and other diagnostic data when you use our website.
-          </li>
-          <li>
-            <strong>Communications data:</strong> any correspondence you send us by email,
-            telephone, or post.
-          </li>
-          <li>
-            <strong>Marketing preferences:</strong> your choices regarding receiving marketing
-            communications from us.
-          </li>
-        </ul>
-        <p className="mt-3">
-          We collect this information directly from you, from third parties such as referral
-          partners, or automatically through the use of cookies and similar technologies on our
-          website.
-        </p>
-      </>
-    ),
+    id: 'who-this-applies-to',
+    heading: 'Who This Policy Applies To',
+    blocks: [
+      { type: 'p', text: 'This Privacy Policy applies to:' },
+      {
+        type: 'ul',
+        items: [
+          'Trade account applicants;',
+          'Business customers;',
+          'Suppliers;',
+          'Website visitors;',
+          'Service providers;',
+          'Business contacts.',
+        ],
+      },
+      { type: 'p', text: 'The Henig Diamonds Website is intended for business customers.' },
+    ],
   },
   {
-    id: 'how-we-use',
-    heading: 'How We Use Your Information',
-    content: (
-      <>
-        <p>We use your personal data for the following purposes:</p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>To process and fulfil orders, quotations, and enquiries.</li>
-          <li>To manage our business relationship with you.</li>
-          <li>To send you pricing, availability updates, and other relevant trade information.</li>
-          <li>
-            To comply with our legal and regulatory obligations, including anti-money laundering
-            (AML) and know-your-customer (KYC) requirements.
-          </li>
-          <li>To improve our website and services through analytics.</li>
-          <li>
-            To send you marketing communications where you have consented or where we have a
-            legitimate business interest in doing so.
-          </li>
-          <li>To respond to enquiries, complaints, or disputes.</li>
-        </ul>
-      </>
-    ),
+    id: 'personal-data-we-collect',
+    heading: 'Personal Data We Collect',
+    blocks: [
+      { type: 'subheading', text: 'Trade Account Information' },
+      { type: 'p', text: 'When applying for a trade account, we may collect:' },
+      {
+        type: 'ul',
+        items: [
+          'Full name;',
+          'Company name;',
+          'Job title;',
+          'Email address;',
+          'Telephone number;',
+          'Business address;',
+          'Delivery address;',
+          'Company registration number;',
+          'VAT registration number; (Where applicable)',
+          'Trade references; and',
+          'Any other information or documentation we reasonably require verifying your business, establish your trade account, or comply with our legal and regulatory obligations.',
+        ],
+      },
+      { type: 'subheading', text: 'Order Information' },
+      { type: 'p', text: 'When placing enquiries or orders, we may collect:' },
+      {
+        type: 'ul',
+        items: [
+          'Product requests;',
+          'Purchase history;',
+          'Delivery information;',
+          'Invoice information;',
+          'Payment information;',
+          'Return and refund information;',
+          'Return authorisation details;',
+          'Warranty claim information (where applicable);',
+          'Product inspection and verification records relating to returned goods.',
+        ],
+      },
+      { type: 'subheading', text: 'Technical Information' },
+      { type: 'p', text: 'When visiting our Website, we may collect:' },
+      {
+        type: 'ul',
+        items: [
+          'IP address;',
+          'Browser information;',
+          'Device information;',
+          'Operating system information;',
+          'Website usage information;',
+          'Cookie data.',
+        ],
+      },
+    ],
   },
   {
-    id: 'legal-basis',
+    id: 'how-we-collect-information',
+    heading: 'How We Collect Information',
+    blocks: [
+      { type: 'p', text: 'Information may be collected when you:' },
+      {
+        type: 'ul',
+        items: [
+          'Visit our Website;',
+          'Apply for a trade account;',
+          'Submit enquiries;',
+          'Place orders;',
+          'Contact our team;',
+          'Subscribe to updates.',
+        ],
+      },
+      { type: 'p', text: 'We may also obtain information from publicly available business records and third-party verification providers.' },
+    ],
+  },
+  {
+    id: 'how-we-use-personal-data',
+    heading: 'How We Use Personal Data',
+    blocks: [
+      { type: 'p', text: 'We may use personal information to:' },
+      {
+        type: 'ul',
+        items: [
+          'Verify trade customers;',
+          'Create and manage accounts;',
+          'Process enquiries and orders;',
+          'Deliver products;',
+          'Manage payments;',
+          'Communicate with customers;',
+          'Improve our services;',
+          'Comply with legal obligations;',
+          'Prevent fraud and financial crime;',
+          'Assess creditworthiness, manage credit accounts, recover outstanding debts, and share relevant information with credit reference agencies (such as Credit safe) or similar organisations where appropriate;',
+          'Process returns, refunds and warranty claims;',
+          'Verify returned products and investigate discrepancies, damaged goods or suspected fraud.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'aml-compliance-checks',
+    heading: 'AML & Compliance Checks',
+    blocks: [
+      { type: 'p', text: 'As a business operating within the diamond and jewellery industry, Henig Diamonds may conduct customer due diligence and verification checks.' },
+      { type: 'p', text: 'Information may be used to:' },
+      {
+        type: 'ul',
+        items: [
+          'Verify customer identity;',
+          'Verify business legitimacy;',
+          'Comply with anti-money laundering requirements;',
+          'Prevent fraud and financial crime.',
+        ],
+      },
+      {
+        type: 'p',
+        text: 'Henig Diamonds may carry out customer due diligence and identity verification checks in accordance with applicable anti-money laundering legislation. For further information, please refer to our {{LINK:Anti-Money Laundering (AML) Policy|/aml-policy}}.',
+      },
+    ],
+  },
+  {
+    id: 'legal-basis-for-processing',
     heading: 'Legal Basis for Processing',
-    content: (
-      <>
-        <p>
-          Under the UK General Data Protection Regulation (UK GDPR), we rely on the following legal
-          bases to process your personal data:
-        </p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>
-            <strong>Contract:</strong> processing is necessary to perform a contract with you or to
-            take steps at your request before entering into one.
-          </li>
-          <li>
-            <strong>Legal obligation:</strong> processing is necessary to comply with a legal
-            obligation (e.g., AML regulations, tax requirements).
-          </li>
-          <li>
-            <strong>Legitimate interests:</strong> processing is necessary for our legitimate
-            business interests, such as maintaining trade relationships and improving our services,
-            where these interests are not overridden by your rights.
-          </li>
-          <li>
-            <strong>Consent:</strong> where you have given clear and specific consent for us to
-            process your data for a particular purpose (e.g., marketing communications).
-          </li>
-        </ul>
-      </>
-    ),
+    blocks: [
+      { type: 'p', text: 'We process personal information where necessary:' },
+      {
+        type: 'ul',
+        items: [
+          'To perform a contract;',
+          'To comply with legal obligations;',
+          'For legitimate business interests;',
+          'Where consent has been provided.',
+        ],
+      },
+    ],
   },
   {
-    id: 'data-sharing',
-    heading: 'Who We Share Your Information With',
-    content: (
-      <>
-        <p>
-          We do not sell your personal data to third parties. We may share your data with:
-        </p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>
-            <strong>Service providers and processors:</strong> companies that provide services on
-            our behalf, such as IT systems, courier and logistics partners, accounting software, and
-            email service providers. These parties are bound by data processing agreements and may
-            only use your data as instructed by us.
-          </li>
-          <li>
-            <strong>Professional advisers:</strong> lawyers, accountants, auditors, and insurers
-            where necessary in the course of providing professional services to us.
-          </li>
-          <li>
-            <strong>Regulatory authorities:</strong> government bodies, law enforcement agencies,
-            or other authorities where we are required or permitted to do so by law.
-          </li>
-          <li>
-            <strong>Business transfers:</strong> in the event of a merger, acquisition, or sale of
-            all or part of our business.
-          </li>
-        </ul>
-      </>
-    ),
+    id: 'marketing-communications',
+    heading: 'Marketing Communications',
+    blocks: [
+      { type: 'p', text: 'Henig Diamonds may send marketing communications regarding products, services, promotions, events, industry updates and other business-related information where permitted by law.' },
+      { type: 'p', text: 'Customers and website visitors may also subscribe to our newsletter to receive updates and marketing communications.' },
+      { type: 'p', text: 'Recipients may opt out or unsubscribe from marketing communications at any time by following the unsubscribe link included in our emails or by contacting us directly.' },
+    ],
+  },
+  {
+    id: 'sharing-information',
+    heading: 'Sharing Information',
+    blocks: [
+      { type: 'p', text: 'We may share information with:' },
+      {
+        type: 'ul',
+        items: [
+          'Delivery providers;',
+          'Independent certification laboratories (where required for product verification, re-certification or authentication);',
+          'Payment providers;',
+          'IT service providers;',
+          'Website hosting providers;',
+          'Marketing and analytics providers;',
+          'Professional advisers;',
+          'Regulatory authorities;',
+          'Law enforcement agencies where legally required;',
+          'Zoho and other business management platforms used to manage customer relationships, orders and business operations.',
+        ],
+      },
+      { type: 'p', text: 'Henig Diamonds does not sell personal information.' },
+    ],
+  },
+  {
+    id: 'international-transfers',
+    heading: 'International Transfers',
+    blocks: [
+      { type: 'p', text: 'Personal information may be processed within the United Kingdom and other countries where our service providers operate.' },
+      { type: 'p', text: 'In some cases, personal information may need to be shared with overseas delivery providers, logistics providers, customs authorities or other third parties where necessary to fulfil orders or arrange international shipments.' },
+      { type: 'p', text: 'Where personal information is transferred or accessed outside the United Kingdom, we will ensure that appropriate safeguards are in place in accordance with applicable data protection laws to protect your personal information.' },
+    ],
+  },
+  {
+    id: 'data-security',
+    heading: 'Data Security',
+    blocks: [
+      { type: 'p', text: 'Henig Diamonds implements appropriate technical and organisational measures to protect personal information.' },
+      { type: 'p', text: 'Access to personal information is restricted to authorised personnel who require access for legitimate business purposes.' },
+      { type: 'p', text: 'However, no method of transmission over the internet can be guaranteed to be completely secure.' },
+    ],
   },
   {
     id: 'data-retention',
     heading: 'Data Retention',
-    content: (
-      <p>
-        We retain your personal data only for as long as necessary to fulfil the purposes for which
-        it was collected, including to satisfy any legal, accounting, or reporting requirements.
-        Trade and financial records are typically retained for a minimum of six years in accordance
-        with UK tax and commercial law. Where data is no longer required, we will securely delete
-        or anonymise it.
-      </p>
-    ),
+    blocks: [
+      { type: 'p', text: 'We retain personal information only for as long as necessary:' },
+      {
+        type: 'ul',
+        items: [
+          'To provide services;',
+          'To comply with legal obligations;',
+          'To maintain business records;',
+          'To prevent fraud; and',
+          'To meet the minimum retention periods required by applicable laws and regulatory requirements.',
+        ],
+      },
+    ],
   },
   {
     id: 'your-rights',
-    heading: 'Your Rights Under UK GDPR',
-    content: (
-      <>
-        <p>You have the following rights in relation to your personal data:</p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>
-            <strong>Right of access:</strong> to request a copy of the personal data we hold about
-            you.
-          </li>
-          <li>
-            <strong>Right to rectification:</strong> to request correction of inaccurate or
-            incomplete data.
-          </li>
-          <li>
-            <strong>Right to erasure:</strong> to request deletion of your data in certain
-            circumstances.
-          </li>
-          <li>
-            <strong>Right to restrict processing:</strong> to ask us to limit how we use your data.
-          </li>
-          <li>
-            <strong>Right to data portability:</strong> to receive your data in a structured,
-            machine-readable format.
-          </li>
-          <li>
-            <strong>Right to object:</strong> to object to processing based on legitimate interests
-            or for direct marketing purposes.
-          </li>
-          <li>
-            <strong>Rights related to automated decision-making:</strong> we do not use solely
-            automated decision-making processes that produce legal or similarly significant effects.
-          </li>
-        </ul>
-        <p className="mt-3">
-          To exercise any of these rights, please contact us at{' '}
-          <a href="mailto:info@henigdiamonds.co.uk" className="text-primary hover:underline">
-            info@henigdiamonds.co.uk
-          </a>
-          . You also have the right to lodge a complaint with the Information Commissioner's Office
-          (ICO) at{' '}
-          <a
-            href="https://ico.org.uk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            ico.org.uk
-          </a>
-          .
-        </p>
-      </>
-    ),
+    heading: 'Your Rights',
+    blocks: [
+      { type: 'p', text: 'Subject to applicable law, you may have the right to:' },
+      {
+        type: 'ul',
+        items: [
+          'Access personal information;',
+          'Correct inaccurate information;',
+          'Request deletion;',
+          'Restrict processing;',
+          'Object to processing;',
+          'Withdraw consent where applicable.',
+        ],
+      },
+      { type: 'p', text: 'Henig Diamonds will respond to legitimate requests in accordance with applicable data protection legislation.' },
+      { type: 'p', text: 'Requests may be submitted to: info@henigdiamonds.co.uk' },
+    ],
   },
   {
     id: 'cookies',
     heading: 'Cookies',
-    content: (
-      <p>
-        Our website uses cookies to distinguish you from other users and to improve your browsing
-        experience. Cookies are small text files stored on your device. We use strictly necessary
-        cookies (required for the site to function), analytical cookies (to understand how the site
-        is used), and, where you have consented, marketing cookies. You may disable cookies in your
-        browser settings; however, some parts of our website may not function as intended as a
-        result.
-      </p>
-    ),
+    blocks: [
+      { type: 'p', text: 'The Website uses cookies and similar technologies.' },
+      { type: 'p', text: 'Further details are available in our {{LINK:Cookie Policy|/cookies-policy}}.' },
+    ],
   },
   {
-    id: 'security',
-    heading: 'Security',
-    content: (
-      <p>
-        We implement appropriate technical and organisational measures to protect your personal data
-        against unauthorised access, loss, alteration, or disclosure. Access to personal data is
-        restricted to employees and contractors who need it to perform their duties, and all
-        personnel are bound by confidentiality obligations. In the event of a personal data breach
-        that is likely to result in risk to your rights and freedoms, we will notify the relevant
-        supervisory authority and, where required, you directly, in accordance with applicable law.
-      </p>
-    ),
+    id: 'third-party-websites',
+    heading: 'Third-Party Websites',
+    blocks: [
+      { type: 'p', text: 'Our Website may contain links to third-party websites.' },
+      { type: 'p', text: 'Henig Diamonds is not responsible for the privacy practices, content or security of external websites and encourages users to review the privacy policies of any third-party websites they visit.' },
+    ],
   },
   {
-    id: 'changes',
+    id: 'complaints',
+    heading: 'Complaints',
+    blocks: [
+      { type: 'p', text: 'If you have concerns regarding our handling of personal information, please contact us first.' },
+      { type: 'p', text: "You may also lodge a complaint with the Information Commissioner's Office (ICO): https://www.ico.org.uk" },
+    ],
+  },
+  {
+    id: 'changes-to-this-policy',
     heading: 'Changes to This Policy',
-    content: (
-      <p>
-        We may update this Privacy Policy from time to time. Any changes will be posted on this
-        page with a revised effective date. We encourage you to review this policy periodically.
-        Continued use of our website or services after any update constitutes acceptance of the
-        revised policy.
-      </p>
-    ),
-  },
-  {
-    id: 'contact',
-    heading: 'Contact Us',
-    content: (
-      <>
-        <p>
-          If you have any questions, concerns, or requests regarding this Privacy Policy or how we
-          handle your personal data, please contact us:
-        </p>
-        <address className="mt-3 not-italic space-y-1 text-muted-foreground">
-          <p>Henig Diamonds Ltd</p>
-          <p>Suite Two, First Floor</p>
-          <p>63–66 Hatton Garden</p>
-          <p>London EC1N 8LE</p>
-          <p className="mt-2">
-            Email:{' '}
-            <a href="mailto:info@henigdiamonds.co.uk" className="text-primary hover:underline">
-              info@henigdiamonds.co.uk
-            </a>
-          </p>
-          <p>
-            Tel:{' '}
-            <a href="tel:+442074040146" className="text-primary hover:underline">
-              +44 (0)207 404 0146
-            </a>
-          </p>
-        </address>
-      </>
-    ),
+    blocks: [
+      { type: 'p', text: 'Henig Diamonds reserves the right to update this Privacy Policy at any time.' },
+      { type: 'p', text: 'Updated versions will be published on the Website.' },
+      { type: 'p', text: 'Continued use of the Website following publication of an updated Privacy Policy constitutes acceptance of the revised version.' },
+    ],
   },
 ];
 
 const PrivacyPolicy = () => {
-  const { pathname } = useLocation();
-
   return (
     <PageLayout>
       {/* Hero */}
@@ -329,31 +336,11 @@ const PrivacyPolicy = () => {
       </section>
 
       {/* Content */}
-      <section className="py-16 md:py-24 section-ivory">
+      <section className="pt-10 pb-16 md:pt-14 md:pb-24 section-ivory">
         <div className="henig-container">
           <div>
 
-            <nav className="mb-10 border-b border-border">
-              <ul className="flex flex-wrap gap-x-1 justify-center">
-                {policyNav.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <li key={link.href}>
-                      <Link
-                        to={link.href}
-                        className={`block text-sm py-2 px-4 -mb-px border-b-2 transition-colors ${
-                          isActive
-                            ? 'border-primary text-primary font-medium'
-                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+            <PolicyTabs />
 
             {/* Main content */}
             <article>
@@ -389,14 +376,14 @@ const PrivacyPolicy = () => {
                       {s.heading}
                     </h2>
                     <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
-                      {s.content}
+                      {renderBlocks(s.blocks)}
                     </div>
                   </motion.div>
                 ))}
               </div>
 
               <p className="mt-12 text-xs text-muted-foreground border-t border-border pt-6">
-                This policy was last reviewed and updated in 2025.
+                Last updated: 01.07.2026.
               </p>
             </article>
 

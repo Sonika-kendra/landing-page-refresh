@@ -1,14 +1,6 @@
 import PageLayout from '@/components/shared/layout/PageLayout';
-import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
-const policyNav = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms & Conditions', href: '/terms-and-conditions' },
-  { label: 'Cancellation & Returns', href: '/cancellation-returns-policy' },
-  { label: 'Quality Policy', href: '/quality-policy' },
-  { label: 'Cookies Policy', href: '/cookies-policy' },
-];
+import PolicyTabs from '@/components/shared/policy/PolicyTabs';
 
 const sections = [
   {
@@ -91,8 +83,6 @@ const sections = [
 ];
 
 const QualityPolicy = () => {
-  const { pathname } = useLocation();
-
   return (
     <PageLayout>
       <section className="bg-accent text-accent-foreground py-10 md:py-14">
@@ -115,31 +105,11 @@ const QualityPolicy = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 section-ivory">
+      <section className="pt-10 pb-16 md:pt-14 md:pb-24 section-ivory">
         <div className="henig-container">
           <div>
 
-            <nav className="mb-10 border-b border-border">
-              <ul className="flex flex-wrap gap-x-1 justify-center">
-                {policyNav.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <li key={link.href}>
-                      <Link
-                        to={link.href}
-                        className={`block text-sm py-2 px-4 -mb-px border-b-2 transition-colors ${
-                          isActive
-                            ? 'border-primary text-primary font-medium'
-                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+            <PolicyTabs />
 
             <article>
               <div className="bg-card border border-border rounded-sm p-6 mb-10">

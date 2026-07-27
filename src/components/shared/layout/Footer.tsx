@@ -164,6 +164,38 @@ const Footer = () => {
               </li>
               <li>
                 <Link
+                  to={websiteUrlConfig.WarrantyPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Warranty Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.SupplyOfGoodsTerms}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Supply of Goods Terms
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.WebsiteTermsOfUse}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  Website Terms of Use
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={websiteUrlConfig.AmlPolicy}
+                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
+                >
+                  AML &amp; Compliance
+                </Link>
+              </li>
+              <li>
+                <Link
                   to={websiteUrlConfig.QualityPolicy}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >

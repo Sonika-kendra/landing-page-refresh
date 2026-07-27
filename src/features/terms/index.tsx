@@ -1,309 +1,203 @@
 import PageLayout from '@/components/shared/layout/PageLayout';
-import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import PolicyTabs from '@/components/shared/policy/PolicyTabs';
+import { renderBlocks, type PolicyBlock } from '@/components/shared/policy/richText';
 
-const policyNav = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms & Conditions', href: '/terms-and-conditions' },
-  { label: 'Cancellation & Returns', href: '/cancellation-returns-policy' },
-  { label: 'Quality Policy', href: '/quality-policy' },
-  { label: 'Cookies Policy', href: '/cookies-policy' },
-];
-
-const sections = [
-  {
-    id: 'introduction',
-    heading: 'Introduction',
-    content: (
-      <>
-        <p>
-          These Terms and Conditions ("Terms") govern the purchase and supply of goods and services
-          by Henig Diamonds Ltd ("we", "us", "our"), a company registered in England and Wales,
-          with its principal place of business at Suite Two, First Floor, 63–66 Hatton Garden,
-          London EC1N 8LE.
-        </p>
-        <p className="mt-3">
-          By placing an order or entering into any agreement with us, you ("the Customer") confirm
-          that you have read, understood, and agree to be bound by these Terms. These Terms apply
-          to all sales, services, and quotations unless otherwise agreed in writing by a director
-          of Henig Diamonds Ltd.
-        </p>
-        <p className="mt-3">
-          We reserve the right to amend these Terms at any time. The version in force at the date
-          of your order will apply to that order.
-        </p>
-      </>
-    ),
-  },
+const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
   {
     id: 'definitions',
     heading: 'Definitions',
-    content: (
-      <>
-        <p>In these Terms, the following definitions apply:</p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>
-            <strong>"Goods"</strong> means diamonds, gemstones, jewellery, and any other products
-            supplied by us.
-          </li>
-          <li>
-            <strong>"Order"</strong> means a purchase order placed by the Customer for Goods or
-            Services.
-          </li>
-          <li>
-            <strong>"Services"</strong> means any advisory, sourcing, or related services we
-            provide alongside or independently of Goods.
-          </li>
-          <li>
-            <strong>"Contract"</strong> means the agreement between us and the Customer for the
-            supply of Goods and/or Services, incorporating these Terms.
-          </li>
-          <li>
-            <strong>"Writing"</strong> includes email correspondence.
-          </li>
-        </ul>
-      </>
-    ),
+    blocks: [
+      { type: 'p', text: '1.1 In these Terms:' },
+      { type: 'p', text: '**"Business Day"** means any day other than a Saturday, Sunday or public holiday in England.' },
+      { type: 'p', text: '**"Customer"** means any individual, company, partnership or other legal entity trading with Henig.' },
+      { type: 'p', text: '**"Goods"** means any diamonds, gemstones, jewellery, precious metals, watches or other products supplied by or purchased by Henig.' },
+      { type: 'p', text: '**"Henig"** means Henig Diamonds Ltd, its successors and permitted assigns.' },
+      { type: 'p', text: '**"Order"** means any order placed verbally, electronically, by email, telephone, website, API, Zoho or any other approved sales platform.' },
+      { type: 'p', text: '**"Policies"** means all policies, procedures and guidelines published by Henig from time to time.' },
+      { type: 'p', text: '**"Terms"** means these General Terms & Conditions.' },
+      { type: 'p', text: '**"Website"** means the official Henig Diamonds website and any associated online platforms operated by Henig.' },
+    ],
   },
   {
-    id: 'quotations-orders',
-    heading: 'Quotations and Orders',
-    content: (
-      <>
-        <p>
-          All quotations issued by us are valid for a period of 48 hours from the date of issue
-          unless otherwise stated in writing, and are subject to availability at the time of order
-          confirmation. Prices quoted are indicative and may fluctuate in line with the diamond
-          market.
-        </p>
-        <p className="mt-3">
-          An Order constitutes an offer by the Customer to purchase Goods and/or Services. No
-          Order shall be deemed accepted until we issue written confirmation. We reserve the right
-          to refuse or cancel any Order at our sole discretion.
-        </p>
-        <p className="mt-3">
-          Once an Order has been accepted and confirmed in writing, cancellation by the Customer
-          will only be accepted at our discretion and may be subject to a restocking or
-          cancellation fee.
-        </p>
-      </>
-    ),
+    id: 'application-of-terms',
+    heading: 'Application of Terms',
+    blocks: [
+      { type: 'p', text: '2.1 These Terms & Conditions apply to all business conducted between Henig and its Customers.' },
+      { type: 'p', text: "2.2 By placing an Order, opening an account, accepting Goods, supplying Goods, or otherwise conducting business with Henig, the Customer agrees to be bound by these Terms and all applicable Policies." },
+      { type: 'p', text: "2.3 These Terms should be read together with Henig's Supply of Goods Terms & Conditions, Purchase of Goods Terms & Conditions and all applicable Policies." },
+      { type: 'p', text: '2.4 In the event of any inconsistency, the document most directly applicable to the transaction shall prevail.' },
+    ],
   },
   {
-    id: 'pricing-payment',
-    heading: 'Pricing and Payment',
-    content: (
-      <>
-        <p>
-          All prices are quoted exclusive of VAT and any applicable duties unless otherwise stated.
-          VAT will be applied at the prevailing rate where applicable.
-        </p>
-        <p className="mt-3">Payment terms are as follows unless otherwise agreed in writing:</p>
-        <ul className="mt-3 space-y-2 list-disc list-outside pl-5">
-          <li>Payment is due in full prior to despatch of Goods, unless credit terms have been agreed.</li>
-          <li>
-            Approved account customers are subject to our standard credit terms, which will be
-            communicated at the time of account opening.
-          </li>
-          <li>
-            We accept payment by bank transfer (BACS/CHAPS). Payment must be received in cleared
-            funds before Goods are released.
-          </li>
-          <li>
-            In the event of late payment, we reserve the right to charge interest on overdue
-            balances at the rate prescribed by the Late Payment of Commercial Debts (Interest) Act
-            1998.
-          </li>
-        </ul>
-      </>
-    ),
+    id: 'business-customers-only',
+    heading: 'Business Customers Only',
+    blocks: [
+      { type: 'p', text: '3.1 Henig supplies and purchases Goods primarily on a business-to-business basis.' },
+      { type: 'p', text: '3.2 Customers warrant that they are acting in the course of a business, profession or trade unless otherwise agreed in writing.' },
+      { type: 'p', text: '3.3 Henig reserves the right to refuse transactions where it believes consumer legislation may apply or where additional legal obligations would arise.' },
+    ],
   },
   {
-    id: 'delivery-risk',
-    heading: 'Delivery and Risk',
-    content: (
-      <>
-        <p>
-          Delivery dates and times given are estimates only and time is not of the essence unless
-          expressly agreed in writing. We shall not be liable for any loss or damage arising from
-          delay in delivery.
-        </p>
-        <p className="mt-3">
-          Risk in the Goods passes to the Customer upon delivery. We will use reasonable endeavours
-          to deliver Goods using a secure, insured courier service. The Customer is responsible for
-          arranging adequate insurance for Goods once risk has passed.
-        </p>
-        <p className="mt-3">
-          Any claim for Goods damaged or lost in transit must be reported to us in writing within
-          48 hours of receipt (or expected delivery date, in the case of non-delivery).
-        </p>
-      </>
-    ),
+    id: 'account-opening-credit-facilities',
+    heading: 'Account Opening & Credit Facilities',
+    blocks: [
+      { type: 'p', text: '4.1 Henig may require Customers to complete account opening documentation and provide company registration details, identification, VAT information, trade references, financial information and any other documentation reasonably required.' },
+      { type: 'p', text: "4.2 Any credit facility is granted entirely at Henig's discretion." },
+      { type: 'p', text: '4.3 Henig may amend, suspend, reduce or withdraw any credit facility at any time without prior notice.' },
+      { type: 'p', text: '4.4 Customers shall promptly notify Henig of any material change to their legal status, ownership or financial position.' },
+    ],
   },
   {
-    id: 'inspection-returns',
-    heading: 'Inspection and Returns',
-    content: (
-      <>
-        <p>
-          The Customer must inspect all Goods promptly upon receipt. Any defects, shortages, or
-          discrepancies must be notified to us in writing within 5 working days of delivery.
-          Failure to notify us within this period will be deemed acceptance of the Goods.
-        </p>
-        <p className="mt-3">
-          Returns will only be accepted with our prior written agreement. Goods must be returned in
-          their original condition, with all certificates and documentation, and using a
-          suitably insured and traceable delivery method. The cost of return postage is the
-          Customer's responsibility unless the Goods are found to be defective.
-        </p>
-        <p className="mt-3">
-          Bespoke or specially sourced items may not be returned unless they are found to be
-          materially defective.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: 'title',
-    heading: 'Title to Goods',
-    content: (
-      <p>
-        Legal and beneficial title to the Goods remains with Henig Diamonds Ltd until full payment
-        has been received in cleared funds. Until title passes, the Customer must store the Goods
-        separately, keep them identifiable as our property, and not pledge, mortgage, charge, or
-        otherwise encumber them. We reserve the right to recover Goods in respect of which title
-        has not passed at any time.
-      </p>
-    ),
-  },
-  {
-    id: 'warranties',
-    heading: 'Warranties and Certificates',
-    content: (
-      <>
-        <p>
-          All diamonds supplied by Henig Diamonds Ltd are warranted to be conflict-free in
-          accordance with the Kimberley Process Certification Scheme. Diamond grading certificates
-          from recognised gemological laboratories (such as GIA, IGI, or HRD) will be provided
-          where applicable and as stated in the Order confirmation.
-        </p>
-        <p className="mt-3">
-          Save as expressly set out in these Terms, all warranties, conditions, and other terms
-          implied by statute or common law are excluded to the fullest extent permitted by
-          applicable law.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: 'limitation-liability',
-    heading: 'Limitation of Liability',
-    content: (
-      <>
-        <p>
-          Nothing in these Terms shall limit or exclude our liability for: (a) death or personal
-          injury caused by our negligence; (b) fraud or fraudulent misrepresentation; or (c) any
-          liability that cannot be excluded or limited by English law.
-        </p>
-        <p className="mt-3">
-          Subject to the above, our total aggregate liability to the Customer in respect of any
-          Contract shall not exceed the total price paid or payable by the Customer under that
-          Contract.
-        </p>
-        <p className="mt-3">
-          We shall not be liable for any indirect, consequential, special, or incidental loss or
-          damage, including loss of profit, loss of revenue, loss of business, or loss of
-          anticipated savings, arising out of or in connection with any Contract.
-        </p>
-      </>
-    ),
+    id: 'anti-money-laundering-compliance',
+    heading: 'Anti-Money Laundering & Compliance',
+    blocks: [
+      { type: 'p', text: "5.1 Customers shall provide all information reasonably requested by Henig for anti-money laundering, sanctions, fraud prevention, Know Your Business (KYB) and regulatory compliance purposes." },
+      { type: 'p', text: '5.2 Henig reserves the right to delay, suspend, refuse or cancel any transaction where compliance concerns arise.' },
+      { type: 'p', text: '5.3 Henig may request updated information at any time to satisfy its legal or regulatory obligations.' },
+      { type: 'p', text: "5.4 Further details are available in Henig's {{LINK:AML & Compliance Procedure|/aml-policy}}." },
+    ],
   },
   {
     id: 'confidentiality',
     heading: 'Confidentiality',
-    content: (
-      <p>
-        Both parties agree to keep confidential all information disclosed by the other that is
-        identified as confidential or that should reasonably be understood to be confidential,
-        including but not limited to pricing, stock details, and business arrangements. This
-        obligation shall survive the termination of any Contract. Neither party shall use
-        confidential information for any purpose other than to perform its obligations under these
-        Terms.
-      </p>
-    ),
+    blocks: [
+      { type: 'p', text: '6.1 All commercial, financial, technical, supplier, pricing, inventory and business information disclosed by Henig shall remain confidential.' },
+      { type: 'p', text: "6.2 Customers shall not disclose such information to any third party without Henig's prior written consent unless required by law." },
+      { type: 'p', text: '6.3 This obligation survives termination of the business relationship.' },
+    ],
+  },
+  {
+    id: 'data-protection-privacy',
+    heading: 'Data Protection & Privacy',
+    blocks: [
+      { type: 'p', text: '7.1 Henig processes personal data in accordance with applicable data protection legislation.' },
+      { type: 'p', text: '7.2 Personal data may be processed for account management, compliance, fraud prevention, contractual performance and other legitimate business purposes.' },
+      { type: 'p', text: "7.3 Further information is available in Henig's {{LINK:Privacy Policy|/privacy-policy}}." },
+    ],
   },
   {
     id: 'intellectual-property',
     heading: 'Intellectual Property',
-    content: (
-      <p>
-        All intellectual property rights in our website, catalogues, images, and marketing
-        materials remain the property of Henig Diamonds Ltd or its licensors. Nothing in these
-        Terms grants the Customer any right to use our intellectual property without our prior
-        written consent.
-      </p>
-    ),
+    blocks: [
+      { type: 'p', text: '8.1 All intellectual property rights belonging to Henig, including logos, trademarks, trade names, product images, CAD designs, renders, videos, website content, catalogues, marketing materials and documentation remain the exclusive property of Henig unless otherwise agreed in writing.' },
+      { type: 'p', text: '8.2 No licence or ownership rights are granted except as expressly stated.' },
+    ],
+  },
+  {
+    id: 'website-electronic-services',
+    heading: 'Website & Electronic Services',
+    blocks: [
+      { type: 'p', text: "9.1 Access to and use of Henig's Website, customer portal, API and any other online services are governed by the Henig {{LINK:Website Terms of Use|/website-terms-of-use}}, which form part of Henig's overall legal framework." },
+      { type: 'p', text: 'Henig may communicate electronically with Customers and Suppliers, including by email, customer portal, API, electronic data interchange (EDI) or any other approved electronic platform.' },
+      { type: 'p', text: 'Electronic quotations, purchase orders, invoices, statements, notices, approvals and other communications shall have the same legal effect as written communications.' },
+      { type: 'p', text: 'Henig may rely upon electronic records, CRM records, ERP records, website logs, API logs and other system records as evidence of transactions, communications and contractual agreements.' },
+    ],
+  },
+  {
+    id: 'limitation-of-liability',
+    heading: 'Limitation of Liability',
+    blocks: [
+      { type: 'p', text: '10.1 Nothing in these Terms excludes liability where such exclusion would be unlawful.' },
+      { type: 'p', text: "10.2 Subject to Clause 10.1, Henig's total liability arising out of any transaction shall not exceed the value of the Goods or services giving rise to the claim." },
+      { type: 'p', text: '10.3 Henig shall not be liable for indirect, consequential, special or economic loss, including loss of profit, business interruption, loss of opportunity or loss of goodwill.' },
+    ],
+  },
+  {
+    id: 'indemnity',
+    heading: 'Indemnity',
+    blocks: [
+      { type: 'p', text: "11.1 The Customer agrees to indemnify and keep indemnified Henig against all losses, liabilities, claims, damages, costs and expenses arising from the Customer's breach of these Terms, negligence, unlawful acts or misuse of the Goods." },
+    ],
   },
   {
     id: 'force-majeure',
     heading: 'Force Majeure',
-    content: (
-      <p>
-        We shall not be liable for any failure or delay in performing our obligations under a
-        Contract where such failure or delay results from any cause beyond our reasonable control,
-        including but not limited to acts of God, natural disasters, government action, war,
-        terrorism, strikes, supply chain disruption, or pandemics. In such circumstances, we will
-        notify you as soon as reasonably practicable and will use reasonable endeavours to resume
-        performance.
-      </p>
-    ),
+    blocks: [
+      { type: 'p', text: '12.1 Henig shall not be liable for any delay or failure to perform its obligations where caused by events beyond its reasonable control, including but not limited to natural disasters, strikes, transport disruption, supplier failures, cyber-attacks, government actions, pandemics, customs delays or utility failures.' },
+    ],
+  },
+  {
+    id: 'assignment',
+    heading: 'Assignment',
+    blocks: [
+      { type: 'p', text: "13.1 The Customer may not assign or transfer any rights or obligations under these Terms without Henig's prior written consent." },
+      { type: 'p', text: '13.2 Henig may assign or transfer its rights and obligations at any time.' },
+    ],
+  },
+  {
+    id: 'severability',
+    heading: 'Severability',
+    blocks: [
+      { type: 'p', text: '14.1 If any provision of these Terms is held to be invalid or unenforceable, the remaining provisions shall continue in full force and effect.' },
+    ],
+  },
+  {
+    id: 'waiver',
+    heading: 'Waiver',
+    blocks: [
+      { type: 'p', text: '15.1 Failure or delay by Henig in exercising any right or remedy shall not constitute a waiver of that right or remedy.' },
+    ],
+  },
+  {
+    id: 'entire-agreement',
+    heading: 'Entire Agreement',
+    blocks: [
+      { type: 'p', text: '16.1 These Terms, together with any applicable Supply of Goods Terms & Conditions, Purchase of Goods Terms & Conditions and incorporated Policies, constitute the entire agreement between Henig and the Customer.' },
+      { type: 'p', text: '16.2 They supersede all previous discussions, negotiations, understandings and agreements relating to the relevant transaction.' },
+    ],
+  },
+  {
+    id: 'third-party-rights',
+    heading: 'Third Party Rights',
+    blocks: [
+      { type: 'p', text: '17.1 Unless expressly stated otherwise, no person who is not a party to these Terms shall have any right to enforce any provision under the Contracts (Rights of Third Parties) Act 1999.' },
+    ],
+  },
+  {
+    id: 'policies-procedures',
+    heading: 'Policies & Procedures',
+    blocks: [
+      { type: 'p', text: '18.1 The following documents form part of these Terms and are incorporated by reference:' },
+      {
+        type: 'ul',
+        items: [
+          'Supply of Goods Terms & Conditions: {{LINK:[Link]|/supply-of-goods-terms}}',
+          'Purchase of Goods Terms & Conditions: **[Link]**',
+          'Return Policy: {{LINK:[Link]|/cancellation-returns-policy}}',
+          'Warranty Policy: {{LINK:[Link]|/warranty-policy}}',
+          'KYB & Supplier Onboarding Procedure: **[Link]**',
+          'AML & Compliance Procedure: {{LINK:[Link]|/aml-policy}}',
+          'Responsible Sourcing Procedure: **[Link]**',
+          'Privacy Policy: {{LINK:[Link]|/privacy-policy}}',
+          'Website Terms of Use: {{LINK:[Link]|/website-terms-of-use}}',
+          'IT & Cyber Security Policy (where applicable): **[Link]**',
+        ],
+      },
+      { type: 'p', text: 'Customers agree to comply with all applicable Policies published by Henig from time to time.' },
+      { type: 'p', text: "Henig reserves the right to amend, replace or withdraw any Policy at its sole discretion." },
+      { type: 'p', text: "The version published on Henig's website at the time of the relevant transaction shall apply unless otherwise agreed in writing." },
+    ],
+  },
+  {
+    id: 'amendments',
+    heading: 'Amendments',
+    blocks: [
+      { type: 'p', text: '19.1 Henig reserves the right to amend these Terms at any time.' },
+      { type: 'p', text: "19.2 Updated versions shall become effective upon publication on Henig's website unless otherwise stated." },
+    ],
   },
   {
     id: 'governing-law',
-    heading: 'Governing Law and Jurisdiction',
-    content: (
-      <p>
-        These Terms and any Contract shall be governed by and construed in accordance with the laws
-        of England and Wales. Each party irrevocably agrees to submit to the exclusive jurisdiction
-        of the courts of England and Wales in relation to any dispute or claim arising out of or in
-        connection with these Terms or any Contract.
-      </p>
-    ),
-  },
-  {
-    id: 'contact',
-    heading: 'Contact Us',
-    content: (
-      <>
-        <p>
-          For any queries relating to these Terms and Conditions, please contact us:
-        </p>
-        <address className="mt-3 not-italic space-y-1 text-muted-foreground">
-          <p>Henig Diamonds Ltd</p>
-          <p>Suite Two, First Floor</p>
-          <p>63–66 Hatton Garden</p>
-          <p>London EC1N 8LE</p>
-          <p className="mt-2">
-            Email:{' '}
-            <a href="mailto:info@henigdiamonds.co.uk" className="text-primary hover:underline">
-              info@henigdiamonds.co.uk
-            </a>
-          </p>
-          <p>
-            Tel:{' '}
-            <a href="tel:+442074040146" className="text-primary hover:underline">
-              +44 (0)207 404 0146
-            </a>
-          </p>
-        </address>
-      </>
-    ),
+    heading: 'Governing Law',
+    blocks: [
+      { type: 'p', text: '20.1 These Terms shall be governed by and construed in accordance with the laws of England and Wales.' },
+      { type: 'p', text: '20.2 The courts of England and Wales shall have exclusive jurisdiction in relation to any dispute arising out of or in connection with these Terms.' },
+    ],
   },
 ];
 
 const TermsAndConditions = () => {
-  const { pathname } = useLocation();
-
   return (
     <PageLayout>
       {/* Hero */}
@@ -322,37 +216,17 @@ const TermsAndConditions = () => {
             transition={{ delay: 0.15 }}
             className="henig-body-large text-accent-foreground/70 max-w-2xl mx-auto"
           >
-            The terms that govern the supply of goods and services by Henig Diamonds Ltd.
+            The general terms that govern the supply of goods and services by Henig Diamonds Ltd.
           </motion.p>
         </div>
       </section>
 
       {/* Content */}
-      <section className="py-16 md:py-24 section-ivory">
+      <section className="pt-10 pb-16 md:pt-14 md:pb-24 section-ivory">
         <div className="henig-container">
           <div>
 
-            <nav className="mb-10 border-b border-border">
-              <ul className="flex flex-wrap gap-x-1 justify-center">
-                {policyNav.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <li key={link.href}>
-                      <Link
-                        to={link.href}
-                        className={`block text-sm py-2 px-4 -mb-px border-b-2 transition-colors ${
-                          isActive
-                            ? 'border-primary text-primary font-medium'
-                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+            <PolicyTabs />
 
             {/* Main content */}
             <article>
@@ -388,14 +262,14 @@ const TermsAndConditions = () => {
                       {s.heading}
                     </h2>
                     <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
-                      {s.content}
+                      {renderBlocks(s.blocks)}
                     </div>
                   </motion.div>
                 ))}
               </div>
 
               <p className="mt-12 text-xs text-muted-foreground border-t border-border pt-6">
-                These Terms and Conditions were last reviewed and updated in 2025.
+                Version 1.0. Effective Date: [Insert Date].
               </p>
             </article>
 

@@ -14,6 +14,10 @@ export const websiteUrlConfig = {
     CancellationReturnsPolicy: `/cancellation-returns-policy`,
     QualityPolicy: `/quality-policy`,
     CookiesPolicy: `/cookies-policy`,
+    SupplyOfGoodsTerms: `/supply-of-goods-terms`,
+    WarrantyPolicy: `/warranty-policy`,
+    AmlPolicy: `/aml-policy`,
+    WebsiteTermsOfUse: `/website-terms-of-use`,
     Landing: {
         ShopCollection: `${oldJewelleryWebsiteURL}/collections/all`,
         BestSeller: `${oldJewelleryWebsiteURL}/collections/all`

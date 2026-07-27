@@ -28,7 +28,11 @@ const sitemapSections = [
     links: [
       { label: 'Privacy Policy', href: websiteUrlConfig.PrivacyPolicy, internal: true },
       { label: 'Terms & Conditions', href: websiteUrlConfig.TermsAndConditions, internal: true },
+      { label: 'Supply of Goods Terms', href: websiteUrlConfig.SupplyOfGoodsTerms, internal: true },
+      { label: 'Website Terms of Use', href: websiteUrlConfig.WebsiteTermsOfUse, internal: true },
       { label: 'Cancellation & Returns', href: websiteUrlConfig.CancellationReturnsPolicy, internal: true },
+      { label: 'Warranty Policy', href: websiteUrlConfig.WarrantyPolicy, internal: true },
+      { label: 'AML & Compliance', href: websiteUrlConfig.AmlPolicy, internal: true },
       { label: 'Quality Policy', href: websiteUrlConfig.QualityPolicy, internal: true },
       { label: 'Cookies Policy', href: websiteUrlConfig.CookiesPolicy, internal: true },
     ],
@@ -67,7 +71,7 @@ const SitemapPage = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 section-ivory">
+      <section className="pt-10 pb-16 md:pt-14 md:pb-24 section-ivory">
         <div className="henig-container">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {sitemapSections.map((section, i) => (
