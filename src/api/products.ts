@@ -73,6 +73,9 @@ export const productsApi = {
   getOneDiamond: (id: string) =>
     client.get(ep.oneDiamond(id), undefined, undefined, false, base),
 
+  askImageVideo: (id: string) =>
+    client.post(ep.askImageVideo(id), undefined, undefined, base),
+
   getByName: (name: string) =>
     client.get(ep.byName, { name }, undefined, false, base),
 

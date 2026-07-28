@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Copy, Check, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize, ShoppingBag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, Check, Heart, Share2, BarChart2, Download, FileText, Truck, RotateCcw, Maximize, ShoppingBag, ImagePlus } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useFavourites } from '@/context/FavouritesContext';
 import { useCompare } from './CompareContext';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { productsApi } from '@/api/products';
 import type { DiamondItem } from './DiamondCard';
 import { extractDiamondFields, shareDiamond } from './DiamondCard';
 import defaultProductImage from '@/assets/product-placeholder.svg';
@@ -27,6 +28,8 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
   const [justLiked, setJustLiked] = useState(false);
   const [bagJustAdded, setBagJustAdded] = useState(false);
   const [addedToBag, setAddedToBag] = useState(false);
+  const [askingImageVideo, setAskingImageVideo] = useState(false);
+  const [askedImageVideo, setAskedImageVideo] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const { isCompared, toggleCompare } = useCompare();
   const { addItem, loading: cartLoading } = useCart();
@@ -37,6 +40,7 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
   useEffect(() => {
     setSelectedImage(0);
     setAddedToBag(false);
+    setAskedImageVideo(false);
   }, [item?.id, open]);
 
   if (!item) return null;
@@ -84,6 +88,21 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
       setTimeout(() => { setBagJustAdded(false); setAddedToBag(true); }, 600);
     } catch (err: any) {
       toast({ title: 'Could not add to bag', description: err?.message ?? 'Please try again.', variant: 'destructive' });
+    }
+  };
+
+  const handleAskImageVideo = async () => {
+    if (askedImageVideo) return;
+    if (!isAuthenticated) { openModal('login'); return; }
+    setAskingImageVideo(true);
+    try {
+      await productsApi.askImageVideo(item.id);
+      setAskedImageVideo(true);
+      toast({ title: 'Request sent', description: 'We’ll email you an image or video of this stone shortly.' });
+    } catch (err: any) {
+      toast({ title: 'Could not send request', description: err?.message ?? 'Please try again.', variant: 'destructive' });
+    } finally {
+      setAskingImageVideo(false);
     }
   };
 
@@ -287,6 +306,16 @@ const DiamondDetailModal = ({ item, open, onClose }: DiamondDetailModalProps) =>
                 >
                   <ShoppingBag className="h-4 w-4" />
                   {bagJustAdded ? 'Added!' : addedToBag ? 'Go to Bag' : 'Add to Bag'}
+                </button>
+
+                {/* Ask for image/video */}
+                <button
+                  onClick={handleAskImageVideo}
+                  disabled={askingImageVideo || askedImageVideo}
+                  className="flex items-center justify-center gap-1.5 border border-foreground/30 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 transition-all duration-200 hover:bg-foreground/5 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  {askedImageVideo ? 'Request Sent' : askingImageVideo ? 'Sending…' : 'Ask for Image/Video'}
                 </button>
 
                 {/* Return policy */}

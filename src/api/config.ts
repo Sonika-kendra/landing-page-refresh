@@ -159,6 +159,7 @@ export const API_CONFIG = {
       byName: '/products/by-name',
       one: (id: string) => `/products/${id}`,
       oneDiamond: (id: string) => `/products/diamonds/${id}`,
+      askImageVideo: (id: string) => `/products/diamonds/${id}/ask-image-video`,
       create: '/products',
       update: (id: string) => `/products/${id}`,
       updateTags: (zohoId: string) => `/products/${zohoId}/tags`,
