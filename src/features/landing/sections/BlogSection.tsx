@@ -31,7 +31,7 @@ const BlogSection = () => {
   console.log(oldWebsiteURL);
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl md:text-3xl font-serif text-center mb-12">
           Read Through our Blog
@@ -45,7 +45,7 @@ const BlogSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="text-center mt-12"
+          className="text-center mt-8"
         >
           <Button
             size="sm"

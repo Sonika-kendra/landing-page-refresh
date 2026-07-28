@@ -37,7 +37,8 @@ const LandingPage = () => {
       <Suspense fallback={<div className="min-h-32" />}>
         {/* ponytail: partner/certification section temporarily disabled per request */}
         {/* <CertificationsAndPartnersSection /> */}
-        <FeaturesGridSection />
+        {/* ponytail: bespoke design service section temporarily disabled per request */}
+        {/* <FeaturesGridSection /> */}
         <BestSellerSection />
         <FAQSection />
         <InstagramSection />
