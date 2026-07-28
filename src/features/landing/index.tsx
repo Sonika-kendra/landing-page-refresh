@@ -35,7 +35,8 @@ const LandingPage = () => {
       <CategorySection />
       <AboutSection />
       <Suspense fallback={<div className="min-h-32" />}>
-        <CertificationsAndPartnersSection />
+        {/* ponytail: partner/certification section temporarily disabled per request */}
+        {/* <CertificationsAndPartnersSection /> */}
         <FeaturesGridSection />
         <BestSellerSection />
         <FAQSection />

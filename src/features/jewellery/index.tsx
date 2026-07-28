@@ -11,7 +11,8 @@ const JewelleryPage = () => (
     <JewelleryHeroSection />
     <NewArrivalsAndBestsellersSection />
     <CategorySection />
-    <CertificationsAndPartnersSection />
+    {/* ponytail: partner/certification section temporarily disabled per request */}
+    {/* <CertificationsAndPartnersSection /> */}
     <CatalogueBespokeSection />
     <CommitmentSection />
   </PageLayout>
