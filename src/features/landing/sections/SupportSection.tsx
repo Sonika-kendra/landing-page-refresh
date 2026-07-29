@@ -40,9 +40,9 @@ const features: Feature[] = [
 const SupportSection = () => {
   return (
     <section className="py-10 section-ivory">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-center items-center sm:items-start gap-30 sm:gap-40">
         {features.map((feature, idx) => (
-          <div key={idx} className="flex flex-col items-center text-center w-32">
+          <div key={idx} className="flex flex-col items-center text-center">
             {feature.icon && (
               <div className="mb-2 text-gray-700">
                 {feature.icon}
@@ -50,7 +50,7 @@ const SupportSection = () => {
             )}
 
             <h3
-              className={`font-semibold ${
+              className={`font-semibold text-base whitespace-nowrap ${
                 feature.highlight ? 'text-red-600' : 'text-gray-800'
               }`}
             >
