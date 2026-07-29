@@ -4,7 +4,7 @@ import JewelleryHeroSection from './sections/JewelleryHeroSection';
 import NewArrivalsAndBestsellersSection from './sections/NewArrivalsAndBestsellersSection';
 import CategorySection from './sections/CategorySection';
 import CatalogueBespokeSection from './sections/CatalogueBespokeSection';
-import CommitmentSection from './sections/CommitmentSection';
+import SupportSection from '@/features/landing/sections/SupportSection';
 
 const JewelleryPage = () => (
   <PageLayout>
@@ -14,7 +14,7 @@ const JewelleryPage = () => (
     {/* ponytail: partner/certification section temporarily disabled per request */}
     {/* <CertificationsAndPartnersSection /> */}
     <CatalogueBespokeSection />
-    <CommitmentSection />
+    <SupportSection />
   </PageLayout>
 );
 

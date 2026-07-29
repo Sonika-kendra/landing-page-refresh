@@ -37,11 +37,11 @@ const CommitmentSection = () => {
 
   return (
     <section className="py-10 bg-secondary section-ivory">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div className="max-w-7xl mx-auto px-2 flex flex-col sm:flex-row justify-center items-center sm:items-start gap-14 sm:gap-24">
         {items.map((item, index) => (
-          <div key={index} className="flex flex-col items-center text-center w-32">
+          <div key={index} className="flex flex-col items-center text-center">
             {item.icon}
-            <h3 className="font-semibold mt-2">{item.title}</h3>
+            <h3 className="font-semibold mt-2 text-base whitespace-nowrap">{item.title}</h3>
             <p className="text-gray-500 text-sm">{item.subtitle}</p>
           </div>
         ))}
