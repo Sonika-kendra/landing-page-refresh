@@ -4,6 +4,7 @@ import {
   FaClock,
   FaExchangeAlt,
   FaUndoAlt,
+  FaShippingFast,
 } from 'react-icons/fa';
 
 
@@ -15,6 +16,11 @@ interface Feature {
 }
 
 const features: Feature[] = [
+  {
+    icon: <FaShippingFast size={28} />,
+    title: 'Same Day Dispatch',
+    subtitle: 'On orders placed before 2pm',
+  },
   {
     icon: <FaShieldAlt size={28} />,
     title: 'Secure & Insured Delivery',
@@ -40,7 +46,7 @@ const features: Feature[] = [
 const SupportSection = () => {
   return (
     <section className="py-10 section-ivory">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-center items-center sm:items-start gap-30 sm:gap-40">
+      <div className="max-w-7xl mx-auto px-2 flex flex-col sm:flex-row justify-center items-center sm:items-start gap-14 sm:gap-24">
         {features.map((feature, idx) => (
           <div key={idx} className="flex flex-col items-center text-center">
             {feature.icon && (
