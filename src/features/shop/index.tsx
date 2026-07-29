@@ -11,6 +11,7 @@ import type { FilterValues } from '@/components/shared/filters/AdvancedFilterSor
 import ShopProductCard from '@/components/shared/product/ShopProductCard';
 import ShapeIcon from '@/components/shared/ShapeIcon';
 import YouMayAlsoLike from './components/YouMayAlsoLike';
+import QRScanButton from '@/components/shared/product/QRScanButton';
 import CommitmentSection from '@/features/jewellery/sections/CommitmentSection';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -1050,6 +1051,8 @@ const ShopPage = () => {
                 </button>
               )}
             </label>
+
+            <QRScanButton />
 
             <label className="flex items-center gap-2 text-sm text-foreground/55">
               <span className="whitespace-nowrap">Sort by</span>
