@@ -15,7 +15,7 @@ const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
       { type: 'p', text: '**"Goods"** means any diamonds, gemstones, jewellery, precious metals, watches or other products supplied by Henig.' },
       { type: 'p', text: '**"Henig"** means Henig Diamonds Ltd.' },
       { type: 'p', text: '**"Order"** means any order placed verbally, by email, telephone, Zoho, API, website or any other approved sales platform.' },
-      { type: 'p', text: "**\"Policies\"** means Henig's published policies, as amended from time to time, including the {{LINK:Return Policy|/cancellation-returns-policy}}, {{LINK:Warranty Policy|/warranty-policy}}, {{LINK:AML & Compliance Procedure|/aml-policy}}, {{LINK:Privacy Policy|/privacy-policy}} and any other applicable policy available here: **[Link]**." },
+      { type: 'p', text: "**\"Policies\"** means Henig's published policies, as amended from time to time, including the {{LINK:Return Policy|/cancellation-returns-policy}}, {{LINK:Warranty Policy|/cancellation-returns-policy#warranty-definitions}}, {{LINK:AML & Compliance Procedure|/aml-policy}}, {{LINK:Privacy Policy|/privacy-policy}} and any other applicable policy available here: **[Link]**." },
     ],
   },
   {
@@ -146,7 +146,7 @@ const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
       { type: 'p', text: '12.2 The warranty applies only to genuine manufacturing defects.' },
       { type: 'p', text: '12.3 The warranty does not cover accidental damage, wear and tear, misuse, third-party repairs, resizing by third parties, or loss resulting from negligence.' },
       { type: 'p', text: '12.4 Diamonds are not supplied with any additional warranty beyond any applicable laboratory certificate.' },
-      { type: 'p', text: "12.5 Full warranty terms are set out in Henig's {{LINK:Warranty Policy|/warranty-policy}}." },
+      { type: 'p', text: "12.5 Full warranty terms are set out in Henig's {{LINK:Warranty Policy|/cancellation-returns-policy#warranty-definitions}}." },
     ],
   },
   {
@@ -156,7 +156,7 @@ const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
       { type: 'p', text: '13.1 Bespoke and special-order Goods are manufactured specifically for the Customer.' },
       { type: 'p', text: '13.2 Once production has commenced, Orders may not be cancelled.' },
       { type: 'p', text: '13.3 Bespoke Goods are non-returnable except in the event of a verified manufacturing defect.' },
-      { type: 'p', text: "13.4 Further details are set out in Henig's {{LINK:Return Policy|/cancellation-returns-policy}} and {{LINK:Warranty Policy|/warranty-policy}}." },
+      { type: 'p', text: "13.4 Further details are set out in Henig's {{LINK:Return Policy|/cancellation-returns-policy}} and {{LINK:Warranty Policy|/cancellation-returns-policy#warranty-definitions}}." },
     ],
   },
   {

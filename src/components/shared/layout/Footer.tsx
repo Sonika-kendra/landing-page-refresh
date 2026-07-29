@@ -183,15 +183,7 @@ const Footer = () => {
                   to={websiteUrlConfig.CancellationReturnsPolicy}
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
-                  Cancellation &amp; Returns
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={websiteUrlConfig.WarrantyPolicy}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Warranty Policy
+                  Returns &amp; Warranty
                 </Link>
               </li>
               <li>
@@ -200,14 +192,6 @@ const Footer = () => {
                   className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
                 >
                   AML &amp; Compliance
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={websiteUrlConfig.QualityPolicy}
-                  className="text-base text-accent-foreground/70 hover:text-primary transition-colors"
-                >
-                  Quality Policy
                 </Link>
               </li>
               <li>

@@ -164,7 +164,7 @@ const sections: { id: string; heading: string; blocks: PolicyBlock[] }[] = [
         items: [
           'Supply of Goods Terms & Conditions: {{LINK:[Link]|/supply-of-goods-terms}}',
           'Return Policy: {{LINK:[Link]|/cancellation-returns-policy}}',
-          'Warranty Policy: {{LINK:[Link]|/warranty-policy}}',
+          'Warranty Policy: {{LINK:[Link]|/cancellation-returns-policy#warranty-definitions}}',
           'AML & Compliance Procedure: {{LINK:[Link]|/aml-policy}}',
           'Privacy Policy: {{LINK:[Link]|/privacy-policy}}',
           'Website Terms of Use: {{LINK:[Link]|/website-terms-of-use}}',

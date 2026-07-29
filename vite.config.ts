@@ -15,7 +15,6 @@ export default defineConfig(() => {
     "/new/privacy-policy",
     "/new/terms-and-conditions",
     "/new/cancellation-returns-policy",
-    "/new/quality-policy",
     "/new/cookies-policy",
     "/new/sitemap",
   ];

@@ -12,10 +12,8 @@ export const websiteUrlConfig = {
     TermsAndConditions: `/terms-and-conditions`,
     PrivacyPolicy: `/privacy-policy`,
     CancellationReturnsPolicy: `/cancellation-returns-policy`,
-    QualityPolicy: `/quality-policy`,
     CookiesPolicy: `/cookies-policy`,
     SupplyOfGoodsTerms: `/supply-of-goods-terms`,
-    WarrantyPolicy: `/warranty-policy`,
     AmlPolicy: `/aml-policy`,
     WebsiteTermsOfUse: `/website-terms-of-use`,
     Landing: {

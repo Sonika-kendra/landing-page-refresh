@@ -72,10 +72,8 @@ const AccountWishlist       = lazy(() => import('@/features/account/MyWishlist')
 const PrivacyPolicy = lazy(() => import('@/features/privacy'));
 const TermsAndConditions = lazy(() => import('@/features/terms'));
 const CancellationReturnsPolicy = lazy(() => import('@/features/cancellation-returns'));
-const QualityPolicy = lazy(() => import('@/features/quality-policy'));
 const CookiesPolicy = lazy(() => import('@/features/cookies-policy'));
 const SupplyOfGoodsTerms = lazy(() => import('@/features/supply-of-goods-terms'));
-const WarrantyPolicy = lazy(() => import('@/features/warranty-policy'));
 const AmlPolicy = lazy(() => import('@/features/aml-policy'));
 const WebsiteTermsOfUse = lazy(() => import('@/features/website-terms-of-use'));
 const Wishlist = lazy(() => import('@/features/wishlist'));
@@ -109,10 +107,8 @@ const AppRoutes = () => (
         <Route path={websiteUrlConfig.PrivacyPolicy} element={<PrivacyPolicy />} />
         <Route path={websiteUrlConfig.TermsAndConditions} element={<TermsAndConditions />} />
         <Route path={websiteUrlConfig.CancellationReturnsPolicy} element={<CancellationReturnsPolicy />} />
-        <Route path={websiteUrlConfig.QualityPolicy} element={<QualityPolicy />} />
         <Route path={websiteUrlConfig.CookiesPolicy} element={<CookiesPolicy />} />
         <Route path={websiteUrlConfig.SupplyOfGoodsTerms} element={<SupplyOfGoodsTerms />} />
-        <Route path={websiteUrlConfig.WarrantyPolicy} element={<WarrantyPolicy />} />
         <Route path={websiteUrlConfig.AmlPolicy} element={<AmlPolicy />} />
         <Route path={websiteUrlConfig.WebsiteTermsOfUse} element={<WebsiteTermsOfUse />} />
         <Route path={websiteUrlConfig.Sitemap} element={<SitemapPage />} />
