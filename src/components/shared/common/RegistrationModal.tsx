@@ -10,10 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { authApi } from '@/api/auth';
+import { websiteUrlConfig } from '@/config/site';
 import Logo from '@/assets/icons/logoDark.png';
 
 type FormMode = 'register' | 'login' | 'forgot' | 'verify-pending' | 'forgot-sent';
 type AccountManager = { _id: string; full_name?: string; firstName?: string; lastName?: string; email: string };
+
+const DEPARTMENT_OPTIONS = [
+  { value: 'accounts', label: 'Accounts' },
+  { value: 'buying', label: 'Buying' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'management', label: 'Management' },
+];
 
 const ERROR_MAP: Record<string, string> = {
   EMAIL_NOT_VERIFIED: 'Please verify your email before logging in.',
@@ -30,6 +38,17 @@ const ERROR_MAP: Record<string, string> = {
   TOO_MANY_FORGOT_PASSWORD_ATTEMPTS: 'Too many reset attempts. Please try again later.',
   TOKEN_NOT_FOUND_OR_ALREADY_VERIFIED: 'This email is already verified or the link is invalid.',
 };
+
+const TermsLink = () => (
+  <a
+    href={websiteUrlConfig.TermsAndConditions}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-primary hover:underline"
+  >
+    Terms &amp; Conditions
+  </a>
+);
 
 const mapApiError = (err: unknown): string => {
   const axiosErr = err as { response?: { data?: { error?: string; errors?: { msg: string } | { msg: string }[] } } };
@@ -56,6 +75,7 @@ const RegistrationModal = () => {
 
   const [accountManagers, setAccountManagers] = useState<AccountManager[]>([]);
   const [selectedAccountManager, setSelectedAccountManager] = useState('');
+  const [department, setDepartment] = useState('');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -127,6 +147,10 @@ const RegistrationModal = () => {
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!department) {
+      setApiError('Please select a department.');
+      return;
+    }
     setApiError('');
     setIsLoading(true);
     try {
@@ -137,7 +161,8 @@ const RegistrationModal = () => {
         phone: formData.phone,
         email: formData.email,
         password: formData.password,
-        acceptTermsAndConditions: true,
+        acceptTermsAndConditions: formData.acceptTerms,
+        department,
         ...(selectedAccountManager && { accountManagerId: selectedAccountManager }),
       });
       setPendingEmail(formData.email);
@@ -304,6 +329,10 @@ const RegistrationModal = () => {
                     {isLoading ? 'Signing In…' : 'Sign In'}
                   </Button>
 
+                  <p className="text-center text-xs text-background/50">
+                    By signing in, you agree to our <TermsLink />.
+                  </p>
+
                   <p className="text-center text-sm text-background/60">
                     Don't have an account?
                     <button
@@ -388,6 +417,25 @@ const RegistrationModal = () => {
                       />
                     </div>
 
+                    <div>
+                      <Label htmlFor="department" className="text-background text-xs">Department *</Label>
+                      <Select value={department || undefined} onValueChange={setDepartment}>
+                        <SelectTrigger
+                          id="department"
+                          className="mt-0.5 h-9 bg-foreground/20 border-background/20 text-background text-sm focus:border-primary focus:ring-0 focus:ring-offset-0 [&>span]:text-background/40 data-[placeholder]:text-background/40"
+                        >
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent className="z-[1400]">
+                          {DEPARTMENT_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {accountManagers.length > 0 && (
                       <div>
                         <Label htmlFor="accountManager" className="text-background text-xs">Account Manager</Label>
@@ -431,6 +479,19 @@ const RegistrationModal = () => {
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 !mt-3">
+                      <Checkbox
+                        id="acceptTerms"
+                        checked={formData.acceptTerms}
+                        onCheckedChange={(v) => setFormData({ ...formData, acceptTerms: !!v })}
+                        required
+                        className="mt-0.5"
+                      />
+                      <Label htmlFor="acceptTerms" className="text-xs text-background/70 font-normal leading-snug">
+                        I agree to the <TermsLink />
+                      </Label>
                     </div>
 
                     <Button type="submit" className="w-full btn-henig-primary !mt-4" disabled={isLoading}>

@@ -30,6 +30,7 @@ export interface RegisterPayload {
   county?: string;
   country?: string;
   tradeReferences?: string;
+  department?: string;
   email: string;
   password: string;
   acceptTermsAndConditions: boolean;
