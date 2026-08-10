@@ -265,22 +265,25 @@ const CaratRangeSlider = ({
 };
 
 const PriceRangeSlider = ({
+  min,
+  max,
   currentValue,
   onChange,
   currencySymbol,
 }: {
+  min: number;
+  max: number;
   currentValue: [number, number];
   onChange: (val: [number, number]) => void;
   currencySymbol: string;
 }) => {
-  const [min, max] = DEFAULT_PRICE_RANGE;
   const [local, setLocal] = useState<[number, number]>(currentValue);
   useEffect(() => { setLocal(currentValue); }, [currentValue[0], currentValue[1]]);
 
   const handleCommit = (v: [number, number]) => {
     const lo = Math.max(min, Math.min(v[0], v[1]));
     const hi = Math.min(max, Math.max(v[0], v[1]));
-    onChange(lo === min && hi >= max ? DEFAULT_PRICE_RANGE : [lo, hi]);
+    onChange(lo === min && hi >= max ? [min, max] : [lo, hi]);
   };
 
   return (
@@ -342,7 +345,8 @@ const renderFilterItems = (
   dynamicCaratItems?: VisualFilterItem[],
   dynamicRingSizeItems?: VisualFilterItem[],
   dynamicCertificateItems?: VisualFilterItem[],
-  currencySymbol = '£'
+  currencySymbol = '£',
+  priceRange: [number, number] = DEFAULT_PRICE_RANGE
 ) => {
   const items =
     (tab.key === 'category'          && dynamicCategoryItems)    ? dynamicCategoryItems    :
@@ -418,6 +422,8 @@ const renderFilterItems = (
   if (tab.key === 'price') {
     return (
       <PriceRangeSlider
+        min={priceRange[0]}
+        max={priceRange[1]}
         currentValue={currentValue as [number, number]}
         onChange={(val) => onChange(tab.key, val)}
         currencySymbol={currencySymbol}
@@ -531,6 +537,7 @@ type FilterSidebarContentProps = {
   dynamicRingSizeItems?: VisualFilterItem[];
   dynamicCertificateItems?: VisualFilterItem[];
   currencySymbol: string;
+  priceRange: [number, number];
 };
 
 // A titled filter section, flat and border-divided — same look as the diamond shop sidebar,
@@ -565,6 +572,7 @@ const FilterSidebarContent = ({
   dynamicRingSizeItems,
   dynamicCertificateItems,
   currencySymbol,
+  priceRange,
 }: FilterSidebarContentProps) => (
   <div>
     {hasActiveFilters && (
@@ -606,7 +614,7 @@ const FilterSidebarContent = ({
         !(
           tab.key === 'price' &&
           Array.isArray(filterValues.price) &&
-          isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
+          isSameRange(filterValues.price as [number, number], priceRange)
         ) &&
         !(
           tab.key === 'caratWeight' &&
@@ -621,11 +629,11 @@ const FilterSidebarContent = ({
           title={tab.label}
           isActive={isFilterActive}
           onClear={() =>
-            handleFilterChange(tab.key, tab.key === 'price' ? DEFAULT_PRICE_RANGE : tab.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
+            handleFilterChange(tab.key, tab.key === 'price' ? priceRange : tab.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
           }
           noBorder={i === filterTabs.length - 1}
         >
-          {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems, currencySymbol)}
+          {renderFilterItems(tab, filterValues[tab.key], handleFilterChange, dynamicCategoryItems, dynamicCollectionItems, dynamicMetalItems, dynamicShapeItems, dynamicStockTypeItems, dynamicCaratItems, dynamicRingSizeItems, dynamicCertificateItems, currencySymbol, priceRange)}
         </FilterSection>
       );
     })}
@@ -657,8 +665,28 @@ const ShopPage = () => {
   const [dynamicCaratItems, setDynamicCaratItems] = useState<VisualFilterItem[]>([]);
   const [dynamicRingSizeItems, setDynamicRingSizeItems] = useState<VisualFilterItem[]>([]);
   const [dynamicCertificateItems, setDynamicCertificateItems] = useState<VisualFilterItem[]>([]);
+  const [maxPrice, setMaxPrice] = useState(DEFAULT_PRICE_RANGE[1]);
   const [youMayAlsoLikeItems, setYouMayAlsoLikeItems] = useState<{ name: string; image: string; id: string }[]>([]);
   const navigate = useNavigate();
+
+  // Price slider ceiling: the highest-priced jewellery item currently in stock for this
+  // type, rounded up to a clean step. Falls back to DEFAULT_PRICE_RANGE until it loads.
+  const priceRange = useMemo<[number, number]>(() => [0, maxPrice], [maxPrice]);
+
+  const stockTypeParam = searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE;
+
+  useEffect(() => {
+    productsApi.list({
+      per_page: 1, page: 1, status: 'active', category: 'Jewellery',
+      sort: 'price-desc', stock_type: stockTypeParam,
+    })
+      .then((res) => {
+        const top = (res.data?.items ?? [])[0] as ShopProduct | undefined;
+        const topPrice = typeof top?.price === 'number' ? top.price : 0;
+        if (topPrice > 0) setMaxPrice(Math.ceil(topPrice / 100) * 100);
+      })
+      .catch(() => {});
+  }, [stockTypeParam]);
 
   // Filter values are derived from the URL — single source of truth
   const filterValues = useMemo<FilterValues>(() => {
@@ -668,6 +696,7 @@ const ShopPage = () => {
         cfSubCategory: fromSlug(categorySlug),
         cfSubCategoryType: searchParams.get('type') ?? '',
         stockType: searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE,
+        price: priceRange,
       };
     }
     const priceMin = searchParams.get('price_min');
@@ -685,15 +714,15 @@ const ShopPage = () => {
       stockType: searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE,
       inStock: searchParams.get('in_stock') ?? '',
       price: (priceMin !== null || priceMax !== null)
-        ? [Number(priceMin) || DEFAULT_PRICE_RANGE[0], Number(priceMax) || DEFAULT_PRICE_RANGE[1]] as [number, number]
-        : DEFAULT_PRICE_RANGE,
+        ? [Number(priceMin) || priceRange[0], Number(priceMax) || priceRange[1]] as [number, number]
+        : priceRange,
       caratWeight: (caratMin !== null || caratMax !== null)
         ? [Number(caratMin) || DEFAULT_CARAT_RANGE[0], Number(caratMax) || DEFAULT_CARAT_RANGE[1]] as [number, number]
         : DEFAULT_CARAT_RANGE,
       ringSize: searchParams.get('ring_size') ?? '',
       certificate: searchParams.get('certificate') ?? '',
     };
-  }, [categorySlug, searchParams]);
+  }, [categorySlug, searchParams, priceRange]);
 
   // Reset page and search when navigating via header (category slug changes)
   useEffect(() => {
@@ -809,8 +838,8 @@ const ShopPage = () => {
       params.search = debouncedSearch;
     if (Array.isArray(filterValues.price)) {
       const [lo, hi] = filterValues.price as [number, number];
-      if (lo > DEFAULT_PRICE_RANGE[0]) params.price_min = lo;
-      if (hi < DEFAULT_PRICE_RANGE[1]) params.price_max = hi;
+      if (lo > priceRange[0]) params.price_min = lo;
+      if (hi < priceRange[1]) params.price_max = hi;
     }
     if (Array.isArray(filterValues.caratWeight)) {
       const [lo, hi] = filterValues.caratWeight as [number, number];
@@ -838,7 +867,7 @@ const ShopPage = () => {
     selectedCategory, page, currencySymbol, sortBy, debouncedSearch,
     filterValues.subCategory, filterValues.cfSubCategory, filterValues.cfSubCategoryType,
     filterValues.metal, filterValues.shape,
-    filterValues.stockType, filterValues.inStock, filterValues.price,
+    filterValues.stockType, filterValues.inStock, filterValues.price, priceRange,
     filterValues.caratWeight, filterValues.ringSize, filterValues.certificate,
   ]);
 
@@ -879,8 +908,8 @@ const ShopPage = () => {
       if (newFilters.inStock === 'true') newParams.set('in_stock', 'true');
       if (Array.isArray(newFilters.price)) {
         const [lo, hi] = newFilters.price as [number, number];
-        if (lo > DEFAULT_PRICE_RANGE[0]) newParams.set('price_min', String(lo));
-        if (hi < DEFAULT_PRICE_RANGE[1]) newParams.set('price_max', String(hi));
+        if (lo > priceRange[0]) newParams.set('price_min', String(lo));
+        if (hi < priceRange[1]) newParams.set('price_max', String(hi));
       }
       if (Array.isArray(newFilters.caratWeight)) {
         const [lo, hi] = newFilters.caratWeight as [number, number];
@@ -896,7 +925,7 @@ const ShopPage = () => {
         setSearchParams(newParams, { replace: true });
       }
     },
-    [filterValues, categorySlug, navigate, setSearchParams]
+    [filterValues, categorySlug, navigate, setSearchParams, priceRange]
   );
 
   const handleReset = useCallback(() => {
@@ -910,7 +939,7 @@ const ShopPage = () => {
   // handleReset intentionally preserves it, so it's excluded from hasActiveFilters/chips too.
   const hasActiveFilters = useMemo(() => {
     const { category, subCategory, cfSubCategory, cfSubCategoryType, metal, shape, price, inStock, caratWeight, ringSize, certificate } = filterValues;
-    const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : DEFAULT_PRICE_RANGE;
+    const [lo, hi] = Array.isArray(price) ? (price as [number, number]) : priceRange;
     const [clo, chi] = Array.isArray(caratWeight) ? (caratWeight as [number, number]) : DEFAULT_CARAT_RANGE;
     return Boolean(
       debouncedSearch.trim() ||
@@ -922,12 +951,12 @@ const ShopPage = () => {
       (typeof shape === 'string' && shape) ||
       (Array.isArray(shape) && shape.length > 0) ||
       inStock === 'true' ||
-      !isSameRange([lo, hi], DEFAULT_PRICE_RANGE) ||
+      !isSameRange([lo, hi], priceRange) ||
       !isSameRange([clo, chi], DEFAULT_CARAT_RANGE) ||
       (typeof ringSize === 'string' && ringSize) ||
       (typeof certificate === 'string' && certificate)
     );
-  }, [filterValues, debouncedSearch]);
+  }, [filterValues, debouncedSearch, priceRange]);
 
   const activeFilterChips = useMemo(() => {
     const chips: { key: FilterTabKey; label: string }[] = [];
@@ -947,7 +976,7 @@ const ShopPage = () => {
       chips.push({ key: 'inStock', label: 'In-Stock & Ready to Ship' });
     if (
       Array.isArray(filterValues.price) &&
-      !isSameRange(filterValues.price as [number, number], DEFAULT_PRICE_RANGE)
+      !isSameRange(filterValues.price as [number, number], priceRange)
     ) {
       const [lo, hi] = filterValues.price as [number, number];
       chips.push({ key: 'price', label: `${currencySymbol}${lo}–${currencySymbol}${hi}` });
@@ -967,7 +996,7 @@ const ShopPage = () => {
     if (typeof filterValues.certificate === 'string' && filterValues.certificate)
       chips.push({ key: 'certificate', label: filterValues.certificate });
     return chips;
-  }, [filterValues, currencySymbol]);
+  }, [filterValues, currencySymbol, priceRange]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -1017,6 +1046,7 @@ const ShopPage = () => {
                     dynamicRingSizeItems={dynamicRingSizeItems.length ? dynamicRingSizeItems : undefined}
                     dynamicCertificateItems={dynamicCertificateItems.length ? dynamicCertificateItems : undefined}
                     currencySymbol={currencySymbol}
+                    priceRange={priceRange}
                   />
                 </div>
                 <div className="shrink-0 border-t border-border/40 px-5 py-3">
@@ -1130,7 +1160,7 @@ const ShopPage = () => {
                   key={chip.key}
                   type="button"
                   onClick={() =>
-                    handleFilterChange(chip.key, chip.key === 'price' ? DEFAULT_PRICE_RANGE : chip.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
+                    handleFilterChange(chip.key, chip.key === 'price' ? priceRange : chip.key === 'caratWeight' ? DEFAULT_CARAT_RANGE : '')
                   }
                   className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >
