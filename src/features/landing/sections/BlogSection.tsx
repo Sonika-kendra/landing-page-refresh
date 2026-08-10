@@ -4,7 +4,7 @@ import VerticalBlogListWithImage from './blog/VerticalBlogCarousel';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { oldWebsiteURL, websiteUrlConfig } from '@/config/site';
+import { websiteUrlConfig } from '@/config/site';
 import { ArrowRight } from 'lucide-react';
 
 const BlogSection = () => {
@@ -27,8 +27,6 @@ const BlogSection = () => {
   }, []);
 
   if (loading || posts.length === 0) return null;
-
-  console.log(oldWebsiteURL);
 
   return (
     <section className="py-12 bg-white">
