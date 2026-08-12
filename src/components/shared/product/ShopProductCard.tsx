@@ -35,6 +35,7 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
   const [bagJustAdded, setBagJustAdded] = useState(false);
   const { isFavourite, toggleFavourite } = useFavourites();
   const liked = isFavourite(product.id);
+  const stockLabel = product.stockType === 'Lab' ? 'Lab' : 'NT';
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -64,12 +65,10 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Badge */}
-        {product.badge && (
-          <span className="absolute left-3 top-3 z-10 rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white" style={{ backgroundColor: '#C3AC88' }}>
-            {product.badge}
-          </span>
-        )}
+        {/* Stock badge */}
+        <span className="absolute left-3 top-3 z-10 rounded bg-foreground/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background">
+          {stockLabel}
+        </span>
 
         {/* Image */}
         <Link to={`${productPath(product.category, product.subCategory, product.id)}`} className="shrink-0">
@@ -175,12 +174,10 @@ const ShopProductCard = ({ product, listView = false, onAddToBag }: ShopProductC
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Badge */}
-      {product.badge && (
-        <span className="absolute left-3 top-3 z-10 rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white" style={{ backgroundColor: '#C3AC88' }}>
-          {product.badge}
-        </span>
-      )}
+      {/* Stock badge */}
+      <span className="absolute left-3 top-3 z-10 rounded bg-foreground/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background">
+        {stockLabel}
+      </span>
 
       {/* Wishlist */}
       <button

@@ -15,7 +15,7 @@ const styleClass = (style?: AnnStyle) => {
   return '';
 };
 
-const isHtmlContent = (text: string) => /<[a-z][\s\S]*>/i.test(text);
+const isHtmlContent = (text: string) => /<[a-z][\s\S]*>/i.test(text) || /&[a-z]+;|&#\d+;/i.test(text);
 
 const toAnnMsg = (raw: unknown): AnnMsg =>
   typeof raw === 'string' ? { text: raw } : (raw as AnnMsg);

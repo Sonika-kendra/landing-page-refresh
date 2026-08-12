@@ -71,7 +71,6 @@ const filterTabs: { key: FilterTabKey; label: string }[] = [
   { key: 'cfSubCategoryType', label: 'Collections' },
   { key: 'metal', label: 'Metals' },
   { key: 'shape', label: 'Shapes' },
-  { key: 'stockType', label: 'Stock Type' },
   { key: 'caratWeight', label: 'Carat Weight' },
   // { key: 'ringSize', label: 'Ring Size' }, // ponytail: disabled for now, re-enable when ready
   { key: 'certificate', label: 'Certificates' },
@@ -586,6 +585,25 @@ const FilterSidebarContent = ({
         </button>
       </div>
     )}
+
+    <FilterSection title="Type">
+      <div className="flex flex-wrap gap-1.5">
+        {stockTypes.map((opt) => {
+          const isActive = filterValues.stockType === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => handleFilterChange('stockType', opt)}
+              aria-pressed={isActive}
+              className={`rounded-md border px-3 py-1 text-sm font-medium transition-all duration-200 ${isActive ? 'border-accent bg-accent text-accent-foreground shadow-sm' : 'border-border/50 text-foreground/65 hover:border-accent/60 hover:text-foreground'}`}
+            >
+              {opt === 'Lab' ? 'Lab Grown' : opt}
+            </button>
+          );
+        })}
+      </div>
+    </FilterSection>
 
     <FilterSection
       title="Availability"
@@ -1115,7 +1133,7 @@ const ShopPage = () => {
             </div>
 
             <span className="ml-auto text-sm text-foreground/55">
-              {total.toLocaleString()}{total === 1 ? 'result' : 'results'}
+              {total.toLocaleString()} {total === 1 ? 'result' : 'results'}
             </span>
             {currencies.length > 0 && (
               <select

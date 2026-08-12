@@ -55,8 +55,9 @@ const toAnnMsg = (raw: unknown): AnnMsg =>
 const cleanHtml = (html: string) =>
   html.replace(/^<p[^>]*>([\s\S]*?)<\/p>$/i, '$1').trim();
 
-// Strip all tags for list preview
-const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').trim();
+// Strip all tags and decode entities (e.g. &amp;) for list preview
+const stripHtml = (html: string) =>
+  (new DOMParser().parseFromString(html, 'text/html').body.textContent || '').trim();
 
 // Convert legacy { text, link, style } to HTML for the editor initial value
 const legacyToHtml = (msg: AnnMsg): string => {
