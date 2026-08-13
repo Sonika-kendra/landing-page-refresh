@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Star, Package, ImagePlus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Sparkles, Package, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/components/shared/common/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -15,102 +15,98 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import DataTable from '@/components/shared/common/DataTable';
 import type { ColumnDef } from '@/components/shared/common/DataTable';
 import { productsApi } from '@/api/products';
-import { toast } from '@/hooks/use-toast';
 
 interface Product {
-  item_id: string;
+  id: string;
   sku: string;
   name: string;
-  category_name?: string;
-  rate: number;
-  stock_on_hand?: number;
+  category?: string;
+  price: number;
+  currency?: string;
+  stock?: number;
   status?: string;
-  isBestseller?: boolean;
-  isNewArrival?: boolean;
 }
 
-const isDiamond = (p: Product) =>
-  p.category_name?.toLowerCase().includes('diamond') ?? false;
+// Zoho cf_status values a live item can have — anything else (Sold, Returned, …) is
+// dropped from the local catalogue by the sync job, so these are the only real options.
+const STATUS_OPTIONS = ['Available', 'In Transit', 'Waiting QC'];
+
+function CopySkuButton({ sku }: { sku: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(sku);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy SKU"
+      className="ml-1 text-muted-foreground/50 transition-colors hover:text-foreground"
+    >
+      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+    </button>
+  );
+}
 
 const Products = () => {
   const navigate = useNavigate();
   const [typeFilter, setTypeFilter] = useState('all');
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [uploadingId, setUploadingId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadTargetRef = useRef<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  const toggleBestseller = async (item: Product, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await productsApi.updateTags(item.item_id, { isBestseller: !item.isBestseller });
-      setRefreshKey((k) => k + 1);
-    } catch {
-      toast({ title: 'Failed to update tag', variant: 'destructive' });
-    }
-  };
-
-  const handleUploadImage = (item: Product, e: React.MouseEvent) => {
-    e.stopPropagation();
-    uploadTargetRef.current = item.item_id;
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    const id = uploadTargetRef.current;
-    e.target.value = '';
-    if (!file || !id) return;
-    setUploadingId(id);
-    try {
-      await productsApi.uploadImage(id, file);
-      toast({ title: 'Image uploaded to WorkDrive', description: 'Product image updated.' });
-      setRefreshKey((k) => k + 1);
-    } catch {
-      toast({ title: 'Upload failed', variant: 'destructive' });
-    } finally {
-      setUploadingId(null);
-      uploadTargetRef.current = null;
-    }
-  };
+  const { data: subcategories } = useQuery({
+    queryKey: ['admin', 'products', 'subcategories'],
+    queryFn: () => productsApi.getSubcategories().then((r) => r.data.subcategories),
+    staleTime: 60 * 60 * 1000,
+  });
+  const categoryOptions = useMemo(
+    () => Object.keys(subcategories ?? {}).sort(),
+    [subcategories],
+  );
 
   const searchFn = useCallback(
-    (p: Product, q: string) => {
-      const matchText =
-        !q ||
-        p.name.toLowerCase().includes(q) ||
-        (p.sku ?? '').toLowerCase().includes(q) ||
-        (p.category_name ?? '').toLowerCase().includes(q);
-
-      const matchType =
-        typeFilter === 'all' ||
-        (typeFilter === 'Diamond' ? isDiamond(p) : !isDiamond(p));
-
-      return matchText && matchType;
-    },
-    [typeFilter],
+    (p: Product, q: string) =>
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      (p.sku ?? '').toLowerCase().includes(q) ||
+      (p.category ?? '').toLowerCase().includes(q),
+    [],
   );
 
   const columns: ColumnDef<Product>[] = [
     {
       key: 'name',
-      label: 'Product',
+      label: 'Name',
       sortable: true,
+      render: (_, p) => <p className="text-sm font-medium">{p.name}</p>,
+    },
+    {
+      key: 'sku',
+      label: 'SKU',
+      width: '140px',
       render: (_, p) => (
-        <div>
-          <p className="text-sm font-medium">{p.name}</p>
-          <p className="text-xs text-muted-foreground">{p.sku}</p>
-        </div>
+        <p className="flex items-center text-sm text-muted-foreground">
+          {p.sku}
+          {p.sku && <CopySkuButton sku={p.sku} />}
+        </p>
       ),
     },
     {
-      key: 'category_name',
+      key: 'category',
       label: 'Category',
       width: '160px',
-      render: (val) => <Badge variant="outline">{(val as string) ?? '—'}</Badge>,
+      render: (val) => <Badge variant="outline">{(val as string) || '—'}</Badge>,
     },
     {
-      key: 'stock_on_hand',
+      key: 'status',
+      label: 'Status',
+      width: '130px',
+      render: (val) => <Badge variant="secondary">{(val as string) || '—'}</Badge>,
+    },
+    {
+      key: 'stock',
       label: 'Stock',
       width: '80px',
       align: 'center',
@@ -124,64 +120,20 @@ const Products = () => {
       ),
     },
     {
-      key: 'rate',
+      key: 'price',
       label: 'Price',
       width: '120px',
       sortable: true,
-      render: (val) => (
+      render: (val, p) => (
         <span className="text-sm font-medium">
-          £{((val as number) ?? 0).toLocaleString()}
+          {p.currency ?? '£'}{((val as number) ?? 0).toLocaleString()}
         </span>
-      ),
-    },
-    {
-      key: 'isBestseller',
-      label: 'Tags',
-      width: '140px',
-      align: 'right',
-      render: (_, p) => (
-        <div className="flex items-center justify-end gap-1.5">
-          {p.isNewArrival && <Badge className="text-[10px] px-1.5">New</Badge>}
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            title="Upload custom image to WorkDrive"
-            onClick={(e) => handleUploadImage(p, e)}
-            disabled={uploadingId === p.item_id}
-          >
-            {uploadingId === p.item_id
-              ? <LoadingSpinner size={14} />
-              : <ImagePlus className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-            }
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            title={p.isBestseller ? 'Remove bestseller' : 'Mark bestseller'}
-            onClick={(e) => toggleBestseller(p, e)}
-          >
-            <Star
-              className={`h-3.5 w-3.5 ${
-                p.isBestseller ? 'fill-primary text-primary' : 'text-muted-foreground'
-              }`}
-            />
-          </Button>
-        </div>
       ),
     },
   ];
 
   return (
     <div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
       <AdminPageHeader
         title="Products"
         description="Manage your diamond and jewellery catalogue"
@@ -199,28 +151,59 @@ const Products = () => {
 
       <DataTable<Product>
         queryKey={['admin', 'products']}
-        fetchFn={() => productsApi.list({ per_page: 200 })}
+        fetchFn={() =>
+          productsApi.list({
+            per_page: 200,
+            category: typeFilter !== 'all' ? typeFilter : undefined,
+            cf_sub_category: categoryFilter !== 'all' ? categoryFilter : undefined,
+            cf_status: statusFilter !== 'all' ? statusFilter : undefined,
+          })
+        }
         dataKey="items"
         columns={columns}
         clientSidePagination
         clientSideSearchFn={searchFn}
         searchable
         searchPlaceholder="Search by name or SKU…"
-        refreshKey={refreshKey}
+        extraParams={{ typeFilter, categoryFilter, statusFilter }}
         emptyIcon={<Package className="h-10 w-10 opacity-25" />}
         emptyMessage="No products found."
-        onRowClick={(p) => navigate(`/admin/products/${p.item_id}`)}
+        onRowClick={(p) => navigate(`/admin/products/${p.id}`)}
         toolbar={
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="h-8 w-44 text-sm rounded-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="Diamond">Diamonds</SelectItem>
-              <SelectItem value="Jewellery">Jewellery</SelectItem>
-            </SelectContent>
-          </Select>
+          <>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-8 w-40 text-sm rounded-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="Diamonds">Diamonds</SelectItem>
+                <SelectItem value="Jewellery">Jewellery</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="h-8 w-44 text-sm rounded-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categoryOptions.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-8 w-40 text-sm rounded-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                {STATUS_OPTIONS.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
         }
       />
     </div>

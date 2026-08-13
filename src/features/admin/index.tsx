@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/admin/draft',     label: 'Draft Users',      icon: FileEdit,        countKey: 'draftUsers' as const },
   { to: '/admin/approvals', label: 'Pending Approvals', icon: UserCheck,      countKey: 'pendingApprovals' as const },
   { to: '/admin/users',     label: 'All Users',        icon: Users,           countKey: undefined },
+  { to: '/admin/products',  label: 'Products',         icon: Boxes,           countKey: undefined },
   { to: '/admin/orders',    label: 'Orders',           icon: ShoppingCart,    countKey: undefined },
   { to: '/admin/posts',     label: 'Blog Posts',       icon: FileText,        countKey: undefined },
   { to: '/admin/zoho',      label: 'Zoho Sync',        icon: RefreshCw,       countKey: 'zohoOrderFormErrors' as const },

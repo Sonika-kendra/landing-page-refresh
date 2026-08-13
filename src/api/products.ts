@@ -5,7 +5,7 @@ const { base, endpoints: ep } = API_CONFIG.products;
 
 export const productsApi = {
   list: (params?: {
-    page?: number; per_page?: number; status?: string;
+    page?: number; per_page?: number; status?: string; cf_status?: string;
     category_id?: string; category?: string;
     sub_category?: string; cf_sub_category?: string; cf_sub_category_type?: string;
     metal?: string; shape?: string;

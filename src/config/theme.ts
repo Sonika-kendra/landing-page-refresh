@@ -98,6 +98,9 @@ export const navigationLinks = [
           { label: 'Bracelets', href: websiteUrlConfig.Jewellery.Bracelets, image: bracelet },
           { label: 'Necklaces', href: websiteUrlConfig.Jewellery.Necklaces, image: necklace },
         ],
+        extraLinks: [
+          { label: 'Bespoke', href: websiteUrlConfig.Contact },
+        ],
       },
       {
         title: 'Rings',
@@ -139,7 +142,7 @@ export const navigationLinks = [
       },
     ],
   },
-  { label: 'Events & Blogs', href: websiteUrlConfig.Blogs },
+  { label: 'Blogs', href: websiteUrlConfig.Blogs },
   { label: 'Contact us', href: websiteUrlConfig.Contact },
 ];
 

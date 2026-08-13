@@ -62,28 +62,31 @@ type TabKey = keyof FilterValues;
 // Tabs whose value is a multi-select array of pill options rather than a single string
 const MULTI_SELECT_KEYS: TabKey[] = ['shape', 'colour', 'clarity', 'cut', 'polish', 'symmetry', 'fluorescence', 'certificate'];
 
-// Range-typed tabs need their default and isSameRange comparison instead of plain truthiness
-// totalValue is handled separately by rangeDefaultFor since its ceiling is fetched dynamically.
+// Range-typed tabs need their default and isSameRange comparison instead of plain truthiness.
+// caratWeight and totalValue are handled separately by rangeDefaultFor since their bounds are
+// fetched dynamically from live stock instead of being fixed constants.
 const RANGE_DEFAULTS: Partial<Record<TabKey, [number, number]>> = {
-  caratWeight: DEFAULT_CARAT_RANGE,
   depth: DEFAULT_DEPTH_RANGE, table: DEFAULT_TABLE_RANGE,
 };
 // Non-range, non-multi-select tabs whose "no filter applied" state isn't an empty string
 const NON_EMPTY_DEFAULTS: Partial<Record<TabKey, string>> = { type: DEFAULT_STOCK_TYPE };
 
-// totalValue's real ceiling is fetched from live stock (see maxPrice state), so callers pass
-// the current range in explicitly instead of relying on the static RANGE_DEFAULTS fallback.
-const rangeDefaultFor = (key: TabKey, totalValueRange: [number, number]): [number, number] | undefined =>
-  key === 'totalValue' ? totalValueRange : RANGE_DEFAULTS[key];
+type DynamicRanges = { caratWeight: [number, number]; totalValue: [number, number] };
+const DEFAULT_RANGES: DynamicRanges = { caratWeight: DEFAULT_CARAT_RANGE, totalValue: DEFAULT_TOTAL_VALUE_RANGE };
 
-const defaultFor = (key: TabKey, totalValueRange: [number, number] = DEFAULT_TOTAL_VALUE_RANGE): unknown =>
-  rangeDefaultFor(key, totalValueRange) ?? (MULTI_SELECT_KEYS.includes(key) ? [] : NON_EMPTY_DEFAULTS[key] ?? '');
+// caratWeight's and totalValue's real bounds are fetched from live stock (see caratRange/maxPrice
+// state), so callers pass the current ranges in explicitly instead of relying on RANGE_DEFAULTS.
+const rangeDefaultFor = (key: TabKey, ranges: DynamicRanges): [number, number] | undefined =>
+  key === 'totalValue' ? ranges.totalValue : key === 'caratWeight' ? ranges.caratWeight : RANGE_DEFAULTS[key];
 
-const isDefaultValue = (key: TabKey, value: unknown, totalValueRange: [number, number] = DEFAULT_TOTAL_VALUE_RANGE): boolean => {
-  const def = rangeDefaultFor(key, totalValueRange);
+const defaultFor = (key: TabKey, ranges: DynamicRanges = DEFAULT_RANGES): unknown =>
+  rangeDefaultFor(key, ranges) ?? (MULTI_SELECT_KEYS.includes(key) ? [] : NON_EMPTY_DEFAULTS[key] ?? '');
+
+const isDefaultValue = (key: TabKey, value: unknown, ranges: DynamicRanges = DEFAULT_RANGES): boolean => {
+  const def = rangeDefaultFor(key, ranges);
   if (def) return isSameRange(value as [number, number], def);
   if (Array.isArray(value)) return value.length === 0;
-  return value === defaultFor(key, totalValueRange);
+  return value === defaultFor(key, ranges);
 };
 
 const staticOptions: Record<string, string[]> = {
@@ -92,10 +95,11 @@ const staticOptions: Record<string, string[]> = {
   fluorescence: FLUORESCENCES, certificate: CERTIFICATES, type: STOCK_TYPES,
 };
 
-// Carat range slider (same pattern as shop)
+// Carat range slider — bounds come from the live min/max carat weight in stock (see caratRange state)
 const CaratRangeSlider = ({
-  currentValue, onChange,
+  min, max, currentValue, onChange,
 }: {
+  min: number; max: number;
   currentValue: [number, number];
   onChange: (v: [number, number]) => void;
 }) => {
@@ -103,17 +107,17 @@ const CaratRangeSlider = ({
   useEffect(() => { setLocal(currentValue); }, [currentValue[0], currentValue[1]]);
 
   const handleCommit = (v: [number, number]) => {
-    const lo = Math.max(0, Math.min(v[0], v[1]));
-    const hi = Math.min(10, Math.max(v[0], v[1]));
-    onChange(lo === 0 && hi >= 10 ? DEFAULT_CARAT_RANGE : [lo, hi]);
+    const lo = Math.max(min, Math.min(v[0], v[1]));
+    const hi = Math.min(max, Math.max(v[0], v[1]));
+    onChange(lo <= min && hi >= max ? [min, max] : [lo, hi]);
   };
 
   return (
     <div className="px-1 pb-2.5 pt-3">
       <Slider
-        min={0} max={10} step={0.01}
-        value={[Math.min(local[0], 10), Math.min(local[1], 10)]}
-        onValueChange={(v) => setLocal([v[0], v[1]] as [number, number])}
+        min={min} max={max} step={0.01}
+        value={local}
+        onValueChange={(v) => setLocal(v as [number, number])}
         onValueCommit={(v) => handleCommit(v as [number, number])}
       />
       <div className="mt-3 flex items-center justify-between gap-2">
@@ -122,13 +126,13 @@ const CaratRangeSlider = ({
             type="number"
             inputMode="decimal"
             step={0.01}
-            min={0}
-            max={10}
+            min={min}
+            max={max}
             value={local[0]}
             onChange={(e) => setLocal([Number(e.target.value) || 0, local[1]])}
             onBlur={() => handleCommit(local)}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            className="w-10 bg-transparent text-sm font-medium text-foreground/70 outline-none"
+            className="w-14 bg-transparent text-sm font-medium text-foreground/70 outline-none"
           />
           <span className="text-sm font-medium text-foreground/70">ct</span>
         </label>
@@ -138,13 +142,13 @@ const CaratRangeSlider = ({
             type="number"
             inputMode="decimal"
             step={0.01}
-            min={0}
-            max={10}
+            min={min}
+            max={max}
             value={local[1]}
             onChange={(e) => setLocal([local[0], Number(e.target.value) || 0])}
             onBlur={() => handleCommit(local)}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            className="w-10 bg-transparent text-sm font-medium text-foreground/70 outline-none"
+            className="w-14 bg-transparent text-sm font-medium text-foreground/70 outline-none"
           />
           <span className="text-sm font-medium text-foreground/70">ct</span>
         </label>
@@ -268,11 +272,12 @@ const FilterSection = ({
 
 const renderTab = (
   tab: { key: TabKey; label: string }, value: FilterValues[TabKey], onChange: (k: TabKey, v: unknown) => void,
-  currencySymbol = '£', totalValueRange: [number, number] = DEFAULT_TOTAL_VALUE_RANGE,
+  ranges: DynamicRanges = DEFAULT_RANGES, currencySymbol = '£',
 ) => {
   if (tab.key === 'caratWeight') {
     return (
       <CaratRangeSlider
+        min={ranges.caratWeight[0]} max={ranges.caratWeight[1]}
         currentValue={value as [number, number]}
         onChange={(v) => onChange(tab.key, v)}
       />
@@ -293,7 +298,7 @@ const renderTab = (
   if (tab.key === 'totalValue') {
     return (
       <PriceRangeSlider
-        min={totalValueRange[0]} max={totalValueRange[1]}
+        min={ranges.totalValue[0]} max={ranges.totalValue[1]}
         currentValue={value as [number, number]}
         onChange={(v) => onChange(tab.key, v)}
         currencySymbol={currencySymbol}
@@ -386,6 +391,7 @@ const DiamondShopPage = () => {
   const [selectedItem, setSelectedItem] = useState<DiamondItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [maxPrice, setMaxPrice] = useState(DEFAULT_TOTAL_VALUE_RANGE[1]);
+  const [caratRange, setCaratRange] = useState<[number, number]>(DEFAULT_CARAT_RANGE);
 
   // Browsers restore the previous scroll offset on a manual reload (F5) for the same
   // history entry, which looks like "landing on row 2" when a filter was scrolled to earlier.
@@ -415,6 +421,30 @@ const DiamondShopPage = () => {
       .catch(() => {});
   }, [stockTypeTab]);
 
+  // Carat slider bounds: the real min/max carat weight across current diamond stock.
+  // Falls back to DEFAULT_CARAT_RANGE until it loads.
+  // ponytail: cf_carat_total occasionally holds a parcel/lot total (e.g. 73.7, 94.7) rather than
+  // a single stone's weight, so cap at 50ct — well above any real single diamond in this catalogue
+  // (largest legitimate value seen is ~6ct) — to keep those lot totals from blowing out the slider.
+  useEffect(() => {
+    productsApi.getFilterOptions({ category: 'Diamonds' })
+      .then((res) => {
+        const values = (res.data?.caratValues ?? []).filter((v) => v > 0 && v < 50);
+        if (values.length) {
+          setCaratRange([
+            Math.floor(Math.min(...values) * 100) / 100,
+            Math.ceil(Math.max(...values) * 100) / 100,
+          ]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const dynamicRanges = useMemo<DynamicRanges>(
+    () => ({ caratWeight: caratRange, totalValue: totalValueRange }),
+    [caratRange, totalValueRange]
+  );
+
   // All other filters from URL
   const filterValues = useMemo<FilterValues>(() => {
     const parseMulti = (key: string) =>
@@ -438,8 +468,8 @@ const DiamondShopPage = () => {
       certificate: parseMulti('certificate'),
       type:        searchParams.get('stock_type') === 'Lab' ? 'Lab' : DEFAULT_STOCK_TYPE,
       caratWeight: (caratMin || caratMax)
-        ? [Number(caratMin) || DEFAULT_CARAT_RANGE[0], Number(caratMax) || DEFAULT_CARAT_RANGE[1]] as [number, number]
-        : DEFAULT_CARAT_RANGE,
+        ? [Number(caratMin) || caratRange[0], Number(caratMax) || caratRange[1]] as [number, number]
+        : caratRange,
       depth: (depthMin || depthMax)
         ? [Number(depthMin) || DEFAULT_DEPTH_RANGE[0], Number(depthMax) || DEFAULT_DEPTH_RANGE[1]] as [number, number]
         : DEFAULT_DEPTH_RANGE,
@@ -450,7 +480,7 @@ const DiamondShopPage = () => {
         ? [Number(totalMin) || totalValueRange[0], Number(totalMax) || totalValueRange[1]] as [number, number]
         : totalValueRange,
     };
-  }, [searchParams, totalValueRange]);
+  }, [searchParams, totalValueRange, caratRange]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchInput), 400);
@@ -493,10 +523,10 @@ const DiamondShopPage = () => {
     if (filterValues.certificate.length)  params.certificate  = filterValues.certificate.join(',');
     if (debouncedSearch)                  params.search       = debouncedSearch;
 
-    if (!isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE)) {
+    if (!isSameRange(filterValues.caratWeight, caratRange)) {
       const [lo, hi] = filterValues.caratWeight;
-      if (lo > DEFAULT_CARAT_RANGE[0]) params.carat_min = lo;
-      if (hi < DEFAULT_CARAT_RANGE[1]) params.carat_max = hi;
+      if (lo > caratRange[0]) params.carat_min = lo;
+      if (hi < caratRange[1]) params.carat_max = hi;
     }
     if (!isSameRange(filterValues.depth, DEFAULT_DEPTH_RANGE)) {
       const [lo, hi] = filterValues.depth;
@@ -532,7 +562,7 @@ const DiamondShopPage = () => {
       filterValues.shape, filterValues.colour, filterValues.clarity,
       filterValues.cut, filterValues.polish, filterValues.symmetry,
       filterValues.fluorescence, filterValues.certificate,
-      filterValues.caratWeight,
+      filterValues.caratWeight, caratRange,
       filterValues.depth, filterValues.table, filterValues.totalValue]);
 
   const setFilter = useCallback((key: TabKey, value: unknown) => {
@@ -551,7 +581,7 @@ const DiamondShopPage = () => {
 
     if (key === 'caratWeight') {
       const [lo, hi] = value as [number, number];
-      writeRange(lo, hi, DEFAULT_CARAT_RANGE, 'carat_min', 'carat_max');
+      writeRange(lo, hi, caratRange, 'carat_min', 'carat_max');
     } else if (key === 'depth') {
       const [lo, hi] = value as [number, number];
       writeRange(lo, hi, DEFAULT_DEPTH_RANGE, 'depth_min', 'depth_max');
@@ -570,7 +600,7 @@ const DiamondShopPage = () => {
     setPage(1);
     setSearchParams(newParams, { replace: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [searchParams, stockTypeTab, setSearchParams, totalValueRange]);
+  }, [searchParams, stockTypeTab, setSearchParams, totalValueRange, caratRange]);
 
   // Removes a single value from a multi-select tab's array (e.g. unchecking one shape pill)
   // without clearing the other selected values in that same tab.
@@ -588,9 +618,9 @@ const DiamondShopPage = () => {
 
   const isTabActive = (key: TabKey) => {
     const val = filterValues[key];
-    return Boolean(val) && !isDefaultValue(key, val, totalValueRange);
+    return Boolean(val) && !isDefaultValue(key, val, dynamicRanges);
   };
-  const clearTab = (key: TabKey) => setFilter(key, defaultFor(key, totalValueRange));
+  const clearTab = (key: TabKey) => setFilter(key, defaultFor(key, dynamicRanges));
 
   const handleReset = useCallback(() => {
     setSearchInput('');
@@ -607,12 +637,12 @@ const DiamondShopPage = () => {
       filterValues.shape.length || filterValues.colour.length || filterValues.clarity.length ||
       filterValues.cut.length || filterValues.polish.length || filterValues.symmetry.length ||
       filterValues.fluorescence.length || filterValues.certificate.length ||
-      !isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE) ||
+      !isSameRange(filterValues.caratWeight, caratRange) ||
       !isSameRange(filterValues.depth, DEFAULT_DEPTH_RANGE) ||
       !isSameRange(filterValues.table, DEFAULT_TABLE_RANGE) ||
       !isSameRange(filterValues.totalValue, totalValueRange)
     );
-  }, [filterValues, debouncedSearch, totalValueRange]);
+  }, [filterValues, debouncedSearch, totalValueRange, caratRange]);
 
   const activeChips = useMemo(() => {
     // removeValue is set for multi-select tabs so a chip removes just that one value;
@@ -629,7 +659,7 @@ const DiamondShopPage = () => {
     pushMulti('symmetry', 'Symmetry');
     pushMulti('fluorescence', '');
     pushMulti('certificate', '');
-    if (!isSameRange(filterValues.caratWeight, DEFAULT_CARAT_RANGE)) {
+    if (!isSameRange(filterValues.caratWeight, caratRange)) {
       const [lo, hi] = filterValues.caratWeight;
       chips.push({ key: 'caratWeight', label: `${lo.toFixed(2)}–${hi.toFixed(2)}ct` });
     }
@@ -646,7 +676,7 @@ const DiamondShopPage = () => {
       chips.push({ key: 'totalValue', label: `Price: ${currencySymbol}${lo.toLocaleString()}–${currencySymbol}${hi.toLocaleString()}` });
     }
     return chips;
-  }, [filterValues, currencySymbol, totalValueRange]);
+  }, [filterValues, currencySymbol, totalValueRange, caratRange]);
 
   const openModal = (item: DiamondItem) => {
     setSelectedItem(item);
@@ -701,7 +731,7 @@ const DiamondShopPage = () => {
                   </FilterSection>
 
                   <FilterSection title="Carat" isActive={isTabActive('caratWeight')} onClear={() => clearTab('caratWeight')}>
-                    {renderTab({ key: 'caratWeight', label: 'Carat' }, filterValues.caratWeight, setFilter)}
+                    {renderTab({ key: 'caratWeight', label: 'Carat' }, filterValues.caratWeight, setFilter, dynamicRanges)}
                   </FilterSection>
 
                   <div className="grid grid-cols-2 gap-x-5 border-b border-border/50 py-4">
@@ -772,7 +802,7 @@ const DiamondShopPage = () => {
                   </div>
 
                   <FilterSection title="Price" isActive={isTabActive('totalValue')} onClear={() => clearTab('totalValue')} noBorder>
-                    {renderTab({ key: 'totalValue', label: 'Price' }, filterValues.totalValue, setFilter, currencySymbol, totalValueRange)}
+                    {renderTab({ key: 'totalValue', label: 'Price' }, filterValues.totalValue, setFilter, dynamicRanges, currencySymbol)}
                   </FilterSection>
                 </div>
 
@@ -880,7 +910,7 @@ const DiamondShopPage = () => {
               {activeChips.map((chip) => (
                 <button
                   key={`${chip.key}-${chip.removeValue ?? ''}`} type="button"
-                  onClick={() => chip.removeValue !== undefined ? removeFilterValue(chip.key, chip.removeValue) : setFilter(chip.key, defaultFor(chip.key, totalValueRange))}
+                  onClick={() => chip.removeValue !== undefined ? removeFilterValue(chip.key, chip.removeValue) : setFilter(chip.key, defaultFor(chip.key, dynamicRanges))}
                   className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-1 pl-3 pr-2 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                 >
                   {chip.label}

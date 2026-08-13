@@ -95,11 +95,17 @@ const mobileNavItems: MobileNavItem[] = navigationLinks.map((link) => {
         };
       });
 
+      const extraItems: MobileNavItem[] = ('extraLinks' in category ? category.extraLinks : [])?.map((extraLink) => ({
+        id: `${categoryId}/${extraLink.label}`,
+        label: extraLink.label,
+        href: extraLink.href,
+      })) ?? [];
+
       return {
         id: categoryId,
         label: category.title,
         href: category.showAll?.href,
-        items: childItems,
+        items: [...childItems, ...extraItems],
       };
     });
 
@@ -663,6 +669,17 @@ const Header = () => {
                           </Link>
                         </li>
                       )}
+
+                      {'extraLinks' in category && category.extraLinks?.map((extraLink) => (
+                        <li key={extraLink.label} className="pt-2">
+                          <Link
+                            to={extraLink.href}
+                            className="text-sm font-semibold text-primary hover:underline"
+                          >
+                            {extraLink.label} →
+                          </Link>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 ))}
