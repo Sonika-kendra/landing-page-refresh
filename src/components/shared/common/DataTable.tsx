@@ -140,7 +140,9 @@ export interface DataTableProps<T extends Record<string, any>> {
   refreshKey?: unknown;
   refetchInterval?: number;
   staleTime?: number;
-  onDataLoaded?: (rows: T[], total: number) => void;
+  /** rawResponseData is the untouched response.data — use it to read fields (e.g. a server total)
+   *  that fall outside the dataKey/totalKey the table itself paginates by. */
+  onDataLoaded?: (rows: T[], total: number, rawResponseData?: unknown) => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -309,7 +311,7 @@ function DataTable<T extends Record<string, any>>({
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   useEffect(() => {
-    if (!isLoading && response) onDataLoaded?.(rows, total);
+    if (!isLoading && response) onDataLoaded?.(rows, total, response.data);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows, total, isLoading]);
 

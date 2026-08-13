@@ -15,6 +15,7 @@ export const productsApi = {
     bestseller?: boolean; new_arrival?: boolean;
     certificate?: string; ring_size?: string;
     carat_min?: number; carat_max?: number;
+    has_image?: 'true' | 'false' | 'all';
   }) =>
     client.get(ep.all, params, undefined, false, base),
 

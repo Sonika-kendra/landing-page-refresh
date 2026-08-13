@@ -30,6 +30,10 @@ interface Product {
 // Zoho cf_status values a live item can have — anything else (Sold, Returned, …) is
 // dropped from the local catalogue by the sync job, so these are the only real options.
 const STATUS_OPTIONS = ['Available', 'In Transit', 'Waiting QC'];
+const IMAGE_OPTIONS: { value: 'true' | 'false'; label: string }[] = [
+  { value: 'true', label: 'Has Image' },
+  { value: 'false', label: 'No Image' },
+];
 
 function CopySkuButton({ sku }: { sku: string }) {
   const [copied, setCopied] = useState(false);
@@ -55,6 +59,8 @@ const Products = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [imageFilter, setImageFilter] = useState<'all' | 'true' | 'false'>('all');
+  const [total, setTotal] = useState(0);
 
   const { data: subcategories } = useQuery({
     queryKey: ['admin', 'products', 'subcategories'],
@@ -157,6 +163,7 @@ const Products = () => {
             category: typeFilter !== 'all' ? typeFilter : undefined,
             cf_sub_category: categoryFilter !== 'all' ? categoryFilter : undefined,
             cf_status: statusFilter !== 'all' ? statusFilter : undefined,
+            has_image: imageFilter,
           })
         }
         dataKey="items"
@@ -165,12 +172,30 @@ const Products = () => {
         clientSideSearchFn={searchFn}
         searchable
         searchPlaceholder="Search by name or SKU…"
-        extraParams={{ typeFilter, categoryFilter, statusFilter }}
+        extraParams={{ typeFilter, categoryFilter, statusFilter, imageFilter }}
         emptyIcon={<Package className="h-10 w-10 opacity-25" />}
         emptyMessage="No products found."
         onRowClick={(p) => navigate(`/admin/products/${p.id}`)}
+        onDataLoaded={(_, t, raw) => {
+          const dbTotal = (raw as { page_context?: { total?: number } } | undefined)?.page_context?.total;
+          setTotal(dbTotal ?? t);
+        }}
         toolbar={
           <>
+            <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap">
+              {total} {total === 1 ? 'item' : 'items'}
+            </span>
+            <Select value={imageFilter} onValueChange={(v) => setImageFilter(v as typeof imageFilter)}>
+              <SelectTrigger className="h-8 w-40 text-sm rounded-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Images</SelectItem>
+                {IMAGE_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="h-8 w-40 text-sm rounded-sm">
                 <SelectValue />
