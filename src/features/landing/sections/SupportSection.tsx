@@ -1,10 +1,10 @@
 import React from 'react';
 import {
-  FaShieldAlt,
+  FaGem,
+  FaBoxOpen,
   FaClock,
-  FaExchangeAlt,
-  FaUndoAlt,
-  FaShippingFast,
+  FaUsers,
+  FaHandsHelping,
 } from 'react-icons/fa';
 
 
@@ -17,29 +17,29 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: <FaShippingFast size={28} />,
+    icon: <FaGem size={28} />,
+    title: 'Award Winning Supplier',
+    subtitle: 'Constantly improving quality',
+  },
+  {
+    icon: <FaBoxOpen size={28} />,
+    title: 'FREE Delivery',
+    subtitle: 'For all website customers',
+  },
+  {
+    icon: <FaClock size={28} />,
     title: 'Same Day Dispatch',
     subtitle: 'On orders placed before 2pm',
   },
   {
-    icon: <FaShieldAlt size={28} />,
-    title: 'Secure & Insured Delivery',
-    subtitle: 'Dispatched within 2 working days.',
+    icon: <FaUsers size={28} />,
+    title: 'Representatives',
+    subtitle: 'Covering the UK & Ireland',
   },
   {
-    icon: <FaClock size={28} />,
-    title: 'Bespoke Services',
-    subtitle: 'Pricing in 24-48hr',
-  },
-  {
-    icon: <FaExchangeAlt size={28} />,
-    title: 'Straightforward Returns',
-    subtitle: '21-day hassle-free returns',
-  },
-  {
-    icon: <FaUndoAlt size={28} />,
-    title: 'Manufacturing Warranty',
-    subtitle: 'With 30-Day Returns, T&Cs.',
+    icon: <FaHandsHelping size={28} />,
+    title: 'Customer Service',
+    subtitle: 'We pride ourselves on this',
   },
 ];
 

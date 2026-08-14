@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import diamondsCategory from '@/assets/diamonds/diamonds-category.jpg';
-import labGrownDiamond from '@/assets/diamonds/lab-grown-diamond.jpg';
-import gemstoneNecklace from '@/assets/gemstone-necklace.jpg';
-import diamondPairs from '@/assets/diamond-pairs.jpg';
+import diamondsCategory from '@/assets/diamonds/category/Naturals.png';
+import labGrownDiamond from '@/assets/diamonds/category/Lab grown.png';
+import gemstoneNecklace from '@/assets/diamonds/category/Gemstones.png';
+import diamondPairs from '@/assets/diamonds/category/Matching Pairs.png';
 import { websiteUrlConfig } from '@/config/site';
 import { useAuth } from '@/context/AuthContext';
 
